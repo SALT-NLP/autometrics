@@ -1,0 +1,25 @@
+def get_default_formatter(dataset):
+    '''
+        Format the summary
+    '''
+    input_column = dataset.get_input_column()
+    output_column = dataset.get_output_column()
+    reference_columns = dataset.get_reference_columns()
+
+    if not input_column:
+        raise ValueError("Input column not found in dataset.  When constructing your Dataset please provide input_column.")
+    if not output_column:
+        raise ValueError("Output column not found in dataset.  When constructing your Dataset please provide output_column.")
+
+    def default_formatter(row):
+        references = row[reference_columns]
+
+        references = [ref for ref in references if ref is not None]
+
+        if not references or len(references) == 0:
+            return f"«Input ({input_column}): «{row[input_column]}»\nOutput ({output_column}): «{row[output_column]}»»"
+        
+        ref_str = "\n".join([f"Reference {i+1} ({reference_columns[i]}): «{ref}»" for i, ref in enumerate(references)])
+        return f"«Input ({input_column}): «{row[input_column]}»\n{ref_str}\nOutput ({output_column}): «{row[output_column]}»»"
+    
+    return default_formatter

@@ -4,10 +4,13 @@ class Aggregator(ABC):
     """
     Abstract class for metric aggregator
     """
-    def __init__(self, name, description, input_metrics=None):
+    def __init__(self, name, description, input_metrics=None, dataset=None, **kwargs):
         self.name = name
         self.description = description
-        self.input_metrics = input_metrics
+        if input_metrics is None:
+            self.input_metrics = dataset.get_metrics()
+        else:
+            self.input_metrics = input_metrics
 
     def ensure_dependencies(self, dataset):
         """
@@ -58,3 +61,9 @@ class Aggregator(ABC):
         Identify the important metrics
         """
         pass
+
+    def get_name(self):
+        return self.name
+    
+    def get_description(self):
+        return self.description

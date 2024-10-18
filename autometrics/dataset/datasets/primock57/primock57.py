@@ -1,6 +1,8 @@
 from autometrics.dataset.Dataset import Dataset
 import pandas as pd
 
+from autometrics.metrics.dummy import DummyMetric
+
 class Primock57(Dataset):
     def __init__(self, path):
         df = pd.read_csv(path)
@@ -28,4 +30,6 @@ class Primock57(Dataset):
         output_column = "generated_note"
         reference_columns = ["human_note", "eval_note", "edited_note"]
 
-        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns)
+        metrics = [DummyMetric(col) for col in metric_columns]
+
+        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)

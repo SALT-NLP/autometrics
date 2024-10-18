@@ -1,7 +1,7 @@
 from autometrics.dataset import Dataset
 from scipy.stats import spearmanr
 
-def calculate_correlation(dataset: Dataset, group_by: str = None, correlation=spearmanr) -> dict:
+def calculate_correlation(dataset: Dataset, group_by: str = None, correlation=spearmanr, compute_all=False) -> dict:
     '''
     Calculate the correlation for the given dataset.
 
@@ -36,7 +36,10 @@ def calculate_correlation(dataset: Dataset, group_by: str = None, correlation=sp
     df = dataset.get_dataframe()
     target_columns = dataset.get_target_columns()
     ignore_columns = dataset.get_ignore_columns()
-    metric_columns = dataset.get_metric_columns()
+    if compute_all:
+        metric_columns = [col for col in df.columns if col not in ignore_columns and col not in target_columns]
+    else:
+        metric_columns = dataset.get_metric_columns()
 
     if metric_columns is None:
         metric_columns = [col for col in df.columns if col not in ignore_columns and col not in target_columns]

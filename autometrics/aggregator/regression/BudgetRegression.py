@@ -4,7 +4,7 @@ class BudgetRegression(Regression):
     """
     Class for regression aggregation
     """
-    def __init__(self, regressor: Regression, metric_budget: int, name=None, description=None):
+    def __init__(self, regressor: Regression, metric_budget: int, name=None, description=None, dataset=None, **kwargs):
         """
         Initialize the class
         """
@@ -13,7 +13,7 @@ class BudgetRegression(Regression):
         self.name = regressor.name + f"Top {metric_budget}" if not name else name
         self.description = regressor.description + f"Top {metric_budget}" if not description else description
 
-        super().__init__(self.name, self.description, model=self.model)
+        super().__init__(self.name, self.description, model=self.model, dataset=dataset, **kwargs)
 
     def learn(self, dataset, target_column=None):
         """

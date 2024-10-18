@@ -3,7 +3,7 @@ from sklearn.linear_model import LinearRegression
 from autometrics.aggregator.regression import Regression
 
 class Linear(Regression):
-    def __init__(self, name=None, description=None):
+    def __init__(self, name=None, description=None, dataset=None, **kwargs):
         model = LinearRegression()
 
         if not name:
@@ -12,4 +12,4 @@ class Linear(Regression):
         if not description:
             description = "Linear regression"
 
-        super().__init__(name, description, model=model)
+        super().__init__(name, description, model=model, dataset=dataset, **kwargs)

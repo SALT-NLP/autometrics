@@ -26,7 +26,7 @@ class Dataset:
         __repr__():
             Returns a string representation of the dataset.
     """
-    def __init__(self, dataframe, target_columns, ignore_columns, metric_columns, name, data_id_column=None, model_id_column=None, input_column=None, output_column=None, reference_columns=None):
+    def __init__(self, dataframe, target_columns, ignore_columns, metric_columns, name, data_id_column=None, model_id_column=None, input_column=None, output_column=None, reference_columns=None, metrics=None):
         self.dataframe = dataframe
         self.target_columns = target_columns
         self.ignore_columns = ignore_columns
@@ -37,6 +37,7 @@ class Dataset:
         self.input_column = input_column
         self.output_column = output_column
         self.reference_columns = reference_columns
+        self.metrics = metrics
 
     def get_dataframe(self):
         return self.dataframe
@@ -68,8 +69,15 @@ class Dataset:
     def get_reference_columns(self):
         return self.reference_columns
     
+    def get_metrics(self):
+        return self.metrics
+    
     def set_dataframe(self, dataframe):
         self.dataframe = dataframe
+
+    def add_metric(self, metric):
+        self.metrics.append(metric)
+        self.metric_columns.append(metric.get_name())
     
     def __str__(self):
         return f"Dataset: {self.name}, Target Columns: {self.target_columns}, Ignore Columns: {self.ignore_columns}, Metric Columns: {self.metric_columns}\n{self.dataframe.head()}"
@@ -115,9 +123,9 @@ class Dataset:
             val_df = df.iloc[val_items]
             test_df = df.iloc[test_items]
 
-        train_dataset = Dataset(train_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns)
-        val_dataset = Dataset(val_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns)
-        test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns)
+        train_dataset = Dataset(train_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+        val_dataset = Dataset(val_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+        test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
         
         return train_dataset, val_dataset, test_dataset
 
@@ -158,10 +166,10 @@ class Dataset:
             if split_column:
                 split_df = df[df[split_column].isin(split_items)]
             else:
-                split_df = df.iloc[split_items]
-            split_dataset = Dataset(split_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column)
+                split_df = df.iloc[split_items].copy()
+            split_dataset = Dataset(split_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
             split_datasets.append(split_dataset)
 
-        test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column)
+        test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
 
         return split_datasets, test_dataset

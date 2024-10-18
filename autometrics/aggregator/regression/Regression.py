@@ -4,8 +4,8 @@ class Regression(Aggregator):
     """
     Class for regression aggregation
     """
-    def __init__(self, name, description, input_metrics=None, model=None):
-        super().__init__(name, description, input_metrics)
+    def __init__(self, name, description, input_metrics=None, model=None, dataset=None, **kwargs):
+        super().__init__(name, description, input_metrics, dataset, **kwargs)
         self.model = model
 
     def learn(self, dataset, target_column=None):
@@ -30,7 +30,7 @@ class Regression(Aggregator):
         Predict the target column
         """
 
-        df = dataset.get_dataframe()
+        df = dataset.get_dataframe().copy()
 
         input_columns = self.get_input_columns()
         X = df[input_columns]
@@ -38,7 +38,7 @@ class Regression(Aggregator):
         y = self.model.predict(X)
 
         if update_dataset:
-            df[self.name] = y
+            df.loc[:, self.name] = y
             dataset.set_dataframe(df)
 
         return y

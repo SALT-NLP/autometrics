@@ -12,8 +12,10 @@ class BudgetRegression(Regression):
         self.model = regressor.model
         self.name = regressor.name + f"Top {metric_budget}" if not name else name
         self.description = regressor.description + f"Top {metric_budget}" if not description else description
+        self.dataset = regressor.dataset if not dataset else dataset
+        self.metric_budget = metric_budget  
 
-        super().__init__(self.name, self.description, model=self.model, dataset=dataset, **kwargs)
+        super().__init__(self.name, self.description, model=self.model, dataset=self.dataset, **kwargs)
 
     def learn(self, dataset, target_column=None):
         """

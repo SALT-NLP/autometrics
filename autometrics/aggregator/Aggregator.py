@@ -11,6 +11,7 @@ class Aggregator(ABC):
             self.input_metrics = dataset.get_metrics()
         else:
             self.input_metrics = input_metrics
+        self.dataset = dataset
 
     def ensure_dependencies(self, dataset):
         """

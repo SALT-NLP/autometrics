@@ -134,12 +134,29 @@ class Dataset:
 
         if test_ratio and test_ratio > 0:
             # Sample test_ratio of the data for testing
-            test_size = int(test_ratio * len(df))
+            
             if seed:
                 np.random.seed(seed)
-            test_items = np.random.choice(df[split_column].unique(), test_size, replace=False)
-            df = df[~df[split_column].isin(test_items)]
-            test_df = df[df[split_column].isin(test_items)]
+
+            if not split_column:
+                split_column = self.data_id_column
+
+            if not split_column:
+                items = np.arange(len(df))
+                test_size = int(test_ratio * len(items))
+                test_items = np.random.choice(np.arange(len(df)), test_size, replace=False)
+                test_df = df[df.index.isin(test_items)]
+                df = df[~df.index.isin(test_items)]
+                train_df = df.copy()
+
+            else:
+                items = df[split_column].unique()
+                test_size = int(test_ratio * len(items))
+                test_items = np.random.choice(df[split_column].unique(), test_size, replace=False)
+                test_df = df[df[split_column].isin(test_items)]
+                df = df[~df[split_column].isin(test_items)]
+                train_df = df.copy()
+            
         else:
             test_df = None
 
@@ -163,13 +180,18 @@ class Dataset:
         split_datasets = []
         for i in range(k):
             split_items = splits[i]
+            non_split_items = np.concatenate([splits[j] for j in range(k) if j != i])
             if split_column:
                 split_df = df[df[split_column].isin(split_items)]
+                non_split_df = df[df[split_column].isin(non_split_items)]
             else:
                 split_df = df.iloc[split_items].copy()
-            split_dataset = Dataset(split_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-            split_datasets.append(split_dataset)
+                non_split_df = df.iloc[non_split_items].copy()
+            split_val_dataset = Dataset(split_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+            split_train_dataset = Dataset(non_split_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+            split_datasets.append((split_train_dataset, split_val_dataset))
 
+        train_dataset = Dataset(train_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
         test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
 
-        return split_datasets, test_dataset
+        return split_datasets, train_dataset, test_dataset

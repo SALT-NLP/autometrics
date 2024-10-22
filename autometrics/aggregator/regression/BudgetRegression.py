@@ -35,7 +35,8 @@ class BudgetRegression(Regression):
         self.model.fit(X, y)
 
         important_metrics = self.identify_important_metrics()[:self.metric_budget]
+        important_metrics = [metric[1] for metric in important_metrics]
 
         self.input_metrics = [metric for metric in self.input_metrics if metric.get_name() in important_metrics]
 
-        self.model.fit(X[important_metrics], y)
+        self.model.fit(X[self.get_input_columns()], y)

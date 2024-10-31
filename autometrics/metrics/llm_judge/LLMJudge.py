@@ -55,6 +55,33 @@ class LLMJudge(Metric):
                 row[self.dataset.get_reference_columns()[i]] = ref
 
         grade_row(row, self.evaluation_axis, self.model, self.formatter, self.task_description)
+
+    def calculate_row(self, row, dataset, update_dataset=True, **kwargs):
+        """
+        Calculate the metric
+        """
+        input_column = dataset.get_input_column()
+        output_column = dataset.get_output_column()
+
+        if not input_column:
+            raise ValueError("Input column not found in dataset.  When constructing your Dataset please provide input_column.")
+        if not output_column:
+            raise ValueError("Output column not found in dataset.  When constructing your Dataset please provide output_column.")
+        
+        references = None
+        if dataset.get_reference_columns():
+            reference_columns = dataset.get_reference_columns()
+            references = row[reference_columns]
+
+        input = row[input_column]
+        output = row[output_column]
+
+        result = self.calculate(input, output, references, **kwargs)
+
+        if update_dataset:
+            row[self.name] = result
+
+        return result
     
     def predict(self, dataset, update_dataset=True, max_workers=64, metric_name=None, **kwargs):
             '''

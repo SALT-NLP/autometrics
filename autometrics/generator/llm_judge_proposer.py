@@ -1,4 +1,4 @@
-from autometrics.generator import Generator
+from autometrics.generator.Generator import Generator
 from autometrics.metrics.llm_judge.LLMJudge import LLMJudge
 import dspy
 import re
@@ -44,24 +44,38 @@ class GenerateAxisOfVariation(dspy.Module):
         return dspy.Prediction(task_description=task_description, good_examples=good_examples, bad_examples=bad_examples, axes_of_variation=axes)
 
 class LLMJudgeProposer(Generator):
-
-    def __init__(self, name, description, dataset, task_description=None, formatter=None, proposer_model=None, judge_model=None):
-        self.name = name
-        self.description = description
+    def __init__(self, train_dataset=None, task_description=None, formatter=None, proposer_model=None, judge_model=None):
         self.task_description = task_description
-        self.dataset = dataset
+        self.dataset = train_dataset
         self.proposer_model = proposer_model
         self.judge_model = judge_model
+        self.formatter = formatter
 
         if formatter is None:
-            self.formatter = get_default_formatter(dataset)
-        else:
-            self.formatter = formatter
+            self.formatter = self._get_formatter(train_dataset)
 
-    def generate(self, dataset, target_column=None, **kwargs):
+        super().__init__("LLMJudgeProposer",  "Propose new llm as a judge metrics based on the dataset and task description")
+
+    def _get_formatter(self, dataset):
+        if self.formatter:
+            return self.formatter
+        if not dataset:
+            return lambda x: str(x)
+        return get_default_formatter(dataset)
+
+    def generate(self, train_dataset=None, target_column=None, **kwargs):
         """
         Generate new metrics based on the dataset and task description
         """
+        dataset = train_dataset
+        if dataset:
+            self.dataset = dataset
+            self.formatter = self._get_formatter(dataset)
+        elif not self.dataset:
+            raise ValueError("No dataset provided")
+
+        if self.formatter is None:
+            self.formatter = self._get_formatter(dataset)
 
         df = dataset.get_dataframe()
         if not target_column:
@@ -73,14 +87,14 @@ class LLMJudgeProposer(Generator):
         bad_examples_formatted = [self.formatter(row) for _, row in bad_examples.iterrows()]
 
         response = None
-        with dspy.settings.context(lm=self.model):
+        with dspy.settings.context(lm=self.proposer_model):
             response = GenerateAxisOfVariation()(task_description=self.task_description, good_examples=good_examples_formatted, bad_examples=bad_examples_formatted)
 
         axis_of_variation = response.axes_of_variation
 
         new_metrics = []
         for i, axis in enumerate(axis_of_variation):
-            metric_name = axis.split(":")[0].replace("*", "") + "_" + self.model.kwargs['model'].split("/")[-1]
+            metric_name = axis.split(":")[0].replace("*", "") + "_" + self.judge_model.model.split("/")[-1]
 
             new_metrics.append(LLMJudge(metric_name, f"{axis}", self.judge_model, self.dataset, axis, self.formatter, self.task_description))
 

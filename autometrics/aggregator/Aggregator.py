@@ -25,7 +25,7 @@ class Aggregator(ABC):
                 df = dataset.get_dataframe()
 
                 for i, row in df.iterrows():
-                    if row[metric.get_name()] is None:
+                    if metric.get_name() not in row:
                         metric.calculate_row(row, dataset, update_dataset=True)
 
                 dataset.set_dataframe(df)

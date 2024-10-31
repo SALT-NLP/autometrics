@@ -78,6 +78,10 @@ class Dataset:
     def add_metric(self, metric):
         self.metrics.append(metric)
         self.metric_columns.append(metric.get_name())
+
+    def add_metrics(self, metrics):
+        for metric in metrics:
+            self.add_metric(metric)
     
     def __str__(self):
         return f"Dataset: {self.name}, Target Columns: {self.target_columns}, Ignore Columns: {self.ignore_columns}, Metric Columns: {self.metric_columns}\n{self.dataframe.head()}"

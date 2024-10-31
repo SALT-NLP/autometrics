@@ -4,7 +4,7 @@ import pandas as pd
 from autometrics.metrics.dummy import DummyMetric
 
 class Primock57(Dataset):
-    def __init__(self, path):
+    def __init__(self, path='./autometrics/dataset/datasets/primock57/metric-scores.csv'):
         df = pd.read_csv(path)
 
         # add together incorrect_critical and incorrect_noncritical

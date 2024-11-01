@@ -9,20 +9,29 @@ class SimpDA(Dataset):
     def __init__(self, path='./autometrics/dataset/datasets/simplification/simpda.csv'):
         df = pd.read_csv(path)
 
+        # Split the reference columns into separate columns
+        references = df['references'].apply(eval)
 
-        df.drop(columns=['WorkerId'], inplace=True)
+        # identify the longest reference list
+        max_len = max(references.apply(len))
 
-        target_columns = ['Answer.adequacy','Answer.fluency','Answer.simplicity']
-        ignore_columns = ["Input.id","Input.original","Input.simplified","Input.system","ref1"]
+        for i in range(max_len):
+            df[f'ref{i+1}'] = references.apply(lambda x: x[i] if len(x) > i else None)
+
+        df.drop(columns=['references'], inplace=True)
+
+        target_columns = ['fluency','meaning','simplicity']
+        ignore_columns = ["id","original","simple","system"]
+        ignore_columns.extend([f'ref{i+1}' for i in range(max_len)])
         metric_columns = [col for col in df.columns if col not in target_columns and col not in ignore_columns]
 
         name = "SimpDA"
 
-        data_id_column = "Input.id"
-        model_id_column = "Input.system"
-        input_column = "Input.original"
-        output_column = "Input.simplified"
-        reference_columns = ["ref1"]
+        data_id_column = "id"
+        model_id_column = "system"
+        input_column = "original"
+        output_column = "simple"
+        reference_columns = [f'ref{i+1}' for i in range(max_len)]
 
         metrics = [DummyMetric(col) for col in metric_columns]
 

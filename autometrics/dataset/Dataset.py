@@ -75,11 +75,12 @@ class Dataset:
     def set_dataframe(self, dataframe):
         self.dataframe = dataframe
 
-    def add_metric(self, metric):
+    def add_metric(self, metric, update_dataset=True):
         self.metrics.append(metric)
         self.metric_columns.append(metric.get_name())
+        metric.predict(self, update_dataset=update_dataset)
 
-    def add_metrics(self, metrics):
+    def add_metrics(self, metrics, update_dataset=True):
         for metric in metrics:
             self.add_metric(metric)
     
@@ -199,3 +200,14 @@ class Dataset:
         test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
 
         return split_datasets, train_dataset, test_dataset
+    
+    def calculate_metrics(self, update_dataset=True, **kwargs):
+        for metric in self.metrics:
+            if metric.get_name() not in self.get_metric_columns():
+                metric.predict(self, update_dataset=update_dataset, **kwargs)
+
+            df = self.get_dataframe()
+
+            for i, row in df.iterrows():
+                if metric.get_name() not in row:
+                    metric.calculate_row(row, self, update_dataset=update_dataset)

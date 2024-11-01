@@ -1,4 +1,4 @@
-from autometrics.metrics import Metric
+from autometrics.metrics.Metric import Metric
 
 class ReferenceFreeMetric(Metric):
     """

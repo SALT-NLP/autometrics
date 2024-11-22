@@ -1,6 +1,8 @@
 import warnings
 import numpy as np
 
+from autometrics.metrics.MultiMetric import MultiMetric
+
 class Dataset:
     """
     Dataset class for handling and manipulating datasets.
@@ -37,7 +39,8 @@ class Dataset:
         self.input_column = input_column
         self.output_column = output_column
         self.reference_columns = reference_columns
-        self.metrics = metrics
+        self.metrics = []
+        self.add_metrics(metrics)
 
     def get_dataframe(self):
         return self.dataframe
@@ -76,13 +79,25 @@ class Dataset:
         self.dataframe = dataframe
 
     def add_metric(self, metric, update_dataset=True):
-        self.metrics.append(metric)
-        self.metric_columns.append(metric.get_name())
-        metric.predict(self, update_dataset=update_dataset)
+        if isinstance(metric, MultiMetric):
+            self.metrics.append(metric)
+            for submetric_name in metric.get_submetric_names():
+                if submetric_name not in self.metric_columns:
+                    self.metric_columns.append(submetric_name)
+
+                if self.dataframe is not None and update_dataset and submetric_name not in self.dataframe.columns:
+                    metric.predict(self, update_dataset=update_dataset)
+                    break
+        else:
+            self.metrics.append(metric)
+            if metric.get_name() not in self.metric_columns:
+                self.metric_columns.append(metric.get_name())
+            if self.dataframe is not None and update_dataset and metric.get_name() not in self.dataframe.columns:
+                metric.predict(self, update_dataset=update_dataset)
 
     def add_metrics(self, metrics, update_dataset=True):
         for metric in metrics:
-            self.add_metric(metric)
+            self.add_metric(metric, update_dataset=update_dataset)
     
     def __str__(self):
         return f"Dataset: {self.name}, Target Columns: {self.target_columns}, Ignore Columns: {self.ignore_columns}, Metric Columns: {self.metric_columns}\n{self.dataframe.head()}"

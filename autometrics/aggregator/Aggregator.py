@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from autometrics.metrics.MultiMetric import MultiMetric
 
 class Aggregator(ABC):
     """
@@ -19,13 +20,21 @@ class Aggregator(ABC):
         """
         if self.input_metrics:
             for metric in self.input_metrics:
-                if metric.get_name() not in dataset.get_metric_columns():
+                if isinstance(metric, MultiMetric):
+                    for submetric in metric.get_submetric_names():
+                        if submetric not in dataset.get_metric_columns():
+                            metric.predict(dataset)
+                elif metric.get_name() not in dataset.get_metric_columns():
                     metric.predict(dataset)
 
                 df = dataset.get_dataframe()
 
                 for i, row in df.iterrows():
-                    if metric.get_name() not in row:
+                    if isinstance(metric, MultiMetric):
+                        for submetric in metric.get_submetric_names():
+                            if submetric not in row:
+                                metric.calculate_row(row, dataset, update_dataset=True)
+                    elif metric.get_name() not in row:
                         metric.calculate_row(row, dataset, update_dataset=True)
 
                 dataset.set_dataframe(df)
@@ -34,7 +43,13 @@ class Aggregator(ABC):
         """
         Get the input columns
         """
-        return [metric.get_name() for metric in self.input_metrics]
+        input_cols = []
+        for metric in self.input_metrics:
+            if isinstance(metric, MultiMetric):
+                input_cols.extend(metric.get_submetric_names())
+            else:
+                input_cols.append(metric.get_name())
+        return input_cols
 
     @abstractmethod
     def _predict_unsafe(self, dataset, update_dataset=True):

@@ -88,7 +88,7 @@ class LLMJudge(Metric):
                 Grade the dataframe using the LLM judge in parallel with progress bar
             '''
             if metric_name is None:
-                metric_name = self.evaluation_axis.split(":")[0].replace("*", "") + "_" + self.model.kwargs['model'].split("/")[-1]
+                metric_name = self.evaluation_axis.split(":")[0].replace("*", "") + "_" + self.model.model.split("/")[-1]
 
             df = dataset.get_dataframe()
 

@@ -41,21 +41,29 @@ class SimpEval(Dataset):
     def __init__(self, path='./autometrics/dataset/datasets/simplification/simpeval.csv'):
         df = pd.read_csv(path)
 
-        df['score'] = df[['rating_1','rating_2','rating_3']].mean(axis=1)
+        # Split the reference columns into separate columns
+        references = df['references'].apply(eval)
 
-        df.drop(columns=['sentence_type','rating_1','rating_2','rating_3','rating_1_zscore','rating_2_zscore','rating_3_zscore'], inplace=True)
+        # identify the longest reference list
+        max_len = max(references.apply(len))
+
+        for i in range(max_len):
+            df[f'ref{i+1}'] = references.apply(lambda x: x[i] if len(x) > i else None)
+
+        df.drop(columns=['references'], inplace=True)
 
         target_columns = ['score']
-        ignore_columns = ['original_id','original','generation','system','ref1']
+        ignore_columns = ["id","original","simple","system"]
+        ignore_columns.extend([f'ref{i+1}' for i in range(max_len)])
         metric_columns = [col for col in df.columns if col not in target_columns and col not in ignore_columns]
 
         name = "SimpEval"
 
-        data_id_column = "original_id"
+        data_id_column = "id"
         model_id_column = "system"
         input_column = "original"
-        output_column = "generation"
-        reference_columns = ["ref1"]
+        output_column = "simple"
+        reference_columns = [f'ref{i+1}' for i in range(max_len)]
 
         metrics = [DummyMetric(col) for col in metric_columns]
 

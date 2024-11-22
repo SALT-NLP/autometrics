@@ -1,4 +1,5 @@
 from autometrics.aggregator.regression import Regression
+from autometrics.metrics.MultiMetric import MultiMetric
 
 class BudgetRegression(Regression):
     """
@@ -37,6 +38,6 @@ class BudgetRegression(Regression):
         important_metrics = self.identify_important_metrics()[:self.metric_budget]
         important_metrics = [metric[1] for metric in important_metrics]
 
-        self.input_metrics = [metric for metric in self.input_metrics if metric.get_name() in important_metrics]
+        self.input_metrics = [metric for metric in self.input_metrics if (not isinstance(metric, MultiMetric) and metric.get_name() in important_metrics) or (isinstance(metric, MultiMetric) and any(submetric in important_metrics for submetric in metric.get_submetric_names()))]
 
         self.model.fit(X[self.get_input_columns()], y)

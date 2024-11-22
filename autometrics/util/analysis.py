@@ -3,7 +3,7 @@ import pandas as pd
 
 def abbreviate_metric_name(metric_name):
     # Define abbreviations for common long parts of the names
-    return metric_name.replace("inc_plus_omi_", "ipo_").replace("predictions_", "pred_").replace("ElasticNet", "ENet").replace("GradientBoosting", "GB").replace("Ridge", "Rg").replace("Lasso", "L").replace("PLS", "PLS")
+    return metric_name.replace("inc_plus_omi_", "ipo_").replace("predictions_", "pred_").replace("ElasticNet", "ENet").replace("GradientBoosting", "GB").replace("Ridge", "Rg").replace("Lasso", "L").replace("PLS", "PLS").replace("Meta-Llama-3-70b-Instruct", "llama70b")
 
 def display_top_5_metrics_by_validation_precomputed(validation_data, test_data):
     top_correlations = {}

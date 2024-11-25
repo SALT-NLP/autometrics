@@ -19,6 +19,7 @@ def get_good_bad_examples(df, target_column, num_examples=5, flip=False):
 class GenerateAxisOfVariationSignature(dspy.Signature):
     """Given some good examples of outputs for a model and some bad examples, generate axes of variation that can explain some of the important differences related to the quality of the outputs.  Return a list of axes of variation from most important to least important alongside few word descriptions (part of the same list).  An additional description of the task is provided for context."""
     task_description = dspy.InputField(desc="A description of the task that the model is trying to solve.")
+    target_name = dspy.InputField(desc="If provided, a brief suggestion of the overall target value we are trying to predict.  Can sometimes be useful for generating axes of variation, and other times be ignored (when 'None' or not useful).")
     good_examples = dspy.InputField(desc="A list of good examples of outputs for a model.")
     bad_examples = dspy.InputField(desc="A list of bad examples of outputs for a model.")
     axes_of_variation = dspy.OutputField(desc="A numbered list of five axes of variation from most important to least important including a few word description of each axis.")
@@ -28,8 +29,10 @@ class GenerateAxisOfVariation(dspy.Module):
         super(GenerateAxisOfVariation, self).__init__()
         self.generate_axes = dspy.ChainOfThought(GenerateAxisOfVariationSignature)
 
-    def forward(self, task_description, good_examples, bad_examples):
-        axes_of_variation = self.generate_axes(task_description=task_description, good_examples=good_examples, bad_examples=bad_examples).axes_of_variation
+    def forward(self, task_description, good_examples, bad_examples, target_name=None):
+        if not target_name:
+            target_name = "None"
+        axes_of_variation = self.generate_axes(task_description=task_description, target_name=target_name, good_examples=good_examples, bad_examples=bad_examples).axes_of_variation
 
         # Split the axes of variation based on the newline, number, (optional period) pattern
         axes = re.split(r"\n\d+\.", axes_of_variation)
@@ -41,7 +44,7 @@ class GenerateAxisOfVariation(dspy.Module):
         if axes[0].startswith("1."):
             axes[0] = axes[0][2:].strip()
 
-        return dspy.Prediction(task_description=task_description, good_examples=good_examples, bad_examples=bad_examples, axes_of_variation=axes)
+        return dspy.Prediction(task_description=task_description, target_name=target_name, good_examples=good_examples, bad_examples=bad_examples, axes_of_variation=axes)
 
 class LLMJudgeProposer(Generator):
     def __init__(self, train_dataset=None, task_description=None, formatter=None, proposer_model=None, judge_model=None):
@@ -88,7 +91,7 @@ class LLMJudgeProposer(Generator):
 
         response = None
         with dspy.settings.context(lm=self.proposer_model):
-            response = GenerateAxisOfVariation()(task_description=self.task_description, good_examples=good_examples_formatted, bad_examples=bad_examples_formatted)
+            response = GenerateAxisOfVariation()(task_description=self.task_description, good_examples=good_examples_formatted, bad_examples=bad_examples_formatted, target_name=target_column)
 
         axis_of_variation = response.axes_of_variation
 

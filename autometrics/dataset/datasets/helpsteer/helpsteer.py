@@ -38,16 +38,19 @@ class HelpSteer(Dataset):
 
         super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
 
-    def get_splits(self, split_column=None, train_ratio=0.5, val_ratio=0.2, seed=None, preserve_splits=True):
+    def get_splits(self, split_column=None, train_ratio=0.5, val_ratio=0.2, seed=None, preserve_splits=True, max_size=None):
         if preserve_splits:
             # The validation set is best used as the test set since we don't have a test set
             updated_train_ratio = (train_ratio) / (train_ratio + val_ratio)
             updated_val_ratio = (val_ratio) / (train_ratio + val_ratio)
-            trainset, valset = self.train_dataset.get_splits(split_column, updated_train_ratio, updated_val_ratio, seed)
+            trainset, valset, _ = self.train_dataset.get_splits(split_column, updated_train_ratio, updated_val_ratio, seed)
+            if max_size:
+                trainset = trainset.get_subset(max_size)
+                valset = valset.get_subset(max_size)
             return trainset, valset, self.val_dataset
 
         else:
-            return super().get_splits(split_column, train_ratio, val_ratio, seed)
+            return super().get_splits(split_column, train_ratio, val_ratio, seed, max_size=max_size)
 
     def get_kfold_splits(self, k=5, split_column=None, seed=None, test_ratio=0.3, preserve_splits=True):
         if preserve_splits:

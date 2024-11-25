@@ -105,7 +105,7 @@ class Dataset:
     def __repr__(self):
         return self.__str__()
     
-    def get_splits(self, split_column=None, train_ratio=0.5, val_ratio=0.2, seed=None):
+    def get_splits(self, split_column=None, train_ratio=0.5, val_ratio=0.2, seed=None, max_size=None):
         df = self.get_dataframe()
 
         if not split_column:
@@ -147,6 +147,11 @@ class Dataset:
         val_dataset = Dataset(val_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
         test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
         
+        if max_size:
+            train_dataset = train_dataset.get_subset(max_size)
+            val_dataset = val_dataset.get_subset(max_size)
+            test_dataset = test_dataset.get_subset(max_size)
+
         return train_dataset, val_dataset, test_dataset
 
     def get_kfold_splits(self, k=5, split_column=None, seed=None, test_ratio=0.3):
@@ -226,3 +231,10 @@ class Dataset:
             for i, row in df.iterrows():
                 if metric.get_name() not in row:
                     metric.calculate_row(row, self, update_dataset=update_dataset)
+
+    def get_subset(self, size, seed=None):
+        df = self.get_dataframe()
+        if seed:
+            np.random.seed(seed)
+        subset_df = df.sample(n=size)
+        return Dataset(subset_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)

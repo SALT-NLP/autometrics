@@ -3,6 +3,7 @@ from autometrics.metrics.llm_judge.LLMJudge import LLMJudge
 import dspy
 import re
 from autometrics.util.format import get_default_formatter
+from prometheus_eval.litellm import LiteLLM
 
 def get_good_bad_examples(df, target_column, num_examples=5, flip=False):
     '''
@@ -47,17 +48,24 @@ class GenerateAxisOfVariation(dspy.Module):
         return dspy.Prediction(task_description=task_description, target_name=target_name, good_examples=good_examples, bad_examples=bad_examples, axes_of_variation=axes)
 
 class LLMJudgeProposer(Generator):
-    def __init__(self, train_dataset=None, task_description=None, formatter=None, proposer_model=None, judge_model=None):
+    def __init__(self, name="LLMJudgeProposer", description= "Propose new llm as a judge metrics based on the dataset and task description", train_dataset=None, task_description=None, formatter=None, proposer_model=None, judge_model=None):
         self.task_description = task_description
         self.dataset = train_dataset
         self.proposer_model = proposer_model
         self.judge_model = judge_model
         self.formatter = formatter
+        if judge_model and hasattr(judge_model, 'name'):
+            self.judge_model_name = judge_model.name
+        elif judge_model and isinstance(judge_model.model, LiteLLM):
+            self.judge_model_name = judge_model.model.name
+        else:
+            self.judge_model_name = judge_model.model.split('/')[-1] if judge_model else "None"
+
 
         if formatter is None:
             self.formatter = self._get_formatter(train_dataset)
 
-        super().__init__("LLMJudgeProposer",  "Propose new llm as a judge metrics based on the dataset and task description")
+        super().__init__(name, description)
 
     def _get_formatter(self, dataset):
         if self.formatter:
@@ -65,12 +73,10 @@ class LLMJudgeProposer(Generator):
         if not dataset:
             return lambda x: str(x)
         return get_default_formatter(dataset)
-
-    def generate(self, train_dataset=None, target_column=None, **kwargs):
-        """
-        Generate new metrics based on the dataset and task description
-        """
-        dataset = train_dataset
+    
+    # Get Good and Bad Examples formatted properly
+    def _preprocess_dataset(self, dataset, target_column):
+        dataset = dataset
         if dataset:
             self.dataset = dataset
             self.formatter = self._get_formatter(dataset)
@@ -89,15 +95,28 @@ class LLMJudgeProposer(Generator):
         good_examples_formatted = [self.formatter(row) for _, row in good_examples.iterrows()]
         bad_examples_formatted = [self.formatter(row) for _, row in bad_examples.iterrows()]
 
+        return good_examples_formatted, bad_examples_formatted
+    
+    def _get_axes_of_variation(self, good_examples, bad_examples):
         response = None
         with dspy.settings.context(lm=self.proposer_model):
-            response = GenerateAxisOfVariation()(task_description=self.task_description, good_examples=good_examples_formatted, bad_examples=bad_examples_formatted, target_name=target_column)
+            response = GenerateAxisOfVariation()(task_description=self.task_description, good_examples=good_examples, bad_examples=bad_examples)
 
-        axis_of_variation = response.axes_of_variation
+        return response.axes_of_variation
+
+
+    def generate(self, train_dataset=None, target_column=None, **kwargs):
+        """
+        Generate new metrics based on the dataset and task description
+        """
+        
+        good_examples_formatted, bad_examples_formatted = self._preprocess_dataset(train_dataset, target_column)
+
+        axis_of_variation = self._get_axes_of_variation(good_examples_formatted, bad_examples_formatted)
 
         new_metrics = []
         for i, axis in enumerate(axis_of_variation):
-            metric_name = axis.split(":")[0].replace("*", "") + "_" + self.judge_model.model.split("/")[-1]
+            metric_name = axis.split(":")[0].replace("*", "") + "_" + self.judge_model_name
 
             new_metrics.append(LLMJudge(metric_name, f"{axis}", self.judge_model, self.dataset, axis, self.formatter, self.task_description))
 

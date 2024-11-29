@@ -3,6 +3,7 @@ from autometrics.metrics.Metric import Metric
 from autometrics.util.format import get_default_formatter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+import math
 
 class LLMAsAJudgeSignature(dspy.Signature):
     """Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score from 1-5 on this metric."""
@@ -116,4 +117,5 @@ class LLMJudge(Metric):
                     dataset.get_metric_columns().append(metric_name)
 
             results.sort(key=lambda x: x[0])
-            return [score for _, score in results]
+
+            return [score if score is not None and not math.isnan(score) else 0 for _, score in results]

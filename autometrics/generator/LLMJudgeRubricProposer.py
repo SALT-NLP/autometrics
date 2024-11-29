@@ -1,4 +1,5 @@
 from autometrics.metrics.llm_judge.LLMJudgeRubric import LLMJudgeRubric
+from autometrics.metrics.llm_judge.LLMJudgeRubricDSPy import LLMJudgeRubricDSPy
 from autometrics.generator.LLMJudgeProposer import LLMJudgeProposer
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import dspy
@@ -45,7 +46,7 @@ class LLMJudgeRubricProposer(LLMJudgeProposer):
         if self.judge_model_name == 'None':
             self.judge_model_name = 'prometheus-7b-v2.0'
 
-    def generate(self, train_dataset=None, target_column=None, **kwargs):
+    def generate(self, train_dataset=None, target_column=None, use_prometheus=True, **kwargs):
         """
         Generate new metrics based on the dataset and task description.
         """
@@ -90,9 +91,11 @@ class LLMJudgeRubricProposer(LLMJudgeProposer):
 
                     metric_name = f"{llm_rubric.criteria.split(':')[0].replace('*', '')}_{self.judge_model_name}_rubric"
 
-                    if self.judge_model and isinstance(self.judge_model, PrometheusEval):
+                    LLMJudgeClass = LLMJudgeRubric if use_prometheus else LLMJudgeRubricDSPy
+
+                    if (self.judge_model and isinstance(self.judge_model, PrometheusEval)) or not use_prometheus:
                         new_metrics.append(
-                            LLMJudgeRubric(
+                            LLMJudgeClass(
                                 metric_name,
                                 llm_rubric.criteria,
                                 train_dataset,
@@ -103,7 +106,7 @@ class LLMJudgeRubricProposer(LLMJudgeProposer):
                         )
                     else:
                         new_metrics.append(
-                            LLMJudgeRubric(
+                            LLMJudgeClass(
                                 metric_name,
                                 llm_rubric.criteria,
                                 train_dataset,

@@ -1,0 +1,107 @@
+{
+  "generate_score": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "text": "\u00abInput (original): \u00ab0    for rowling, this scene is important because it shows harry's bravery, and by retrieving cedric's corpse, he demonstrates selflessness and compassion.\nName: original, dtype: object\u00bb\nReference 1 (ref1): \u00abref1\u00bb\nReference 2 (ref2): \u00abref2\u00bb\nReference 3 (ref3): \u00abref3\u00bb\nReference 4 (ref4): \u00abref4\u00bb\nReference 5 (ref5): \u00abref5\u00bb\nReference 6 (ref6): \u00abref6\u00bb\nReference 7 (ref7): \u00abref7\u00bb\nReference 8 (ref8): \u00abref8\u00bb\nReference 9 (ref9): \u00abref9\u00bb\nReference 10 (ref10): \u00abref10\u00bb\nOutput (simple): \u00ab0    for rowling, this scene is important because it shows harry's bravery, and cedric's corpse, he shows selflessness and compassion.\nName: simple, dtype: object\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "score": -0.519980282
+      },
+      {
+        "text": "\u00abInput (original): \u00ab0    he advocates applying a user-centered design process in product development cycles and also works towards popularizing interaction design as a mainstream discipline.\nName: original, dtype: object\u00bb\nReference 1 (ref1): \u00abref1\u00bb\nReference 2 (ref2): \u00abref2\u00bb\nReference 3 (ref3): \u00abref3\u00bb\nReference 4 (ref4): \u00abref4\u00bb\nReference 5 (ref5): \u00abref5\u00bb\nReference 6 (ref6): \u00abref6\u00bb\nReference 7 (ref7): \u00abref7\u00bb\nReference 8 (ref8): \u00abref8\u00bb\nReference 9 (ref9): \u00abref9\u00bb\nReference 10 (ref10): \u00abref10\u00bb\nOutput (simple): \u00ab0    he stands for applying a user-centered design process in product development cycles, and also works for making interaction design as a mainstream discipline.\nName: simple, dtype: object\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "score": 0.482134301
+      },
+      {
+        "text": "\u00abInput (original): \u00ab0    advocacy countries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\nName: original, dtype: object\u00bb\nReference 1 (ref1): \u00abref1\u00bb\nReference 2 (ref2): \u00abref2\u00bb\nReference 3 (ref3): \u00abref3\u00bb\nReference 4 (ref4): \u00abref4\u00bb\nReference 5 (ref5): \u00abref5\u00bb\nReference 6 (ref6): \u00abref6\u00bb\nReference 7 (ref7): \u00abref7\u00bb\nReference 8 (ref8): \u00abref8\u00bb\nReference 9 (ref9): \u00abref9\u00bb\nReference 10 (ref10): \u00abref10\u00bb\nOutput (simple): \u00ab0    advocacy countries with a minority muslim population are more likely to be muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\nName: simple, dtype: object\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "score": -0.421749832
+      },
+      {
+        "text": "\u00abInput (original): \u00ab0    bankers from shorebank, a community development bank in chicago, helped yunus with the official incorporation of the bank under a grant from the ford foundation.\nName: original, dtype: object\u00bb\nReference 1 (ref1): \u00abref1\u00bb\nReference 2 (ref2): \u00abref2\u00bb\nReference 3 (ref3): \u00abref3\u00bb\nReference 4 (ref4): \u00abref4\u00bb\nReference 5 (ref5): \u00abref5\u00bb\nReference 6 (ref6): \u00abref6\u00bb\nReference 7 (ref7): \u00abref7\u00bb\nReference 8 (ref8): \u00abref8\u00bb\nReference 9 (ref9): \u00abref9\u00bb\nReference 10 (ref10): \u00abref10\u00bb\nOutput (simple): \u00ab0    bankers from shorebank, a community development bank in chicago, helped yunus with the government saying that the bank was independent from the ford foundation.\nName: simple, dtype: object\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "score": -0.602202076
+      },
+      {
+        "text": "\u00abInput (original): \u00ab0    before the advent of the pocket calculator, it was the most commonly used calculation tool in science and engineering.\nName: original, dtype: object\u00bb\nReference 1 (ref1): \u00abref1\u00bb\nReference 2 (ref2): \u00abref2\u00bb\nReference 3 (ref3): \u00abref3\u00bb\nReference 4 (ref4): \u00abref4\u00bb\nReference 5 (ref5): \u00abref5\u00bb\nReference 6 (ref6): \u00abref6\u00bb\nReference 7 (ref7): \u00abref7\u00bb\nReference 8 (ref8): \u00abref8\u00bb\nReference 9 (ref9): \u00abref9\u00bb\nReference 10 (ref10): \u00abref10\u00bb\nOutput (simple): \u00ab0    before the invention of the pocket calculator, it was the most commonly used calculation tool in science and engineering.\nName: simple, dtype: object\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "score": 1.153978984
+      },
+      {
+        "text": "\u00abInput (original): \u00ab0    before the advent of the pocket calculator, it was the most commonly used calculation tool in science and engineering.\nName: original, dtype: object\u00bb\nReference 1 (ref1): \u00abref1\u00bb\nReference 2 (ref2): \u00abref2\u00bb\nReference 3 (ref3): \u00abref3\u00bb\nReference 4 (ref4): \u00abref4\u00bb\nReference 5 (ref5): \u00abref5\u00bb\nReference 6 (ref6): \u00abref6\u00bb\nReference 7 (ref7): \u00abref7\u00bb\nReference 8 (ref8): \u00abref8\u00bb\nReference 9 (ref9): \u00abref9\u00bb\nReference 10 (ref10): \u00abref10\u00bb\nOutput (simple): \u00ab0    , it was the tool used calculation.\nName: simple, dtype: object\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "score": -1.688563622
+      },
+      {
+        "text": "\u00abInput (original): \u00ab0    bankers from shorebank, a community development bank in chicago, helped yunus with the official incorporation of the bank under a grant from the ford foundation.\nName: original, dtype: object\u00bb\nReference 1 (ref1): \u00abref1\u00bb\nReference 2 (ref2): \u00abref2\u00bb\nReference 3 (ref3): \u00abref3\u00bb\nReference 4 (ref4): \u00abref4\u00bb\nReference 5 (ref5): \u00abref5\u00bb\nReference 6 (ref6): \u00abref6\u00bb\nReference 7 (ref7): \u00abref7\u00bb\nReference 8 (ref8): \u00abref8\u00bb\nReference 9 (ref9): \u00abref9\u00bb\nReference 10 (ref10): \u00abref10\u00bb\nOutput (simple): \u00ab0    bankers from shorebank, a community development bank in chicago, helped yunus with the official recording of the bank under a grant from the ford foundation.\nName: simple, dtype: object\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "score": 0.42611289
+      },
+      {
+        "text": "\u00abInput (original): \u00ab0    he was also named 1982 \"sportsman of the year\" by sports illustrated.\nName: original, dtype: object\u00bb\nReference 1 (ref1): \u00abref1\u00bb\nReference 2 (ref2): \u00abref2\u00bb\nReference 3 (ref3): \u00abref3\u00bb\nReference 4 (ref4): \u00abref4\u00bb\nReference 5 (ref5): \u00abref5\u00bb\nReference 6 (ref6): \u00abref6\u00bb\nReference 7 (ref7): \u00abref7\u00bb\nReference 8 (ref8): \u00abref8\u00bb\nReference 9 (ref9): \u00abref9\u00bb\nReference 10 (ref10): \u00abref10\u00bb\nOutput (simple): \u00ab0    1982 he was named \"sportsman.\"\nName: simple, dtype: object\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "score": -1.250861466
+      }
+    ],
+    "signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score for the .",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    },
+    "extended_signature": {
+      "instructions": "Evaluate the input text based on the provided task description and metric, and provide a score and step-by-step reasoning for how well the text meets the given metric, ensuring to balance simplicity with preservation of original meaning.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    }
+  }
+}

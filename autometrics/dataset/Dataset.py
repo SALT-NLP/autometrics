@@ -21,6 +21,8 @@ class Dataset:
             Returns the list of columns to be ignored.
         get_metric_columns():
             Returns the list of metric columns.
+        get_output_column():
+            Returns the output column. (The column that contains the LLM output!)
         get_name():
             Returns the name of the dataset.
         __str__():

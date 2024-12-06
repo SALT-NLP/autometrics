@@ -1,16 +1,64 @@
-import dspy
 from autometrics.metrics.Metric import Metric
+import dspy
 from autometrics.util.format import get_default_formatter
+from dspy.teleprompt import MIPROv2
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 import math
+import pandas as pd
+
+def exact_match_rounded(x, y):
+    return int(round(x) == round(y))
+
+def inverse_distance(x, y):
+    if x == y:
+        return 1
+
+    return min(100, 1 / (abs(x - y) + 1)) / 100
+
+def get_wrapped_metric(metric_func):
+    def wrapped_metric(example, pred, trace=None):
+        return metric_func(example.score, pred.score)
+    return wrapped_metric
+
+def prepare_dataset(dataset, target_column, task_description, metric_name, formatter):
+    dspy_dataset = []
+
+    for i, row in dataset.get_dataframe().iterrows():
+        input = row[dataset.get_input_column()]
+        output = row[dataset.get_output_column()]
+        references = [row[col] for col in dataset.get_reference_columns()]
+        
+        row_dict = {dataset.get_input_column(): input, dataset.get_output_column(): output}
+        if references is not None and len(references) > 0:
+            for i, ref in enumerate(references):
+                row_dict[dataset.get_reference_columns()[i]] = ref
+
+        row_dict_df = pd.DataFrame([row_dict])
+
+        dspy_dataset.append(
+            dspy.Example(
+                text=formatter(row_dict_df),
+                task_description=task_description,
+                metric=metric_name,
+                score=row[target_column]
+            ).with_inputs('text', 'task_description', 'metric')
+        )
+
+    return dspy_dataset
+
+def grade_row(row, axis, llm, formatter, task_description, program):
+    '''Helper function to grade a single row'''
+    with dspy.settings.context(lm=llm):
+        return program(formatter(row), axis, task_description).score
+
 
 class LLMAsAJudgeSignature(dspy.Signature):
-    """Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score from 1-5 on this metric."""
+    """Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score for the ."""
     text = dspy.InputField(desc="The input text that we want to rate.")
     task_description = dspy.InputField(desc="A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available.")
     metric = dspy.InputField(desc="The metric that we want to rate the text on.")
-    score = dspy.OutputField(desc="The score that the text should recieve on this metric (1=low, 5=high).")
+    score = dspy.OutputField(desc="The score that the text should recieve on this metric.")
 
 class LLMAsAJudge(dspy.Module):
     def __init__(self):
@@ -34,31 +82,72 @@ class LLMAsAJudge(dspy.Module):
             score = 0.0
 
         return dspy.Prediction(text=text, metric=metric, score=score)
-    
-def grade_row(row, axis, llm, formatter, task_description):
-    '''Helper function to grade a single row'''
-    with dspy.settings.context(lm=llm):
-        return LLMAsAJudge()(formatter(row), axis, task_description).score
-    
-class LLMJudge(Metric):
-    def __init__(self, name, description, model, dataset, evaluation_axis, formatter=None, task_description=None):
-        super().__init__(name, description)
+
+class LLMJudgeOptimized(Metric):
+    # TODO: Better output prompt path
+    def __init__(self, name, description, model, train_dataset, formatter=None, task_description=None, target_column=None, eval_function_name='inverse_distance', custom_eval_function=None, load_prompt=None, optimize=True, output_prompt_path='output_prompt.dspy', metric_name=None):
+        self.eval_function = None
+        if custom_eval_function is not None:
+            self.eval_function = custom_eval_function
+        elif eval_function_name == 'exact_match_rounded':
+            self.eval_function = exact_match_rounded
+        elif eval_function_name == 'inverse_distance':
+            self.eval_function = inverse_distance
+
         self.model = model
         if formatter is None:
-            self.formatter = get_default_formatter(dataset)
+            self.formatter = get_default_formatter(train_dataset)
         else:
             self.formatter = formatter
-        self.dataset = dataset
         self.task_description = task_description
-        self.evaluation_axis = evaluation_axis
-        
+        self.dataset = train_dataset
+        self.target_column = target_column
+        self.metric_name = metric_name if metric_name is not None else target_column
+
+        self.program = LLMAsAJudge()
+
+        if load_prompt is not None:
+            self.program.load(load_prompt)
+
+        if optimize:
+
+            train_set = prepare_dataset(
+                train_dataset,
+                target_column,
+                task_description,
+                self.metric_name,
+                self.formatter
+            )
+
+            teleprompter = MIPROv2(
+                metric=get_wrapped_metric(self.eval_function),
+                auto="medium"
+            )
+
+            optimized_program = teleprompter.compile(
+                self.program.deepcopy(),
+                trainset=train_set,
+                max_bootstrapped_demos=8,
+                max_labeled_demos=8,
+                requires_permission_to_run=False,
+            )
+
+            if output_prompt_path is not None:
+                optimized_program.save(output_prompt_path)
+
+            self.program = optimized_program
+
+
+        super().__init__(name, description)
+        pass
+
     def calculate(self, input, output, references=None, **kwargs):
         row = {self.dataset.get_input_column(): input, self.dataset.get_output_column(): output}
         if references is not None:
             for i, ref in enumerate(references):
                 row[self.dataset.get_reference_columns()[i]] = ref
 
-        grade_row(row, self.evaluation_axis, self.model, self.formatter, self.task_description)
+        grade_row(row, self.metric_name, self.model, self.formatter, self.task_description, self.program)
 
     def calculate_row(self, row, dataset, update_dataset=True, **kwargs):
         """
@@ -92,7 +181,7 @@ class LLMJudge(Metric):
                 Grade the dataframe using the LLM judge in parallel with progress bar
             '''
             if metric_name is None:
-                metric_name = self.evaluation_axis.split(":")[0].replace("*", "") + "_" + self.model.model.split("/")[-1]
+                metric_name = self.metric_name + "_" + self.model.model.split("/")[-1]
 
             df = dataset.get_dataframe()
 
@@ -101,7 +190,7 @@ class LLMJudge(Metric):
             # Create a ThreadPoolExecutor
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 # Submit tasks to the executor
-                futures = {executor.submit(grade_row, row, self.evaluation_axis, self.model, self.formatter, self.task_description): index for index, row in df.iterrows()}
+                futures = {executor.submit(grade_row, row, self.metric_name, self.model, self.formatter, self.task_description): index for index, row in df.iterrows()}
 
                 # Collect the results with tqdm progress bar
                 for future in tqdm(as_completed(futures), total=len(futures), desc="Grading rows", unit="row"):

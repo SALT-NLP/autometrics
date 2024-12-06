@@ -36,11 +36,11 @@ class JudgeByRubric(dspy.Module):
 
 
 class LLMJudgeRubricDSPy(Metric):
-    def __init__(self, name, description, dataset, rubric, judge=None, task_description=None, judge_api_base="http://jagupard37:8000/v1"):
+    def __init__(self, name, description, dataset, rubric, judge=None, task_description=None, judge_api_base="http://future-hgx-1:7410/v1"):
         super().__init__(name, description)
         self.dataset = dataset
         self.rubric = rubric
-        self.judge = judge if judge else dspy.LM("openai/meta-llama/Meta-Llama-3.1-70b-Instruct", api_base="http://future-hgx-1:7410/v1", api_key="None")
+        self.judge = judge if judge else dspy.LM("openai/meta-llama/Meta-Llama-3.1-70b-Instruct", api_base=judge_api_base, api_key="None")
         self.task_description = task_description
         
     def calculate(self, input, output, references=None, **kwargs):

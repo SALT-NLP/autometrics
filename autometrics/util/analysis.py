@@ -27,7 +27,7 @@ def display_top_5_metrics_by_validation_precomputed(validation_data, test_data):
     
     return df
 
-def display_top_5_metrics_by_validation(validation_dataset, test_dataset, compute_all=False):
+def display_top_5_metrics_by_validation(validation_dataset, test_dataset, compute_all=False, func=calculate_correlation):
     """
     Returns dataframe of the top 5 metrics by validation score
 
@@ -44,8 +44,8 @@ def display_top_5_metrics_by_validation(validation_dataset, test_dataset, comput
         A DataFrame containing the top 5 metrics by validation score for each target category, along with the test score.
     """
 
-    validation_data = calculate_correlation(validation_dataset, compute_all=compute_all)
-    test_data = calculate_correlation(test_dataset, compute_all=compute_all)
+    validation_data = func(validation_dataset, compute_all=compute_all)
+    test_data = func(test_dataset, compute_all=compute_all)
 
     return display_top_5_metrics_by_validation_precomputed(validation_data, test_data)
     

@@ -14,7 +14,7 @@ def inverse_distance(x, y):
     if x == y:
         return 1
 
-    return min(100, 1 / (abs(x - y) + 1)) / 100
+    return 1 / (abs(x - y) + 1)
 
 def get_wrapped_metric(metric_func):
     def wrapped_metric(example, pred, trace=None):
@@ -25,20 +25,9 @@ def prepare_dataset(dataset, target_column, task_description, metric_name, forma
     dspy_dataset = []
 
     for i, row in dataset.get_dataframe().iterrows():
-        input = row[dataset.get_input_column()]
-        output = row[dataset.get_output_column()]
-        references = [row[col] for col in dataset.get_reference_columns()]
-        
-        row_dict = {dataset.get_input_column(): input, dataset.get_output_column(): output}
-        if references is not None and len(references) > 0:
-            for i, ref in enumerate(references):
-                row_dict[dataset.get_reference_columns()[i]] = ref
-
-        row_dict_df = pd.DataFrame([row_dict])
-
         dspy_dataset.append(
             dspy.Example(
-                text=formatter(row_dict_df),
+                text=formatter(row),
                 task_description=task_description,
                 metric=metric_name,
                 score=row[target_column]
@@ -54,7 +43,7 @@ def grade_row(row, axis, llm, formatter, task_description, program):
 
 
 class LLMAsAJudgeSignature(dspy.Signature):
-    """Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score for the ."""
+    """Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score for the output."""
     text = dspy.InputField(desc="The input text that we want to rate.")
     task_description = dspy.InputField(desc="A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available.")
     metric = dspy.InputField(desc="The metric that we want to rate the text on.")
@@ -190,7 +179,7 @@ class LLMJudgeOptimized(Metric):
             # Create a ThreadPoolExecutor
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 # Submit tasks to the executor
-                futures = {executor.submit(grade_row, row, self.metric_name, self.model, self.formatter, self.task_description): index for index, row in df.iterrows()}
+                futures = {executor.submit(grade_row, row, self.metric_name, self.model, self.formatter, self.task_description, self.program): index for index, row in df.iterrows()}
 
                 # Collect the results with tqdm progress bar
                 for future in tqdm(as_completed(futures), total=len(futures), desc="Grading rows", unit="row"):

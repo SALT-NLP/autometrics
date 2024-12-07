@@ -21,7 +21,7 @@ def get_wrapped_metric(metric_func):
         return metric_func(example.score, pred.score)
     return wrapped_metric
 
-def prepare_dataset(dataset, target_column, task_description, metric_name, formatter):
+def prepare_dataset(dataset, target_column, task_description, metric_name, formatter, suggested_range=(1,5)):
     dspy_dataset = []
 
     for i, row in dataset.get_dataframe().iterrows():
@@ -30,23 +30,24 @@ def prepare_dataset(dataset, target_column, task_description, metric_name, forma
                 text=formatter(row),
                 task_description=task_description,
                 metric=metric_name,
+                suggested_range=suggested_range,
                 score=row[target_column]
-            ).with_inputs('text', 'task_description', 'metric')
+            ).with_inputs('text', 'task_description', 'metric', 'suggested_range')
         )
 
     return dspy_dataset
 
-def grade_row(row, axis, llm, formatter, task_description, program):
+def grade_row(row, axis, llm, formatter, task_description, program, suggested_range=(1,5)):
     '''Helper function to grade a single row'''
     with dspy.settings.context(lm=llm):
-        return program(formatter(row), axis, task_description).score
-
+        return program(formatter(row), axis, suggested_range=suggested_range,task_description=task_description).score
 
 class LLMAsAJudgeSignature(dspy.Signature):
-    """Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score for the output."""
+    """Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric."""
     text = dspy.InputField(desc="The input text that we want to rate.")
     task_description = dspy.InputField(desc="A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available.")
     metric = dspy.InputField(desc="The metric that we want to rate the text on.")
+    suggested_range = dspy.InputField(desc="The suggested range of possible values for the metric.")
     score = dspy.OutputField(desc="The score that the text should recieve on this metric.")
 
 class LLMAsAJudge(dspy.Module):
@@ -54,17 +55,14 @@ class LLMAsAJudge(dspy.Module):
         super(LLMAsAJudge, self).__init__()
         self.generate_score = dspy.ChainOfThought(LLMAsAJudgeSignature)
 
-    def forward(self, text, metric, task_description=None):
+    def forward(self, text, metric, suggested_range=(1,5), task_description=None):
         if task_description is None:
             task_description = "None"
-        score = self.generate_score(task_description=task_description, text=text, metric=metric).score
+        suggested_range_str = f"{suggested_range[0]} to {suggested_range[1]}"
+        score = self.generate_score(task_description=task_description, text=text, metric=metric, suggested_range=suggested_range_str).score
         # Convert the string score to a float by stripping any additional text and converting to a float
         if '\n' in score:
             score = score.split('\n')[0]
-
-        if '.' in score:
-            score = score.split('.')[0]
-            
         try:
             score = float(score.strip())
         except:
@@ -92,6 +90,7 @@ class LLMJudgeOptimized(Metric):
         self.dataset = train_dataset
         self.target_column = target_column
         self.metric_name = metric_name if metric_name is not None else target_column
+        self.suggested_range = (self.dataset.get_dataframe()[self.target_column].min(), self.dataset.get_dataframe()[self.target_column].max())
 
         self.program = LLMAsAJudge()
 
@@ -105,7 +104,8 @@ class LLMJudgeOptimized(Metric):
                 target_column,
                 task_description,
                 self.metric_name,
-                self.formatter
+                self.formatter,
+                self.suggested_range
             )
 
             teleprompter = MIPROv2(
@@ -136,7 +136,7 @@ class LLMJudgeOptimized(Metric):
             for i, ref in enumerate(references):
                 row[self.dataset.get_reference_columns()[i]] = ref
 
-        grade_row(row, self.metric_name, self.model, self.formatter, self.task_description, self.program)
+        grade_row(row, self.metric_name, self.model, self.formatter, self.task_description, self.program, suggested_range=self.suggested_range)
 
     def calculate_row(self, row, dataset, update_dataset=True, **kwargs):
         """
@@ -179,7 +179,7 @@ class LLMJudgeOptimized(Metric):
             # Create a ThreadPoolExecutor
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 # Submit tasks to the executor
-                futures = {executor.submit(grade_row, row, self.metric_name, self.model, self.formatter, self.task_description, self.program): index for index, row in df.iterrows()}
+                futures = {executor.submit(grade_row, row, self.metric_name, self.model, self.formatter, self.task_description, self.program, self.suggested_range): index for index, row in df.iterrows()}
 
                 # Collect the results with tqdm progress bar
                 for future in tqdm(as_completed(futures), total=len(futures), desc="Grading rows", unit="row"):

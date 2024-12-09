@@ -1,0 +1,113 @@
+{
+  "generate_score": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "text": "\u00abInput (original): \u00abhe advocates applying a user-centered design process in product development cycles and also works towards popularizing interaction design as a mainstream discipline.\u00bb\nReference 1 (ref1): \u00abhe says to use a user-centered design process. he also tries to get more people to use interaction design.\u00bb\nReference 2 (ref2): \u00abhe believes interaction design should be the normal. he also prefers user-centered design processes in his product development.\u00bb\nReference 3 (ref3): \u00abhe suggests using a user-centered design process when developing products and also works towards making interaction design popular.\u00bb\nReference 4 (ref4): \u00abhe recommends using a user-centered design process in product development cycles and also to popularize interaction design as a mainstream discipline.\u00bb\nReference 5 (ref5): \u00abhe advocates for a user-centered design process and works towards making interaction design more mainstream.\u00bb\nReference 6 (ref6): \u00abhe advocates applying a user-centered design process in product development cycles. he also works towards popularizing interaction design as a mainstream discipline.\u00bb\nReference 7 (ref7): \u00abhe recommends applying a user-centered design process in product development cycles.  he also works towards making interactive design a mainsteam subject.\u00bb\nReference 8 (ref8): \u00abhe recommends using a user-centered design process.\u00bb\nReference 9 (ref9): \u00abhe suggests a user process in the development cycle and wants to popularize  an interaction design.\u00bb\nReference 10 (ref10): \u00abhe recommends applying a user-centered design process and also works towards popularizing interaction design.\u00bb\nOutput (simple): \u00abhe advocates using a user-centered design process in product development cycles and also works for popularizing trade design as a whole field.\u00bb\u00bb",
+        "metric": "fluency",
+        "reasoning": "The output sentence is not a clear simplification of the original sentence. The term \"trade design\" is not a clear equivalent of \"interaction design\", and the phrase \"as a whole field\" is not a clear equivalent of \"as a mainstream discipline\". The sentence also contains some awkward phrasing, such as \"works for popularizing\".",
+        "score": "2"
+      },
+      {
+        "augmented": true,
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "text": "\u00abInput (original): \u00abbefore the advent of the pocket calculator, it was the most commonly used calculation tool in science and engineering.\u00bb\nReference 1 (ref1): \u00abthe pocket calculator replaced its use in science and engineering.\u00bb\nReference 2 (ref2): \u00abit was the most used calculation tool in science and engineering before the pocket calculator came out.\u00bb\nReference 3 (ref3): \u00abbefore the pocket calculator was invented it was the most used calculation tool.\u00bb\nReference 4 (ref4): \u00abit was the most commonly used calculation tool before the invention of the pocket calculator.\u00bb\nReference 5 (ref5): \u00abit was the most common tool before the calculator.\u00bb\nReference 6 (ref6): \u00abbefore the invention of the pocket calculator, it was the most often used calculation tool for science and engineering.\u00bb\nReference 7 (ref7): \u00abbefore the invention of the pocket calculator, it was the most common counting tool in science and engineering.\u00bb\nReference 8 (ref8): \u00abbefore the pocket calculator was invented, it was the most popular calculation tool in science and engineering.\u00bb\nReference 9 (ref9): \u00abit was the most commonly used calculation tool before the pocket calculator.\u00bb\nReference 10 (ref10): \u00abbefore the pocket calculator was invented it was common as an science and engineering tool.\u00bb\nOutput (simple): \u00abbefore the invention of the pocket calculator, it was the most commonly used calculation tool in science and engineering.\u00bb\u00bb",
+        "metric": "fluency",
+        "reasoning": "The output sentence is almost identical to the original sentence, which means it did not simplify the sentence as intended. A simplified sentence should be easier to understand and convey the same meaning in a more concise way.",
+        "score": "1"
+      },
+      {
+        "augmented": true,
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "text": "\u00abInput (original): \u00abadvocacy countries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\u00bb\nReference 1 (ref1): \u00abmosques play a larger role in civic participation in advocacy countries with a muslim minority.\u00bb\nReference 2 (ref2): \u00abcountries with a minority muslim population are more likely to use mosques to promote civil participation than muslim-majority countries in the middle east.\u00bb\nReference 3 (ref3): \u00abadvocacy countries with minority muslim populations are more likely than muslim majority countries from the greater middle east to have mosques to get people to be a part of the community.\u00bb\nReference 4 (ref4): \u00abadvocacy countries with a minority of muslims are more likely than countries with a majority of muslims to use mosques to promote civic participation.\u00bb\nReference 5 (ref5): \u00abcountries with a smaller muslim population are more likely to use mosques as a way to help local groups get together.\u00bb\nReference 6 (ref6): \u00abadvocacy countries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques to promote civic participation.\u00bb\nReference 7 (ref7): \u00abadvocacy countries with a low muslim population are more likely to use mosques as a way to promote people participation.\u00bb\nReference 8 (ref8): \u00abcountries in the middle east with a minority muslim population are more likely to use mosques as a means of promoting civic participation than countries with a majority muslim population.\u00bb\nReference 9 (ref9): \u00abcountries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\u00bb\nReference 10 (ref10): \u00abadvocacy countries with smaller muslim populations are more likely to use mosques to promote civic participation.\u00bb\nOutput (simple): \u00abadvocacy countries with a minority muslim population are more likely to be muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\u00bb\u00bb",
+        "metric": "fluency",
+        "reasoning": "The output sentence is not a simplification of the original sentence, but rather a rewording that changes the meaning. The original sentence states that advocacy countries with a minority Muslim population are more likely to use mosques to promote civic participation than Muslim-majority countries, but the output sentence implies the opposite.",
+        "score": "1"
+      },
+      {
+        "text": "\u00abInput (original): \u00abcolor ranges from orange to pale yellow.\u00bb\nReference 1 (ref1): \u00abcolor can be orange to pale yellow.\u00bb\nReference 2 (ref2): \u00abcolor ranges from orange to light yellow.\u00bb\nReference 3 (ref3): \u00abcolor goes from orange to yellow.\u00bb\nReference 4 (ref4): \u00abcolor is from orange to pale yellow.\u00bb\nReference 5 (ref5): \u00abcolor ranges from orange to yellow.\u00bb\nReference 6 (ref6): \u00abthe color spans from orange to pale yellow.\u00bb\nReference 7 (ref7): \u00abcolor varied from orange to pale yellow.\u00bb\nReference 8 (ref8): \u00abthe color can be orange to pale yellow.\u00bb\nReference 9 (ref9): \u00abcolor goes from orange to pale yellow.\u00bb\nReference 10 (ref10): \u00abcolor ranges from orange to light yellow.\u00bb\nOutput (simple): \u00abcertifiable color ranges from orange to pale yellow.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "score": 3
+      },
+      {
+        "text": "\u00abInput (original): \u00abbankers from shorebank, a community development bank in chicago, helped yunus with the official incorporation of the bank under a grant from the ford foundation.\u00bb\nReference 1 (ref1): \u00abbankers from shorebank in chicago helped yunus with the incorporation of the bank, with a grant from the ford foundation.\u00bb\nReference 2 (ref2): \u00abchicago's shoreback helped yunus form with a grant from the ford foundation.\u00bb\nReference 3 (ref3): \u00abshorebank is a community development bank in chicago.  bankers from there helped yunus with the official incorporation of the bank.  they did so with a grant from the ford foundation.\u00bb\nReference 4 (ref4): \u00abbankers from chicago-based community development bank shorebank helped yunus with official incorporation thanks to a ford foundation grant.\u00bb\nReference 5 (ref5): \u00abyumus gained help to incorporate the bank from shorebank and the ford foundation.\u00bb\nReference 6 (ref6): \u00abbakers helped yunus incorporate the bank with a grant.\u00bb\nReference 7 (ref7): \u00abbankers from shorebank and a ford grant helped yunus incorporate the bank.\u00bb\nReference 8 (ref8): \u00abbankers from shorebank, a bank in chicago, helped yunus incorporate the bank using funds given to them from the ford foundation.\u00bb\nReference 9 (ref9): \u00abbankers from shorebank in chicago helped yunis with making the bank with money from the ford foundation.\u00bb\nReference 10 (ref10): \u00abbankers from shorebank in chicago helped yunus with the incorporation of the bank under a ford foundation grant.\u00bb\nOutput (simple): \u00abbankers from shorebank, a community development bank in chicago, helped yunus with the government saying that the bank was independent from the ford foundation.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "score": 3
+      },
+      {
+        "text": "\u00abInput (original): \u00abat the voyager 2 images ophelia appears as an elongated object, the major axis pointing towards uranus.\u00bb\nReference 1 (ref1): \u00aba voyager 2 picture was an object called ophelia pointing toward uranus.\u00bb\nReference 2 (ref2): \u00abthe voyager 2 images showed ophelia as a long object with the major axis pointing at uranus.\u00bb\nReference 3 (ref3): \u00abin the voyager 2 images, ophelia looks like an elogated object, with the major axis pointing towards uranus.\u00bb\nReference 4 (ref4): \u00abophelia looks like a long item from voyager 2 images with the large part pointing toward uranus.\u00bb\nReference 5 (ref5): \u00abin the voyager 2 images, ophelia appears as an elongated object with the major axis pointing towards uranus.\u00bb\nReference 6 (ref6): \u00abimages of ophelia, an elongated object, point toward uranus.\u00bb\nReference 7 (ref7): \u00abat the voyager 2 images ophelia appears as an long object, the major axis pointing towards uranus\u00bb\nReference 8 (ref8): \u00abophelia looks like a long object pointed at uranus.\u00bb\nReference 9 (ref9): \u00abat the voyager 2 images, ophelia appears as a lengthen object with the major center line pointing towards uranus.\u00bb\nReference 10 (ref10): \u00abin the images of voyager 2, ophelia looks like a long object with its main axis pointed towards uranus.\u00bb\nOutput (simple): \u00abat the voyager 2 images ophelia appears as a stretched object, the major axis pointing towards uranus.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "score": 3
+      },
+      {
+        "text": "\u00abInput (original): \u00abhe was also named 1982 \"sportsman of the year\" by sports illustrated.\u00bb\nReference 1 (ref1): \u00abhe also received the title of 1982 \"sportsman of the year\" by the magazine sports illustrated.\u00bb\nReference 2 (ref2): \u00abhe was 1982 \"sportsman of the year\" by sports illustrated.\u00bb\nReference 3 (ref3): \u00abhe was also 1982 \"sportsman of the year\" in sports illustrated.\u00bb\nReference 4 (ref4): \u00abhe was sports illustrated's \"sportsman of the year\" in 1982 .\u00bb\nReference 5 (ref5): \u00abhe was also named 1982 \"sportsman of the year\" by sports illustrated.\u00bb\nReference 6 (ref6): \u00abhe was named \"sportsman of the year\" by sports illustrated in 1982.\u00bb\nReference 7 (ref7): \u00abhe was also named sports illustrated's 1982 \"sportsman of the year.\u00bb\nReference 8 (ref8): \u00abhe was called 1982 sportsman of the year by sports illustrated.\u00bb\nReference 9 (ref9): \u00absports illustrated named him 1982's \"sportsman of the year\".\u00bb\nReference 10 (ref10): \u00abhe was named \"sportsman of the year\" by sports illustrated in 1982.\u00bb\nOutput (simple): \u00ab1982 he was named \"sportsman.\"\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "score": 1
+      },
+      {
+        "text": "\u00abInput (original): \u00abbefore the advent of the pocket calculator, it was the most commonly used calculation tool in science and engineering.\u00bb\nReference 1 (ref1): \u00abthe pocket calculator replaced its use in science and engineering.\u00bb\nReference 2 (ref2): \u00abit was the most used calculation tool in science and engineering before the pocket calculator came out.\u00bb\nReference 3 (ref3): \u00abbefore the pocket calculator was invented it was the most used calculation tool.\u00bb\nReference 4 (ref4): \u00abit was the most commonly used calculation tool before the invention of the pocket calculator.\u00bb\nReference 5 (ref5): \u00abit was the most common tool before the calculator.\u00bb\nReference 6 (ref6): \u00abbefore the invention of the pocket calculator, it was the most often used calculation tool for science and engineering.\u00bb\nReference 7 (ref7): \u00abbefore the invention of the pocket calculator, it was the most common counting tool in science and engineering.\u00bb\nReference 8 (ref8): \u00abbefore the pocket calculator was invented, it was the most popular calculation tool in science and engineering.\u00bb\nReference 9 (ref9): \u00abit was the most commonly used calculation tool before the pocket calculator.\u00bb\nReference 10 (ref10): \u00abbefore the pocket calculator was invented it was common as an science and engineering tool.\u00bb\nOutput (simple): \u00abbefore the advent of the pocket calculator, it was the most common design tool in science and engineering.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "score": 4
+      }
+    ],
+    "signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score from 1-5 on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric (1=low, 5=high)."
+        }
+      ]
+    },
+    "extended_signature": {
+      "instructions": "Evaluate the given text based on the provided task description and metric, and return a score from 1 to 5, along with a step-by-step explanation of the reasoning behind the score. Ensure the score reflects how well the text meets the task description and metric requirements.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric (1=low, 5=high)."
+        }
+      ]
+    }
+  }
+}

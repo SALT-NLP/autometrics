@@ -1,0 +1,157 @@
+{
+  "generate_score": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "text": "\u00abInput (original): \u00abhowever, the bz\u00f6 differs a bit in comparison to the freedom party, as is in favor of a referendum about the lisbon treaty but against an eu-withdrawal.\u00bb\nReference 1 (ref1): \u00abthe bz\u00f6 is in favor of a referendum about the lisbon treaty but against an eu-withdrawal.\u00bb\nReference 2 (ref2): \u00abhowever, the bz\u00f6 is slightly different compared to the freedom party, which supports a referendum about the lisbon treaty but against an eu-withdrawal.\u00bb\nReference 3 (ref3): \u00abbz\u00f6 is a little different from the freedom party. bz\u00f6 supports a public vote on the lisbon treaty. it is also against leaving the eu.\u00bb\nReference 4 (ref4): \u00abhowever, the bzo is not the same as the freedom party.\u00bb\nReference 5 (ref5): \u00abunlike the freedom party, the bz\u00f6 supports voting about the lisbon treaty but against an eu-withdrawal.\u00bb\nReference 6 (ref6): \u00abthe bzo is a bit different than the freedom party.  they are in favor of a referendum about the lisbon treaty but against an eu-withdrawal.\u00bb\nReference 7 (ref7): \u00abthe bzo approves of the lisbon treaty but doesn't like the eu-withdrawal\u00bb\nReference 8 (ref8): \u00abthe bzo is different from the freedom party because it supports changes to the lisbon treaty but is not for the eu-withdrawel.\u00bb\nReference 9 (ref9): \u00abthe bzo differs slightly from the freedom party, in that it supports a referendum about the lisbon treaty but is against an eu-withdrawal.\u00bb\nReference 10 (ref10): \u00abthe bz\u00f6 is different from the freedom party because it is against an eu-withdrawal.\u00bb\nOutput (simple): \u00ab, the bz\u00f6 differs a bit in comparison is in favor, but an eu-withdrawal.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "suggested_range": [
+          -1.850506613,
+          0.992377276
+        ],
+        "score": -1.368747758
+      },
+      {
+        "text": "\u00abInput (original): \u00abthe latter provided audiences with the sort of information later provided by intertitles, and can help historians imagine what the film may have been like.\u00bb\nReference 1 (ref1): \u00abthe latter provided audiences with the sort of information later provided by intertitles, and can help historians imagine what the film may was like.\u00bb\nReference 2 (ref2): \u00abthe one told latest gave people the information by words in the film and can help historians think about what the movie may have been like.\u00bb\nReference 3 (ref3): \u00abthis gave audiences the kind of information now found in intertitles. historians can then imagine what the film was like.\u00bb\nReference 4 (ref4): \u00abthis gave the audience information similar to intertitles. this helps historians imagine what the film was like.\u00bb\nReference 5 (ref5): \u00abthe latter gave audiences information later provided by intertitles, which help historians see what the film was like.\u00bb\nReference 6 (ref6): \u00abaudiences of the film received extra information wile watching the film.\u00bb\nReference 7 (ref7): \u00abthe latter gave audiences information later given by intertitles.  it can help historians imagine what the film may have been like.\u00bb\nReference 8 (ref8): \u00abthis gave audiences the type of information later given by intertitles and helps historians imagine what the film would have been like.\u00bb\nReference 9 (ref9): \u00abthe latter provided audiences with the sort of information later provided by intertitles. this can help historians imagine what the film may have been like.\u00bb\nReference 10 (ref10): \u00abaudiences were given information that helped them see what the film could have been like.\u00bb\nOutput (simple): \u00abprovided with the latter audiences provided the sort of information, and can help historians imagine what the film may have been like.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "suggested_range": [
+          -1.850506613,
+          0.992377276
+        ],
+        "score": -0.623756203
+      },
+      {
+        "text": "\u00abInput (original): \u00abname arzashkun seems to be the assyrian form of an armenian name ending in -ka formed from a proper name arzash, which recalls the name arsene, arsissa, applied by the ancients to part of lake van.\u00bb\nReference 1 (ref1): \u00abname arzashkum seems to be the assyrian form of an armenian name ending in -ka. it comes from a proper name arzash, which recalls the name arsene, arsissa, given by the ancients to part of lake van.\u00bb\nReference 2 (ref2): \u00abarzashkun looks like the assyrian versino of an armenian name ending in -ka formed from arzash, which descends from arsene, arsissa, a former name for lake van.\u00bb\nReference 3 (ref3): \u00abthe name arzashkun seems to be an assyrian form of an armenian name ending in -ka formed from arzash, which brings back the name arsene, arsissa, used by the historical people to part of lake van.\u00bb\nReference 4 (ref4): \u00abarzashkun seems to be the assyrian form of an armenian name.\u00bb\nReference 5 (ref5): \u00abthe name arzashkun is the assyrian form of an armenian name ending in -ka. this is formed from a proper name arzash.\u00bb\nReference 6 (ref6): \u00abthe name arzashkun seems to be the assyrian form of an armenian name ending in -ka developed from a proper name arzash, which is similar to the names arsene and arsissa that the ancients used for part of lake van.\u00bb\nReference 7 (ref7): \u00abthe name arzashkum might be the assyrian form of an armenian name.\u00bb\nReference 8 (ref8): \u00abarzashkun is a form of the name -ka from the name arzash which is from the name arsene, arsissa coming from the old times as part of lake van.\u00bb\nReference 9 (ref9): \u00abarzashkun is the assyrian form of an armenian name ending in -ka.  the name is formed from the proper name arzash, which is like the name arsene, arsissa which was the name used by the ancient people to describe lake van.\u00bb\nReference 10 (ref10): \u00abthe name arzashkun is an assyrian version of an armenian name.\u00bb\nOutput (simple): \u00abname arzashkun seems to be the assyrian form of an urartian name ending in - ka formed from a proper name arzash, which the name arsene, arsissa, known by the ancients to part of lake van.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "suggested_range": [
+          -1.850506613,
+          0.992377276
+        ],
+        "score": -0.311205081
+      },
+      {
+        "text": "\u00abInput (original): \u00abit was discovered by stephen p. synnott in images from the voyager 1 space probe taken on march 5, 1979 while orbiting around jupiter.\u00bb\nReference 1 (ref1): \u00abit was found by stephen p. synnott in images taken by the voyager 1 space probe.they were taken on march 5, 1979 near jupiter.\u00bb\nReference 2 (ref2): \u00abstephen synnott discovered this using pictures from voyager 1 taken in orbit around jupiter.\u00bb\nReference 3 (ref3): \u00abthe discovery was made by stephen p. synott. the images where taken from the voyager 1 space probe on march 5, 1979 in orbit.\u00bb\nReference 4 (ref4): \u00abstephen p. synnott discovered it.  he found it in images from the voyager 1 space probe taken on march 5, 1979 while spinning around jupiter.\u00bb\nReference 5 (ref5): \u00abthe voyager 1 was orbiting around jupiter, and stephen p. synnot discovered it .\u00bb\nReference 6 (ref6): \u00abit was discovered by stephen p. synnott in the voyager 1 space probe's photos taken march 5, 1979 while orbiting around jupiter.\u00bb\nReference 7 (ref7): \u00abstephen p. synnott found it in pictures from the voyager 1 space ship taken march 5, 1979 while going around jupiter.\u00bb\nReference 8 (ref8): \u00abit was discovered by stephen p. synnott in images from the voyager 1 space probe.the images were taken on march 5, 1979 while orbiting around jupiter.\u00bb\nReference 9 (ref9): \u00abit was found by stephen p. synnott in pictures taken from the voyager 1 space probe that were taken march 5, 1979 while the probe was travelling around jupiter.\u00bb\nReference 10 (ref10): \u00abstephen p. synnott noticed it in pictures from the voyager 1 space probe.\u00bb\nOutput (simple): \u00abit was found by stephen p. synnott in images from the voyager 1 space probe taken on march 5, 1979, while orbit around jupiter.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "suggested_range": [
+          -1.850506613,
+          0.992377276
+        ],
+        "score": -0.128938156
+      },
+      {
+        "text": "\u00abInput (original): \u00abhowever travel through very remote areas, on isolated tracks, requires advance planning and a suitable, reliable vehicle (usually a four wheel drive).\u00bb\nReference 1 (ref1): \u00abtraveling through far away areas requires advance planning and a suitable, reliable vehicle (usually a four wheel drive).\u00bb\nReference 2 (ref2): \u00abtravel through very remote areas requires advanced planning and a reliable vehicle.\u00bb\nReference 3 (ref3): \u00abtravel through distant areas requires advance planning and a suitable vehicle.\u00bb\nReference 4 (ref4): \u00abhowever travel through very remote areas, on isolated tracks, requires advance planning and a suitable, reliable vehicle.\u00bb\nReference 5 (ref5): \u00aba reliable four wheel drive vehicle and careful planning  is needed to travel through remote areas or on tracks that are difficult to reach.\u00bb\nReference 6 (ref6): \u00abtravel in remote isolated areas requires prior planning and a good vehicle.\u00bb\nReference 7 (ref7): \u00abtravel through unknown areas takes planning ahead and a good car usually four wheel drive.\u00bb\nReference 8 (ref8): \u00abhowever travel through rural areas, on isolated tracks, requires early planning and a suitable, reliable vehicle (usually a four wheel drive).\u00bb\nReference 9 (ref9): \u00abhowever travel through very remote areas, requires advance planning and a suitable, reliable vehicle (usually a four wheel drive).\u00bb\nReference 10 (ref10): \u00abto travel in isolated areas, one needs to plan in advance and have a suitable and reliable vehicle.\u00bb\nOutput (simple): \u00abhowever travel through very remote areas, on isolated tracks, requires advance planning and a suitable, reliable vehicle.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "suggested_range": [
+          -1.850506613,
+          0.992377276
+        ],
+        "score": 0.341360373
+      },
+      {
+        "text": "\u00abInput (original): \u00abmonteux is a commune of the vaucluse d\u00e9partement in southern france, in the area provence-alpes-c\u00f4te d'azur.\u00bb\nReference 1 (ref1): \u00abmonteux is a commune in southern france.\u00bb\nReference 2 (ref2): \u00abmonteux is in the vaucluse area in southern france. it's in the provence-alpes-c\u00f4te d'azur.\u00bb\nReference 3 (ref3): \u00abmonteux is a part of the vaucluse departement in the area of provence-alpes-cote d'azur south france\u00bb\nReference 4 (ref4): \u00abmonteux is a commune in southern france. it is part of the vaucluse d\u00e9partement.  the commune is located in provence-alpes-c\u00f4te d'azur.\u00bb\nReference 5 (ref5): \u00abmonteux is a place where religious people live in southern france, located in provense-alpes-c\u00f4te d'azur.\u00bb\nReference 6 (ref6): \u00abmonteux is a commune of the vaucluse d\u00e9partement in southern france.\u00bb\nReference 7 (ref7): \u00abmonteux is a commune of the vaucluse d\u00e9partement in southern france, in provence-alpes-c\u00f4te d'azur.\u00bb\nReference 8 (ref8): \u00abmonteux  commune can be found in southern france.\u00bb\nReference 9 (ref9): \u00abmonteux is a commune in the vaucluse d\u00e9partement of southern france. it is located in the area of provence-alpes-c\u00f4te d'azur.\u00bb\nReference 10 (ref10): \u00abmonteux is a community of the vaucluse d\u00e9partement in southern france, in the provence-alpes-c\u00f4te d'azur.\u00bb\nOutput (simple): \u00abit is found in the region provence-alpes-c\u00f4te d'azur in the vaucluse department in the south of france.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "suggested_range": [
+          -1.850506613,
+          0.992377276
+        ],
+        "score": 0.3631608979999999
+      },
+      {
+        "text": "\u00abInput (original): \u00abit is also a starting point for people wanting to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 1 (ref1): \u00abit is a starting point for people who want to explore cooktown, cape york peninsula, or the atherton tableland.\u00bb\nReference 2 (ref2): \u00abit's also a starting point for exploring cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 3 (ref3): \u00abit is a good place to start when exploring other places.\u00bb\nReference 4 (ref4): \u00abit is the start for people looking at cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 5 (ref5): \u00abit is a starting point for people who want to tour cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 6 (ref6): \u00abit is also a starting point for people who want to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 7 (ref7): \u00abit is a starting point for people who want to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 8 (ref8): \u00abit is also where people go first when they want to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 9 (ref9): \u00abit's a good place to start if you want to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 10 (ref10): \u00abpeople that want to explore cooktown, cape york peninsula, and the atherton tableland can start at that point.\u00bb\nOutput (simple): \u00abit is also a starting point for people wanting to see cooktown, cape york peninsula, and the atherton tableland.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "suggested_range": [
+          -1.850506613,
+          0.992377276
+        ],
+        "score": 0.830404048
+      },
+      {
+        "text": "\u00abInput (original): \u00abhe was also named 1982 \"sportsman of the year\" by sports illustrated.\u00bb\nReference 1 (ref1): \u00abhe also received the title of 1982 \"sportsman of the year\" by the magazine sports illustrated.\u00bb\nReference 2 (ref2): \u00abhe was 1982 \"sportsman of the year\" by sports illustrated.\u00bb\nReference 3 (ref3): \u00abhe was also 1982 \"sportsman of the year\" in sports illustrated.\u00bb\nReference 4 (ref4): \u00abhe was sports illustrated's \"sportsman of the year\" in 1982 .\u00bb\nReference 5 (ref5): \u00abhe was also named 1982 \"sportsman of the year\" by sports illustrated.\u00bb\nReference 6 (ref6): \u00abhe was named \"sportsman of the year\" by sports illustrated in 1982.\u00bb\nReference 7 (ref7): \u00abhe was also named sports illustrated's 1982 \"sportsman of the year.\u00bb\nReference 8 (ref8): \u00abhe was called 1982 sportsman of the year by sports illustrated.\u00bb\nReference 9 (ref9): \u00absports illustrated named him 1982's \"sportsman of the year\".\u00bb\nReference 10 (ref10): \u00abhe was named \"sportsman of the year\" by sports illustrated in 1982.\u00bb\nOutput (simple): \u00abhe was also named 1982 \"sportsman of the year\" by sports illustrated magazine.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "suggested_range": [
+          -1.850506613,
+          0.992377276
+        ],
+        "score": 0.7906330309999999
+      },
+      {
+        "text": "\u00abInput (original): \u00abit was the first asteroid to be discovered by a spacecraft.\u00bb\nReference 1 (ref1): \u00abit was the first asteroid to be found be a spacecraft.\u00bb\nReference 2 (ref2): \u00abit was the first asteroid to be found by a spacecraft.\u00bb\nReference 3 (ref3): \u00abit was the first piece of rock in space to be found by a spacecraft.\u00bb\nReference 4 (ref4): \u00abit was the first asteroid found by a spaceship.\u00bb\nReference 5 (ref5): \u00abit was the first asteroid discovered by a spacecraft.\u00bb\nReference 6 (ref6): \u00abit was the first asteroid found by a spacecraft.\u00bb\nReference 7 (ref7): \u00abit was the first asteroid to be discovered by a spacecraft.\u00bb\nReference 8 (ref8): \u00abthe asteroid was the first one that a spacecraft discovered.\u00bb\nReference 9 (ref9): \u00abit was the first asteroid discovered by a spacecraft.\u00bb\nReference 10 (ref10): \u00abit was the first asteroid discovered by a spacecraft.\u00bb\nOutput (simple): \u00abit was the first asteroid to be found by a spacecraft.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "fluency",
+        "suggested_range": [
+          -1.850506613,
+          0.992377276
+        ],
+        "score": 0.992377276
+      }
+    ],
+    "signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    },
+    "extended_signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    }
+  }
+}

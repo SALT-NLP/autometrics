@@ -5,7 +5,7 @@
     "train": [],
     "demos": [],
     "signature": {
-      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score from 1-5 on this metric.",
       "fields": [
         {
           "prefix": "Text:",
@@ -20,21 +20,17 @@
           "description": "The metric that we want to rate the text on."
         },
         {
-          "prefix": "Suggested Range:",
-          "description": "The suggested range of possible values for the metric."
-        },
-        {
           "prefix": "Reasoning: Let's think step by step in order to",
           "description": "${reasoning}"
         },
         {
           "prefix": "Score:",
-          "description": "The score that the text should recieve on this metric."
+          "description": "The score that the text should recieve on this metric (1=low, 5=high)."
         }
       ]
     },
     "extended_signature": {
-      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "instructions": "Given an input text, a task description, and a metric to rate the text on, carefully evaluate the text's quality and provide a score from 1 to 5 based on the specified metric, while also providing a clear and concise reasoning for the assigned score, following the task description and demonstrating a good understanding of the topic.",
       "fields": [
         {
           "prefix": "Text:",
@@ -49,16 +45,12 @@
           "description": "The metric that we want to rate the text on."
         },
         {
-          "prefix": "Suggested Range:",
-          "description": "The suggested range of possible values for the metric."
-        },
-        {
           "prefix": "Reasoning: Let's think step by step in order to",
           "description": "${reasoning}"
         },
         {
           "prefix": "Score:",
-          "description": "The score that the text should recieve on this metric."
+          "description": "The score that the text should recieve on this metric (1=low, 5=high)."
         }
       ]
     }

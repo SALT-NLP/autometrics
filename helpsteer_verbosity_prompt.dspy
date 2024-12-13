@@ -1,0 +1,147 @@
+{
+  "generate_score": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "text": "\u00abInput (prompt): \u00abaccording to the following reference text delimited in ###\n###\nStephen V Locust (Moldavian: \u015etefan V L\u0103cust\u0103), (1496 \u2013 20 December 1540) was Prince of Moldavia from 1538 to 1540. His nickname comes from a large locust invasion of the country that happened during his reign (most probably in 1539) and led to harvest loss, and famine.\n\nStephen was born after July 1496 in the capital city of Suceava, as the posthumous son of his father Alexandru of Moldavia, then the older son and heir of Stephen III the Great. His mother was Maria Asenina-Palaiologina a native Constantinopolitan of Byzantine imperial heritage. About 1\u20132 years after his birth due to succession for the throne ambitions by his step grand-mother, Maria Voichi\u021ba (3rd wife of Stephen III) who wanted to secure it to her son Bogdan-Vlad (future Bogdan III the One-Eyed), his mom takes him back to Constantinople where he will spend most part of his life before acceding to the throne at age 42. Based on his maternal origin and uprising in the Christian community of Constantinople as well as his direct nomination by the sultan he can be considered the first Phanariote ruler of Moldavia.\n\nIn the summer of 1538 he is appointed by sultan Suleiman the Magnificent as \"Voievode &amp; Hospodar\" of Moldavia and he will participate in the campaign against his predecessor and uncle Petru IV Rare\u015f. Petru was preparing to fight against overwhelming odds the sultan's army but he was deserted by most of his troops under the command of his grand boyars (nobles) the hetman (army commander) Mihul and logothete Trotusanul. Petru then flees in exile in Transylvania. Suleiman enters the city of Suceava, captures Moldavian treasury, battle flags and princely artifacts including Stephen IIIs sword and convokes formally the \"Sfatul Tarii\" (National Assembly) who sanctions unanimously his choice for the throne - Stephen V. As punishment for his predecessor's disobedience Suleiman also annexed the fortress of Tighina with surrounding area, a further territorial loss for Moldavia after prior conquest of Kilia and Cetatea Alba (Asprokastron) in 1484. This extended the country's vulnerability to attacks from South-West and caused discontent among the boyar elite and wider population. However otherwise the sultan renews Moldavia's autonomy and self rule and keeps unchanged the tribute at 10,000 gold coins annually.\n\nHis reign was noted mostly for the financial difficulties brought on by the locust invasion, but he appears to have made the best efforts to renew diplomatic relations with Hungary and Poland and, at the end of summer of 1540, took an increasing anti-Ottoman stance and even sanctioned a raid against Tighina which resulted in the death of about 150 Ottomans and confiscation per Polish contemporary accounts, of about 68,000 sheep.\n\nIn the meantime his ousted predecessor Petru IV Rare\u015f after public supplication in front of the sultan and after having paid the biggest bribe yet for a Romanian prince is re-appointed in early December by Suleiman after he received the news of Moldavian raid against his subjects. Before Petru IV Rare\u015f could reach Moldavia Stephen V is assassinated by a plot lead by the same grand boyars - Mihul and Trotusanul five days before Christmas 1540. They will receive their punishment soon thereafter once Petru reached Suceava, although in between these two events there will be a 5-6 week rule by Alexandru Cornea, another grandson of Stephen III the Great. Stephen V is the first ruler of Moldavia assassinated by his boyars.\n\nStephen's V wife, Cheajna (whose origin and age we do not have information), was pardoned and she was allowed to retain quarters within the princely palace but she had passed months thereafter and was interred at the Bistri\u021ba Monastery where Stephen V himself might have been buried as well.\n###\nWhat were the key political and social challenges facing Stephen V during his reign, and how did he address these challenges?\u00bb\nOutput (response): \u00abStephen V faced several challenges during his reign, including a locust invasion that led to a famine, tensions with the Ottoman Empire, and a dispute with his predecessor over the throne. To address these challenges, Stephen V attempted to renew diplomatic relations with Hungary and Poland, and even sanctioned a raid against Tighina, resulting in the death of about 150 Ottomans and the confiscation of about 68,000 sheep. However, his attempts were ultimately unsuccessful, and he was assassinated by a plot lead by his boyars.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "verbosity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abReference:\n<start of reference>\nThe Nigerian Maritime Administration and Safety Agency (NIMASA), as the lead Agency under the Ministry of Transportation and the Nigerian Navy in partnership with the Inter-Regional Coordination Centre ICC Yaound\u00e9, will host the fifth plenary of the Gulf of Guinea Maritime Collaboration Forum for the Shared Awareness and Deconfliction (GOG-MCF\/SHADE)The Gulf of Guinea MCF\/SHADE 5th plenary which is scheduled to take place in the Federal Capital Territory Abuja from May 10th \u2013 11th has \"Enduring and Sustainable Security\" as its theme and all regional Navies amongst other international stakeholders are expected to attend.\n\nSpeaking ahead of the forum, the director general, Nigerian Maritime Administration and Safety Agency (NIMASA), Dr. Bashir Jamoh, identified regional co-operation as having played an important role in reducing incidents of piracy in the Gulf of Guinea.\n\nAccording to him, \"the establishment of GOG-MCF\/SHADE has enabled working-level stakeholders from the GoG region and outside the region to connect and discuss how best to tackle piracy in the area. We believe that this has been a catalyst for non-regional stakeholders to step up and initiate effective maritime law enforcement operations to support regional efforts\". \"These collaborative initiatives and efforts of the Nigerian Navy and other regional Navies including the deployment of the Deep Blue Project, has been responsible for the considerable reduction in piracy incidents on Nigerian waters and the GoG region. It is noteworthy that the International Maritime Bureau, IMB has removed Nigeria from the global piracy list.\n\nis not easy, but sustaining the status will be more challenging. Our goal is to sustain this new status of a piracy free Gulf of Guinea\n\nThe Gulf of Guinea collaboration Forum SHADE was established by Nigeria and 22 countries of the ICC in July 2021. The goal was to implement effective operational counter -piracy cooperation amongst regional and international Navies as well as the shipping industry and reporting Centres of the Yaounde Code of Conduct (ICC) for the a Regional Strategy for Maritime Safety and Security in Central and West Africa region.\n\nThe previous edition of the plenary held virtually in July last year, due to travel restrictions brought on by the COVID-19 pandemic, and was hosted by the Gulf of Guinea Maritime Institute (GOGMI) in Accra, Ghana.\n\nThe minister of Transportation, Rotimi Amaechi, minister of state for Transportation, Senator Gbemisola Saraki, Chief of Naval Staff, Vice Admiral AZ Gambo and the DG NIMASA, Dr Bashir Jamoh are leading participants in plenary from Nigeria while Captain Bell Bell of the ICC-Yaounde is leading the international Navies and participants to the plenary.\n<end of reference>\nInstruction:\nFrom the text, provide an overview of the impact that the forum has had on the reduction of piracy incidents in the Gulf of Guinea.\u00bb\nOutput (response): \u00abThe establishment of GOG-MCF\/SHADE has enabled working-level stakeholders from the GoG region and outside the region to connect and discuss how best to tackle piracy in the area. This collaborative initiative has been a catalyst for non-regional stakeholders to step up and initiate effective maritime law enforcement operations to support regional efforts.\n\nThe Nigerian Navy and other regional Navies, including the deployment of the Deep Blue Project, have been responsible for the considerable reduction in piracy incidents on Nigerian waters and the GoG region. As a result, the International Maritime Bureau (IMB) has removed Nigeria from the global piracy list.\n\nThe goal of the Gulf of Guinea collaboration Forum SHADE is to implement effective operational counter-piracy cooperation amongst regional and international Navies as well as the shipping industry and reporting Centres of the Yaounde Code of Conduct (ICC) for the Regional Strategy for Maritime Safety and Security in Central and West Africa region.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "verbosity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abConsider this reference information delimited in \"\"\":\n\"\"\"\nNapanee railway station in Napanee, Ontario, Canada is served by Via Rail trains running from Toronto to Ottawa and Montreal. The 1856 limestone railway station is an unstaffed but heated shelter with telephones and washrooms, which opens at least half an hour before a train arrives. The shelter and platform are wheelchair-accessible.\n\nNapanee station is one of originally 34 first generation Grand Trunk Railway stations in Ontario from the same era as the opening of the line. Nine still exist, of which three remain in active service. The station building is owned and maintained by the municipality.\n\nRailway services\nAs of early May 2020, Napanee station is served by two domestic routes (with connections). Departures have been reduced to one per day in either direction due to the coronavirus pandemic (effective March 31, 2020).\n\nOttawa - Toronto Route\n\nMontreal - Toronto Route\n\nHistory\n\nThe original Grand Trunk stations were stone buildings constructed during or immediately after the 1856 opening of the GTR (now CN) mainline from Montr\u00e9al to Toronto. Nine survive today, including a pair at Napanee and Ernestown in Lennox and Addington County which were built from Kingston Limestone using similar design. The first generation \"Type C\" Grand Trunk stations (small stations in Napanee, Ernestown, Brighton) were stone rectangular buildings with four chimneys and five bays for arched windows on the long side and two on each end, under a pitched slate roof with elongated eaves and soffits supported by end rafters and triangular brackets.\n\nAt the time of the railway's construction, Bath, Ontario was a bustling lakefront manufacturing village with 400-1000 people. The rails led to a shift in population from Bath (which was not on the GTR mainline) to Napanee (well served by the York Road, Napanee River and Grand Trunk Railway). The railway also led to a shift in population away from small towns to larger centres such as Belleville and Kingston.\n\nAt one point, Napanee was served by two railways; the Grand Trunk (Montr\u00e9al-Toronto) and the Bay of Quinte Railway (Deseronto-Sydenham). The BQR was integrated into Canadian Northern Railway's mainline to Smiths Falls in 1910 and became part of CN when CNoR went bankrupt in 1918. The last fragment of this line was disconnected in 2010 at Napanee's historic Grand Trunk station; it crossed Hwy 401 to a Goodyear Tire and Rubber factory as a dead end after the rails to Smiths Falls were removed in the 1980s. The section from Strathcona to Smiths Falls is now the Cataraqui Trail.\n\nNapanee's station is now municipally owned and remains in active use. The train no longer stops at Ernestown, leaving a boarded-up but intact CN-owned station in a rural area at an inaccessible point on the CN mainline  west of Camden East Road. The other seven stations from this original set are CN-owned and in varying condition. Trains no longer stop at St. Marys Junction, Brighton and Prescott. Kingston's historic outer station, in use until 1974, is now abandoned and in ruins. Belleville's original station is intact but largely vacant as a new facility was built adjacent in 2012. The original Port Hope (1856) and Georgetown (1858) stations remain in active service.\n\nWith the exception of the removal of stone chimneys on the four corners, the exterior currently looks much as it did originally. The 1856 Napanee Station was provincially designated Feb 26, 1993 under Part 4 of the Ontario Heritage Act; Brighton Station obtained a similar designation in 2000. The other seven original stations are designated federally under the Heritage Railway Stations Protection Act, a status which does not apply to the municipally-owned Napanee station as the railway no longer directly owns the building.\n\"\"\"\n\nWhat is the historic significance of Napanee railway station?\u00bb\nOutput (response): \u00abNapanee railway station in Napanee, Ontario, Canada is historically significant as one of the original 34 first-generation Grand Trunk Railway stations in Ontario built during the 1856 opening of the line from Montreal to Toronto. It is a limestone railway station that is unstaffed but heated with telephones and washrooms. It is an example of a historically significant architectural style, and it is one of nine original Grand Trunk Railway stations still standing in Ontario. As of early May 2020, it is served by two domestic routes (with connections) and is wheelchair-accessible.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "verbosity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 1
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWhat are some good examples of movie subtitles? I want you to list them out in a numbered format.\u00bb\nOutput (response): \u00abI am a helpful AI assistant who answers user queries about a reference text. Here are some good examples of movie subtitles listed out in a numbered format:\n\n1. Rogue One: A Star Wars Story\n2. The Lord of the Rings: The Fellowship of the Ring\n3. Iron Man 3\n4. Captain America: The Winter Soldier\n5. The Amazing Spider-Man 2\n6. The Hunger Games: Mockingjay - Part 1\n7. The Hunger Games: Mockingjay - Part 2\n8. X-Men: Days of Future Past\n9. John Wick\n10. Jurassic World\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "verbosity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 1
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWrite a short story about a jeweller who wants to close his shop and retire, but gets one final chance to make a big sale.\u00bb\nOutput (response): \u00abIn the end, it's not about the money, it's about the art.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "verbosity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 0
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWrite a poem about a shoehorn in under 250 words. The poem should use imagery and sensory language to describe the shoehorn\u2019s purpose and the emotions it evokes. Additionally, the poem should include at least two metaphors and a clear theme.\u00bb\nOutput (response): \u00abA shoehorn, so simple and sleek,\nA tool to help your shoes fit so sleek.\nNot just a fancy name,\nIt's also a friend, to help you don your shoes in a breeze.\n\nIt's made of metal, sturdy and strong,\nWith a curved shape that's hard to wrong.\nIt's designed to slip between your toes,\nAnd help you slide into your shoes with ease and poise.\n\nIt's like a helping hand, a friend to lean on,\nWhen you need to get your shoes on, and keep on.\nIt's there for you, through thick and thin,\nTo help you slip into your shoes, and keep your feet in.\n\nSo, next time you reach for your shoehorn,\nRemember it's not just a fancy name,\nBut a friend to help you, and a tool to adore,\nThat's always there to help you, in a fancy new pair of shoes to wear.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "verbosity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWrite a poem about gloom, where gloom is a personified character.\u00bb\nOutput (response): \u00abI'm sorry, but I need more information about the reference text to answer your query. Can you provide more details or a link to the text?\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "verbosity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 0
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abReference:\n<start of reference>\nErik Guldentops (born ca. 1941) is a Belgian computer scientist and management consultant, who was systems engineer at SWIFT and Executive Professor at Antwerp Management School, known for his work on IT governance.\n\nBiography \nGuldentops started his Humanities study at the 1960 at the Onze-Lieve-Vrouwcollege in Antwerpen, where he graduated in economics in 1967. In 1969 he proceeded to study Computer science at the Karel De Grote Hogeschool, where he graduated in 1971. Subsequently after another year at the Katholieke Universiteit Leuven, he received a Post-graduate degree in computer science.\n\nGuldentops started his career at the Society for Worldwide Interbank Financial Telecommunication (SWIFT) in 1974 as Chief Inspector, and was Director Information Security from 1996 to 2001. From 1993 to 2001 he was also Vice President Research at the ISACA (Information Systems Audit and Control Association). In 1998 he was appointed Executive Professor at the Antwerp Management School. Since his retired in 2010, he is Visiting Lecturer at the Antwerp Management School. In 2009 he also had started his own consultancy firm. Guldentops has been member of the International Federation for Information Processing IFIP TC11 WG11.5.\n\nIn 2000 Guldentops received the 2000 J.Lainhart Award for \"his impact on the profession\u2019s Common Body of Knowledge\", and in 2005 the J.Wasserman Award for \"his overall contribution to the IT Audit profession.\"\n\nSelected publications\nGuldentops authored and co-authored several publications. Books: \n 2002. Integrity, internal control and security in information systems : connecting governance and technology : IFIP TC11\/WG11.5 fourth working conference on integrity and internal control in information systems, November 15\u201316, 2001, Brussels, Belgium. With Michael Gertz and Leon Strous (eds.)\n\nArticles, a selection:\n Van Grembergen, Wim, Steven De Haes, and Erik Guldentops. \"Structures, processes and relational mechanisms for IT governance.\" Strategies for information technology governance 2.004 (2004): 1-36.\n<end of reference>\nInstruction:\nWrite a list format summary of Erik Guldentops' key contributions and achievements in at least 5 bulleted points for students of information science.\u00bb\nOutput (response): \u00ab- IT Governance: Guldentops' work on IT governance has had a significant impact on the profession's Common Body of Knowledge.\n- J. Lainhart Award: In 2000, he received the J. Lainhart Award for his impact on the profession's Common Body of Knowledge.\n- J. Wasserman Award: In 2005, he received the J. Wasserman Award for his overall contribution to the IT Audit profession.\n- Visiting Lecturer: Since his retirement in 2010, he has been Visiting Lecturer at the Antwerp Management School.\n- Founding Member: He is a founding member of the IFIP TC11 WG11.5.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "verbosity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      }
+    ],
+    "signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    },
+    "extended_signature": {
+      "instructions": "Given a specific input text that is a response from a chatbot, the task description that the chatbot was trying to follow when generating the response, and the metric of \"verbosity\" to rate the text on, with a suggested range of possible values from 0 to 4, use your understanding of the task and the provided text to return a score on the verbosity metric, along with a step-by-step explanation of your reasoning for the given score. When generating the score, consider the level of detail and complexity in the chatbot's response, as well as its overall clarity and concision. Provide a score that accurately reflects the verbosity of the chatbot's response, and ensure that your reasoning is clear and easy to follow.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    }
+  }
+}

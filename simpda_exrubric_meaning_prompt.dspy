@@ -1,0 +1,157 @@
+{
+  "generate_score": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "text": "\u00abInput (original): \u00abunlike the clouds on earth, however, which are composed of crystals of ice, neptune's cirrus clouds are made up of crystals of frozen methane.\u00bb\nReference 1 (ref1): \u00abthe clouds on earth are made of crystals of ice. but on neptune, the clouds are made of crystals of frozen methane.\u00bb\nReference 2 (ref2): \u00abmethane crystals make up neptune's clouds. earth's clouds are from crystals of ice.\u00bb\nReference 3 (ref3): \u00abclouds on earth are made of ice crystals. cirrus clouds on neptune are made of frozen methane crystals.\u00bb\nReference 4 (ref4): \u00abneptune's cirrus clouds are made up of crystals of frozen methane, not like the clouds on earth which are made up of crystals of ice.\u00bb\nReference 5 (ref5): \u00abthe clouds on earth are made of crystals of ice.  neptunes cirrus clouds are made of crystals of frozen methane.\u00bb\nReference 6 (ref6): \u00abneptune's thin clouds have ice methane while the earth has crystals of ice.\u00bb\nReference 7 (ref7): \u00abunlike the clouds on earth which are composed of crystals of ice, neptune's cirrus clouds are made up of crystals of frozen methane.\u00bb\nReference 8 (ref8): \u00abunlike the clouds on earth, which are made of ice crystals, neptune's cirrus clouds are made of frozen methane crystals.\u00bb\nReference 9 (ref9): \u00abclouds on earth are composed of crystals of ice.  neptune's cirrus clouds are composed of crystals of frozen methane.\u00bb\nReference 10 (ref10): \u00abneptune's clouds are made from frozen methane instead of ice like clouds on earth.\u00bb\nOutput (simple): \u00abunlike the clouds on earth, however, it is made up of crystals of ice, neptune's clouds are made up of different crystals.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "suggested_range": [
+          -1.688563622,
+          1.153978984
+        ],
+        "score": -0.614208609
+      },
+      {
+        "text": "\u00abInput (original): \u00abreflection nebulae are usually blue because the scattering is more efficient for blue light than red (this is the same scattering process that gives us blue skies and red sunsets).\u00bb\nReference 1 (ref1): \u00abreflection nebulae are usually blue because the light scattering is more efficient than red.\u00bb\nReference 2 (ref2): \u00abreflection nebulae are usually blue because blue light is more efficient than red.\u00bb\nReference 3 (ref3): \u00abreflection nebulae are blue most times because the light moves better for blue than red (this is the same thing that gives us blue skies and red sunsets.\u00bb\nReference 4 (ref4): \u00abreflection nebulae are usually blue.  this is because the scattering is more effective for blue light than for red.\u00bb\nReference 5 (ref5): \u00abreflection nebulae are usually blue because light scatters better when it is blue than when it is red, like what makes skies blue and sunsets red.\u00bb\nReference 6 (ref6): \u00abreflection nebulae are blue because it is more efficient to scatter blue light than red. this scattering is what creates blue skies and red sunsets.\u00bb\nReference 7 (ref7): \u00abreflection nebulae are usually blue since the scattering is more efficient for blue light than red (this is why we have blue skies and red sunsets).\u00bb\nReference 8 (ref8): \u00abthe reason the nebulae are blue is because it is easier for blue light to scatter.\u00bb\nReference 9 (ref9): \u00abreflection nebulae are usually blue because the scattering is more efficient for blue light than red. this is the same scattering process that gives us blue skies and red sunsets.\u00bb\nReference 10 (ref10): \u00abnebulae's reflections are usually blue because blue light can  scatter more efficiently than red. this is the same scattering process that gives us blue skies and red sunsets.\u00bb\nOutput (simple): \u00abfocus nebulae tend to be blue as the release is more good for blue light than red (this is the same release process that give us the blue sky and red sunsets).\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "suggested_range": [
+          -1.688563622,
+          1.153978984
+        ],
+        "score": -0.68130638
+      },
+      {
+        "text": "\u00abInput (original): \u00abadvocacy countries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\u00bb\nReference 1 (ref1): \u00abmosques play a larger role in civic participation in advocacy countries with a muslim minority.\u00bb\nReference 2 (ref2): \u00abcountries with a minority muslim population are more likely to use mosques to promote civil participation than muslim-majority countries in the middle east.\u00bb\nReference 3 (ref3): \u00abadvocacy countries with minority muslim populations are more likely than muslim majority countries from the greater middle east to have mosques to get people to be a part of the community.\u00bb\nReference 4 (ref4): \u00abadvocacy countries with a minority of muslims are more likely than countries with a majority of muslims to use mosques to promote civic participation.\u00bb\nReference 5 (ref5): \u00abcountries with a smaller muslim population are more likely to use mosques as a way to help local groups get together.\u00bb\nReference 6 (ref6): \u00abadvocacy countries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques to promote civic participation.\u00bb\nReference 7 (ref7): \u00abadvocacy countries with a low muslim population are more likely to use mosques as a way to promote people participation.\u00bb\nReference 8 (ref8): \u00abcountries in the middle east with a minority muslim population are more likely to use mosques as a means of promoting civic participation than countries with a majority muslim population.\u00bb\nReference 9 (ref9): \u00abcountries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\u00bb\nReference 10 (ref10): \u00abadvocacy countries with smaller muslim populations are more likely to use mosques to promote civic participation.\u00bb\nOutput (simple): \u00abcall country with a small muslim people are more likely than muslim-majority countries of the greater middle east to use mosques as a means to promote civic part.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "suggested_range": [
+          -1.688563622,
+          1.153978984
+        ],
+        "score": -0.32876601
+      },
+      {
+        "text": "\u00abInput (original): \u00abadvocacy countries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\u00bb\nReference 1 (ref1): \u00abmosques play a larger role in civic participation in advocacy countries with a muslim minority.\u00bb\nReference 2 (ref2): \u00abcountries with a minority muslim population are more likely to use mosques to promote civil participation than muslim-majority countries in the middle east.\u00bb\nReference 3 (ref3): \u00abadvocacy countries with minority muslim populations are more likely than muslim majority countries from the greater middle east to have mosques to get people to be a part of the community.\u00bb\nReference 4 (ref4): \u00abadvocacy countries with a minority of muslims are more likely than countries with a majority of muslims to use mosques to promote civic participation.\u00bb\nReference 5 (ref5): \u00abcountries with a smaller muslim population are more likely to use mosques as a way to help local groups get together.\u00bb\nReference 6 (ref6): \u00abadvocacy countries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques to promote civic participation.\u00bb\nReference 7 (ref7): \u00abadvocacy countries with a low muslim population are more likely to use mosques as a way to promote people participation.\u00bb\nReference 8 (ref8): \u00abcountries in the middle east with a minority muslim population are more likely to use mosques as a means of promoting civic participation than countries with a majority muslim population.\u00bb\nReference 9 (ref9): \u00abcountries with a minority muslim population are more likely than muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\u00bb\nReference 10 (ref10): \u00abadvocacy countries with smaller muslim populations are more likely to use mosques to promote civic participation.\u00bb\nOutput (simple): \u00abadvocacy countries with a minority muslim population are more likely to be muslim-majority countries of the greater middle east to use mosques as a way to promote civic participation.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "suggested_range": [
+          -1.688563622,
+          1.153978984
+        ],
+        "score": -0.421749832
+      },
+      {
+        "text": "\u00abInput (original): \u00abhe advocates applying a user-centered design process in product development cycles and also works towards popularizing interaction design as a mainstream discipline.\u00bb\nReference 1 (ref1): \u00abhe says to use a user-centered design process. he also tries to get more people to use interaction design.\u00bb\nReference 2 (ref2): \u00abhe believes interaction design should be the normal. he also prefers user-centered design processes in his product development.\u00bb\nReference 3 (ref3): \u00abhe suggests using a user-centered design process when developing products and also works towards making interaction design popular.\u00bb\nReference 4 (ref4): \u00abhe recommends using a user-centered design process in product development cycles and also to popularize interaction design as a mainstream discipline.\u00bb\nReference 5 (ref5): \u00abhe advocates for a user-centered design process and works towards making interaction design more mainstream.\u00bb\nReference 6 (ref6): \u00abhe advocates applying a user-centered design process in product development cycles. he also works towards popularizing interaction design as a mainstream discipline.\u00bb\nReference 7 (ref7): \u00abhe recommends applying a user-centered design process in product development cycles.  he also works towards making interactive design a mainsteam subject.\u00bb\nReference 8 (ref8): \u00abhe recommends using a user-centered design process.\u00bb\nReference 9 (ref9): \u00abhe suggests a user process in the development cycle and wants to popularize  an interaction design.\u00bb\nReference 10 (ref10): \u00abhe recommends applying a user-centered design process and also works towards popularizing interaction design.\u00bb\nOutput (simple): \u00abhe advocates using a user-centered design process in product development cycles and also works for popularizing trade design as a whole field.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "suggested_range": [
+          -1.688563622,
+          1.153978984
+        ],
+        "score": 0.384119685
+      },
+      {
+        "text": "\u00abInput (original): \u00abit has a capacity of 98,772, making it the largest stadium in europe, and the eleventh largest in the world.\u00bb\nReference 1 (ref1): \u00abit can hold 98,772 people making it the largest stadium in europe and the eleventh largest in the world.\u00bb\nReference 2 (ref2): \u00abwith a capacity of 98,772 it is the biggest stadium in europe and the eleventh largest in the world.\u00bb\nReference 3 (ref3): \u00abit has a capacity of 98,772 people so it is the largest stadium in europe, and the eleventh largest in the world.\u00bb\nReference 4 (ref4): \u00abit's capacity of 98,772 makes it the largest stadium in europe, and the 11th largest in the world.\u00bb\nReference 5 (ref5): \u00abit is the largest stadium in europe. it is the 11th largest stadium in the world.\u00bb\nReference 6 (ref6): \u00abit holds 98,772 people. it's the largest stadium in europe and the eleventh largest in the world.\u00bb\nReference 7 (ref7): \u00abit can hold 98,772, so it's the biggest stadium in europe, and the eleventh largest in the world.\u00bb\nReference 8 (ref8): \u00abit holds 98,772 people and is the biggest stadium in europe.\u00bb\nReference 9 (ref9): \u00abit is the largest stadium in europe with a capacity of 98,772. it is also the eleventh largest in the world.\u00bb\nReference 10 (ref10): \u00abwith a capacity of 98,772,  it is the largest stadium in europe, and the eleventh largest in the world.\u00bb\nOutput (simple): \u00abit is a measure of 98,772, to make it the largest stadium in europe, and the 11th in the world.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "suggested_range": [
+          -1.688563622,
+          1.153978984
+        ],
+        "score": -0.004566071
+      },
+      {
+        "text": "\u00abInput (original): \u00abit is also a starting point for people wanting to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 1 (ref1): \u00abit is a starting point for people who want to explore cooktown, cape york peninsula, or the atherton tableland.\u00bb\nReference 2 (ref2): \u00abit's also a starting point for exploring cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 3 (ref3): \u00abit is a good place to start when exploring other places.\u00bb\nReference 4 (ref4): \u00abit is the start for people looking at cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 5 (ref5): \u00abit is a starting point for people who want to tour cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 6 (ref6): \u00abit is also a starting point for people who want to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 7 (ref7): \u00abit is a starting point for people who want to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 8 (ref8): \u00abit is also where people go first when they want to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 9 (ref9): \u00abit's a good place to start if you want to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\nReference 10 (ref10): \u00abpeople that want to explore cooktown, cape york peninsula, and the atherton tableland can start at that point.\u00bb\nOutput (simple): \u00abit is a starting point for people wanting to explore cooktown, cape york peninsula, and the atherton tableland.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "suggested_range": [
+          -1.688563622,
+          1.153978984
+        ],
+        "score": 0.980848018
+      },
+      {
+        "text": "\u00abInput (original): \u00abthe kindle 2 features 16-level grayscale display, improved battery life, 20 percent faster page-refreshing, a text-to-speech option to read the text aloud, and overall thickness reduced from 0.8 to 0.36 inches (9.1 millimeters).\u00bb\nReference 1 (ref1): \u00abthe kindle 2 has attractive features. it has multiple levels of grayscale display. the kindle 2 is thinner. it has a better battery life. pages refresh faster now. it will also read text to you.\u00bb\nReference 2 (ref2): \u00abfeatures of the kindle 2 include a 16-level grayscale display, improved battery life, 20 percent faster page-refreshing, and a text-to-speech option, and reduced overall thickness.\u00bb\nReference 3 (ref3): \u00abthe kindle 2 features 16-level grayscale display and improved battery life. it also has 20 percent faster page-refreshing, a text-to-speech option to read the text aloud, and overall thickness reduced from 0.8 to 0.36 inches (9.1 millimeters).\u00bb\nReference 4 (ref4): \u00abthe kindle 2 features several technological advances.\u00bb\nReference 5 (ref5): \u00abthe kindle 2 is faster, has a better battery, and is thinner.\u00bb\nReference 6 (ref6): \u00abthe kindle 2 has 16-level grayscale display and a longer battery life.  it also refreshes the page faster, can read the text out loud and is thinner.\u00bb\nReference 7 (ref7): \u00abthe kindle 2 has many upgraded features such as improved battery life and faster page refreshing, in addition the overall thickness has been reduced.\u00bb\nReference 8 (ref8): \u00abthe kindle 2 features 16-level grayscale display, better battery life, 20 percent faster page-refreshing, a text-to-speech option, reduced thickness.\u00bb\nReference 9 (ref9): \u00abthe kindle 2 has a grayscale display, better battery life, faster page-refreshing, options for text to speech and reading, and reduced thickness.\u00bb\nReference 10 (ref10): \u00abthe kindle 2 has 16 level gray colors shown, better battery life, 20 % faster page speed, text-to-speech to read words for you aloud, and thickness down from .8 to .36 inches  (9.1 millimeters).\u00bb\nOutput (simple): \u00abthe kindle 2 features 16-level grayscale display, improved battery life, 20% faster page-refreshing, a text-to-speech option to read the text aloud, and thickness from 0.8 to 0.36 inches (9.1 millimeters).\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "suggested_range": [
+          -1.688563622,
+          1.153978984
+        ],
+        "score": 0.5891175439999999
+      },
+      {
+        "text": "\u00abInput (original): \u00abbefore the advent of the pocket calculator, it was the most commonly used calculation tool in science and engineering.\u00bb\nReference 1 (ref1): \u00abthe pocket calculator replaced its use in science and engineering.\u00bb\nReference 2 (ref2): \u00abit was the most used calculation tool in science and engineering before the pocket calculator came out.\u00bb\nReference 3 (ref3): \u00abbefore the pocket calculator was invented it was the most used calculation tool.\u00bb\nReference 4 (ref4): \u00abit was the most commonly used calculation tool before the invention of the pocket calculator.\u00bb\nReference 5 (ref5): \u00abit was the most common tool before the calculator.\u00bb\nReference 6 (ref6): \u00abbefore the invention of the pocket calculator, it was the most often used calculation tool for science and engineering.\u00bb\nReference 7 (ref7): \u00abbefore the invention of the pocket calculator, it was the most common counting tool in science and engineering.\u00bb\nReference 8 (ref8): \u00abbefore the pocket calculator was invented, it was the most popular calculation tool in science and engineering.\u00bb\nReference 9 (ref9): \u00abit was the most commonly used calculation tool before the pocket calculator.\u00bb\nReference 10 (ref10): \u00abbefore the pocket calculator was invented it was common as an science and engineering tool.\u00bb\nOutput (simple): \u00abbefore the invention of the pocket calculator, it was the most commonly used calculation tool in science and engineering.\u00bb\u00bb",
+        "task_description": "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.",
+        "metric": "meaning",
+        "suggested_range": [
+          -1.688563622,
+          1.153978984
+        ],
+        "score": 1.153978984
+      }
+    ],
+    "signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    },
+    "extended_signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    }
+  }
+}

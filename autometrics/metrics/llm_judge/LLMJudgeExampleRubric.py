@@ -5,8 +5,9 @@ from dspy.teleprompt import MIPROv2
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 import math
-import pandas as pd
 from autometrics.util.normalize import find_distinct_quintiles_with_min_max, map_to_bucket
+from dspy.evaluate import Evaluate
+import random
 
 def exact_match_rounded(x, y):
     return int(round(x) == round(y))
@@ -22,45 +23,60 @@ def get_wrapped_metric(metric_func):
         return metric_func(example.score, pred.score)
     return wrapped_metric
 
-def prepare_dataset(dataset, target_column, task_description, metric_name, formatter):
+def prepare_dataset_bucketted(dataset, target_column, task_description, metric_name, formatter, suggested_range=(1,5)):
+    buckets = [[] for _ in range(5)]
     dspy_dataset = []
 
     # Find the quintile ranges for the target column
     quintiles = find_distinct_quintiles_with_min_max(dataset, target_column)
 
     for i, row in dataset.get_dataframe().iterrows():
+        bucket_idx = map_to_bucket(row[target_column], quintiles)
+        buckets[bucket_idx].append(
+            {
+                'text': formatter(row),
+                'task_description': task_description,
+                'metric': metric_name,
+                'suggested_range': suggested_range,
+                'score': row[target_column]
+            }
+        )
+
         dspy_dataset.append(
             dspy.Example(
                 text=formatter(row),
                 task_description=task_description,
                 metric=metric_name,
-                score=map_to_bucket(row[target_column], quintiles) + 1
-            ).with_inputs('text', 'task_description', 'metric')
+                suggested_range=suggested_range,
+                score=row[target_column]
+            ).with_inputs('text', 'task_description', 'metric', 'suggested_range')
         )
 
-    return dspy_dataset
+    return buckets, dspy_dataset
 
-def grade_row(row, axis, llm, formatter, task_description, program):
+def grade_row(row, axis, llm, formatter, task_description, program, suggested_range=(1,5)):
     '''Helper function to grade a single row'''
     with dspy.settings.context(lm=llm):
-        return program(formatter(row), axis,task_description=task_description).score
+        return program(formatter(row), axis, suggested_range=suggested_range,task_description=task_description).score
 
 class LLMAsAJudgeSignature(dspy.Signature):
-    """Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score from 1-5 on this metric."""
+    """Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric."""
     text = dspy.InputField(desc="The input text that we want to rate.")
     task_description = dspy.InputField(desc="A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available.")
     metric = dspy.InputField(desc="The metric that we want to rate the text on.")
-    score = dspy.OutputField(desc="The score that the text should recieve on this metric (1=low, 5=high).")
+    suggested_range = dspy.InputField(desc="The suggested range of possible values for the metric.")
+    score = dspy.OutputField(desc="The score that the text should recieve on this metric.")
 
 class LLMAsAJudge(dspy.Module):
     def __init__(self):
         super(LLMAsAJudge, self).__init__()
         self.generate_score = dspy.ChainOfThought(LLMAsAJudgeSignature)
 
-    def forward(self, text, metric, task_description=None):
+    def forward(self, text, metric, suggested_range=(1,5), task_description=None):
         if task_description is None:
             task_description = "None"
-        score = self.generate_score(task_description=task_description, text=text, metric=metric).score
+        suggested_range_str = f"{suggested_range[0]} to {suggested_range[1]}"
+        score = self.generate_score(task_description=task_description, text=text, metric=metric, suggested_range=suggested_range_str).score
         # Convert the string score to a float by stripping any additional text and converting to a float
         if '\n' in score:
             score = score.split('\n')[0]
@@ -71,9 +87,9 @@ class LLMAsAJudge(dspy.Module):
 
         return dspy.Prediction(text=text, metric=metric, score=score)
 
-class LLMJudgeNormalizeOptimized(Metric):
+class LLMJudgeExampleRubric(Metric):
     # TODO: Better output prompt path
-    def __init__(self, name, description, model, train_dataset, formatter=None, task_description=None, target_column=None, eval_function_name='inverse_distance', custom_eval_function=None, load_prompt=None, optimize=True, output_prompt_path='output_prompt.dspy', metric_name=None):
+    def __init__(self, name, description, model, train_dataset, formatter=None, task_description=None, target_column=None, eval_function_name='inverse_distance', custom_eval_function=None, load_prompt=None, optimize=True, output_prompt_path='output_prompt.dspy', metric_name=None, attempts=5, examples_per_range=2, seed=42):
         self.eval_function = None
         if custom_eval_function is not None:
             self.eval_function = custom_eval_function
@@ -91,40 +107,48 @@ class LLMJudgeNormalizeOptimized(Metric):
         self.dataset = train_dataset
         self.target_column = target_column
         self.metric_name = metric_name if metric_name is not None else target_column
+        self.suggested_range = (self.dataset.get_dataframe()[self.target_column].min().item(), self.dataset.get_dataframe()[self.target_column].max().item())
+        self.attempts = attempts
+        self.examples_per_range = examples_per_range
 
         self.program = LLMAsAJudge()
+
+        random.seed(seed)
 
         if load_prompt is not None:
             self.program.load(load_prompt)
 
         if optimize:
 
-            train_set = prepare_dataset(
+            train_buckets, trainset = prepare_dataset_bucketted(
                 train_dataset,
                 target_column,
                 task_description,
                 self.metric_name,
                 self.formatter,
+                self.suggested_range
             )
 
-            teleprompter = MIPROv2(
-                metric=get_wrapped_metric(self.eval_function),
-                auto="medium",
-                num_threads=64,
-            )
+            evaluate = Evaluate(devset=trainset, metric=get_wrapped_metric(self.eval_function), num_threads=64, display_progress=True, display_table=False)
 
-            optimized_program = teleprompter.compile(
-                self.program.deepcopy(),
-                trainset=train_set,
-                max_bootstrapped_demos=8,
-                max_labeled_demos=8,
-                requires_permission_to_run=False,
-            )
+            demosets = [[] for _ in range(self.attempts)]
+            for i in range(self.attempts):
+                for bucket in train_buckets:
+                    sample = random.sample(bucket, min(self.examples_per_range, len(bucket)))
+                    demosets[i].extend(sample)
+
+            best_score = -100000
+            for i, demoset in enumerate(demosets):
+                new_program = self.program.deepcopy()
+                new_program.generate_score._predict.demos = demoset
+                score = evaluate(new_program)
+                if score > best_score:
+                    best_score = score
+                    self.program = new_program
+                    print(f"New best score: {best_score}")
 
             if output_prompt_path is not None:
-                optimized_program.save(output_prompt_path)
-
-            self.program = optimized_program
+                self.program.save(output_prompt_path)
 
 
         super().__init__(name, description)
@@ -136,7 +160,7 @@ class LLMJudgeNormalizeOptimized(Metric):
             for i, ref in enumerate(references):
                 row[self.dataset.get_reference_columns()[i]] = ref
 
-        grade_row(row, self.metric_name, self.model, self.formatter, self.task_description, self.program)
+        grade_row(row, self.metric_name, self.model, self.formatter, self.task_description, self.program, suggested_range=self.suggested_range)
 
     def calculate_row(self, row, dataset, update_dataset=True, **kwargs):
         """
@@ -179,7 +203,7 @@ class LLMJudgeNormalizeOptimized(Metric):
             # Create a ThreadPoolExecutor
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 # Submit tasks to the executor
-                futures = {executor.submit(grade_row, row, self.metric_name, self.model, self.formatter, self.task_description, self.program): index for index, row in df.iterrows()}
+                futures = {executor.submit(grade_row, row, self.metric_name, self.model, self.formatter, self.task_description, self.program, self.suggested_range): index for index, row in df.iterrows()}
 
                 # Collect the results with tqdm progress bar
                 for future in tqdm(as_completed(futures), total=len(futures), desc="Grading rows", unit="row"):

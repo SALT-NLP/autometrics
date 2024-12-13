@@ -1,0 +1,167 @@
+{
+  "generate_score": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "text": "\u00abInput (prompt): \u00abWrite a poem about a beautiful spring day, in iambic pentameter, with ten syllables per line, and rhyming at the end of each couplet. Include vivid descriptions of nature coming to life after winter, with images of flowers blooming, birds singing, and trees swaying in the breeze. Convey the joy and optimism of the season through your words, and the sense of renewal and hope that it brings.\u00bb\nOutput (response): \u00ab(The reference text is missing, so I cannot create a poem based on it.)\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 0
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWhat are some interesting facts about aliens? Format them in bullet points.\u00bb\nOutput (response): \u00ab.\n.\n.\n.\n.\n.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 0
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abRead this for context:\nThe current progress of functional nano biosensors for potential tuberculosis diagnosis: The novel way for TB control? Tuberculosis (TB), induced by the foxy Mycobacterium tuberculosis (Mtb), is still one of the top killers worldwide among infectious diseases. Although several antibiotics have been developed to significantly relieve the tuberculosis epidemics worldwide, there are still several important scientific challenges for tuberculosis. As one of the most critical issues for tuberculosis control, the accurate and timely diagnosis of tuberculosis is critical for the following therapy of tuberculosis and is thus responsible for the effective control of drug-resistant tuberculosis. Current tuberculosis diagnostic methods in clinics are still facing the difficulty that they can\u2019t provide rapid diagnostic results with high sensitivity and accuracy, which therefore requires the development of more effective novel diagnostic strategies. In recent decades, nanomaterials have been proven to show promising potential for novel nano biosensor construction based on their outstanding physical, chemical, and biological properties. Taking these promising advantages, nanomaterial-based biosensors show the potential to allow rapid, sensitive, and accurate tuberculosis diagnosis. Here, aiming to increase the development of a more effective tuberculosis diagnostic strategy, we summarized the current progress of nano biosensors for potential tuberculosis diagnosis applications. We discussed the different kinds of diagnostic targets for tuberculosis diagnosis based on nano biosensors, ranging from the detection of bacterial components from M. tuberculosis, such as DNA and proteins, to the host immunological responses, such as specific cytokine production, and to the direct whole cell detection of M. tuberculosis. We believe that this review would enhance our understanding of nano biosensors for potential tuberculosis diagnosis, and further promote future research on nano biosensor-based tuberculosis diagnosis to benefit the more effective control of tuberculosis epidemic.\n\nYour task is to:\nCan you help me choose a few options for an appropriate title that gives the main idea of the article? The following choices are as follows : \n\"Accurate and timely diagnosis of tuberculosis\"\n\"Challenges in current tuberculosis diagnostic methods\"\n\"Develop more effective novel diagnostic strategies\"\n\"Promising potential of nanomaterials for nano biosensor construction\"\n\"Different diagnostic targets for tuberculosis diagnosis based on nano biosensors\"\n\"Detection of bacterial components from M. tuberculosis (DNA and proteins)\"\n\"Detection of host immunological responses (specific cytokine production)\"\n\"Direct whole cell detection of M. tuberculosis\"\n\"Enhancing our understanding of nano biosensors for potential tuberculosis diagnosis\"\n\"Promoting future research on nano biosensor-based tuberculosis diagnosis\"\n\"Effective control of the tuberculosis epidemic\"\nTry to choose a title that encompasses all ideas expressed within the article.\u00bb\nOutput (response): \u00abThe different diagnostic targets for tuberculosis diagnosis based on nano biosensors.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 1
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWhat are some examples of havens for wildlife in residential areas that can be created by people? \nI want your answer enumerated (1., 2., etc.).\u00bb\nOutput (response): \u00abI want to see 5 of them.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 1
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abI want a list of 10 outfit ideas for the summer evening, including dress code for different events and what to avoid.\u00bb\nOutput (response): \u00abYou are a helpful AI assistant who answers user queries about a reference text. Please answer the following query to the best of your ability, being as concise as possible while following the instructions carefully. Be sure to include all necessary details and references to respond to the prompt, and do not ask about real-time or future information.\n\n### Reference text\nnan\n\n### Task\nI want a list of 10 outfit ideas for the summer evening, including dress code for different events and what to avoid.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWhat is the safest way to drive on a curved roadway at night?\u00bb\nOutput (response): \u00abTo drive safely on a curved roadway at night, you should slow down, navigate the curve at a reasonable speed, and ensure that your headlights are on. You should also make sure that your mirrors are adjusted properly.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWhat is an injunction and how can it be useful in resolving legal disputes? I want the answer formatted using numbered items (1., 2., etc.).\u00bb\nOutput (response): \u00abAn injunction is a court order that requires a person or entity to take or refrain from taking certain actions. Injunctive relief is an equitable remedy that is available in federal and state courts in the United States. An injunction is useful in resolving legal disputes by providing a party with a remedy that is tailored to their specific situation. Injunctive relief can be used to protect a party's rights, prevent irreparable harm, or ensure that a contract is performed. There are several types of injunctions, including temporary restraining orders, preliminary injunctions, and permanent injunctions. The decision to grant an injunction is based on a number of factors, including the likelihood that the plaintiff will succeed on the merits of their case, the harm that the plaintiff will suffer if the injunction is not granted, and the harm that the defendant will suffer if the injunction is granted.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 3
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abaccording to the following reference text delimited in ###\n###\nSince I was young my life has been a bit of a mess with no order at all, but there was one that I knew was clear, and this was that my family was the one thing I could always go back to. The mess that was my life was a result of many factors. Some of them were problems for my parents that later affected me and also problems within our family. Since my parents were still new in this country they needed to get jobs that would allow them to support themselves and also this meant that they had to be away for long amounts of time. This resulted in me having to take preschool twice. Since they were busy, and I could not go with them I needed a place to stay so preschool was a simple solution that allowed them to work while not having to worry if I was ok or not. When I started elementarily I had to move frequently because they moved around a lot for their jobs and in addition, we also moved homes frequently so I had to switch schools in order to make their lives a little easier. However, entering middle school they began to settle down which let me stay in a middle school all four years. My middle school years were also the years where I began to see conflicts that I had been oblivious to previously. I began to see how they would fight with frequency over many things, and I also began to notice how my dad had a tendency to drink away his worries. I noticed this and it was hard to not see it because these times were the times when he would be the most aggressive or when he would be the least approachable. When this happened, I had an overwhelming sense of uselessness and would do anything possible to avoid him. However, I had to depend on him to take me.\nSince I was young my life has been a bit of a mess with no order at all, but there was one that I knew was clear, and this was that my family was the one thing I could always go back to. The mess that was my life was a result of many factors. Some of them being problems for my parents that later affected me and also problems within our family. Since my parents were still new in this country they needed to get jobs that would allow them to support themselves and also this meant that they had to be away for long amounts of time. This resulted in me having to take preschool twice. Since they were busy, and I could not go with them I needed a place to stay so preschool was a simple solution that allowed them to work while not having to worry if I was ok or not. When I started elementarily I had to move frequently because they moved around a lot for their jobs and in addition, we also moved homes frequently so I had to switch schools in order to make their lives a little easier. However, entering middle school they began to settle down which let me stay in a middle school all four years. My middle school years were also the years where I began to see conflicts that I had been oblivious to previously. I began to see how they would fight with frequency over many things, and I also began to notice how my dad had a tendency to drink away his worries. I noticed this and it was hard to not see it because during these times were the times when he would be the most aggressive or when he would be the least approachable. When this happened, I had an overwhelming sense of uselessness and would do anything possible to avoid him. However, I had to depend on him to take me to school every day so could never avoid him and this was a major problem for me because I didn\u2019t want to be fully dependent on him. Later on when I was in the 8th or 9th grade I began to talk back to my father and began to argue with him frequently. I had finally gained the courage to talk back and talk against what he was doing, however this just led to a rise in arguments and also led to a greater tear in our relationship. Current events are also affecting us today. We have been affected by a new law that might go into place, and if it does it has the capacity to tear us apart. My parents and brother would have to leave and I would stay behind to try and accomplish my dream\u2026\n###\nFrom the passage provided, please list any homophones used, and list them in alphabetical order from A to Z. Also, please identify any spelling or grammatical mistakes and list them in the order they are found, starting at the top of the essay.\u00bb\nOutput (response): \u00ab\u2022 A, an, and, are, as, at, by, for, in, is, it, my, of, on, or, to, up, were, you're\n\u2022 spelling mistake \"there\" should be \"their\"\n\u2022 Grammar mistake \"since I was young my life has been a bit of a mess with no order at all, but there was one that I knew was clear, and this was that my family was the one thing I could always go back to.\" should be \"Since I was young, my life has been a bit of a mess with no order at all, but there was one that I knew was clear, and this was that my family was the one thing I could always go back to.\"\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 3
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abPlease write a poem about a candelabra in the style of William Blake. The poem should be about the metaphorical significance of the candelabra as a symbol of human enlightenment and should be at least 8 lines.\u00bb\nOutput (response): \u00abThe candelabra stood, a symbol of divine light,\nA beacon for the soul, to guide us in the night.\nIts flames, like candles burning bright,\nBurn away the shadows, banishing every fright.\n\nIts beauty is a metaphor for human mind,\nA lamp that shines in darkness, never to be confined.\nLike the candelabra, our soul must strive,\nTo light the way, to seek our divine life.\n\nIn this world of shadows, we must not give in,\nFor the candelabra of enlightenment, we must begin.\nSo let us kindle our inner flame,\nAnd become the beacon, the light to our aim.\n\nFor the candelabra, a symbol of our soul,\nShines bright, forever in our mind's control.\nAnd like the candelabra, we must strive,\nTo light the way, to our true nature to live.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 4
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abgiven this background information delimited in \"\"\"\n\"\"\"\nA total lunar eclipse took place at the Moon's descending node of the orbit on Tuesday, May 24, 1910 with an umbral eclipse magnitude of 1.09503. A total lunar eclipse takes place when the Earth comes between the Sun and the Moon and its shadow covers the Moon. Eclipse watchers can see the Moon turn red when the eclipse reaches totality. Total eclipses of the Moon happen at Full Moon when the Sun, Earth, and Moon are aligned to form a line. The astronomical term for this type of alignment is syzygy, which comes from the Greek word for being paired together. The Moon does not have its own light but shines because its surface reflects the Sun's rays. During a total lunar eclipse, the Earth comes between the Sun and the Moon and blocks any direct sunlight from reaching the Moon. The Sun casts the Earth's shadow on the Moon's surface. A shallow total eclipse saw the Moon in relative darkness for 49 minutes and 29.5 seconds. The Moon was 9.503% of its diameter into the Earth's umbral shadow, and should have been significantly darkened. The partial eclipse lasted for 3 hours, 35 minutes and 22.9 seconds in total.\n\nEclipse season\nThis event followed the total solar eclipse of May 9, 1910.\n\nVisibility\nIt was completely visible over Australia, the Americas, Europe and Africa, seen rising over Australia and setting over Europe and Africa.\n\nRelated lunar eclipses\n\nSaros series\n\nIt last occurred on May 11, 1892 and will next occur on June 3, 1928.\n\nThis is the 32nd member of Lunar Saros 129, and the first total eclipse. The next event is the June 1928 lunar eclipse. Lunar Saros 129 contains 11 total lunar eclipses between 1910 and 2090. Solar Saros 136 interleaves with this lunar saros with an event occurring every 9 years 5 days alternating between each saros series.\n\nInex series\n\nHalf-Saros cycle\nA lunar eclipse will be preceded and followed by solar eclipses by 9 years and 5.5 days (a half saros). This lunar eclipse is related to two total solar eclipses of Solar Saros 136.\n\nSee also\nList of lunar eclipses\nList of 20th-century lunar eclipses\n\nNotes\n\nExternal links\n\n1910-05\n1910 in science\n\"\"\"\nFrom the text given, extract the places where the eclipse was visible from.\u00bb\nOutput (response): \u00abIt was completely visible over Australia, the Americas, Europe and Africa, seen rising over Australia and setting over Europe and Africa.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "coherence",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 4
+      }
+    ],
+    "signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    },
+    "extended_signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    }
+  }
+}

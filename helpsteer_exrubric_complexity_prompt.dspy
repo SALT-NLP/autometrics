@@ -1,0 +1,167 @@
+{
+  "generate_score": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "text": "\u00abInput (prompt): \u00abConsider this reference information delimited in \"\"\":\n\"\"\"\nCar carrying six Oklahoma students came to 'rolling stop' before deadly collision with rock-hauling truck, NTSB says\n\nA four-seat hatchback with six high school girls crammed inside rolled through a stop sign before it was struck by a rock-hauling truck in Oklahoma, according to officials.\n\nThe group of teens, all of them students at Tishomingo High School, were out for lunch on Wednesday when the deadly crash unfolded around 1:30 p.m. Police said their 2015 Chevrolet Spark collided with a 1994 Peterbilt truck as it entered the intersection at U.S. 377 and Oklahoma-22.\n\nThe 16-year-old driver, a 17-year-old passenger and two 15-year-old passengers were all pronounced dead at the scene of the crash. The remaining two passengers \u2014 ages 17 and 15 \u2014 were rushed to a nearby hospital for treatment, but they were both pronounced dead a short time later.\n\nA preliminary investigation carried out by the Oklahoma Highway Patrol revealed the Chevy stopped behind another vehicle at the traffic sign but did not come to a full stop before it entered the intersection. The National Transportation and Safety Board on Thursday, citing witness accounts, confirmed the vehicle came to a \"rolling stop\" before the deadly collision.\n\nIn this image provided by KFOR-TV, a heavily damaged vehicle is seen off a road in Tishomingo, Okla., following a two-vehicle collision in which six teenage students were killed, Tuesday, March 22, 2022. (AP)\n\nThe southbound semitrailer then struck the front left side of the hatchback, carrying the girls eastbound, the impact of which sent both vehicles flying off the roadway, according to the NTSB.\n\n\"Our prayers are with each of the families involved and our community,\" the Johnston County Oklahoma Sheriff's Office said on Facebook in wake of the tragedy. \"This is an absolute tragedy which will have life long effects. This community and families need our support and prayers at this time.\n\nThe Highway Patrol identified the driver of the truck as 51-yaer-old Valendon Burton of Burneyville, Okla. He was not injured in the incident.\n\nBoth the NTSB and the Oklahoma Highway Patrol's Traffic Homicide Unit continue to investigate.\n\"\"\"\n\nRewrite the text to be more emotional and less factual, as though it were written by a grieving teacher.\n\nYesterday, my students and I were out for lunch when we witnessed a horrible collision. Our car was stopped at a stop sign when a massive truck ran into us at full speed. My students and I were all thrown against the dashboard and windows, and I was the only one to survive.\n\nThe truck driver did not see us at the stop sign and did not even attempt to slow down or change course. The impact was so great that it sent our car flying off the road and into a ditch. My students were all killed instantly, and I am devastated.\n\nI am grieving for my students, who were all so young and had so much potential. They were all members of our school choir and had such beautiful voices. They were my friends and my family, and I will miss them terribly.\n\nThis tragedy has affected our whole community, and we are all grieving together. We are praying for the families of my students and for the truck driver, who is also suffering.\n\nI am grateful to be alive, but I feel so lost without my students. I hope that someday, I can find the strength to move on and continue to make them proud.\u00bb\nOutput (response): \u00abHello\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 0
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abRead this for context:\nJammin' in the Alley is proof as the concert series kicks off at 3:30 p.m. Saturday in the alley adjacent to the Belmont Inn. Roots and Dore will kick off the free series, which will then move to Thursdays starting at 7 p.m. April 1.\n\nUp to 15 acts have been scheduled for the series, said Mike Clary, director of community development for the city.\n\nThe series was established last year as a way to present music during the pandemic, he said. The goals for Jammin' in the Alley, like all city events, are to create activity within the city, which will have a positive economic impact and improve the quality of life for residents.\n\nRiyen Roots and Kenny Dore (pronounced Doe Ray as in \"do re me fa so la ti do\") are not strangers to Abbeville. They performed at the Hogs &amp; Hens Festival last fall.\n\nThe Asheville, N.C.-based duo was hired to do the festival and it went over well. \"It seems like we're getting a lot of love down in that area,\" Roots said. \"We're gonna have a really good time. I would like to give thanks to Mike Elis of Artisan Entertainment for bringing us down there.\"\n\nThe duo specializes in original acoustic-based blues and soul and Americana music. Its inspiration is 100 years of American roots music, Roots said. The group features music by Robert Johnson, the Allman Brothers, Johnny Cash and Carter family tunes. Mostly it's all blues-based.\n\n\"He (Roots) and Dore are one of the most talented duos in the Carolinas. Their music is absolute gold,\" said Elis, who is the CEO of Artisan Entertainment. He met the group around three years ago after it opened a show in Hendersonville, N.C. \"Roots is a master of the old Memphis blues.\"\n\nIt's why they are both blues icons in the Asheville area, Elis said. \"If people visit, they will be treated to a great day of music.\"\n\nThe duo performs up to 200 shows a year and can play for any audience. \"I always say we've never met an audience we couldn't make happy,\" said Roots, who plays the guitar while Dore plays the harmonica. When a third member is added, the group is called the Dore Band. \"I've always been told I'm like a large Swiss Army knife of music.\"\n\nRoots' favorite music includes Sam Cooke and Otis Redding tunes; he is a huge fan of Johnny Cash and Blaze Foley (a country music singer and songwriter). As far as blues, his favorite musicians are Blind Willie Johnson, BB King and Robert Johnson.\n\nA proud moment for Roots is when he met King, who gave him some practical advice. King told me \"To treat every show as though it's the biggest show of my life whether it's 3 or 300 people. That's been the secret to my relative success.\"\n\nRoots assesses success by watching how the audience is interacting, getting them dancing or clapping or most important, people approaching them and saying, \"Thanks so much, I needed that.\"\n\nJohnny Lee Hooker once said \"Music is a healer,\" Roots recalled. \"I think blues is a healing music that is needed. That's another reason we're out and about.\"\n\nGiven the pandemic, a lot of healing is needed. COVID-19 has been a tedious time, to say the least, Roots said.\n\nMost of their shows are performed in a 90-mile radius of Asheville, what Roots calls \"our daily bread shows.\" The group also goes to New Orleans once a year, although COVID-19 has slowed down travel.\n\n\"It's not easy to be a traveling musician, but we're fortunate enough to find venues that have social distance rules and large open zones. It looks like things are starting to bounce back a little bit. I definitely see it getting busier, especially with the weathering improving.\"\n\nThe band has about 12 breweries in a 90-mile radius that it plays consistently, Roots said, adding that he jokingly says: \"Blues and brews, you can't lose.\" If there is barbecue there, that's a plus.\n\n\"In my experience, I host two weekly open mics in Asheville and Black Mountain, N.C., and that's to provide some consistency for artists who emotionally, very much need to get out and perform,\" Roots said.\n\nA lot of venues have opened up even with limited seating, Elis said. That's why it is important for people to support local musicians.\n\n\"We lost a lot of that for so long,\" he said. \"My advice is to come out, enjoy a drink and a meal and enjoy the music.\"\n\nPeople also should support local businesses like Belmont. They go out of their way to bring entertainment to the city, Elis said.\n\nWhile masking and social distancing are encouraged, Clary said masks are not required to attend the concert.\n\nYour task is to:\nWhich music genre is the most prominent in the text? No details other than the genre name please.\u00bb\nOutput (response): \u00abBlues\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 0
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWhat is equality, and how can it be defined?  I\u2019m trying to figure out if my country, the United States, is really a \u201cland of opportunity\u201d, or if it\u2019s really just for a select few.\u00bb\nOutput (response): \u00abEquality is a concept that is used to describe a state of being where all individuals or groups are treated equally, without discrimination or bias. Equality can be defined in various ways, depending on the context in which it is being used. In general, it refers to the idea that everyone should have equal access to resources, opportunities, and rights, regardless of their race, gender, sexual orientation, religion, or any other characteristic that may be used to discriminate against them.\n\nThe United States is a diverse country with a history of discrimination and inequality. While the United States has made progress towards becoming a more equal society, there is still work to be done to achieve true equality for all. Some argue that the United States is a land of opportunity, where anyone can succeed if they work hard enough. Others argue that the United States is still dominated by a small group of wealthy and powerful individuals, and that true equality is a distant dream.\n\nIn order to answer this question, it is important to consider various factors such as income inequality, access to education and healthcare, and representation in politics and the workforce. It is also important to acknowledge the ongoing challenges and barriers faced by marginalized communities in the United States, such as racial and ethnic minorities, LGBTQ+ individuals, and people with disabilities.\n\nOverall, while the United States has made progress towards becoming a more equal society, there is still work to be done to achieve true equality for all.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 1
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWhat are some examples of an auditorium? I want the answer formatted like this: 1. Lincoln Center, 2. Hollywood Bowl, 3. Radio City Music Hall, 4. Symphony Hall, 5. Carnegie Hall.\u00bb\nOutput (response): \u00abSome examples of an auditorium include Lincoln Center, Hollywood Bowl, Radio City Music Hall, Symphony Hall, and Carnegie Hall.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 1
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abgiven this background information delimited in \"\"\"\n\"\"\"\nMost dog owners would agree that leashes are the most crucial tool in their arsenal. And yet, the seemingly unassuming item is so often undervalued as merely a means of transporting one\u2019s pup from point A to B, so that they might entertain, exhaust, or relieve themselves.\n\nYet not only do the best leashes, like our favorite Lead Mate and Leash Combo (available at Amazon), ensure security in the most perilous situations\u2014navigating sidewalks, streets, hikes, bikes, fire engines, darting squirrels, and other dogs\u2014they serve as a primary instrument of communication between a canine and their handler.\n\nWhen it comes to walking, every tug of the leash translates to the wordless transmission of \"look,\" \"listen,\" \"leave that,\" or \"turn right here.\" So, we tested some of the most popular dog leash brands to find out which would best facilitate that ongoing conversation, as well as provide safety and comfort for both the dog and pet owner.\n\nHere are the best leashes you can buy right now.\n\"\"\"\nWhat are some takeaways from the text above? Answer the question as if you were a dog lover in at least 5 sentences.\u00bb\nOutput (response): \u00abA dog's collar and leash are more than just accessories; they serve as essential tools for controlling and communicating with our furry friends. When selecting a leash, it is essential to consider the dog's size, strength, and behavior, as well as the handler's comfort and convenience. The best leashes are those that provide a secure grip, are comfortable to hold, and are durable enough to withstand the rigors of daily use. Some popular leash materials include nylon, leather, and cotton, each with its unique benefits and drawbacks. Ultimately, the best leash is one that suits the needs of both the dog and its handler, and it is essential to try out different types and brands to find the perfect match.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abRefer to the information below to help with the following  delimited in ###:\n###\nDafinone appointed Africa Members Advisory Board chair by ICAEW\n\nThe Institute of Chartered Accountants in England and Wales (ICAEW) has announced the appointment of Ede Dafinone as chair of its Africa Members Advisory Board.\n\nDafinone is to take over immediately from Daniel Ndonye (Kenya) who has retired.\n\nIn a statement, ICAEW's Regional Director for the Middle East, Africa and South Asia, Michael Armstrong said: \"Ede is an accomplished business leader and an experienced board member in both the public and private sectors.\n\n\"We are confident that he will add great value to our Africa Members Advisory Board, considering his experience in multiple industries, and that ICAEW will benefit from his insights, judgment and counsel.\"\n\nArmstrong added: \"Ede's experience spans audit and consultancy in a wide range of sectors including conglomerates, government parastatals, building contractors, manufacturing, transport and haulage contractors. This experience will be invaluable as the ICAEW seeks to increase its profile across various sectors on the continent.\n\n\"As the accounting profession undergoes massive changes due to the advancement of technology like Artificial Intelligence and the growing use of the cloud, we feel that it is important for ICAEW to have someone on the ground to guide us on how to implement our strategies on the continent.\n\n\"Nigeria's financial services sector is a diversified one, in which the largest firms follow a universal model and a range of specialised actors tap specific niches. New trends include merchant banks, sector-specific lending vehicles, and from policymakers, increased focus on financial inclusion. These include microfinance, mobile tools, and the establishment of a network of mobile money agents to service this developing financial infrastructure.\"\n\nThe ICAEW Africa Members Advisory Board (MAB) is a volunteer advisory board, whose primary aim is to advise, guide and support the ICAEW Middle East, Africa and South Asia (MEASA) Regional Director and Africa team to implement ICAEW's international strategy.\n\nThere are over 1.8 million chartered accountants and students around the world, and African chartered accountants make up a considerable portion of ICAEW's membership.\n\nICAEW trains, develops and supports each one of them so that they have the knowledge and values to help build local and global economies that are sustainable, accountable and fair.\n\nIn addition to serving as Chair and CEO, Mr. Dafinone has been on the Africa MAB (representing Nigeria) since its inception in 2016.\n\nHe is currently the Deputy Managing Partner of Horwath Dafinone based in Lagos, Nigeria. He started his career with Touche Ross &amp; Co in London in 1984 and joined his family firm in 1989.\n\nDafinone said that he was eager to offer his insights while growing ICAEW's profile on the continent. \"I look forward to bringing together the strengths of our members across Africa to support ICAEW's vision of strong global economies.\"\n###\n\nPlease rewrite the text to be more emotional and personal, as though it were written by a member of the organization expressing their excitement and gratitude.\u00bb\nOutput (response): \u00abEde Dafinone has been appointed as the new chair of our Africa Members Advisory Board, and we couldn't be more thrilled! Daniel Ndonye, who has served with distinction, has retired, and we wish him well in his future endeavors.\n\nEde is an accomplished business leader and an experienced board member in both the public and private sectors. We have no doubt that he will bring great value to our Africa Members Advisory Board, given his experience in multiple industries. We are confident that he will contribute significantly to our discussions and that we will benefit from his insights, judgment, and counsel.\n\nEde's experience spans audit and consultancy in a wide range of sectors, including conglomerates, government parastatals, building contractors, manufacturing, transport, and haulage contractors. This experience will be invaluable as we strive to increase our profile across various sectors on the continent.\n\nNigeria's financial services sector is a diversified one, in which the largest firms follow a universal model and a range of specialized actors tap specific niches. New trends include merchant banks, sector-specific lending vehicles, and from policymakers, increased focus on financial inclusion. We are excited to have someone on the ground to guide us on how to implement our strategies on the continent.\n\nThe ICAEW Africa Members Advisory Board (MAB) is a volunteer advisory board, whose primary aim is to advise, guide, and support the ICAEW Middle East, Africa, and South Asia (MEASA) Regional Director and Africa team to implement ICAEW's international strategy. We have over 1.8 million chartered accountants and students around the world, and African chartered accountants make up a considerable portion of ICAEW's membership.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abaccording to the following reference text delimited in ###\n###\nKrilogy Financial LLC lifted its holdings in shares of Vanguard Total Stock Market ETF (NYSEARCA:VTI) by 156.1% during the 2nd quarter, according to the company in its most recent filing with the Securities and Exchange Commission (SEC). The institutional investor owned 8,337 shares of the company's stock after purchasing an additional 5,081 shares during the period. Krilogy Financial LLC's holdings in Vanguard Total Stock Market ETF were worth $1,305,000 at the end of the most recent reporting period.\n\nOther institutional investors have also made changes to their positions in the company. Camarda Financial Advisors LLC purchased a new stake in shares of Vanguard Total Stock Market ETF in the 2nd quarter worth $6,340,000. Ironwood Investment Counsel LLC increased its stake in shares of Vanguard Total Stock Market ETF by 195.3% in the 1st quarter. Ironwood Investment Counsel LLC now owns 5,776 shares of the company's stock worth $744,000 after purchasing an additional 3,820 shares in the last quarter. Mercer Global Advisors Inc. ADV increased its stake in shares of Vanguard Total Stock Market ETF by 34.1% in the 1st quarter. Mercer Global Advisors Inc. ADV now owns 49,381 shares of the company's stock worth $6,366,000 after purchasing an additional 12,555 shares in the last quarter. Kistler Tiffany Companies LLC increased its stake in shares of Vanguard Total Stock Market ETF by 10.0% in the 2nd quarter. Kistler Tiffany Companies LLC now owns 67,212 shares of the company's stock worth $10,521,000 after purchasing an additional 6,118 shares in the last quarter. Finally, BNP Paribas Arbitrage SA increased its stake in shares of Vanguard Total Stock Market ETF by 9.1% in the 1st quarter. BNP Paribas Arbitrage SA now owns 13,601 shares of the company's stock worth $1,753,000 after purchasing an additional 1,129 shares in the last quarter.\n\nGet Vanguard Total Stock Market ETF alerts:\n\nVTI stock traded down $0.05 during trading on Friday, reaching $170.98. The company's stock had a trading volume of 2,192,401 shares, compared to its average volume of 5,468,378. Vanguard Total Stock Market ETF has a 1 year low of $109.49 and a 1 year high of $172.56. The company's fifty day moving average is $162.31 and its 200-day moving average is $152.31.\n\nVanguard Total Stock Market ETF Profile\n\nVanguard Total Stock Market ETF (the Fund) is an exchange-traded share class of Vanguard Total Stock Market Index Fund, which employs a passive management or indexing investment approach designed to track the performance of the of the MSCI US Broad Market Index, which represents 99.5% or more of the total market capitalization of all of the United States common stocks traded on the New York and American Stock Exchanges and the Nasdaq over-the-counter market.\n###\nWhat are the key drivers of the Vanguard Total Stock Market ETF's performance?\u00bb\nOutput (response): \u00abKey drivers of the Vanguard Total Stock Market ETF's performance include:\n\n1. Diversification: The ETF offers exposure to a broad range of stocks, providing investors with diversification across different sectors and market caps.\n\n2. Low cost: The ETF has a low expense ratio, which makes it an affordable investment option for long-term investors.\n\n3. Market-cap weighted: The ETF is market-cap weighted, which means that larger companies have a greater impact on the fund's performance than smaller ones.\n\n4. Diversified exposure: The ETF provides exposure to a wide range of companies, including both large-cap and small-cap stocks, as well as international stocks.\n\n5. Easy to invest: The ETF is easy to invest in, as it can be purchased through most brokerage accounts and requires minimal research or management.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 3
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abConsider this reference information delimited in \"\"\":\n\"\"\"\nVance Joy\u2019s first solo single in over three years, \u201cMissing Piece,\u201d sets the tone for Dr. Jackson Avery\u2019s farewell to \u201cGrey\u2019s Anatomy\u201d during tonight\u2019s episode.\n\nAs was revealed on May 6, the third-to-last episode of the hit ABC show\u2019s 17th season will see the exit of Dr. Avery, played by Jesse Williams, who has been a mainstay on \u201cGrey\u2019s Anatomy\u201d since Season 7. \u201cMissing Piece\u201d is featured at the end of the episode, as Dr. Avery reflects on his memories at Grey Sloan Memorial Hospital and bids his colleagues goodbye.\n\n\u201cMissing Piece\u201d is a tried-and-true love song, centered on the feeling of finally finding \u2014 as the title suggests \u2014 your missing puzzle piece. Over uplifting guitar riffs, Joy sings in the chorus: \u201cBecause when I\u2019m in a room with you, that missing piece is found \/ You know when you\u2019re by my side, darling, nothing can break us down.\u201d Beyond soundtracking Dr. Avery\u2019s goodbye, the song also mirrors the relationship between him and April Kepner (Sarah Drew), who agreed to move with Dr. Avery to Boston in the previous episode.\n\nIndeed, love is at the core of \u201cMissing Piece.\u201d Joy, who had a huge hit in 2013 with \u201cRiptide,\u201d tells Variety that he wrote the new single a year ago while quarantining in his hometown of Melbourne, Australia \u2014 separated from his girlfriend, who lives in Spain.\n\n\u201cI know a lot of people were separated [during that time], and travel was difficult and still is,\u201d Joy says. \u201cIt\u2019s a song about wanting to see and be with someone, but also the feeling of not being too fazed. It\u2019s a consolation knowing that when you do see each other, it\u2019s all going to be good \u2014 what you have is so good that even if it\u2019s a long time, you can wait it out and you know that whatever you have is not just for right now.\u201d\n\nJoy co-wrote the song with Joel Little, who has penned and produced hits for the likes of Lorde and Taylor Swift. Even though their session was over Zoom, Joy says collaborating with Little brought out the best in him. When coming up with lyrics for the chorus, Joy started reading through the Notes app on his phone and came across the lyric fragment \u201cWhen I\u2019m in a room with you.\u201d At first, Joy didn\u2019t think it was anything special, but Little urged him to plug it into the chorus.\n\n\u201cIt\u2019s always nice to collaborate with someone who can see the potential in some random thing you\u2019ve jotted down \u2014 like, I wouldn\u2019t have recognized that as being an opening line to a chorus,\u201d Joy says.\n\n\u201cGrey\u2019s Anatomy\u201d music supervisor Kasey Truman says she was looking for the perfect heartfelt song to bid Dr. Avery farewell, and upon receiving a version of \u201cMissing Piece,\u201d knew it was the one.\n\"\"\"\n\nCan you elaborate on how the song \"Missing Piece\" by Vance Joy was used in \"Grey's Anatomy\", what it symbolizes in the context of the show, and the backstory behind the creation of this song?\u00bb\nOutput (response): \u00ab\"Missing Piece\" by Vance Joy was used in \"Grey's Anatomy\" to signify the character Dr. Jackson Avery's departure from the show. The song reflects on the feeling of finally finding one's missing puzzle piece in a relationship, which mirrors the relationship between Dr. Avery and April Kepner. Joy wrote the song a year ago while quarantining in his hometown of Melbourne, Australia, separated from his girlfriend who lives in Spain. The song is a reflection of his personal experience and the longing to be with someone during a difficult time. The song also symbolises the hope and love that can endure even in difficult times.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 3
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWrite a python script that prints \"True\" if the number 5 is even, and \"False\" if the number 5 is odd.\u00bb\nOutput (response): \u00ab```python\nprint(5 % 2 == 0)\n```\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 4
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abReference:\nOn Tuesday, Nov. 30, A24 announced the launch of its newest capsule line of vintage merch, this time taking inspiration from some lesser-known, cult classic films of the past. Partnering with New York-based home goods brand Intramural Shop, the throwback collection is set to feature an array of curated and collectible items, ranging from printed tees, embroidered caps, and even coffee mugs. The first drop on Wednesday, Dec. 1, is one of three vintage capsule collections, which are planned to roll out in the coming months.\n\nThe vintage merch collection includes a total of 38 items taken from past films produced by some of the biggest names in entertainment, like Columbia Pictures and HBO, as well as film festivals Cannes and NYFF, and old-school tech companies like Industrial Light+Magic and LaserDisc. Within the upcoming release, some stand-out pieces include a white tee stamped with the 1998 title Wild Things ($100), a teal-colored 1972 Academy Awards baseball cap ($55), a blue and yellow Blockbuster duffle bag ($60), a silk Armani scarf printed with the face of legendary film director Martine Scorcese ($85), and a beach towel with a still from the 1994 hit film Reality Bites ($80).\n\nCourtesy of A24\n\nBijan Shahvali, founder of Intramural Shop, sourced the coveted pieces from all over the globe, in addition to pulling items from his own personal collection and of friends within his vintage network. \"I was thrilled when A24 reached out because I think they really embody all the things I love about film,\" Shahvali exclusively told NYLON in an official statement. \"My goal for this curation was to celebrate all the different aspects of the film experience that we are all nostalgic for \u2014 the blockbusters, the arthouse, theatre, the emergence of cable television, and everything in between \u2014 while still feeling very much like A24. I also wanted the collection to be something film buffs and filmmakers alike would get a kick out of.\"\n\nGift the movie lover in your life for the holidays or add onto your own merch collection with items from A24 x Intramural Shop's vintage merch drop, available to shop starting on Wednesday, Dec. 1, on A24films.com.\n\nInstruction:\nWhat are some of the most notable items in the vintage merchandise collection, and what are the films they are inspired by?\u00bb\nOutput (response): \u00abSome of the most notable items in the vintage merchandise collection include a white tee stamped with the 1998 title Wild Things ($100), a teal-colored 1972 Academy Awards baseball cap ($55), a blue and yellow Blockbuster duffle bag ($60), a silk Armani scarf printed with the face of legendary film director Martine Scorcese ($85), and a beach towel with a still from the 1994 hit film Reality Bites ($80). These items are inspired by the films Wild Things, Reality Bites, The Godfather, and Casablanca.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "complexity",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 4
+      }
+    ],
+    "signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    },
+    "extended_signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    }
+  }
+}

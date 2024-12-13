@@ -1,0 +1,167 @@
+{
+  "generate_score": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "text": "\u00abInput (prompt): \u00abWhat are some ways to validate information? I want a list of 5. Format your answer as a numbered list.\u00bb\nOutput (response): \u00abNo\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 0
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abName at least 10 famous sopranos from opera, including their birth and death dates, and one famous aria from their most well-known opera.\u00bb\nOutput (response): \u00abGot it. Waiting for your instructions.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 0
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abRead this for context:\n<start of reference>\nThere is a delicious ambiguity in the word \"overthrown,\" as it means both perverted and destroyed. But God long remembers the testimony of those whose exercise of dominion served His honor.\n\n8. _A man shall be praised according to his wisdom, but he who is of a perverse heart shall be despised_. The first line is actually ambiguous, referring to how one's public honor from God matches the quality of his wisdom. However, there comes a point when it's not a question of quality but fundamental orientation. Thus, the perverse will curry God's despite.\n\n9. _Better is a despised one, and having a servant, than he honoring himself and lacks bread_. This is another figure of speech about how we run our personal domains. If God prospers our actions (wealthy enough to own slaves), it won't matter what other people think of us. But fame means nothing if God beggars your existence.\n\n10. _A righteous one understands the soul of his animal; but the tender mercies of the wicked are cruel_. There are better translations for this one. God created all things and made us managers. In our fallen state, we exercise that authority quite poorly, but it remains in our hands to some degree (according to the Covenant of Noah). So someone who seeks God's moral character will acknowledge his domestic animals as creatures from God's hand and take due care and responsibility for their lives. The contrast found its way into English long ago with the same sarcasm reflected here.\n\n11. _He who tills his land shall be satisfied with bread; but he who follows vanities lacks heart_. Here we have more of the contrast between good and evil in terms of exercising dominion. This is mostly figure of speech: Stick with what God has called you to do. Whatever this brings you will fill your soul. Stop chasing stuff that appeals to your ego, because it only proves your heart is empty of any meaningful commitment.\n\n12. _The wicked desires the net of evils; but the root of the righteous yields fruit_. A parallel to the previous proverb, this is related to another ancient proverb that says you don't go hunting or fishing when it's time to plant or harvest. The wicked \"desire\" here is the image of obsession over some ethereal vision of joy, in this case a preference for wasting time with predatory schemes. Stay home and take care of things in their season and you'll never lack.\n\n13. _The wicked is snared by the transgression of his lips, but the just shall come out of trouble_. Another parallel, this proverb builds on the image of hooking or snaring. It also carries some humor \u2013 the phrase \"transgression of his lips\" could also be read \"trespassing boundaries.\" Thus, the wicked keep intruding where they'll be trapped, but the righteous keep escaping the tight spots in life. Not just as an individual, this is the image of someone trying to move their entire household of people, herds and wagons.\n\n14. _A man shall be satisfied with good by the fruit of his mouth, and the reward of a man's hands shall be given to him_. This proverb rests on seeing the dramatic imagery. As before, speech is more at expressing one's personal moral code of law. We see the humor of what comes out of your mouth is the fruit you can eat to your full, and what you give with your hands is the payment returned to your hands. The Lord fills our lives in the same measure as our obedience to Him.\n\n15. _The way of a fool is right in his own eyes, hut he who listens to advice is wise_. Here we have contrasted the image of someone who listens only to the demands of their flesh, versus someone who learns from others.\n<end of reference>\nYour task is to:\nFrom the text, summarize the common themes in 10 proverbs or less.\u00bb\nOutput (response): \u00abPraise, dominion, transgression, reward, and obedience are some of the common themes.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 1
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abgiven this background information delimited in \"\"\"\n\"\"\"\nCoromandel now home to two award-winning Four Square stores\n\nOwner Operators of the Coromandel store, Chris and Rebecca Beard are excited about the win. Photo \/ Supplied\n\nOwner Operators of the Coromandel store, Chris and Rebecca Beard are excited about the win. Photo \/ Supplied\n\nWaikato Herald\n\nThe Coromandel has a reason to celebrate as the region is now home to the top Four Square supermarket for the second year in a row.\n\nFollowing the 2020 winner Four Square Matarangi, Four Square Coromandel took out the prize for best Four Square store at the 2021 Foodstuffs North Island Co-op Awards.\n\nOwner Operators of the Coromandel store, Chris and Rebecca Beard, think the win a great testament to their excellent local service that only the \"Coro\" can give.\n\nSays Chris: \"It's like no other here, you'll always catch the team helping customers or checking in to see how their day has been, just really getting to know our locals on a personal level. We're able to give our shoppers that large scale shopping experience with your everyday essentials while maintaining that friendly local feel which we think is pretty special.\"\n\nThe couple has only taken over the store in November, after spending almost four years owning Four Square Tokomaru Bay, Gisborne, which was also a finalist for the award. Chris says it's wonderful to be able to build on the legacy of the store and be an award winner in such a short period of time.\n\n\"There's a talented team and network here and we're thrilled to be able to carry on and continue to deliver our community with the high-quality service they have come to expect from us.\"\n\nThe judging and decision for the award took place in August when previous owner-operators Damien and Renee Langely were still running the store, however, they are still excited for the new Coromandel team's win.\n\nChris says this was thanks to the value and ethos of Foodstuffs North Island which often feels like one big family. \"No matter which store you're from, we're also a co-operative and that means everyone is there to lend a hand, offer advice or ready to catch up for a yarn.\"\n\nThe awards were held online this time, but Chris says it meant they could celebrate in real-time, in-store. \"The team [was] able to watch live and get involved which built a great atmosphere. It was really special to be a part of it with each other and see the look of excitement and sense of achievement on everyone's faces.\"\n\nAs for next year, Chris is going for a hat-trick for the Coromandel store. \"We'll continue to do what we do best, which is serve our local community and deliver fantastic products at great value and top-quality customer service. Hasn't led us wrong yet.\"\n\"\"\"\nWhat type of award is this?\n- National award\n- Local award\n- Industry award\n- Other (please specify)\u00bb\nOutput (response): \u00abNational award\n\nThe Foodstuffs North Island Co-op Awards are a national award that recognizes the top Four Square supermarket in the country. Therefore, the answer to this question should be \"National award\".\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 1
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abRefer to the information below to help with the following  delimited in ###:\n###\nMizzou Women Start Cancun Challenge with Win\n\nCANCUN, MEXICO -- Missouri Women's Basketball (4-0) started off the Cancun Challenge on the right foot, earning a 49-44 victory over Wichita State (2-2) on Wednesday. Senior Sydney Crafton led the Tigers with 14 points on the game, marking her third double figure scoring game this season. Crafton finished 4-for-5 from the field, and she made 5-of-6 shots from the free throw line.\n\nScoring in the game started right off the bat, with a jumper from Wichita State in the first few seconds of play, but Bri Kulas quickly responded with a basket of her own, marking the beginning of a 6-0 run for the Tigers. A huge block by Sydney Crafton led the teams into the under-16 media timeout, and, despite the team's fast start, Mizzou kept the Shockers from finding the net until the 14-minute mark on the clock.\n\nLeading the scoring for Mizzou in the first half, Liz Smith hit a jumper with 11:24 on the clock, forcing Wichita State to take a timeout and giving Mizzou a 10-9 lead.\n\nWith 10:35 left in the half, WSU's Jazmien Gordon made a layup to give the Shockers a brief lead in the game, but Crafton sunk two free throws to put Mizzou back on top. Morgan Eye then hit a clutch three-pointer helping the Tigers to a 15-11 lead just before the under-8 media timeout.\n\nWith just under two minutes to play in the first half, the Tigers pulled away thanks to a three-pointer from Crafton and a layup from Kulas. Wichita State answered with a layup in the last minute making it 20-15 in Mizzou's favor. Kulas was fouled with 22 seconds left, and sunk both from the charity stripe. The Tigers went into the locker room at the half with a 22-15 lead over Wichita State.\n\nCrafton started off the scoring in the second half for Mizzou, sinking a free throw and following it up with a layup for the Tigers. The score was answered by a Wichita State three-pointer, but MU still led 25-18 at the under-16 timeout.\n\nWith 15:11 left on the clock, Bri Kulas hit a key three-pointer to negate an earlier jump shot from Wichita State, keeping the Tigers ahead 28-20. After two free throws from Lianna Doty the Tigers continued to lead 30-23.\n\nAfter a Wichita State timeout, a wide-open Maddie Stock added a trey, giving Mizzou a 10-point lead, their largest of the game. Crafton added a layup, putting Mizzou up 35-23. With just under 10 minutes left in the game, Crafton hit another fastbreak layup followed almost immediately by another three from Maddie Stock.\n\nWichita State put a few points on the board, but an and-one from Doty with 6:40 on the clock held on to the lead for Missouri, putting the Tigers up 43-30.\n\nWith just over two minutes in the game, the Shockers added a free throw and a layup to creep up on the Tigers' lead, 44-37, but Crafton kept the Tigers afloat, making two from the charity stripe.\n\nMissouri held on to its 46-41 lead through the last minute of the game, but a foul on Liene Priede gave WSU's Alex Harden two free throws with just 13 seconds left. Harden made one of her shots, and Kyley Simmons was fouled a few seconds later. Simmons added a free throw giving Mizzou the 47-42 lead, but WSU broke away and recorded another layup. Eye hit two free throws after the game's final foul, helping the Tigers to their first win of the Cancun Challenge.\n\nMissouri will hit the hardwood again Friday at 5 p.m. against the Green Bay Phoenix.\n###\n\nList the key statistics of the game in at least 5 bullet points for quick understanding.\u00bb\nOutput (response): \u00abSydney Crafton led the Tigers with 14 points on the game, marking her third double figure scoring game this season.\nCrafton finished 4-for-5 from the field, and she made 5-of-6 shots from the free throw line.\nCrafton added a layup, putting Mizzou up 35-23.\nWith just under 10 minutes left in the game, Crafton hit another fastbreak layup followed almost immediately by another three from Maddie Stock.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abRead this for context:\nGrabbing Jack's arm, Hopper stuffed the chest into his mouth and swam out of the cave. Staying near the bottom of the pool, Hopper cleared the turbulent waters and raced for the surface. He shoved Jack out of the water above him and hit the surface at a faster swim desperate to get to the shore.\n\n\"He's not breathing!\" Hopper's deep voice boomed over the roar of the falls. Gasping for air, Hopper allowed Sarah and Nicole to drag Jack over the rocks and onto the grass. Sarah forced Jack into a sitting position and used the Heimlich maneuver to purge his lungs of water. Then she laid him on his back and forced air into his lungs.\n\nNicole placed an ear to Jack's chest. \"No heartbeat!\" she gasped.\n\nSarah pushed her away and started pumping his chest. Hopper appeared at her side and began puffing air into Jack's lungs.\n\n\"It's only a game.\" Nicole managed to hug herself as she watched them struggle to bring Jack back to life.\n\n\"It can't be safe to allow someone to think they've died. I don't care if it is just hypnosis, this is insane,\" Sarah said as she continued to force Jack's heart to beat. After what felt like a lifetime, Jack coughed, and his head jerked forward. Hopper roared with delight as his friend rolled to his side gasping for air. Sarah hugged the giant troll, relieved they did not have to wait until the adventure was over to find out if Jack had actually suffered from the ordeal.\n\n\"What happened?\" Jack squeaked, looking up at his three nearly hysterical friends.\n\n\"You were dead.\" Hopper smiled weakly. \"I pulled you out of the cave just in time.\"\n\n\"Dead?\" Jack coughed, rolled over onto his back and sat up.\n\n\"Absolutely,\" Hopper added, \"Sarah revived you.\"\n\n\"I guess I wasn't cut out for underwater spelunking,\" Jack said with a forced smile.\n\n\"Maybe not, but you're a great treasure hunter.\" Hopper's huge hairy face glowed with excitement as he presented Jack the small chest and added, \"The honor is all yours.\"\n\n\"I saw you dive into the water and pull me out,\" Jack whispered softly to his friends, oblivious to the chest. \"Nicole grabbed my arms and Sarah kissed me...\"\n\n\"Are you all right?\" Nicole moved forward. She stared at him with such intensity; Jack could no longer meet her gaze. He fell silently back onto the grass.\n\n\"My chest hurts, and I've got a massive headache.\" He sighed, clutching his head in both hands.\n\n\"Let's get him out of the sun,\" Sarah ordered, pulling Jack to his feet. \"Can you walk?\"\n\n\"I didn't get hit by a bus,\" Jack growled, but leaned against Hopper's hulking form nonetheless. \"How long was I out?\"\n\n\"How long before you ran out of air?\" The Hopper asked, leading Jack to a large evergreen tree.\n\n\"The bag sprang a leak, after my second breath. I was pretty far in...\" Jack stammered, trying to remember. \"There was a side tunnel near the back. I had just entered it after searching the central area and finding nothing.\"\n\n\"Two minutes tops,\" Hopper answered firmly, stopping inside the tree line. \"I found you just inside the main entrance.\"\n\n\"Two minutes, I guess that's okay.\"\n\n\"Of course, it's okay,\" Nicole said. \"Do you really think you stopped breathing?\"\n\n\"It sure seemed like it to me,\" Hopper offered, lowering Jack onto the soft grass.\n\n\"It's just part of the game. We wanted some excitement. So Strong gave it to us.\n\nYour task is to:\nSummarize the adventure game experience by using the text directly in at least 5 sentences aimed at high school students.\u00bb\nOutput (response): \u00abHopper, Sarah, and Nicole are playing an adventure game that involves treasure hunting. The group searches a cave and is successful in finding the chest, but Jack is left for dead in the cave after it fills with water. \"Grabbing Jack's arm, Hopper stuffed the chest into his mouth and swam out of the cave. Staying near the bottom of the pool, Hopper cleared the turbulent waters and raced for the surface. He shoved Jack out of the water above him and hit the surface at a faster swim desperate to get to the shore.\" After reviving Jack, they learn that the game's experience was too intense for Jack.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 2
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abaccording to the following reference text delimited in ###\n###\nboat me around gently. whoever i'm with i'm seeing only you. diplomacy has wounded us. pierced us. smashed us. is there something in the turning of this river's head that will mend our dislocations? your eagle drives my ego. there is ice in your thighs. take the buoys of light for your thighpaths whose eyes night has darkened.\n###\nWhat is the poem about? What is the poem trying to communicate?\u00bb\nOutput (response): \u00abThe poem is about love and the narrator's desire to be with the person they love. The poem expresses the desire to be with the person they love, regardless of what others may think. The poem also mentions the difficulties of being in a relationship, and the hope that there is something in the turning of the river's head that will mend the dislocations in the relationship. The poem ends with a reference to the eagle driving the narrator's ego, and the suggestion that the person they love has ice in their thighs.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 3
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abWhat is the difference between a bank and a credit union, and which one is better to join?\u00bb\nOutput (response): \u00abBanks and credit unions are both financial institutions that offer similar services, such as checking and savings accounts, loans, and credit cards. However, there are some differences between the two types of institutions.\n\nBanks are typically larger and offer more products and services, but may have higher fees and interest rates. Credit unions, on the other hand, are often smaller and offer more personalized service, but may have limited product offerings and lower interest rates on loans.\n\nWhen deciding which one is better to join, it depends on your personal needs and preferences. If you are looking for a wide range of products and services, a bank may be a better option. However, if you value personalized service and want to support a local organization, a credit union may be a better fit.\n\nIt's also worth noting that some credit unions have specific membership requirements, such as working for a certain employer or living in a certain geographic area. So, it's important to research the eligibility requirements of any credit union you are considering joining.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 3
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abgiven this background information delimited in \"\"\"\n\"\"\"\nKadie has always thought of Lyanna as a silly goose. She is always making jokes that no one laughs at and she is always doing something clumsy. Kadie was getting angry with Lyanna because she felt like she was the only one who ever had to put up with her shenanigans.\n\nKadie: I can't believe you. You're always making jokes that no one laughs at and you're always doing something clumsy. I'm getting really angry with you because I feel like I'm the only one who ever has to put up with your shenanigans.\nLyanna: What are you talking about? I don't understand why you're so mad.\nKadie: You're always making jokes that no one laughs at and you're always doing something clumsy. It's like you're not even trying to be funny or graceful, it's just annoying.\nLyanna: Well, I'm sorry if my humor isn't to your liking, but I don't see what the big deal is. Everyone has different senses of humor, maybe you just don't get mine. And as for being clumsy, well, that's just a part of who I am. I can't help it if I'm not as coordinated as some people are.\nKadie: It's not just that, it's like you don't even care about how your actions affect other people. You could trip and fall and knock someone over and it would be hilarious to you, but the person who got hurt would be furious. And sometimes your jokes are mean-spirited, like when you make fun of someone's weight or intelligence. It's not funny, it's cruel.\nLyanna: Okay, first of all, I would never trip and fall on purpose to hurt someone else. That would be terrible! And as for my sense of humor, yes, sometimes it might be a little mean-spirited, but only because I know the person can take a joke - they're usually pretty thick-skinned about things like that anyway. If they can't take a little good-natured ribbing then they need to lighten up!\nKadie: Well, I'm not like that. I don't think it's funny to make fun of someone else's expense, and I certainly don't find it amusing when someone gets hurt because of your careless antics. It might be all fun and games to you, but it's not to me. So please, can you try to be a little more considerate in the future?\nLyanna: Yeah, sure, I'll try. I'm sorry if I've been causing you so much stress.\n\"\"\"\nWhat are the differences in perspective between Kadie and Lyanna, and how might this conversation be resolved?\u00bb\nOutput (response): \u00abThe differences in perspective between Kadie and Lyanna can be seen in their different reactions to Lyanna's humor and clumsiness. Kadie feels that Lyanna's jokes are not funny and her clumsiness is annoying. Lyanna, on the other hand, sees her humor as a part of her personality and her clumsiness as something she cannot help.\n\nTo resolve this conversation, Kadie and Lyanna could try to understand each other's perspectives and find a way to compromise. Kadie could try to be more patient with Lyanna's humor and understand that it is a part of who she is. Lyanna could try to be more considerate of others' feelings and be more careful with her actions.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 4
+      },
+      {
+        "text": "\u00abInput (prompt): \u00abRefer to the information below to help with the following  delimited in ###:\n###\nAMSTERDAM \u2014 A cold case team that combed through evidence for five years in a bid to unravel one of World War II's enduring mysteries has reached what it calls the \u201cmost likely scenario\u201d of who betrayed Jewish teenage diarist Anne Frank and her family.\n\nTheir answer, outlined in a new book called \u201cThe Betrayal of Anne Frank A Cold Case Investigation,\u201d by Canadian academic and author Rosemary Sullivan, is that it could have been a prominent Jewish notary called Arnold van den Bergh, who disclosed the secret annex hiding place of the Frank family to German occupiers to save his own family from deportation and murder in Nazi concentration camps.\n\n\u201cWe have investigated over 30 suspects in 20 different scenarios, leaving one scenario we like to refer to as the most likely scenario,\u201d said filmmaker Thijs Bayens, who had the idea to put together the cold case team, that was led by retired FBI agent Vincent Pankoke, to forensically examine the evidence.\n\nBayens was quick to add that, \u201cwe don't have 100% certainty.\u201d\n\n80 years later, Anne Frank's diary still has much to teach\n\nAnne Frank's Diary Still Has Much To Teach\n\u201cThere is no smoking gun because betrayal is circumstantial,\u201d Bayens told The Associated Press on Monday.\n\nThe Franks and four other Jews hid in the annex, reached by a secret staircase hidden behind a bookcase, from July 1942 until they were discovered in August 1944 and deported to concentration camps.\n\nOnly Anne's father, Otto Frank, survived the war. Anne and her sister died in the Bergen-Belsen concentration camp. Anne was 15.\n\nThe diary Anne wrote while in hiding was published after the war and became a symbol of hope and resilience that has been translated into dozens of languages and read by millions.\n\nBut the identity of the person who gave away the location of their hiding place has always remained a mystery, despite previous investigations.\n\nThe team's findings suggest that Otto Frank was one of the first to hear about the possible involvement of Van den Bergh, a prominent member of the Jewish community in Amsterdam.\n\nA brief note, a typed copy of an anonymous tip delivered to Otto Frank after the war, names Van den Bergh, who died in 1950, as the person who informed German authorities in Amsterdam where to find the Frank family, the researchers say.\n\nThe note was an overlooked part of a decades-old Amsterdam police investigation that was reviewed by the team, which used artificial intelligence to analyze and draw links between archives around the world.\n\n\nThe Anne Frank House museum in the canal-side Amsterdam building that includes the secret annex welcomed the new research, but said it also leaves questions unanswered. The museum gave the researchers access to its archives for the cold case project.\n\nLooking Back At The Life Of Anne Frank\n\u201cNo, I don't think we can say that a mystery has been solved now. I think it's an interesting theory that the team came up with,\u201d said museum director Ronald Leopold. \u201cI think they come up with a lot of interesting information, but I also think there are still many missing pieces of the puzzle. And those pieces need to be further investigated in order to see how we can value this new theory.\u201d\n\nBayens said the hunt for the betrayer was also a way of looking for an explanation of how the horror of the Nazi occupation forced some members of a once close-knit Amsterdam community to turn on one another.\n\nHow did fascism bring people \u201cto the desperate point of betraying each other, which is an awful, really awful situation?\u201d he said.\n\n\u201cWe went looking for a perpetrator, and we found a victim,\u201d Bayens said.\n###\n\nThe title of the passage above is, \u201cCold Case Team Shines New Light on Who May Have Betrayed Ann Frank.\u201d After reviewing the information, on a scale of 1-3, did the passage follow the main idea presented, i.e., who betrayed Frank? (1- doesn't offer any information, the title was just an attention grabber, 3- the author gives specific evidence to support the title's claim).\u00bb\nOutput (response): \u00ab3\n\nThe passage provided several details that supported the claim of who betrayed Frank. The cold case team investigated over 30 suspects, and one stood out as the most likely. The team reached their conclusion after five years of work. The team gave details about the suspect, including how he lived close to the Frank family and had connections with the Nazi party. He also passed away before the team could investigate him.\u00bb\u00bb",
+        "task_description": "Answer the user query as a helpful chatbot assistant.",
+        "metric": "correctness",
+        "suggested_range": [
+          0,
+          4
+        ],
+        "score": 4
+      }
+    ],
+    "signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    },
+    "extended_signature": {
+      "instructions": "Given an input text, the task description that the model was trying to follow, and a metric to rate the text on, return a score on this metric.",
+      "fields": [
+        {
+          "prefix": "Text:",
+          "description": "The input text that we want to rate."
+        },
+        {
+          "prefix": "Task Description:",
+          "description": "A description of the task that the model was trying to solve when it generated the text.  Could be left blank if not available."
+        },
+        {
+          "prefix": "Metric:",
+          "description": "The metric that we want to rate the text on."
+        },
+        {
+          "prefix": "Suggested Range:",
+          "description": "The suggested range of possible values for the metric."
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Score:",
+          "description": "The score that the text should recieve on this metric."
+        }
+      ]
+    }
+  }
+}

@@ -110,7 +110,8 @@ class LLMJudgeOptimized(Metric):
 
             teleprompter = MIPROv2(
                 metric=get_wrapped_metric(self.eval_function),
-                auto="medium"
+                auto="medium",
+                num_threads=64,
             )
 
             optimized_program = teleprompter.compile(

@@ -17,8 +17,42 @@ Specific Instructions
 	2.	If Information is Unclear or Missing: Do not fabricate or make assumptions. If information is unavailable, unclear, or not included in the provided context, leave that section blank or mark it as "Needs more information."
 	3.	Markdown Formatting: Output the completed Metric Card as a markdown text block rather than rendering or printing the markdown directly.  Also start the block with "---" as shown in the examples.
 	4.	Focus on Consistency: Use the provided categorical suggestions (see below) to ensure uniformity across all Metric Cards, particularly in fields like “Metric Type,” “Domain,” and “Tasks.”
-	5.	Mathematical Formatting: Use $$ for block math and $ for inline math with no spaces between the dollar signs and the content (e.g., $r$, not $ r $).
-  
+	5.	Mathematical Formatting:
+    •	Use $ for inline math expressions (e.g., $r$, not $ r $).
+    •	Use $$ for block math expressions and ensure a full line break before and after each block math expression. This formatting ensures proper rendering in markdown.
+    •	Example of proper usage for $$:  
+
+** Correct **
+```
+Where:
+- $CHRP$ is the average precision of character and word n-grams:
+
+$$
+CHRP = \frac{1}{N} \sum_{n=1}^N \frac{\text{n-grams in hypothesis and reference}}{\text{total n-grams in hypothesis}}
+$$
+
+- $CHRR$ is the average recall of character and word n-grams:
+
+$$
+CHRR = \frac{1}{N} \sum_{n=1}^N \frac{\text{n-grams in hypothesis and reference}}{\text{total n-grams in reference}}
+$$
+```
+
+** Incorrect **
+```
+Where:
+- $CHRP$ is the average precision of character and word n-grams:
+  $$
+  CHRP = \frac{1}{N} \sum_{n=1}^N \frac{\text{n-grams in hypothesis and reference}}{\text{total n-grams in hypothesis}}
+  $$
+- $CHRR$ is the average recall of character and word n-grams:
+  $$
+  CHRR = \frac{1}{N} \sum_{n=1}^N \frac{\text{n-grams in hypothesis and reference}}{\text{total n-grams in reference}}
+  $$
+```
+    
+    •	Ensure all block math expressions are clearly separated from list items or inline text.
+
 ## Categorical Suggestions for Consistency
 
 Note: These suggestions are not exhaustive. While you should prioritize using the categories listed here for consistency, you may add new categories if the metric clearly warrants them.

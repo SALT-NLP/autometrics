@@ -69,13 +69,19 @@ The metric computes cosine similarity for each token pair between the reference 
 
 For a reference sentence $x = \langle x_1, \dots, x_k \rangle$ and a candidate sentence $\hat{x} = \langle \hat{x}_1, \dots, \hat{x}_l \rangle$, the BERTScore components are defined as:
 
+Recall:
+
 $$
 R_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{\hat{x}_j \in \hat{x}} x_i^\top \hat{x}_j
 $$
 
+Precision:
+
 $$
-P_{\text{BERT}} = \frac{1}{|\hat{x}|} \sum_{\hat{x}_j \in \hat{x}} \max_{x_i \in x} x_i^\top \hat{x}_j
+P_{\text{BERT}} = \frac{1}{|\hat{x}|} \sum_{\hat{x}_j \in \hat{x}} \max_{x_i \in x} \left( x_i^\top \hat{x}_j \right)
 $$
+
+F1:
 
 $$
 F_{\text{BERT}} = \frac{2 \cdot P_{\text{BERT}} \cdot R_{\text{BERT}}}{P_{\text{BERT}} + R_{\text{BERT}}}
@@ -84,6 +90,8 @@ $$
 Here, $x_i$ and $\hat{x}_j$ represent the contextual embeddings of the tokens, and the similarity is computed using cosine similarity.
 
 With IDF weighting, recall is modified as:
+
+Recall Modified:
 
 $$
 R_{\text{BERT}} = \frac{\sum_{x_i \in x} \text{idf}(x_i) \cdot \max_{\hat{x}_j \in \hat{x}} x_i^\top \hat{x}_j}{\sum_{x_i \in x} \text{idf}(x_i)}
@@ -94,12 +102,12 @@ Baseline rescaling adjusts scores to lie within [0, 1].
 ### Inputs and Outputs
 
 - **Inputs:**  
-- Generated text (candidate)  
-- Reference text(s)  
-- Optional: IDF weights for importance weighting  
+  - Generated text (candidate)  
+  - Reference text(s)  
+  - Optional: IDF weights for importance weighting  
 
 - **Outputs:**  
-- Scalar precision, recall, and F1 scores  
+  - Scalar precision, recall, and F1 scores  
 
 ## Intended Use
 
@@ -111,41 +119,41 @@ Baseline rescaling adjusts scores to lie within [0, 1].
 ### Applicability and Limitations
 
 - **Best Suited For:**  
-- Tasks requiring semantic similarity evaluation between generated and reference texts.  
-- Use cases where semantic correctness is prioritized over lexical overlap.  
+  - Tasks requiring semantic similarity evaluation between generated and reference texts.  
+  - Use cases where semantic correctness is prioritized over lexical overlap.  
 
 - **Not Recommended For:**  
-- Open-ended or highly creative generation tasks with diverse acceptable outputs (e.g., storytelling).  
-- Domains with very low-resource or out-of-domain embeddings.  
+  - Open-ended or highly creative generation tasks with diverse acceptable outputs (e.g., storytelling).  
+  - Domains with very low-resource or out-of-domain embeddings.  
 
 ## Metric Implementation
 
 ### Reference Implementations
 
 - **Libraries/Packages:**
-- [BERTScore GitHub Repository](https://github.com/Tiiiger/bert_score)  
-- [Hugging Face `evaluate`](https://huggingface.co/docs/evaluate)  
+  - [BERTScore GitHub Repository](https://github.com/Tiiiger/bert_score)  
+  - [Hugging Face `evaluate`](https://huggingface.co/docs/evaluate)  
 
 ### Computational Complexity
 
 - **Efficiency:**  
-BERTScore is computationally intensive due to the use of contextual embeddings. A GPU is recommended for large-scale evaluations.
+  BERTScore is computationally intensive due to the use of contextual embeddings. A GPU is recommended for large-scale evaluations.
 
 - **Scalability:**  
-Supports multiple languages and embeddings. Processing speed varies based on embedding size and sentence length.
+  Supports multiple languages and embeddings. Processing speed varies based on embedding size and sentence length.
 
 ## Known Limitations
 
 - **Biases:**  
-- Performance may degrade for low-resource languages.  
-- Contextual embeddings may reflect biases present in the pre-trained models.  
+  - Performance may degrade for low-resource languages.  
+  - Contextual embeddings may reflect biases present in the pre-trained models.  
 
 - **Task Misalignment Risks:**  
-- Poor performance on tasks emphasizing diversity or creativity.  
+  - Poor performance on tasks emphasizing diversity or creativity.  
 
 - **Failure Cases:**  
-- Struggles with very long sentences due to truncation in transformer models.  
-- Sensitivity to embedding model choice and layer selection.  
+  - Struggles with very long sentences due to truncation in transformer models.  
+  - Sensitivity to embedding model choice and layer selection.  
 
 ## Related Metrics
 
@@ -157,16 +165,16 @@ Supports multiple languages and embeddings. Processing speed varies based on emb
 ## Further Reading
 
 - **Papers:**  
-- [BERTScore: Evaluating Text Generation with BERT (Zhang et al., 2020)](https://arxiv.org/abs/1904.09675)  
+  - [BERTScore: Evaluating Text Generation with BERT (Zhang et al., 2020)](https://arxiv.org/abs/1904.09675)  
 
 - **Blogs/Tutorials:**  
-- [BERTScore GitHub Documentation](https://github.com/Tiiiger/bert_score)  
+  - [BERTScore GitHub Documentation](https://github.com/Tiiiger/bert_score)  
 
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
-Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu
 """
 

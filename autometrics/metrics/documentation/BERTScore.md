@@ -26,7 +26,7 @@ R_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{\hat{x}_j \in \hat{x}} x_
 $$
 
 $$
-x \left(\text{This is a test}) \frac{1}{2} \right)
+P_{\text{BERT}} = \frac{1}{|\widehat{x}|} \sum_{\widehat{x}_j \in \widehat{x}} \max_{x_i \in x} \left( x_i^{\top} \widehat{x}_j \right)
 $$
 
 $$

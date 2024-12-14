@@ -217,108 +217,107 @@ def SARIsent(ssent, csent, rsents):
 
 
 class SARI(ReferenceBasedMultiMetric):
-	"""
-	---
-	# Metric Card for SARI
+	"""---
+# Metric Card for SARI
 
-	SARI (Sentence Adaptation for Readability Index) is a metric designed to evaluate the quality of text simplification by comparing the system-generated output against both the original input text and reference simplified texts. It measures how well words are added, deleted, and kept appropriately, rewarding edits that enhance readability while preserving meaning.
+SARI (Sentence Adaptation for Readability Index) is a metric designed to evaluate the quality of text simplification by comparing the system-generated output against both the original input text and reference simplified texts. It measures how well words are added, deleted, and kept appropriately, rewarding edits that enhance readability while preserving meaning.
 
-	## Metric Details
+## Metric Details
 
-	### Metric Description
+### Metric Description
 
-	SARI evaluates text simplification by considering three types of operations: additions, deletions, and retention of n-grams. It computes precision and recall for these operations by comparing the system output to both the input and the reference simplified texts. SARI is particularly suited for simplification tasks as it explicitly rewards edits that improve readability while maintaining semantic correctness.
+SARI evaluates text simplification by considering three types of operations: additions, deletions, and retention of n-grams. It computes precision and recall for these operations by comparing the system output to both the input and the reference simplified texts. SARI is particularly suited for simplification tasks as it explicitly rewards edits that improve readability while maintaining semantic correctness.
 
-	- **Metric Type:** Surface-Level Similarity  
-	- **Range:** 0 to 1  
-	- **Higher is Better?:** Yes  
-	- **Reference-Based?:** Yes  
-	- **Input-Required?:** Yes  
+- **Metric Type:** Surface-Level Similarity  
+- **Range:** 0 to 1  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** Yes  
+- **Input-Required?:** Yes  
 
-	### Formal Definition
+### Formal Definition
 
-	SARI is computed as the arithmetic mean of F-scores for the addition and retention operations, along with the precision of the deletion operation:
+SARI is computed as the arithmetic mean of F-scores for the addition and retention operations, along with the precision of the deletion operation:
 
-	$$
-	SARI = \frac{1}{3}(F_{add} + F_{keep} + P_{del})
-	$$
+$$
+SARI = \frac{1}{3}(F_{add} + F_{keep} + P_{del})
+$$
 
-	Where:
-	- $F_{add}$: F-score for addition operations
-	- $F_{keep}$: F-score for keeping relevant text
-	- $P_{del}$: Precision for deletion operations  
+Where:
+- $F_{add}$: F-score for addition operations
+- $F_{keep}$: F-score for keeping relevant text
+- $P_{del}$: Precision for deletion operations  
 
-	Each F-score or precision is computed based on the comparison of n-grams in the input, system output, and references.
+Each F-score or precision is computed based on the comparison of n-grams in the input, system output, and references.
 
-	### Inputs and Outputs
+### Inputs and Outputs
 
-	- **Inputs:**  
-	- Source text (original, complex input text)  
-	- Candidate text (simplified text from the system)  
-	- Reference texts (simplified human-created texts)  
+- **Inputs:**  
+- Source text (original, complex input text)  
+- Candidate text (simplified text from the system)  
+- Reference texts (simplified human-created texts)  
 
-	- **Outputs:**  
-	- Scalar SARI score (range: 0 to 1)
+- **Outputs:**  
+- Scalar SARI score (range: 0 to 1)
 
-	## Intended Use
+## Intended Use
 
-	### Domains and Tasks
+### Domains and Tasks
 
-	- **Domain:** Text Generation  
-	- **Tasks:**  
-	- Text Simplification  
+- **Domain:** Text Generation  
+- **Tasks:**  
+- Text Simplification  
 
-	### Applicability and Limitations
+### Applicability and Limitations
 
-	- **Best Suited For:**  
-	- Text simplification tasks where changes to the text, such as paraphrasing, deletions, or additions, are expected to enhance readability.  
+- **Best Suited For:**  
+- Text simplification tasks where changes to the text, such as paraphrasing, deletions, or additions, are expected to enhance readability.  
 
-	- **Not Recommended For:**  
-	- Open-ended or creative text generation tasks where diversity and semantic similarity matter more than lexical transformation.
+- **Not Recommended For:**  
+- Open-ended or creative text generation tasks where diversity and semantic similarity matter more than lexical transformation.
 
-	## Metric Implementation
+## Metric Implementation
 
-	### Reference Implementations
+### Reference Implementations
 
-	- **Libraries/Packages:**  
-	- [SARI Implementation in LENS Repository](https://github.com/Yao-Dou/LENS/blob/master/experiments/meta_evaluation/metrics/sari.py)  
+- **Libraries/Packages:**  
+- [SARI Implementation in LENS Repository](https://github.com/Yao-Dou/LENS/blob/master/experiments/meta_evaluation/metrics/sari.py)  
 
-	### Computational Complexity
+### Computational Complexity
 
-	- **Efficiency:**  
-	SARI is computationally efficient, with complexity similar to BLEU, as it involves n-gram extraction and comparison.  
+- **Efficiency:**  
+SARI is computationally efficient, with complexity similar to BLEU, as it involves n-gram extraction and comparison.  
 
-	- **Scalability:**  
-	SARI scales well across datasets with multiple references, leveraging n-gram matching for simplicity evaluation.
+- **Scalability:**  
+SARI scales well across datasets with multiple references, leveraging n-gram matching for simplicity evaluation.
 
-	## Known Limitations
+## Known Limitations
 
-	- **Biases:**  
-	- SARI may over-penalize outputs that do not align well with reference texts, particularly in cases where valid simplifications are not covered by references.  
+- **Biases:**  
+- SARI may over-penalize outputs that do not align well with reference texts, particularly in cases where valid simplifications are not covered by references.  
 
-	- **Task Misalignment Risks:**  
-	- SARI is unsuitable for tasks that emphasize semantic similarity over structural changes, such as summarization or machine translation.  
+- **Task Misalignment Risks:**  
+- SARI is unsuitable for tasks that emphasize semantic similarity over structural changes, such as summarization or machine translation.  
 
-	- **Failure Cases:**  
-	- It can struggle with highly creative or diverse simplifications where multiple equally valid outputs are possible.
+- **Failure Cases:**  
+- It can struggle with highly creative or diverse simplifications where multiple equally valid outputs are possible.
 
-	## Related Metrics
+## Related Metrics
 
-	- **BLEU:** Measures surface similarity but does not compare outputs with the input text.  
-	- **FKBLEU:** Combines BLEU with the Flesch-Kincaid readability metric for simplification tasks.  
-	- **ROUGE:** Suitable for summarization but less relevant for simplification.  
+- **BLEU:** Measures surface similarity but does not compare outputs with the input text.  
+- **FKBLEU:** Combines BLEU with the Flesch-Kincaid readability metric for simplification tasks.  
+- **ROUGE:** Suitable for summarization but less relevant for simplification.  
 
-	## Further Reading
+## Further Reading
 
-	- **Papers:**  
-	- [Optimizing Statistical Machine Translation for Text Simplification (Xu et al., 2016)](https://github.com/cocoxu/simplification/)  
+- **Papers:**  
+- [Optimizing Statistical Machine Translation for Text Simplification (Xu et al., 2016)](https://github.com/cocoxu/simplification/)  
 
-	## Metric Card Authors
+## Metric Card Authors
 
-	- **Authors:** Michael J. Ryan  
-	- **Acknowledgment of AI Assistance:**  
-	Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
-	- **Contact:** mryan0@stanford.edu
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
 	"""
 	
 	def __init__(self, name="SARI", description="SARI evaluates the quality of text simplification by comparing the system output against both the original and simplified reference texts. It measures how well words are added, deleted, and kept appropriately, rewarding edits that improve readability while preserving meaning."):

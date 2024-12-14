@@ -2,114 +2,113 @@ from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBa
 from sacrebleu.metrics import TER as ter
 
 class TER(ReferenceBasedMetric):
-    """
-    ---
-    # Metric Card for TER (Translation Edit Rate)
+    """---
+# Metric Card for TER (Translation Edit Rate)
 
-    TER (Translation Edit Rate) is an automatic evaluation metric designed to measure the effort required to edit a machine translation output to match a reference translation. It computes the minimum number of edits (insertions, deletions, substitutions, and shifts of words or phrases) needed to make a hypothesis identical to a reference. TER provides a straightforward, intuitive measure of translation quality and correlates well with human judgments.
+TER (Translation Edit Rate) is an automatic evaluation metric designed to measure the effort required to edit a machine translation output to match a reference translation. It computes the minimum number of edits (insertions, deletions, substitutions, and shifts of words or phrases) needed to make a hypothesis identical to a reference. TER provides a straightforward, intuitive measure of translation quality and correlates well with human judgments.
 
-    ## Metric Details
+## Metric Details
 
-    ### Metric Description
+### Metric Description
 
-    TER calculates the minimum number of edits needed to convert a translation hypothesis into one of the provided reference translations. Edits include:
-    - **Insertions**
-    - **Deletions**
-    - **Substitutions**
-    - **Shifts** (reordering of contiguous sequences of words)
+TER calculates the minimum number of edits needed to convert a translation hypothesis into one of the provided reference translations. Edits include:
+- **Insertions**
+- **Deletions**
+- **Substitutions**
+- **Shifts** (reordering of contiguous sequences of words)
 
-    The final score is normalized by the average length of the reference translations. All edits, including shifts, have a uniform cost of 1. 
+The final score is normalized by the average length of the reference translations. All edits, including shifts, have a uniform cost of 1. 
 
-    TER can be computed in two modes:
-    1. **Untargeted TER (TER):** Compares the hypothesis to predefined reference translations.
-    2. **Human-targeted TER (HTER):** Compares the hypothesis to a targeted reference created by human annotators to maximize semantic equivalence.
+TER can be computed in two modes:
+1. **Untargeted TER (TER):** Compares the hypothesis to predefined reference translations.
+2. **Human-targeted TER (HTER):** Compares the hypothesis to a targeted reference created by human annotators to maximize semantic equivalence.
 
-    - **Metric Type:** Surface-Level Similarity
-    - **Range:** $[0, \infty)$
-    - **Higher is Better?:** No
-    - **Reference-Based?:** Yes
-    - **Input-Required?:** No
+- **Metric Type:** Surface-Level Similarity
+- **Range:** $[0, \infty)$
+- **Higher is Better?:** No
+- **Reference-Based?:** Yes
+- **Input-Required?:** No
 
-    ### Formal Definition
+### Formal Definition
 
-    The TER score is calculated as:
+The TER score is calculated as:
 
-    $$
-    \text{TER} = \frac{\text{Number of edits}}{\text{Average reference length}}
-    $$
+$$
+\text{TER} = \frac{\text{Number of edits}}{\text{Average reference length}}
+$$
 
-    Where:
-    - **Number of edits:** The sum of insertions, deletions, substitutions, and shifts needed to make the hypothesis match the closest reference.
-    - **Average reference length:** The mean number of words in the reference translations.
+Where:
+- **Number of edits:** The sum of insertions, deletions, substitutions, and shifts needed to make the hypothesis match the closest reference.
+- **Average reference length:** The mean number of words in the reference translations.
 
-    ### Inputs and Outputs
+### Inputs and Outputs
 
-    - **Inputs:**  
-    - Hypothesis translation (generated text)
-    - One or more reference translations (gold-standard texts)
+- **Inputs:**  
+- Hypothesis translation (generated text)
+- One or more reference translations (gold-standard texts)
 
-    - **Outputs:**  
-    - Scalar TER score (lower values indicate better translations)
+- **Outputs:**  
+- Scalar TER score (lower values indicate better translations)
 
-    ## Intended Use
+## Intended Use
 
-    ### Domains and Tasks
+### Domains and Tasks
 
-    - **Domain:** Text Generation
-    - **Tasks:** Machine Translation
+- **Domain:** Text Generation
+- **Tasks:** Machine Translation
 
-    ### Applicability and Limitations
+### Applicability and Limitations
 
-    - **Best Suited For:**  
-    Evaluating structured tasks like machine translation where there is a well-defined correspondence between the hypothesis and reference translations.
-    
-    - **Not Recommended For:**  
-    Tasks requiring semantic equivalence or diversity, such as open-ended text generation or dialogue systems.
+- **Best Suited For:**  
+Evaluating structured tasks like machine translation where there is a well-defined correspondence between the hypothesis and reference translations.
 
-    ## Metric Implementation
+- **Not Recommended For:**  
+Tasks requiring semantic equivalence or diversity, such as open-ended text generation or dialogue systems.
 
-    ### Reference Implementations
+## Metric Implementation
 
-    - **Libraries/Packages:**  
-    - [SacreBLEU](https://github.com/mjpost/sacrebleu): Includes an implementation of TER.  
+### Reference Implementations
 
-    ### Computational Complexity
+- **Libraries/Packages:**  
+- [SacreBLEU](https://github.com/mjpost/sacrebleu): Includes an implementation of TER.  
 
-    - **Efficiency:**  
-    The computation of TER involves finding the minimum edit distance, which is optimized using dynamic programming and a greedy beam search for shifts. The algorithm has a complexity of $O(n^2)$ for the edit distance computation and $O(n)$ for the beam search.
+### Computational Complexity
 
-    - **Scalability:**  
-    TER is computationally efficient for sentence-level evaluation but may require optimizations for very large datasets.
+- **Efficiency:**  
+The computation of TER involves finding the minimum edit distance, which is optimized using dynamic programming and a greedy beam search for shifts. The algorithm has a complexity of $O(n^2)$ for the edit distance computation and $O(n)$ for the beam search.
 
-    ## Known Limitations
+- **Scalability:**  
+TER is computationally efficient for sentence-level evaluation but may require optimizations for very large datasets.
 
-    - **Biases:**  
-    - Assigns equal cost to all edits, which may not accurately reflect human perceptions of translation effort.
-    - Penalizes valid translations that differ in structure but are semantically equivalent to the reference.
-    
-    - **Task Misalignment Risks:**  
-    - Not suited for tasks requiring high semantic understanding or creative language use, as it focuses on surface-level similarity.
+## Known Limitations
 
-    - **Failure Cases:**  
-    - TER scores may misrepresent translation quality when references are poorly constructed or insufficient in number.
+- **Biases:**  
+- Assigns equal cost to all edits, which may not accurately reflect human perceptions of translation effort.
+- Penalizes valid translations that differ in structure but are semantically equivalent to the reference.
 
-    ## Related Metrics
+- **Task Misalignment Risks:**  
+- Not suited for tasks requiring high semantic understanding or creative language use, as it focuses on surface-level similarity.
 
-    - **BLEU:** Focuses on n-gram overlap and does not account for reordering.  
-    - **METEOR:** Incorporates stemming and synonymy to capture semantic similarity.  
-    - **HTER:** A variant of TER that uses human-targeted references for improved semantic alignment.
+- **Failure Cases:**  
+- TER scores may misrepresent translation quality when references are poorly constructed or insufficient in number.
 
-    ## Further Reading
+## Related Metrics
 
-    - **Papers:**  
-    - [A Study of Translation Edit Rate with Targeted Human Annotation (Snover et al., 2006)](https://www.mt-archive.info/AMTA-2006-Snover.pdf)  
+- **BLEU:** Focuses on n-gram overlap and does not account for reordering.  
+- **METEOR:** Incorporates stemming and synonymy to capture semantic similarity.  
+- **HTER:** A variant of TER that uses human-targeted references for improved semantic alignment.
 
-    ## Metric Card Authors
+## Further Reading
 
-    - **Authors:** Michael J. Ryan  
-    - **Acknowledgment of AI Assistance:**  
-    Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
-    - **Contact:** mryan0@stanford.edu
+- **Papers:**  
+- [A Study of Translation Edit Rate with Targeted Human Annotation (Snover et al., 2006)](https://www.mt-archive.info/AMTA-2006-Snover.pdf)  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
     """
 
     def __init__(self, name="TER", description="TER (Translation Edit Rate) is a metric that measures the number of edits needed to transform a system output into a reference translation. It quantifies translation quality by counting insertions, deletions, substitutions, and shifts, with lower scores indicating better translations."):

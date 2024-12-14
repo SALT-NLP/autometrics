@@ -2,113 +2,112 @@ from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBa
 from sacrebleu.metrics import BLEU as bleu
 
 class BLEU(ReferenceBasedMetric):
-    """
-    ---
-    # Metric Card for BLEU
+    """---
+# Metric Card for BLEU
 
-    BLEU (Bilingual Evaluation Understudy) is a widely used metric for evaluating the quality of text generated in tasks like machine translation and summarization. It measures the overlap of n-grams between a generated text and one or more reference texts, with a brevity penalty to penalize overly short translations. SacreBLEU, a modern implementation, ensures reproducibility and standardization of BLEU scores across research.
+BLEU (Bilingual Evaluation Understudy) is a widely used metric for evaluating the quality of text generated in tasks like machine translation and summarization. It measures the overlap of n-grams between a generated text and one or more reference texts, with a brevity penalty to penalize overly short translations. SacreBLEU, a modern implementation, ensures reproducibility and standardization of BLEU scores across research.
 
-    ## Metric Details
+## Metric Details
 
-    ### Metric Description
+### Metric Description
 
-    BLEU evaluates the quality of text generation by comparing n-grams in the generated output with those in one or more reference texts. It computes modified precision for n-grams and combines scores using a geometric mean, with a brevity penalty to ensure the length of the generated text matches that of the references. Higher BLEU scores indicate closer similarity to the references.
+BLEU evaluates the quality of text generation by comparing n-grams in the generated output with those in one or more reference texts. It computes modified precision for n-grams and combines scores using a geometric mean, with a brevity penalty to ensure the length of the generated text matches that of the references. Higher BLEU scores indicate closer similarity to the references.
 
-    - **Metric Type:** Surface-Level Similarity
-    - **Range:** 0 to 1
-    - **Higher is Better?:** Yes
-    - **Reference-Based?:** Yes
-    - **Input-Required?:** No
+- **Metric Type:** Surface-Level Similarity
+- **Range:** 0 to 1
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** No
 
-    ### Formal Definition
+### Formal Definition
 
-    $$
-    \text{BLEU} = \text{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
-    $$
+$$
+\text{BLEU} = \text{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
+$$
 
-    where:
-    - $\text{BP} = \min(1, e^{1 - r/c})$ is the brevity penalty,
-    - $r$ is the effective reference length (based on the closest matching reference length for each sentence),
-    - $c$ is the candidate translation length,
-    - $p_n$ is the modified precision for n-grams of length $n$,
-    - $w_n$ are weights for each n-gram (commonly uniform, $w_n = \frac{1}{N}$).
+where:
+- $\text{BP} = \min(1, e^{1 - r/c})$ is the brevity penalty,
+- $r$ is the effective reference length (based on the closest matching reference length for each sentence),
+- $c$ is the candidate translation length,
+- $p_n$ is the modified precision for n-grams of length $n$,
+- $w_n$ are weights for each n-gram (commonly uniform, $w_n = \frac{1}{N}$).
 
-    ### Inputs and Outputs
+### Inputs and Outputs
 
-    - **Inputs:**  
-    - Generated text (candidate translation)  
-    - Reference text(s) (gold-standard translations)  
+- **Inputs:**  
+- Generated text (candidate translation)  
+- Reference text(s) (gold-standard translations)  
 
-    - **Outputs:**  
-    - Scalar BLEU score (range: 0 to 1)
+- **Outputs:**  
+- Scalar BLEU score (range: 0 to 1)
 
-    ## Intended Use
+## Intended Use
 
-    ### Domains and Tasks
+### Domains and Tasks
 
-    - **Domain:** Text Generation
-    - **Tasks:** Machine Translation, Summarization, Data-to-Text Generation
+- **Domain:** Text Generation
+- **Tasks:** Machine Translation, Summarization, Data-to-Text Generation
 
-    ### Applicability and Limitations
+### Applicability and Limitations
 
-    - **Best Suited For:**  
-    Structured tasks with a clear correspondence between generated and reference texts, such as translation or summarization.
-    
-    - **Not Recommended For:**  
-    Open-ended or creative generation tasks where diversity or semantic similarity matters more than lexical overlap (e.g., storytelling, dialogue).
+- **Best Suited For:**  
+Structured tasks with a clear correspondence between generated and reference texts, such as translation or summarization.
 
-    ## Metric Implementation
+- **Not Recommended For:**  
+Open-ended or creative generation tasks where diversity or semantic similarity matters more than lexical overlap (e.g., storytelling, dialogue).
 
-    ### Reference Implementations
+## Metric Implementation
 
-    - **Libraries/Packages:**
-    - [SacreBLEU](https://github.com/mjpost/sacrebleu) (robust, standard implementation)
-    - [NLTK](https://www.nltk.org/api/nltk.translate.html) (basic Python implementation)
-    - [Hugging Face `evaluate`](https://huggingface.co/docs/evaluate) (integrated metric framework)
+### Reference Implementations
 
-    ### Computational Complexity
+- **Libraries/Packages:**
+- [SacreBLEU](https://github.com/mjpost/sacrebleu) (robust, standard implementation)
+- [NLTK](https://www.nltk.org/api/nltk.translate.html) (basic Python implementation)
+- [Hugging Face `evaluate`](https://huggingface.co/docs/evaluate) (integrated metric framework)
 
-    - **Efficiency:**  
-    BLEU is computationally efficient, requiring $O(n \cdot m)$ operations for $n$-gram matching where $n$ is the number of words in the candidate text and $m$ is the number of reference words. SacreBLEU optimizes tokenization and scoring, making it highly suitable for large-scale evaluations.
+### Computational Complexity
 
-    - **Scalability:**  
-    BLEU scales well across datasets of varying sizes due to its simple design. SacreBLEU further supports evaluation with multiple references, diverse tokenization schemes, and language-specific preprocessing, making it adaptable to diverse evaluation setups.
+- **Efficiency:**  
+BLEU is computationally efficient, requiring $O(n \cdot m)$ operations for $n$-gram matching where $n$ is the number of words in the candidate text and $m$ is the number of reference words. SacreBLEU optimizes tokenization and scoring, making it highly suitable for large-scale evaluations.
 
-    ## Known Limitations
+- **Scalability:**  
+BLEU scales well across datasets of varying sizes due to its simple design. SacreBLEU further supports evaluation with multiple references, diverse tokenization schemes, and language-specific preprocessing, making it adaptable to diverse evaluation setups.
 
-    - **Biases:**  
-    - BLEU penalizes valid paraphrases or semantically equivalent outputs that do not match reference n-grams exactly.  
-    - The brevity penalty can overly penalize valid shorter outputs, particularly for tasks where shorter text may be acceptable or even preferred (e.g., summarization).  
+## Known Limitations
 
-    - **Task Misalignment Risks:**  
-    - BLEU is not designed for evaluating tasks with high diversity in acceptable outputs (e.g., open-ended dialogue).  
-    - Scores depend on the quality and number of references; fewer or inconsistent references can lead to misleading evaluations.
+- **Biases:**  
+- BLEU penalizes valid paraphrases or semantically equivalent outputs that do not match reference n-grams exactly.  
+- The brevity penalty can overly penalize valid shorter outputs, particularly for tasks where shorter text may be acceptable or even preferred (e.g., summarization).  
 
-    - **Failure Cases:**  
-    - BLEU struggles to capture semantic adequacy beyond lexical similarity. For instance, it cannot identify whether a translation preserves the meaning of the original sentence if word choices diverge significantly.
+- **Task Misalignment Risks:**  
+- BLEU is not designed for evaluating tasks with high diversity in acceptable outputs (e.g., open-ended dialogue).  
+- Scores depend on the quality and number of references; fewer or inconsistent references can lead to misleading evaluations.
 
-    ## Related Metrics
+- **Failure Cases:**  
+- BLEU struggles to capture semantic adequacy beyond lexical similarity. For instance, it cannot identify whether a translation preserves the meaning of the original sentence if word choices diverge significantly.
 
-    - **ROUGE:** Often used for summarization tasks, emphasizing recall over precision.  
-    - **METEOR:** Incorporates synonym matching for better semantic alignment.  
-    - **BERTScore:** Uses contextual embeddings for semantic similarity.  
+## Related Metrics
 
-    ## Further Reading
+- **ROUGE:** Often used for summarization tasks, emphasizing recall over precision.  
+- **METEOR:** Incorporates synonym matching for better semantic alignment.  
+- **BERTScore:** Uses contextual embeddings for semantic similarity.  
 
-    - **Papers:**  
-    - [Original BLEU Paper (Papineni et al., 2002)](https://www.aclweb.org/anthology/P02-1040)  
-    - [SacreBLEU: A Call for Clarity in Reporting BLEU Scores (Post, 2018)](https://www.aclweb.org/anthology/W18-6319)
-    
-    - **Blogs/Tutorials:**  
-    - [Understanding BLEU](https://machinelearningmastery.com/calculate-bleu-score-for-text-python/)  
-    - [SacreBLEU Documentation](https://github.com/mjpost/sacrebleu)
+## Further Reading
 
-    ## Metric Card Authors
+- **Papers:**  
+- [Original BLEU Paper (Papineni et al., 2002)](https://www.aclweb.org/anthology/P02-1040)  
+- [SacreBLEU: A Call for Clarity in Reporting BLEU Scores (Post, 2018)](https://www.aclweb.org/anthology/W18-6319)
 
-    - **Authors:** Michael J. Ryan  
-    - **Acknowledgment of AI Assistance:**  
-    Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
-    - **Contact:** mryan0@stanford.edu
+- **Blogs/Tutorials:**  
+- [Understanding BLEU](https://machinelearningmastery.com/calculate-bleu-score-for-text-python/)  
+- [SacreBLEU Documentation](https://github.com/mjpost/sacrebleu)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
     """
 
     def __init__(self, name="BLEU", description="BLEU compares the n-grams of the candidate with the n-grams of the reference."):

@@ -40,7 +40,7 @@ With IDF weighting, recall is modified as:
 Recall Modified:
 
 $$
-R_{\text{BERT}} = \frac{\sum_{x_{i} \in x} \operatorname{idf}(x_{i}) \cdot \max_{\hat{x}_{j} \in \hat{x}} x_{i}^{\top} \hat{x}_{j}}{\sum_{x_{i} \in x} \operatorname{idf}(x_{i})}
+R_{\text{BERT}} = \frac{\sum_{x_i \in x} \text{idf}(x_i) \cdot \max _{\hat{x}_j \in \hat{x}} x_i^\top \hat{x}_j}{\sum_{x_i \in x} \text{idf}(x_i)}
 $$
 
 Baseline rescaling adjusts scores to lie within [0, 1].

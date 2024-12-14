@@ -15,7 +15,7 @@ Specific Instructions
     •	Applicability and Limitations
     •	Known Limitations and Related Metrics
 	2.	If Information is Unclear or Missing: Do not fabricate or make assumptions. If information is unavailable, unclear, or not included in the provided context, leave that section blank or mark it as "Needs more information."
-	3.	Markdown Formatting: Output the completed Metric Card as a markdown text block rather than rendering or printing the markdown directly.  Also start the block with "---" as shown in the examples.
+	3.	Markdown Formatting: Output the completed Metric Card as a markdown text block rather than rendering or printing the markdown directly.  Also start the block with "---" as shown in the examples.  Do not end the block with "---".
 	4.	Focus on Consistency: Use the provided categorical suggestions (see below) to ensure uniformity across all Metric Cards, particularly in fields like “Metric Type,” “Domain,” and “Tasks.”
 	5.	Mathematical Formatting:
     •	Use $ for inline math expressions (e.g., $r$, not $ r $).

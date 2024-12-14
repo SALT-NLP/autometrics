@@ -26,7 +26,7 @@ R_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{\hat{x}_j \in \hat{x}} x_
 $$
 
 $$
-P_{\text{BERT}} = \frac{1}{|x|} \sum_{x_j \in \hat{x}_{j} \! } \max_{x_i \in x} x_i^\top \hat{x}_j
+P_{\text{BERT}} = \frac{1}{|x|} \sum_{x_j \in \hat{x}_{j} } \max _{x_i \in x} x_i^\top \hat{x}_j
 $$
 
 $$

@@ -23,13 +23,9 @@ For a reference sentence $x = \langle x_1, \dots, x_k \rangle$ and a candidate s
 
 $$
 R_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{\hat{x}_j \in \hat{x}} x_i^\top \hat{x}_j
-$$
 
-$$
 P_{\text{BERT}} = \frac{1}{|\hat{x}|} \sum_{\hat{x}_{j} \in \hat{x}} \max_{x_{i} \in x} x_{i}^{\top} \hat{x}_{j}
-$$
 
-$$
 F_{\text{BERT}} = \frac{2 \cdot P_{\text{BERT}} \cdot R_{\text{BERT}}}{P_{\text{BERT}} + R_{\text{BERT}}}
 $$
 

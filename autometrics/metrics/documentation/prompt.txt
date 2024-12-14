@@ -9,18 +9,18 @@ Using the provided materials, including the original paper, reference implementa
 
 Specific Instructions
 	1.	Key Sections to Address: Ensure each required section of the template is filled out thoughtfully and thoroughly, including:
-    •	Metric Description
-    •	Inputs and Outputs
-    •	Formal Definition
-    •	Applicability and Limitations
-    •	Known Limitations and Related Metrics
+		•	Metric Description
+		•	Inputs and Outputs
+		•	Formal Definition
+		•	Applicability and Limitations
+		•	Known Limitations and Related Metrics
 	2.	If Information is Unclear or Missing: Do not fabricate or make assumptions. If information is unavailable, unclear, or not included in the provided context, leave that section blank or mark it as "Needs more information."
-	3.	Markdown Formatting: Output the completed Metric Card as a markdown text block rather than rendering or printing the markdown directly.  Also start the block with "---" as shown in the examples.  Do not end the block with "---".
+	3.	Markdown Formatting: Output the completed Metric Card as a markdown text block rather than rendering or printing the markdown directly.  This means you must surround your answer in ```.  Also start the block with "---" as shown in the examples.  Do not end the block with "---".
 	4.	Focus on Consistency: Use the provided categorical suggestions (see below) to ensure uniformity across all Metric Cards, particularly in fields like “Metric Type,” “Domain,” and “Tasks.”
 	5.	Mathematical Formatting:
-    •	Use $ for inline math expressions (e.g., $r$, not $ r $).
-    •	Use $$ for block math expressions and ensure a full line break before and after each block math expression. This formatting ensures proper rendering in markdown.
-    •	Example of proper usage for $$:  
+		•	Use $ for inline math expressions (e.g., $r$, not $ r $).
+		•	Use $$ for block math expressions and ensure a full line break before and after each block math expression. This formatting ensures proper rendering in markdown.
+		•	Example of proper usage for $$:  
 
 ** Correct **
 ```
@@ -51,7 +51,7 @@ Where:
   $$
 ```
     
-    •	Ensure all block math expressions are clearly separated from list items or inline text.
+    	•	Ensure all block math expressions are clearly separated from list items or inline text.
 
 ## Categorical Suggestions for Consistency
 
@@ -181,11 +181,10 @@ These describe what the metric requires for evaluation:
 
 ## Metric Card Authors
 
-- **Authors:** {{ metric_authors | default("[More Information Needed]", true) }}  
-- **Acknowledgment of AI Assistance:**  
+- **Authors:** {{ metric_authors | default("[More Information Needed]", true) }}
+- **Acknowledgment of AI Assistance:**
   {{ ai_assistance | default("Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.", true) }}  
 - **Contact:** {{ metric_contact | default("[More Information Needed]", true) }}
----
 ======
 
 === BLEU Metric Card Example ===

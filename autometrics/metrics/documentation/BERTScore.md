@@ -21,23 +21,13 @@ The metric computes cosine similarity for each token pair between the reference 
 
 For a reference sentence $x = \langle x_1, \dots, x_k \rangle$ and a candidate sentence $\hat{x} = \langle \hat{x}_1, \dots, \hat{x}_l \rangle$, the BERTScore components are defined as:
 
-Recall:
-
 $$
 R_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{\hat{x}_j \in \hat{x}} x_i^\top \hat{x}_j
 $$
 
----
-
-Precision:
-
 $$
-P_{\text{BERT}} = \frac{1}{|\hat{x}|} \sum_{\hat{x}_j \in \hat{x}} \max_{x_i \in x} \left( x_i^\top \hat{x}_j \right)
+x \left(\text{This is a test}) \frac{1}{2}
 $$
-
----
-
-F1:
 
 $$
 F_{\text{BERT}} = \frac{2 \cdot P_{\text{BERT}} \cdot R_{\text{BERT}}}{P_{\text{BERT}} + R_{\text{BERT}}}

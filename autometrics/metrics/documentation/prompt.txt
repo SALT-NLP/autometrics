@@ -1,30 +1,78 @@
-You are an expert in natural language processing and technical documentation, with a focus on metrics for evaluating generative models. I am building a metric bank to recommend the best metrics for various generative tasks. Each metric in this bank will have a corresponding Metric Card designed to provide detailed, standardized documentation about the metric. The purpose of these cards is to help users understand the metric’s strengths, weaknesses, and appropriate use cases.
+You are an expert in natural language processing and technical documentation, specializing in metrics for evaluating generative models. I am building a metric bank to recommend the best metrics for various generative tasks. Each metric in this bank will have a corresponding Metric Card, which provides standardized, detailed documentation about the metric. These Metric Cards will serve as a key resource for researchers and practitioners, helping them select the right metric for their task.
 
-Your Task
+## Your Task
 
-Using the provided materials, including the original paper, any reference implementations, the Metric Card template, and the BLEU Metric Card example, your task is to draft a comprehensive Metric Card for the given metric. The documentation must:
-	1.	Follow the provided template closely, adhering to its format and required sections.
-	2.	Incorporate relevant details from the original paper and reference materials, ensuring technical accuracy.
-	3.	Match the style and quality of the BLEU example, which serves as the exemplar for this task.
+Using the provided materials, including the original paper, reference implementations, the Metric Card Template, and the BLEU Metric Card Example, your task is to draft a comprehensive Metric Card for the given metric. The documentation must:
+	1.	Follow the provided template closely, ensuring adherence to its format and required sections.
+	2.	Incorporate relevant details from the original paper and reference materials, ensuring technical accuracy and completeness.
+	3.	Match the style and quality of the BLEU example, which serves as an exemplar for clarity, structure, and precision.
 
-Guidance
-	•	Focus Areas:
-	•	Clearly explain the metric’s purpose, how it works, and its mathematical formulation.
-	•	Detail its inputs and outputs, as well as whether it is reference-based or input-required.
-	•	Include practical considerations like efficiency, scalability, known limitations, and intended use cases.
-	•	Use formal language that is precise yet accessible to technical readers.
-	•	What to Avoid:
-	•	Including extraneous implementation-specific details that are not broadly applicable (e.g., unique quirks of a particular implementation unless widely adopted).
-	•	Providing actual code examples, as the metric bank will include a unified API for all metrics.
+Specific Instructions
+	1.	Key Sections to Address: Ensure each required section of the template is filled out thoughtfully and thoroughly, including:
+    •	Metric Description
+    •	Inputs and Outputs
+    •	Formal Definition
+    •	Applicability and Limitations
+    •	Known Limitations and Related Metrics
+	2.	Avoid Including Code Examples: The metric bank will provide a unified API, so code examples are unnecessary. Focus instead on implementation-specific details and practical considerations.
+	3.	Focus on Consistency: Use the provided categorical suggestions (see below) to ensure uniformity across all Metric Cards, particularly in fields like “Metric Type,” “Domain,” and “Tasks.”
+	4.	Mathematical Formatting: Use $$ for block math and $ for inline math with no spaces between the dollar signs and the content (e.g., $r$, not $ r $).
 
-Materials You Will Be Provided
-	1.	The original paper introducing or defining the metric, and any supplementary reference material such as documentation from popular implementations (e.g., SacreBLEU README for BLEU).
-	2.	The Metric Card Template, which specifies the required structure and key sections.
-	3.	The BLEU Metric Card Example, which serves as an exemplar of a high-quality metric card.
+## Categorical Suggestions for Consistency
 
-Outputs
+Note: These suggestions are not exhaustive. While you should prioritize using the categories listed here for consistency, you may add new categories if the metric clearly warrants them.
 
-Your output must be a complete Metric Card written in Markdown format that adheres to the provided template.
+### Domains
+
+These represent broad areas of application for the metric. Choose one or more:
+	•	Text Generation
+	•	Speech Generation
+	•	Code Generation
+	•	Multimodal Generation
+	•	Image Captioning
+	•	Dialogue Systems
+	•	Storytelling
+
+### Tasks
+
+These are specific tasks or use cases where the metric applies. Choose one or more:
+	•	Machine Translation
+	•	Summarization
+	•	Paraphrasing
+	•	Data-to-Text Generation
+	•	Image-to-Text Generation
+	•	Dialogue Generation
+	•	Style Transfer
+	•	Creative Writing (e.g., poetry, storytelling)
+	•	Code Completion
+	•	Response Generation
+
+### Metric Type
+
+These classify the metric based on its design and purpose. Choose one:
+	•	Surface-Level Similarity (e.g., BLEU, ROUGE)
+	•	Semantic Similarity (e.g., BERTScore)
+	•	Fluency (e.g., perplexity-based metrics)
+	•	Diversity (e.g., distinct-n)
+	•	Robustness (e.g., adversarial robustness metrics)
+	•	Fairness
+	•	Faithfulness (e.g., factual consistency metrics)
+	•	Reference-Free (e.g., coherence or novelty scoring)
+	•	Explainability
+
+### Inputs
+
+These describe what the metric requires for evaluation:
+	•	Reference-Based
+	•	Reference-Free
+	•	Input-Required
+	•	Input-Optional
+
+## Materials You Will Be Provided
+	1.	Original Paper: The foundational paper introducing or defining the metric.
+	2.	Reference Implementations (when available): Documentation from popular implementations (e.g., SacreBLEU README for BLEU).
+	3.	Metric Card Template: The standardized structure for all Metric Cards (see below).
+	4.	BLEU Metric Card Example: A high-quality example for reference.
 
 === TEMPLATE FOR METRIC CARDS ===
 ---
@@ -102,9 +150,6 @@ Your output must be a complete Metric Card written in Markdown format that adher
 - **Acknowledgment of AI Assistance:**  
   {{ ai_assistance | default("Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.", true) }}  
 - **Contact:** {{ metric_contact | default("[More Information Needed]", true) }}
-======
-
-=== BLEU METRIC CARD EXAMPLE ===
 ---
 # Metric Card for BLEU
 
@@ -120,28 +165,27 @@ BLEU evaluates the quality of text generation by comparing n-grams in the genera
 - **Range:** 0 to 1
 - **Higher is Better?:** Yes
 - **Reference-Based?:** Yes
-- **Input-Required?:** Yes
+- **Input-Required?:** No
 
 ### Formal Definition
 
-\[
+$$
 \text{BLEU} = \text{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
-\]
+$$
 
 where:
-- \( \text{BP} = \min(1, e^{1 - r/c}) \) is the brevity penalty,
-- \( r \) is the effective reference length (based on the closest matching reference length for each sentence),
-- \( c \) is the candidate translation length,
-- \( p_n \) is the modified precision for n-grams of length \( n \),
-- \( w_n \) are weights for each n-gram (commonly uniform, \( w_n = \frac{1}{N} \)).
-
-The standard BLEU metric uses up to 4-grams (\( N = 4 \)) and applies uniform weights.
+- $\text{BP} = \min(1, e^{1 - r/c})$ is the brevity penalty,
+- $r$ is the effective reference length (based on the closest matching reference length for each sentence),
+- $c$ is the candidate translation length,
+- $p_n$ is the modified precision for n-grams of length $n$,
+- $w_n$ are weights for each n-gram (commonly uniform, $w_n = \frac{1}{N}$).
 
 ### Inputs and Outputs
 
 - **Inputs:**  
   - Generated text (candidate translation)  
   - Reference text(s) (gold-standard translations)  
+
 - **Outputs:**  
   - Scalar BLEU score (range: 0 to 1)
 
@@ -172,7 +216,7 @@ The standard BLEU metric uses up to 4-grams (\( N = 4 \)) and applies uniform we
 ### Computational Complexity
 
 - **Efficiency:**  
-  BLEU is computationally efficient, requiring \( O(n \cdot m) \) operations for \( n \)-gram matching where \( n \) is the number of words in the candidate text and \( m \) is the number of reference words. SacreBLEU optimizes tokenization and scoring, making it highly suitable for large-scale evaluations.
+  BLEU is computationally efficient, requiring $O(n \cdot m)$ operations for $n$-gram matching where $n$ is the number of words in the candidate text and $m$ is the number of reference words. SacreBLEU optimizes tokenization and scoring, making it highly suitable for large-scale evaluations.
 
 - **Scalability:**  
   BLEU scales well across datasets of varying sizes due to its simple design. SacreBLEU further supports evaluation with multiple references, diverse tokenization schemes, and language-specific preprocessing, making it adaptable to diverse evaluation setups.
@@ -203,7 +247,7 @@ The standard BLEU metric uses up to 4-grams (\( N = 4 \)) and applies uniform we
   - [SacreBLEU: A Call for Clarity in Reporting BLEU Scores (Post, 2018)](https://www.aclweb.org/anthology/W18-6319)
   
 - **Blogs/Tutorials:**  
-  - [Understanding BLEU](https://machinelearningmastery.com)  
+  - [Understanding BLEU](https://machinelearningmastery.com/calculate-bleu-score-for-text-python/)  
   - [SacreBLEU Documentation](https://github.com/mjpost/sacrebleu)
 
 ## Metric Card Authors
@@ -214,4 +258,4 @@ The standard BLEU metric uses up to 4-grams (\( N = 4 \)) and applies uniform we
 - **Contact:** mryan0@stanford.edu
 ======
 
-Now please write a high quality metric card for {METRIC NAME} given the provided materials!
+Now please write a high quality metric card for {METRIC NAME} given the provided materials!  If the provided materials do not give enough information about a particular point for the metric (e.g. limitations or biases aren't listed) then do NOT make things up.  You can leave blanks or "Needs more information" where needed.  It is absolutely essential not to make things up or guess when producing this documentation otherwise future researchers and engineers will be confused and led astray.

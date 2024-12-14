@@ -18,28 +18,27 @@ class BLEU(ReferenceBasedMetric):
     - **Range:** 0 to 1
     - **Higher is Better?:** Yes
     - **Reference-Based?:** Yes
-    - **Input-Required?:** Yes
+    - **Input-Required?:** No
 
     ### Formal Definition
 
-    \[
+    $$
     \text{BLEU} = \text{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
-    \]
+    $$
 
     where:
-    - \( \text{BP} = \min(1, e^{1 - r/c}) \) is the brevity penalty,
-    - \( r \) is the effective reference length (based on the closest matching reference length for each sentence),
-    - \( c \) is the candidate translation length,
-    - \( p_n \) is the modified precision for n-grams of length \( n \),
-    - \( w_n \) are weights for each n-gram (commonly uniform, \( w_n = \frac{1}{N} \)).
-
-    The standard BLEU metric uses up to 4-grams (\( N = 4 \)) and applies uniform weights.
+    - $\text{BP} = \min(1, e^{1 - r/c})$ is the brevity penalty,
+    - $r$ is the effective reference length (based on the closest matching reference length for each sentence),
+    - $c$ is the candidate translation length,
+    - $p_n$ is the modified precision for n-grams of length $n$,
+    - $w_n$ are weights for each n-gram (commonly uniform, $w_n = \frac{1}{N}$).
 
     ### Inputs and Outputs
 
     - **Inputs:**  
     - Generated text (candidate translation)  
     - Reference text(s) (gold-standard translations)  
+
     - **Outputs:**  
     - Scalar BLEU score (range: 0 to 1)
 
@@ -70,7 +69,7 @@ class BLEU(ReferenceBasedMetric):
     ### Computational Complexity
 
     - **Efficiency:**  
-    BLEU is computationally efficient, requiring \( O(n \cdot m) \) operations for \( n \)-gram matching where \( n \) is the number of words in the candidate text and \( m \) is the number of reference words. SacreBLEU optimizes tokenization and scoring, making it highly suitable for large-scale evaluations.
+    BLEU is computationally efficient, requiring $O(n \cdot m)$ operations for $n$-gram matching where $n$ is the number of words in the candidate text and $m$ is the number of reference words. SacreBLEU optimizes tokenization and scoring, making it highly suitable for large-scale evaluations.
 
     - **Scalability:**  
     BLEU scales well across datasets of varying sizes due to its simple design. SacreBLEU further supports evaluation with multiple references, diverse tokenization schemes, and language-specific preprocessing, making it adaptable to diverse evaluation setups.

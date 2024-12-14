@@ -13,7 +13,7 @@ BLEU evaluates the quality of text generation by comparing n-grams in the genera
 - **Range:** 0 to 1
 - **Higher is Better?:** Yes
 - **Reference-Based?:** Yes
-- **Input-Required?:** Yes
+- **Input-Required?:** No
 
 ### Formal Definition
 
@@ -28,13 +28,12 @@ where:
 - $p_n$ is the modified precision for n-grams of length $n$,
 - $w_n$ are weights for each n-gram (commonly uniform, $w_n = \frac{1}{N}$).
 
-The standard BLEU metric uses up to 4-grams ($N = 4$) and applies uniform weights.
-
 ### Inputs and Outputs
 
 - **Inputs:**  
   - Generated text (candidate translation)  
   - Reference text(s) (gold-standard translations)  
+
 - **Outputs:**  
   - Scalar BLEU score (range: 0 to 1)
 

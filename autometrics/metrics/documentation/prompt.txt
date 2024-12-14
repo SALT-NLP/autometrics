@@ -14,10 +14,11 @@ Specific Instructions
     •	Formal Definition
     •	Applicability and Limitations
     •	Known Limitations and Related Metrics
-	2.	Avoid Including Code Examples: The metric bank will provide a unified API, so code examples are unnecessary. Focus instead on implementation-specific details and practical considerations.
-	3.	Focus on Consistency: Use the provided categorical suggestions (see below) to ensure uniformity across all Metric Cards, particularly in fields like “Metric Type,” “Domain,” and “Tasks.”
-	4.	Mathematical Formatting: Use $$ for block math and $ for inline math with no spaces between the dollar signs and the content (e.g., $r$, not $ r $).
-
+	2.	If Information is Unclear or Missing: Do not fabricate or make assumptions. If information is unavailable, unclear, or not included in the provided context, leave that section blank or mark it as "Needs more information."
+	3.	Markdown Formatting: Output the completed Metric Card as a markdown text block rather than rendering or printing the markdown directly.  Also start the block with "---" as shown in the examples.
+	4.	Focus on Consistency: Use the provided categorical suggestions (see below) to ensure uniformity across all Metric Cards, particularly in fields like “Metric Type,” “Domain,” and “Tasks.”
+	5.	Mathematical Formatting: Use $$ for block math and $ for inline math with no spaces between the dollar signs and the content (e.g., $r$, not $ r $).
+  
 ## Categorical Suggestions for Consistency
 
 Note: These suggestions are not exhaustive. While you should prioritize using the categories listed here for consistency, you may add new categories if the metric clearly warrants them.
@@ -151,6 +152,10 @@ These describe what the metric requires for evaluation:
   {{ ai_assistance | default("Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.", true) }}  
 - **Contact:** {{ metric_contact | default("[More Information Needed]", true) }}
 ---
+======
+
+=== BLEU Metric Card Example ===
+---
 # Metric Card for BLEU
 
 BLEU (Bilingual Evaluation Understudy) is a widely used metric for evaluating the quality of text generated in tasks like machine translation and summarization. It measures the overlap of n-grams between a generated text and one or more reference texts, with a brevity penalty to penalize overly short translations. SacreBLEU, a modern implementation, ensures reproducibility and standardization of BLEU scores across research.
@@ -258,4 +263,12 @@ where:
 - **Contact:** mryan0@stanford.edu
 ======
 
-Now please write a high quality metric card for {METRIC NAME} given the provided materials!  If the provided materials do not give enough information about a particular point for the metric (e.g. limitations or biases aren't listed) then do NOT make things up.  You can leave blanks or "Needs more information" where needed.  It is absolutely essential not to make things up or guess when producing this documentation otherwise future researchers and engineers will be confused and led astray.
+The metric you will be designing a card for is {Metric Name}
+
+=== {SUPPLEMENTAL MATERIALS} ===
+
+======
+
+Now please write a high quality metric card for {Metric Name} given the provided materials!
+
+Final **Important** Note: If the provided materials do not give enough information about a particular point for the metric (e.g. limitations or biases aren't listed) then do NOT make things up.  You can leave blanks or "Needs more information" where needed.  It is absolutely essential not to make things up or guess when producing this documentation otherwise future researchers and engineers will be confused and led astray.  Avoid making up links that you aren't fully confident in the url.

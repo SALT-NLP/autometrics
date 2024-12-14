@@ -26,7 +26,7 @@ R_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{\hat{x}_j \in \hat{x}} x_
 $$
 
 $$
-$P_{\text{BERT}} = \frac{1}{|\hat{x}|} \sum_{\hat{x}_{j} \in \hat{x}} \max_{x_{i} \in x}\bigl(x_{i}^{\top} \hat{x}_{j}\bigr)$
+P_{\text{BERT}} = \frac{1}{|\hat{x}|} \sum_{\hat{x}_{j} \in \hat{x}} \max_{x_{i} \in x}\bigl(x_{i}^{\top} \hat{x}_{j}\bigr)
 $$
 
 $$
@@ -40,7 +40,7 @@ With IDF weighting, recall is modified as:
 Recall Modified:
 
 $$
-$R_{\text{BERT}} = \frac{\sum_{x_{i} \in x} \mathrm{idf}(x_{i}) \cdot \max_{\hat{x}_{j} \in \hat{x}} x_{i}^{\top} \hat{x}_{j}}{\sum_{x_{i} \in x} \mathrm{idf}(x_{i})}$
+R_{\text{BERT}} = \frac{\sum_{x_{i} \in x} \mathrm{idf}(x_{i}) \cdot \max_{\hat{x}_{j} \in \hat{x}} x_{i}^{\top} \hat{x}_{j}}{\sum_{x_{i} \in x} \mathrm{idf}(x_{i})}
 $$
 
 Baseline rescaling adjusts scores to lie within [0, 1].

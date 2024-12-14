@@ -65,7 +65,7 @@ class FKGL(ReferenceFreeMetric):
 
     - **Libraries/Packages:**  
     - [TextStat](https://github.com/shivam5992/textstat): A Python library implementing FKGL and other readability formulas.  
-    - [Microsoft Word Readability Statistics](https://support.microsoft.com/): FKGL is included in Word's readability analysis tool.  
+    - [Microsoft Word Readability Statistics](https://support.microsoft.com/en-us/office/get-your-document-s-readability-and-level-statistics-85b4969e-e80a-4777-8dd3-f7fc3c8b3fd2): FKGL is included in Word's readability analysis tool.  
 
     ### Computational Complexity
 

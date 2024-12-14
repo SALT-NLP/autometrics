@@ -24,16 +24,16 @@ CHRF_{\beta} = (1 + \beta^2) \cdot \frac{CHRP \cdot CHRR}{\beta^2 \cdot CHRP + C
 $$
 
 Where:
-- $CHRP$ is the average precision of character and word n-grams:
+$CHRP$ is the average precision of character and word n-grams:
 $$
 CHRP = \frac{1}{N} \sum_{n=1}^N \frac{\text{n-grams in hypothesis and reference}}{\text{total n-grams in hypothesis}}
 $$
-- $CHRR$ is the average recall of character and word n-grams:
+$CHRR$ is the average recall of character and word n-grams:
 $$
 CHRR = \frac{1}{N} \sum_{n=1}^N \frac{\text{n-grams in hypothesis and reference}}{\text{total n-grams in reference}}
 $$
-- $N$ is the maximum n-gram length (typically $N=6$ for characters and $N=2$ for words).
-- $\beta$ adjusts the weight of recall relative to precision (e.g., $\beta=3$ for CHRF3).
+$N$ is the maximum n-gram length (typically $N=6$ for characters and $N=2$ for words).
+$\beta$ adjusts the weight of recall relative to precision (e.g., $\beta=3$ for CHRF3).
 
 ### Inputs and Outputs
 

@@ -25,6 +25,8 @@ The parts of the repo are organized as follows:
 
 # Getting started
 
+Make sure to install the necessary packages listed in `requirements.txt`.  Notably there could be some requirements missing so it would be amazing to collaborate on updating `requirements.txt` if anything is found to be lacking!
+
 A nice simple starting point to working with this library would be to checkout the notebook `simpda.ipynb`.  This notebook shows computing metric correlations without introducing any LLM as a Judge complexity.  Just computing all metrics and aggregating (so skipping step 2)
 
 For a more in depth introduction it would be useful to check out `simpda_dspy.ipynb` which will serve as an introduction to the LLM as a Judge components of the repo.

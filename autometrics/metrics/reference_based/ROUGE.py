@@ -54,8 +54,11 @@ ROUGE evaluates generated text by comparing it with human-written references. Th
 For an n-gram of length $n$:
 
 $$
-\text{ROUGE-N} = \frac{\sum _{S \in \text{Reference Summaries}} \sum _{\text{gram}_n \in S} \text{Count}_{\text{match}}(\text{gram}_n)}{\sum _{S \in \text{Reference Summaries}} \sum _{\text{gram}_n \in S} \text{Count}(\text{gram}_n)}
+\text{ROUGE-N} = \frac{\sum\limits _{S \in \text{Reference Summaries}} \sum\limits _{\text{gram}_n \in S} \text{Count}_{\text{match}}(\text{gram}_n)}
+{\sum\limits _{S \in \text{Reference Summaries}} \sum\limits _{\text{gram}_n \in S} \text{Count}(\text{gram}_n)}
 $$
+
+where $\text{Count}_{\text{match}}(\text{gram}_n)$ is the number of n-grams appearing in both the candidate and reference summaries.
 
 where $\text{Count}_{\text{match}}(\text{gram}_n)$ is the number of n-grams appearing in both the candidate and reference summaries.
 

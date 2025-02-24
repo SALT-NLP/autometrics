@@ -5,3 +5,4 @@ textstat
 bert-score
 accelerate
 rouge-score
+pyemd

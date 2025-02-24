@@ -27,7 +27,7 @@ Fine-tuning on downstream tasks (e.g., summarization, paraphrasing) and prompt e
 BARTScore is computed as:
 
 $$
-BARTScore = \sum _{t=1}^{m} \omega _{t} \log p ( y _{t} \mid y _{<t}, x, \theta )
+BARTScore = \sum _{t=1}^{m} \omega _{t} \log p ( y _{t} \mid y _{\text{<}t}, x, \theta )
 $$
 
 where:

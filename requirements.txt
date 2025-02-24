@@ -3,3 +3,4 @@ sacrebleu
 scipy
 textstat
 bert-score
+accelerate

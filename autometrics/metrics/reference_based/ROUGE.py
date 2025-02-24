@@ -50,25 +50,33 @@ ROUGE evaluates generated text by comparing it with human-written references. Th
 ### Formal Definition
 
 #### ROUGE-N (N-gram Overlap)
+
 For an n-gram of length $n$:
+
 $$
 \text{ROUGE-N} = \frac{\sum _{S \in \text{Reference Summaries}} \sum _{\text{gram}_n \in S} \text{Count}_{\text{match}}(\text{gram}_n)}{\sum _{S \in \text{Reference Summaries}} \sum _{\text{gram}_n \in S} \text{Count}(\text{gram}_n)}
 $$
+
 where $\text{Count}_{\text{match}}(\text{gram}_n)$ is the number of n-grams appearing in both the candidate and reference summaries.
 
 #### ROUGE-L (Longest Common Subsequence)
+
 $$
 R_{LCS} = \frac{LCS(X, Y)}{|X|}
 $$
+
 $$
 P_{LCS} = \frac{LCS(X, Y)}{|Y|}
 $$
+
 $$
 F_{LCS} = \frac{(1 + \beta^2) R_{LCS} P_{LCS}}{R_{LCS} + \beta^2 P_{LCS}}
 $$
+
 where $LCS(X, Y)$ is the length of the longest common subsequence between candidate summary $X$ and reference summary $Y$.
 
 #### ROUGE-LSum (Summary-Level LCS)
+
 ROUGE-LSum computes LCS on a sentence-by-sentence basis. Each candidate and reference summary is split into sentences based on newline characters before applying ROUGE-L at the sentence level.
 
 ### Inputs and Outputs

@@ -51,35 +51,28 @@ UniEvalSum structures evaluation by generating **Boolean QA-style prompts** for 
 1. **Coherence** (Evaluates whether the summary is well-structured and logically consistent)
    - **Prompt Template:**  
      ```
-     question: Is this a coherent summary to the document? </s> 
-     summary: {system_output} </s> 
-     document: {source}
+     question: Is this a coherent summary to the document? </s> summary: {system_output} </s> document: {source}
      ```
    - **Inputs Required:** Source document, generated summary  
 
 2. **Consistency** (Measures factual consistency with the source document)
    - **Prompt Template:**  
      ```
-     question: Is this claim consistent with the document? </s> 
-     claim: {system_output} </s> 
-     document: {source}
+     question: Is this claim consistent with the document? </s> claim: {system_output} </s> document: {source}
      ```
    - **Inputs Required:** Source document, generated summary  
 
 3. **Fluency** (Evaluates linguistic fluency and grammatical correctness)
    - **Prompt Template:**  
      ```
-     question: Is this a fluent paragraph? </s> 
-     paragraph: {system_output}
+     question: Is this a fluent paragraph? </s> paragraph: {system_output}
      ```
    - **Inputs Required:** Generated summary  
 
 4. **Relevance** (Measures how well the summary captures the key information from the reference summary)
    - **Prompt Template:**  
      ```
-     question: Is this summary relevant to the reference? </s> 
-     summary: {system_output} </s> 
-     reference: {reference}
+     question: Is this summary relevant to the reference? </s> summary: {system_output} </s> reference: {reference}
      ```
    - **Inputs Required:** Generated summary, reference summary  
 

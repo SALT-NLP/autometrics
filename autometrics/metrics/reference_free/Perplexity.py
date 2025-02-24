@@ -193,8 +193,9 @@ class Perplexity(ReferenceFreeMetric):
         Calculate the perplexity for a single document.
         Assumes `input` is a string.
         """
+            
         perplexities = calculate_perplexities(
-            [input],
+            [output],
             self.model,
             self.tokenizer,
             self.device,
@@ -209,8 +210,9 @@ class Perplexity(ReferenceFreeMetric):
         Calculate perplexities for a batch of documents.
         Assumes `inputs` is a list of strings.
         """
+
         return calculate_perplexities(
-            inputs,
+            outputs,
             self.model,
             self.tokenizer,
             self.device,
@@ -231,6 +233,10 @@ if __name__ == "__main__":
     metric = Perplexity(model="gpt2-large", batch_size=8, stride=512, progress_bar=True)
 
     # Compute perplexity using the calculate method on the joined text
-    ppl = metric.calculate(joined_text)
+    ppl = metric.calculate(None, joined_text)
     print(f"Perplexity: {ppl}")
     print("Expected perplexity (from Hugging Face report): ~16.44")
+
+    # RESULTS:
+    # Perplexity: 16.44437599182129
+    # Expected perplexity (from Hugging Face report): ~16.44

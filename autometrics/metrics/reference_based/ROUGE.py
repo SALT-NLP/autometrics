@@ -59,35 +59,35 @@ $$
 
 where $\text{Count}_{\text{match}}(\text{gram}_n)$ is the number of n-grams appearing in both the candidate and reference summaries.
 
-#### ROUGE-L (Longest Common Subsequence)
+## **ROUGE-L (Longest Common Subsequence)**
 
 ROUGE-L evaluates the longest common subsequence (LCS) between the candidate and reference texts. The LCS captures sentence structure similarity by considering word order while allowing gaps.
 
-Given a candidate summary \(X\) of length \(m\) and a reference summary \(Y\) of length \(n\), let \(LCS(X, Y)\) denote the length of their longest common subsequence.
+Given a candidate summary $X$ of length $m$ and a reference summary $Y$ of length $n$, let $LCS(X, Y)$ denote the length of their longest common subsequence.
 
-- **Recall (\( R_{LCS} \))**:
+### **Recall ($R_{LCS}$):**
 
-  $$
-  R_{LCS} = \frac{LCS(X, Y)}{n}
-  $$
+$$
+R_{LCS} = \frac{LCS(X, Y)}{n}
+$$
 
-  Measures the proportion of the reference summary captured by the candidate summary.
+Measures the proportion of the reference summary captured by the candidate summary.
 
-- **Precision (\( P_{LCS} \))**:
+### **Precision ($P_{LCS}$):**
 
-  $$
-  P_{LCS} = \frac{LCS(X, Y)}{m}
-  $$
+$$
+P_{LCS} = \frac{LCS(X, Y)}{m}
+$$
 
-  Measures the proportion of the candidate summary that is part of the LCS.
+Measures the proportion of the candidate summary that is part of the LCS.
 
-- **F-measure (\( F_{LCS} \))**:
+### **F-measure ($F_{LCS}$):**
 
-  $$
-  F_{LCS} = \frac{(1 + \beta^2) \cdot R_{LCS} \cdot P_{LCS}}{R_{LCS} + \beta^2 \cdot P_{LCS}}
-  $$
+$$
+F_{LCS} = \frac{(1 + \beta^2) \cdot R_{LCS} \cdot P_{LCS}}{R_{LCS} + \beta^2 \cdot P_{LCS}}
+$$
 
-  Where \( \beta \) determines the relative weight of recall versus precision. A common choice is \( \beta = 1 \), giving equal weight to both.
+Where $\beta$ determines the relative weight of recall versus precision. A common choice is $\beta = 1$, giving equal weight to both.
 
 #### ROUGE-LSum (Summary-Level LCS)
 

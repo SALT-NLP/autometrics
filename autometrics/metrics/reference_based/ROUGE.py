@@ -61,23 +61,41 @@ where $\text{Count}_{\text{match}}(\text{gram}_n)$ is the number of n-grams appe
 
 #### ROUGE-L (Longest Common Subsequence)
 
-$$
-R_{LCS} = \frac{LCS(X, Y)}{|X|}
-$$
+ROUGE-L evaluates the longest common subsequence (LCS) between the candidate and reference texts. The LCS captures sentence structure similarity by considering word order while allowing gaps.
 
-$$
-P_{LCS} = \frac{LCS(X, Y)}{|Y|}
-$$
+Given a candidate summary \(X\) of length \(m\) and a reference summary \(Y\) of length \(n\), let \(LCS(X, Y)\) denote the length of their longest common subsequence.
 
-$$
-F_{LCS} = \frac{(1 + \beta^2) R_{LCS} P_{LCS}}{R_{LCS} + \beta^2 P_{LCS}}
-$$
+- **Recall (\( R_{LCS} \))**:
 
-where $LCS(X, Y)$ is the length of the longest common subsequence between candidate summary $X$ and reference summary $Y$.
+  $$
+  R_{LCS} = \frac{LCS(X, Y)}{n}
+  $$
+
+  Measures the proportion of the reference summary captured by the candidate summary.
+
+- **Precision (\( P_{LCS} \))**:
+
+  $$
+  P_{LCS} = \frac{LCS(X, Y)}{m}
+  $$
+
+  Measures the proportion of the candidate summary that is part of the LCS.
+
+- **F-measure (\( F_{LCS} \))**:
+
+  $$
+  F_{LCS} = \frac{(1 + \beta^2) \cdot R_{LCS} \cdot P_{LCS}}{R_{LCS} + \beta^2 \cdot P_{LCS}}
+  $$
+
+  Where \( \beta \) determines the relative weight of recall versus precision. A common choice is \( \beta = 1 \), giving equal weight to both.
 
 #### ROUGE-LSum (Summary-Level LCS)
 
-ROUGE-LSum computes LCS on a sentence-by-sentence basis. Each candidate and reference summary is split into sentences based on newline characters before applying ROUGE-L at the sentence level.
+ROUGE-LSum extends ROUGE-L to the summary level by treating newlines as sentence boundaries. Instead of computing a single LCS over the entire text, it:
+
+1. Splits the candidate and reference summaries into sentences.
+2. Computes LCS for each candidate-reference sentence pair.
+3. Aggregates results to produce an overall ROUGE-LSum score.
 
 ### Inputs and Outputs
 
@@ -118,7 +136,7 @@ ROUGE-LSum computes LCS on a sentence-by-sentence basis. Each candidate and refe
 
 - **Efficiency:**  
   - ROUGE-N complexity is $O(n \cdot m)$ for n-gram counting, where $n$ is the candidate text length and $m$ is the reference text length.
-  - ROUGE-L requires LCS computation, which is $O(n \cdot m)$ in the worst case.
+  - ROUGE-L requires LCS computation, which is $O(n \cdot m)$ using dynamic programming.
 
 - **Scalability:**  
   - ROUGE scales well to large datasets but can be computationally intensive when multiple reference texts are used.
@@ -158,8 +176,7 @@ ROUGE-LSum computes LCS on a sentence-by-sentence basis. Each candidate and refe
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
-- **Contact:** mryan0@stanford.edu  
-"""
+- **Contact:** mryan0@stanford.edu  """
 
     def __init__(self):
         name = "ROUGE"

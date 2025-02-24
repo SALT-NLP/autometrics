@@ -10,10 +10,10 @@ UniEvalSum is a multi-dimensional evaluation metric designed specifically for te
 UniEvalSum evaluates text summaries by converting evaluation into a Boolean QA problem. The model is guided by questions tailored to specific evaluation dimensions, enabling it to assess coherence, consistency, fluency, and relevance. It leverages a pre-trained T5 model and intermediate learning techniques to improve evaluation robustness. Unlike traditional similarity-based metrics (e.g., ROUGE, BLEU), UniEvalSum does not rely solely on reference texts and can function in a reference-free manner except for the relevance dimension.
 
 - **Metric Type:** Semantic Similarity, Reference-Free, Multi-Dimensional Evaluation
-- **Range:** [0,1] for all dimensions; Engagingness can exceed 1
-- **Higher is Better?:** Yes
-- **Reference-Based?:** Mixed (Reference required for relevance, but not for other dimensions)
-- **Input-Required?:** Yes
+- **Range:** [0,1] for all dimensions  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** Mixed (Reference required for relevance, but not for other dimensions)  
+- **Input-Required?:** Yes  
 
 ### Formal Definition
 
@@ -33,15 +33,56 @@ where $q$ represents the evaluation question for a given dimension (e.g., "Is th
   - Source document
 
 - **Outputs:**  
-  - Scores for coherence, consistency, fluency, and relevance (range: [0,1])
-  - Overall score (default: average of all dimension scores)
+  - Scores for coherence, consistency, fluency, and relevance (range: [0,1])  
+  - Overall score (default: average of all dimension scores)  
+
+### Prompt Formulation for Evaluation Dimensions
+
+UniEvalSum structures evaluation by generating Boolean QA-style prompts for each dimension:
+
+1. **Coherence** (Evaluates whether the summary is well-structured and logically consistent)
+   - **Prompt Template:**  
+     ```
+     Given the following document and summary, is the summary a coherent representation of the document?
+     Document: {source}
+     Summary: {system_output}
+     ```
+   - **Inputs Required:** Source document, generated summary  
+
+2. **Consistency** (Measures factual consistency with the source document)
+   - **Prompt Template:**  
+     ```
+     Given the following document and summary, does the summary accurately represent the facts in the document?
+     Document: {source}
+     Summary: {system_output}
+     ```
+   - **Inputs Required:** Source document, generated summary  
+
+3. **Fluency** (Evaluates linguistic fluency and grammatical correctness)
+   - **Prompt Template:**  
+     ```
+     Is the following summary fluent and grammatically correct?
+     Summary: {system_output}
+     ```
+   - **Inputs Required:** Generated summary  
+
+4. **Relevance** (Measures how well the summary captures the key information from the reference summary)
+   - **Prompt Template:**  
+     ```
+     Does the summary contain all the important information present in the reference summary?
+     Summary: {system_output}
+     Reference: {reference}
+     ```
+   - **Inputs Required:** Generated summary, reference summary  
+
+These prompts are tokenized and passed into the **UniEvalSum** model, which then predicts Yes/No probabilities, converting them into scores between 0 and 1.
 
 ## Intended Use
 
 ### Domains and Tasks
 
-- **Domain:** Text Generation
-- **Tasks:** Summarization
+- **Domain:** Text Generation  
+- **Tasks:** Summarization  
 
 ### Applicability and Limitations
 
@@ -73,7 +114,7 @@ where $q$ represents the evaluation question for a given dimension (e.g., "Is th
 
 - **Biases:**  
   - May inherit biases from the pre-trained T5 model.  
-  - Performance may degrade if the summary style deviates significantly from the model's training data.
+  - Performance may degrade if the summary style deviates significantly from the model's training data.  
 
 - **Task Misalignment Risks:**  
   - While designed for summarization, results may not generalize to highly domain-specific summarization tasks (e.g., scientific summarization).  

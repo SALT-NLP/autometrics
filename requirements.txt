@@ -4,3 +4,4 @@ scipy
 textstat
 bert-score
 accelerate
+rouge-score

@@ -142,12 +142,12 @@ Fine-tuning on downstream tasks (e.g., summarization, paraphrasing) and prompt e
 BARTScore is computed as:
 
 $$
-BARTScore = \sum _{t=1}^{m} \omega _{t} \log p(y _{t} | y _{<t}, x, \theta)
+BARTScore = \sum _{t=1}^{m} \omega _{t} \log p(y _{t} \mid y _{<t}, x, \theta)
 $$
 
 where:
 
-- $p(y _{t} | y _{<t}, x, \theta)$ is the probability of the $t$-th token in the hypothesis $y$ given the preceding tokens and the source/reference text $x$ under the BART model parameters $\theta$.
+- $p(y _{t} \mid y _{<t}, x, \theta)$ is the probability of the $t$-th token in the hypothesis $y$ given the preceding tokens and the source/reference text $x$ under the BART model parameters $\theta$.
 - $\omega _{t}$ is an optional weighting factor (default: uniform).
 
 The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., source-to-hypothesis for faithfulness, reference-to-hypothesis for precision).

@@ -23,7 +23,7 @@ $$
 \text{Score}_{dim} = \frac{P(\text{"Yes"} \mid s, d, r, q)}{P(\text{"Yes"} \mid s, d, r, q) + P(\text{"No"} \mid s, d, r, q)}
 $$
 
-where $q$ represents the evaluation question for a given dimension (e.g., "Is this a coherent summary of the document?"). The final overall score is computed as the average of the four dimension scores.
+where $q$ represents the evaluation question for a given dimension (e.g., "Is this a coherent summary to the document?"). The final overall score is computed as the average of the four dimension scores.
 
 ### Inputs and Outputs
 
@@ -38,40 +38,40 @@ where $q$ represents the evaluation question for a given dimension (e.g., "Is th
 
 ### Prompt Formulation for Evaluation Dimensions
 
-UniEvalSum structures evaluation by generating Boolean QA-style prompts for each dimension:
+UniEvalSum structures evaluation by generating **Boolean QA-style prompts** for each dimension:
 
 1. **Coherence** (Evaluates whether the summary is well-structured and logically consistent)
    - **Prompt Template:**  
      ```
-     Given the following document and summary, is the summary a coherent representation of the document?
-     Document: {source}
-     Summary: {system_output}
+     question: Is this a coherent summary to the document? </s> 
+     summary: {system_output} </s> 
+     document: {source}
      ```
    - **Inputs Required:** Source document, generated summary  
 
 2. **Consistency** (Measures factual consistency with the source document)
    - **Prompt Template:**  
      ```
-     Given the following document and summary, does the summary accurately represent the facts in the document?
-     Document: {source}
-     Summary: {system_output}
+     question: Is this claim consistent with the document? </s> 
+     claim: {system_output} </s> 
+     document: {source}
      ```
    - **Inputs Required:** Source document, generated summary  
 
 3. **Fluency** (Evaluates linguistic fluency and grammatical correctness)
    - **Prompt Template:**  
      ```
-     Is the following summary fluent and grammatically correct?
-     Summary: {system_output}
+     question: Is this a fluent paragraph? </s> 
+     paragraph: {system_output}
      ```
    - **Inputs Required:** Generated summary  
 
 4. **Relevance** (Measures how well the summary captures the key information from the reference summary)
    - **Prompt Template:**  
      ```
-     Does the summary contain all the important information present in the reference summary?
-     Summary: {system_output}
-     Reference: {reference}
+     question: Is this summary relevant to the reference? </s> 
+     summary: {system_output} </s> 
+     reference: {reference}
      ```
    - **Inputs Required:** Generated summary, reference summary  
 

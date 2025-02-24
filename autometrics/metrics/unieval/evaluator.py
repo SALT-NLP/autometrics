@@ -39,7 +39,7 @@ class SumEvaluator:
             eval_dims = dims
 
         for dim in eval_dims:
-            print('Evaluating {} of {} samples !!!'.format(dim, n_data))
+            # print('Evaluating {} of {} samples !!!'.format(dim, n_data))
 
             # Calculate average sentence-level scores for 'consistency' and 'fluency'
             if dim == 'consistency' or dim == 'fluency':
@@ -125,7 +125,7 @@ class DialogEvaluator:
             eval_dims = dims
 
         for dim in eval_dims:
-            print('Evaluating {} of {} samples !!!'.format(dim, n_data))
+            # print('Evaluating {} of {} samples !!!'.format(dim, n_data))
 
             # Calculate summation score for 'engagingness'
             if dim == 'engagingness':
@@ -214,7 +214,7 @@ class D2tEvaluator:
             eval_dims = dims
 
         for dim in eval_dims:
-            print('Evaluating {} of {} samples !!!'.format(dim, n_data))
+            # print('Evaluating {} of {} samples !!!'.format(dim, n_data))
 
             output_list, ref_list = [], []
             for i in range(n_data):
@@ -252,7 +252,7 @@ class FactEvaluator:
         n_data = len(data)
         eval_scores = [{} for _ in range(n_data)]
 
-        print('Evaluating {} of {} samples !!!'.format(self.dim, n_data))
+        # print('Evaluating {} of {} samples !!!'.format(self.dim, n_data))
 
         # Calculate average sentence-level scores for facutal consistency
         src_list, output_list = [], []

@@ -6,3 +6,5 @@ bert-score
 accelerate
 rouge-score
 pyemd
+scikit-learn
+numpy

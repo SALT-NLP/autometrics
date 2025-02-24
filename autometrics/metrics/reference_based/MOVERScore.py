@@ -296,7 +296,7 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
                 
                 dst = distance_matrix[i]
                 _, flow = emd_with_flow(c1, c2, dst)
-                flow = np.array(flow, dtype=np.float32)
+                flow = np.array(flow, dtype=float)
                 score = 1./(1. + np.sum(flow * dst))#1 - np.sum(flow * dst)
                 preds.append(score)
 

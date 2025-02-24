@@ -20,11 +20,11 @@ Perplexity assesses the predictive capability of a language model by computing t
 Given a sequence of tokens $X = (x_1, x_2, ..., x_T)$, the perplexity of $X$ under a language model with parameters $\theta$ is defined as:
 
 $$
-PPL(X) = \exp \left( -\frac{1}{T} \sum_{i=1}^{T} \log p_{\theta}(x_i \mid x_{<i}) \right)
+PPL(X) = \exp \left( -\frac{1}{T} \sum_{i=1}^{T} \log p_{\theta}(x_i \mid x_{\text{<}i}) \right)
 $$
 
 where:
-- $p_{\theta}(x_i \mid x_{<i})$ is the probability assigned by the model to token $x_i$ given the preceding tokens.
+- $p_{\theta}(x_i \mid x_{\text{<}i})$ is the probability assigned by the model to token $x_i$ given the preceding tokens.
 - $T$ is the length of the sequence.
 
 A lower perplexity value indicates that the model assigns higher probabilities to observed sequences, meaning it better predicts the given data.

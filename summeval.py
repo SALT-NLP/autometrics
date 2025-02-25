@@ -20,7 +20,7 @@ calculate_correlation(dataset, correlation=pearsonr)
 train, dev, test = dataset.get_splits(train_ratio=0.2, val_ratio=0.3, seed=42)
 
 # %%
-display_top_5_metrics_by_validation(dev, test, False)
+display_top_5_metrics_by_validation(dev, test, False).to_csv("summ_eval_starting_metrics.csv", index=True)
 
 # %%
 for target_column in dataset.target_columns:
@@ -37,10 +37,10 @@ for model in [PLS, ElasticNet, Lasso, Ridge, RandomForest, GradientBoosting, Lin
         model_instance.predict(test, target_column)
 
 # %%
-display_top_5_metrics_by_validation(dev, test, True)
+display_top_5_metrics_by_validation(dev, test, True).to_csv("summ_eval_dev_regression.csv", index=True)
 
 # %%
-display_top_5_metrics_by_validation(test, test, True)
+display_top_5_metrics_by_validation(test, test, True).to_csv("summ_eval_test_regression.csv", index=True)
 
 # %%
 for target_column in dataset.target_columns:
@@ -61,10 +61,10 @@ for model in [PLS, ElasticNet, Lasso, Ridge, RandomForest, GradientBoosting, Lin
             budget_model.predict(test, target_column)
 
 # %%
-display_top_5_metrics_by_validation(dev, test, True)
+display_top_5_metrics_by_validation(dev, test, True).to_csv("summ_eval_dev_budget.csv", index=True)
 
 # %%
-display_top_5_metrics_by_validation(test, test, True)
+display_top_5_metrics_by_validation(test, test, True).to_csv("summ_eval_test_budget.csv", index=True)
 
 # %%
 for target_column in dataset.target_columns:

@@ -1,86 +1,66 @@
 import warnings
 import numpy as np
-
+import pandas as pd
+from pydantic import BaseModel, Field
+from typing import List, Optional
 from autometrics.metrics.MultiMetric import MultiMetric
 
-class Dataset:
+class Dataset(BaseModel):
     """
     Dataset class for handling and manipulating datasets.
-    Attributes:
-        dataframe (pd.DataFrame): The dataframe containing the dataset.
-        target_columns (list): List of columns that are target variables.
-        ignore_columns (list): List of columns to be ignored in analysis.
-        metric_columns (list): List of columns that are metrics.
-        name (str): Name of the dataset.
-    Methods:
-        get_dataframe():
-            Returns the dataframe of the dataset.
-        get_target_columns():
-            Returns the list of target columns.
-        get_ignore_columns():
-            Returns the list of columns to be ignored.
-        get_metric_columns():
-            Returns the list of metric columns.
-        get_output_column():
-            Returns the output column. (The column that contains the LLM output!)
-        get_name():
-            Returns the name of the dataset.
-        __str__():
-            Returns a string representation of the dataset, including its name, target columns, ignore columns, metric columns, and the head of the dataframe.
-        __repr__():
-            Returns a string representation of the dataset.
     """
-    def __init__(self, dataframe, target_columns, ignore_columns, metric_columns, name, data_id_column=None, model_id_column=None, input_column=None, output_column=None, reference_columns=None, metrics=None):
-        self.dataframe = dataframe
-        self.target_columns = target_columns
-        self.ignore_columns = ignore_columns
-        self.metric_columns = metric_columns
-        self.name = name
-        self.data_id_column = data_id_column
-        self.model_id_column = model_id_column
-        self.input_column = input_column
-        self.output_column = output_column
-        self.reference_columns = reference_columns
-        self.metrics = []
-        self.add_metrics(metrics)
+    dataframe: pd.DataFrame
+    target_columns: List[str]
+    ignore_columns: List[str]
+    metric_columns: List[str]
+    name: str
+    data_id_column: Optional[str] = None
+    model_id_column: Optional[str] = None
+    input_column: Optional[str] = None
+    output_column: Optional[str] = None
+    reference_columns: Optional[List[str]] = None
+    metrics: List[MultiMetric] = Field(default_factory=list)
 
-    def get_dataframe(self):
+    class Config:
+        arbitrary_types_allowed = True
+    
+    def get_dataframe(self) -> pd.DataFrame:
         return self.dataframe
     
-    def get_target_columns(self):
+    def get_target_columns(self) -> List[str]:
         return self.target_columns
     
-    def get_ignore_columns(self):
+    def get_ignore_columns(self) -> List[str]:
         return self.ignore_columns
     
-    def get_metric_columns(self):
+    def get_metric_columns(self) -> List[str]:
         return self.metric_columns
     
-    def get_name(self):
+    def get_name(self) -> str:
         return self.name
     
-    def get_data_id_column(self):
+    def get_data_id_column(self) -> Optional[str]:
         return self.data_id_column
     
-    def get_model_id_column(self):
+    def get_model_id_column(self) -> Optional[str]:
         return self.model_id_column
     
-    def get_input_column(self):
+    def get_input_column(self) -> Optional[str]:
         return self.input_column
     
-    def get_output_column(self):
+    def get_output_column(self) -> Optional[str]:
         return self.output_column
     
-    def get_reference_columns(self):
+    def get_reference_columns(self) -> Optional[List[str]]:
         return self.reference_columns
     
-    def get_metrics(self):
+    def get_metrics(self) -> List[MultiMetric]:
         return self.metrics
     
-    def set_dataframe(self, dataframe):
+    def set_dataframe(self, dataframe: pd.DataFrame):
         self.dataframe = dataframe
 
-    def add_metric(self, metric, update_dataset=True):
+    def add_metric(self, metric: MultiMetric, update_dataset: bool = True):
         if isinstance(metric, MultiMetric):
             self.metrics.append(metric)
             for submetric_name in metric.get_submetric_names():
@@ -97,25 +77,26 @@ class Dataset:
             if self.dataframe is not None and update_dataset and metric.get_name() not in self.dataframe.columns:
                 metric.predict(self, update_dataset=update_dataset)
 
-    def add_metrics(self, metrics, update_dataset=True):
+    def add_metrics(self, metrics: List[MultiMetric], update_dataset: bool = True):
         for metric in metrics:
             self.add_metric(metric, update_dataset=update_dataset)
     
-    def __str__(self):
-        return f"Dataset: {self.name}, Target Columns: {self.target_columns}, Ignore Columns: {self.ignore_columns}, Metric Columns: {self.metric_columns}\n{self.dataframe.head()}"
+    def __str__(self) -> str:
+        return (f"Dataset: {self.name}, Target Columns: {self.target_columns}, "
+                f"Ignore Columns: {self.ignore_columns}, Metric Columns: {self.metric_columns}\n"
+                f"{self.dataframe.head()}")
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
     
-    def get_splits(self, split_column=None, train_ratio=0.5, val_ratio=0.2, seed=None, max_size=None):
+    def get_splits(self, split_column: Optional[str] = None, train_ratio: float = 0.5, val_ratio: float = 0.2, seed: Optional[int] = None, max_size: Optional[int] = None):
         df = self.get_dataframe()
 
         if not split_column:
             split_column = self.data_id_column
         if not split_column:
-            # Warning: We are going to split based on index which is not recommended.  This means that we could be testing on data that is partially represented in the training set.
-            warnings.warn("No split column specified. Splitting based on index which is not recommended.  This means that we could be testing on data that is partially represented in the training set.")
-
+            warnings.warn("No split column specified. Splitting based on index which is not recommended. "
+                          "This means that we could be testing on data that is partially represented in the training set.")
             items = np.arange(len(df))
         else:
             items = df[split_column].unique()
@@ -133,8 +114,8 @@ class Dataset:
         np.random.shuffle(items)
 
         train_items = items[:train_size]
-        val_items = items[train_size:train_size+val_size]
-        test_items = items[train_size+val_size:]
+        val_items = items[train_size:train_size + val_size]
+        test_items = items[train_size + val_size:]
 
         if split_column:
             train_df = df[df[split_column].isin(train_items)]
@@ -145,9 +126,45 @@ class Dataset:
             val_df = df.iloc[val_items]
             test_df = df.iloc[test_items]
 
-        train_dataset = Dataset(train_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-        val_dataset = Dataset(val_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-        test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+        train_dataset = Dataset(
+            dataframe=train_df,
+            target_columns=self.target_columns,
+            ignore_columns=self.ignore_columns,
+            metric_columns=self.metric_columns,
+            name=self.name,
+            data_id_column=self.data_id_column,
+            model_id_column=self.model_id_column,
+            input_column=self.input_column,
+            output_column=self.output_column,
+            reference_columns=self.reference_columns,
+            metrics=[]
+        )
+        val_dataset = Dataset(
+            dataframe=val_df,
+            target_columns=self.target_columns,
+            ignore_columns=self.ignore_columns,
+            metric_columns=self.metric_columns,
+            name=self.name,
+            data_id_column=self.data_id_column,
+            model_id_column=self.model_id_column,
+            input_column=self.input_column,
+            output_column=self.output_column,
+            reference_columns=self.reference_columns,
+            metrics=[]
+        )
+        test_dataset = Dataset(
+            dataframe=test_df,
+            target_columns=self.target_columns,
+            ignore_columns=self.ignore_columns,
+            metric_columns=self.metric_columns,
+            name=self.name,
+            data_id_column=self.data_id_column,
+            model_id_column=self.model_id_column,
+            input_column=self.input_column,
+            output_column=self.output_column,
+            reference_columns=self.reference_columns,
+            metrics=[]
+        )
         
         if max_size:
             train_dataset = train_dataset.get_subset(max_size)
@@ -156,12 +173,10 @@ class Dataset:
 
         return train_dataset, val_dataset, test_dataset
 
-    def get_kfold_splits(self, k=5, split_column=None, seed=None, test_ratio=0.3):
+    def get_kfold_splits(self, k: int = 5, split_column: Optional[str] = None, seed: Optional[int] = None, test_ratio: float = 0.3):
         df = self.get_dataframe()
 
         if test_ratio and test_ratio > 0:
-            # Sample test_ratio of the data for testing
-            
             if seed:
                 np.random.seed(seed)
 
@@ -175,7 +190,6 @@ class Dataset:
                 test_df = df[df.index.isin(test_items)]
                 df = df[~df.index.isin(test_items)]
                 train_df = df.copy()
-
             else:
                 items = df[split_column].unique()
                 test_size = int(test_ratio * len(items))
@@ -183,16 +197,14 @@ class Dataset:
                 test_df = df[df[split_column].isin(test_items)]
                 df = df[~df[split_column].isin(test_items)]
                 train_df = df.copy()
-            
         else:
             test_df = None
 
         if not split_column:
             split_column = self.data_id_column
         if not split_column:
-            # Warning: We are going to split based on index which is not recommended.  This means that we could be testing on data that is partially represented in the training set.
-            warnings.warn("No split column specified. Splitting based on index which is not recommended.  This means that we could be testing on data that is partially represented in the training set.")
-
+            warnings.warn("No split column specified. Splitting based on index which is not recommended. "
+                          "This means that we could be testing on data that is partially represented in the training set.")
             items = np.arange(len(df))
         else:
             items = df[split_column].unique()
@@ -214,16 +226,64 @@ class Dataset:
             else:
                 split_df = df.iloc[split_items].copy()
                 non_split_df = df.iloc[non_split_items].copy()
-            split_val_dataset = Dataset(split_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-            split_train_dataset = Dataset(non_split_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+            split_val_dataset = Dataset(
+                dataframe=split_df,
+                target_columns=self.target_columns,
+                ignore_columns=self.ignore_columns,
+                metric_columns=self.metric_columns,
+                name=self.name,
+                data_id_column=self.data_id_column,
+                model_id_column=self.model_id_column,
+                input_column=self.input_column,
+                output_column=self.output_column,
+                reference_columns=self.reference_columns,
+                metrics=[]
+            )
+            split_train_dataset = Dataset(
+                dataframe=non_split_df,
+                target_columns=self.target_columns,
+                ignore_columns=self.ignore_columns,
+                metric_columns=self.metric_columns,
+                name=self.name,
+                data_id_column=self.data_id_column,
+                model_id_column=self.model_id_column,
+                input_column=self.input_column,
+                output_column=self.output_column,
+                reference_columns=self.reference_columns,
+                metrics=[]
+            )
             split_datasets.append((split_train_dataset, split_val_dataset))
 
-        train_dataset = Dataset(train_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-        test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+        train_dataset = Dataset(
+            dataframe=train_df,
+            target_columns=self.target_columns,
+            ignore_columns=self.ignore_columns,
+            metric_columns=self.metric_columns,
+            name=self.name,
+            data_id_column=self.data_id_column,
+            model_id_column=self.model_id_column,
+            input_column=self.input_column,
+            output_column=self.output_column,
+            reference_columns=self.reference_columns,
+            metrics=[]
+        )
+        test_dataset = Dataset(
+            dataframe=test_df,
+            target_columns=self.target_columns,
+            ignore_columns=self.ignore_columns,
+            metric_columns=self.metric_columns,
+            name=self.name,
+            data_id_column=self.data_id_column,
+            model_id_column=self.model_id_column,
+            input_column=self.input_column,
+            output_column=self.output_column,
+            reference_columns=self.reference_columns,
+            metrics=[]
+        )
 
         return split_datasets, train_dataset, test_dataset
     
-    def calculate_metrics(self, update_dataset=True, **kwargs):
+    def calculate_metrics(self, update_dataset: bool = True, **kwargs):
         for metric in self.metrics:
             if metric.get_name() not in self.get_metric_columns():
                 metric.predict(self, update_dataset=update_dataset, **kwargs)
@@ -234,9 +294,21 @@ class Dataset:
                 if metric.get_name() not in row:
                     metric.calculate_row(row, self, update_dataset=update_dataset)
 
-    def get_subset(self, size, seed=None):
+    def get_subset(self, size: int, seed: Optional[int] = None) -> 'Dataset':
         df = self.get_dataframe()
         if seed:
             np.random.seed(seed)
         subset_df = df.sample(n=size)
-        return Dataset(subset_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+        return Dataset(
+            dataframe=subset_df,
+            target_columns=self.target_columns,
+            ignore_columns=self.ignore_columns,
+            metric_columns=self.metric_columns,
+            name=self.name,
+            data_id_column=self.data_id_column,
+            model_id_column=self.model_id_column,
+            input_column=self.input_column,
+            output_column=self.output_column,
+            reference_columns=self.reference_columns,
+            metrics=[]
+        )

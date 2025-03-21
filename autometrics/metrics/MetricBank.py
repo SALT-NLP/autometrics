@@ -9,12 +9,21 @@ from autometrics.metrics.reference_based.MOVERScore import MOVERScore
 from autometrics.metrics.reference_based.BARTScore import BARTScore
 from autometrics.metrics.reference_based.UniEvalDialogue import UniEvalDialogue
 from autometrics.metrics.reference_based.UniEvalSum import UniEvalSum
+from autometrics.metrics.reference_based.CIDEr import CIDEr
+# from autometrics.metrics.reference_based.METEOR import METEOR
+# from autometrics.metrics.reference_based.QUAC import QUAC
+from autometrics.metrics.reference_based.StringSimilarity import LevenshteinDistance
+from autometrics.metrics.reference_based.StringSimilarity import LevenshteinRatio
+# from autometrics.metrics.reference_based.StringSimilarity import JaccardSimilarity
+from autometrics.metrics.reference_based.StringSimilarity import HammingDistance
+from autometrics.metrics.reference_based.StringSimilarity import JaroSimilarity
+from autometrics.metrics.reference_based.StringSimilarity import JaroWinklerSimilarity
+
+from autometrics.metrics.reference_free.FKGL import FKGL
 from autometrics.metrics.reference_free.UniEvalFact import UniEvalFact
 from autometrics.metrics.reference_free.Perplexity import Perplexity
 
-from autometrics.metrics.reference_free.FKGL import FKGL
-
-reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum()]
+reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity()]
 reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity()]
 
 all_metrics = reference_based_metrics + reference_free_metrics

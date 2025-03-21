@@ -1,106 +1,121 @@
 ---
 # Metric Card for CIDEr
 
-CIDEr (Consensus-based Image Description Evaluation) evaluates the quality of generated textual descriptions by measuring their similarity to a consensus of human-written reference captions. Primarily developed for image captioning, CIDEr incorporates lexical overlap and content consensus through TF-IDF weighted n-gram matching.
+CIDEr (Consensus-based Image Description Evaluation) measures the similarity between a candidate image caption and a set of human-generated reference captions. It leverages TF-IDF weighted n-gram matching to capture consensus in both content and linguistic style, making it especially useful for benchmarking image captioning systems.
 
 ## Metric Details
 
 ### Metric Description
 
-CIDEr measures how closely a candidate caption matches the consensus of multiple human reference captions. It uses Term Frequency-Inverse Document Frequency (TF-IDF) weighting to emphasize informative n-grams (1 to 4 words). Cosine similarity between candidate and reference captions captures both precision and recall, rewarding descriptions aligning closely with multiple human references.
+CIDEr evaluates how well a candidate caption matches the consensus of human descriptions by comparing n-gram counts weighted by TF-IDF. In this process, each sentence is decomposed into n-grams (typically from unigrams up to four-grams), and each n-gram is weighted according to its term frequency in the sentence and its inverse document frequency across a dataset of images. The final score is the weighted average of cosine similarities computed for each n-gram length. An extended version, CIDEr-D, incorporates additional mechanisms (e.g., clipping and a Gaussian length penalty) to mitigate potential gaming of the metric.
 
 - **Metric Type:** Surface-Level Similarity
-- **Range:** Typically 0 to 10 (scaled)
+- **Range:** Typically 0 to approximately 10 (higher values indicate better consensus)
 - **Higher is Better?:** Yes
 - **Reference-Based?:** Yes
 - **Input-Required?:** No
 
 ### Formal Definition
 
-CIDEr first calculates TF-IDF weights for each n-gram ($\omega_k$):
+For each n-gram $\omega_k$ in a reference sentence $s_{ij}$, the TF-IDF weighting is computed as:
 
 $$
-g_k(s_{ij}) = \frac{h_k(s_{ij})}{\sum_{\omega_l \in \Omega} h_l(s_{ij})} \log\left(\frac{|I|}{\sum_{I_p \in I} \min(1, \sum_q h_k(s_{pq}))}\right)
+g_k(s_{ij}) = \frac{h_k(s_{ij})}{\sum_{\omega_l \in \Omega} h_l(s_{ij})} \log \left( \frac{|I|}{\sum_{p \in I} \min \left(1, \sum_q h_k(s_{pq}) \right)} \right)
 $$
 
-Then, CIDEr computes cosine similarity across reference sentences ($S_i$) for each n-gram level ($n$):
+where:
+- $h_k(s_{ij})$ is the count of n-gram $\omega_k$ in $s_{ij}$,
+- $\Omega$ is the vocabulary of all n-grams,
+- $|I|$ is the total number of images in the dataset, and
+- the denominator in the log computes the document frequency of $\omega_k$.
+
+The n-gram level CIDEr score is defined as:
 
 $$
-\text{CIDEr}_n(c_i, S_i) = \frac{1}{m}\sum_j \frac{g^n(c_i) \cdot g^n(s_{ij})}{\|g^n(c_i)\|\,\|g^n(s_{ij})\|}
+CIDEr_n(c_i, S_i) = \frac{1}{m} \sum_j \frac{g_n(c_i) \cdot g_n(s_{ij})}{\| g_n(c_i) \| \, \| g_n(s_{ij}) \|}
 $$
 
-The final CIDEr score averages across all n-gram levels (N=4):
+where:
+- $c_i$ is the candidate caption,
+- $S_i = \{ s_{i1}, s_{i2}, \dots, s_{im} \}$ is the set of reference captions,
+- $g_n(c_i)$ is the TF-IDF vector for n-grams of length $n$ from $c_i$, and
+- $\| \cdot \|$ denotes the Euclidean norm.
+
+The overall CIDEr score aggregates the n-gram scores:
 
 $$
-\text{CIDEr}(c_i, S_i) = \frac{1}{N}\sum_{n=1}^{N}\text{CIDEr}_n(c_i, S_i)
+CIDEr(c_i, S_i) = \sum_{n=1}^N w_n \, CIDEr_n(c_i, S_i)
 $$
+
+with uniform weights $w_n = \frac{1}{N}$ (typically $N=4$).
 
 ### Inputs and Outputs
 
 - **Inputs:**  
-  - Candidate sentence (generated caption)  
-  - Multiple reference sentences (human-generated captions)
+  - Candidate caption (a string)  
+  - A set of reference captions (a list of strings)
 
 - **Outputs:**  
-  - Scalar CIDEr score (typically 0 to 10)
+  - A scalar CIDEr score representing the degree of consensus between the candidate caption and the references
 
 ## Intended Use
 
 ### Domains and Tasks
 
-- **Domain:** Text Generation, Image Captioning, Multimodal Generation
-- **Tasks:** Image-to-Text Generation, Data-to-Text Generation
+- **Domain:** Image Captioning, Multimodal Generation
+- **Tasks:** Image Description Evaluation
 
 ### Applicability and Limitations
 
 - **Best Suited For:**  
-  Evaluating image captions or short descriptive texts where multiple reference captions are available, and capturing consensus is essential.
+  Evaluating image captioning systems where a rich set of human reference captions (e.g., 50 per image) is available. CIDEr is particularly effective for assessing how well a candidate caption captures the consensus of human descriptions.
 
 - **Not Recommended For:**  
-  Tasks involving open-ended, creative, or semantically diverse descriptions (e.g., storytelling, creative writing), where consensus and lexical overlap are not reliable indicators of quality.
+  Open-ended generation tasks (e.g., creative storytelling or dialogue) where high lexical diversity is expected, or scenarios lacking sufficient reference data.
 
 ## Metric Implementation
 
 ### Reference Implementations
 
 - **Libraries/Packages:**  
-  - [coco-caption](https://github.com/tylin/coco-caption) (official MS COCO evaluation implementation)  
-  - [autometrics](https://github.com/autometrics-dev/autometrics)
+  - [coco-caption repository](https://github.com/tylin/coco-caption) (reference implementation)  
 
 ### Computational Complexity
 
 - **Efficiency:**  
-  Moderate efficiency; complexity scales linearly with candidate length and number of references due to TF-IDF and cosine similarity computations.
+  CIDEr is efficient at the sentence level; it primarily involves n-gram extraction, TF-IDF weighting, and cosine similarity calculations.
 
 - **Scalability:**  
-  Scalable for typical captioning datasets; computationally heavier on large datasets due to global IDF calculation.
+  While the computation scales linearly with the number of reference captions, performance benefits from additional references up to a saturation point.
 
 ## Known Limitations
 
-- **Biases:** Needs more information.
+- **Biases:**  
+  - May favor candidate captions that closely mimic the majority of reference texts, potentially penalizing valid paraphrases or creative expressions.
+  
 - **Task Misalignment Risks:**  
-  CIDEr can underestimate semantically correct but lexically distinct captions due to strict reliance on lexical overlap.
+  - Less effective for tasks with high variability in acceptable outputs, such as creative writing or dialogue generation.
+  
 - **Failure Cases:**  
-  CIDEr fails to adequately evaluate semantically rich paraphrases or descriptions using uncommon wording.
+  - When candidate captions use synonyms or alternative phrasings not reflected in the reference set, CIDEr may under-score these valid variations.
 
 ## Related Metrics
 
-- **BLEU:** Precision-based n-gram overlap metric.
-- **ROUGE:** Recall-based summarization metric.
-- **METEOR:** Incorporates semantic similarity and alignment, less strict on lexical matching.
+- **BLEU:** Focuses on n-gram precision without TF-IDF weighting.  
+- **ROUGE:** Emphasizes n-gram recall.  
+- **METEOR:** Incorporates stemming and synonym matching for enhanced semantic alignment.  
+- **CIDEr-D:** A variant of CIDEr with added clipping and length penalty to reduce susceptibility to metric gaming.
 
 ## Further Reading
 
 - **Papers:**  
-  - [CIDEr: Consensus-based Image Description Evaluation (Vedantam et al., 2015)](https://arxiv.org/abs/1411.5726)  
-  - [Microsoft COCO Captions: Data Collection and Evaluation Server](https://arxiv.org/abs/1504.00325)
-
+  - Vedantam, R., Zitnick, C. L., & Parikh, D. (2015). *CIDEr: Consensus-based Image Description Evaluation*. [Original paper, arXiv:1411.5726](https://arxiv.org/abs/1411.5726)
+  
 - **Blogs/Tutorials:**  
-  - [OECD.AI CIDEr Metric Overview](https://oecd.ai/en/catalogue/metrics/consensus-based-image-description-evaluation-cider)
+  - Documentation and tutorials available on the coco-caption GitHub repository
 
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
-- **Acknowledgment of AI Assistance:**  
-  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.
+- **Acknowledgment of AI Assistance:** Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high), based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu

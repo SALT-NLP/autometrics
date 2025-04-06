@@ -49,7 +49,30 @@ def display_top_5_metrics_by_validation(validation_dataset, test_dataset, comput
 
     return display_top_5_metrics_by_validation_precomputed(validation_data, test_data)
     
-def get_top_metric_by_validation_precomputed(validation_data, target_column=None):
+def get_top_metric_by_validation_precomputed(validation_data, target_column=None, k=1):
+    """
+    Returns the top metric(s) by validation score for a specified target column or all target columns if None.
+
+    Parameters:
+    -----------
+    validation_data : dict
+        A dictionary containing the validation data for each target column.
+    target_column : str or None
+        The target column to get the top metric for. If None, the top metric for all target columns will be returned.
+    k : int
+        The number of top metrics to return for each target column. Default is 1.
+    
+    Returns:
+    --------
+    metric or dict
+        The top metric(s) by validation score for the specified target column, or a dictionary of top metrics for all target columns.
+    If k > 1, a list of top metrics will be returned for each target column.
+    If k = 1, a single metric will be returned for each target column.
+    If target_column is None, a dictionary of top metrics for all target columns will be returned.
+    If target_column is specified, a single metric will be returned for that target column.
+    If no metrics are found, None will be returned.
+    """
+
     top_correlations = {}
 
     # Iterate over each target category (time_sec, inc_plus_omi, etc.)
@@ -57,16 +80,23 @@ def get_top_metric_by_validation_precomputed(validation_data, target_column=None
     for target_column_ in targets:
         val_data = validation_data[target_column_]
         # Sort validation correlations and get top 5
-        best_val_correlation = sorted(val_data.items(), key=lambda x: abs(x[1]), reverse=True)[0]
+        best_val_correlation = sorted(val_data.items(), key=lambda x: abs(x[1]), reverse=True)[0:k]
 
-        metric, _ = best_val_correlation
+        metric_list = [metric for metric, _ in best_val_correlation]
+
+        if k == 1:
+            # If k=1, just take the best metric
+            metric = metric_list[0]
+        else:
+            # If k>1, take the top k metrics
+            metric = metric_list
         
         # Format as (metric_abbr, val_corr, test_corr)
         top_correlations[target_column_] = metric
 
     return top_correlations if target_column is None else top_correlations[target_column]
 
-def get_top_metric_by_validation(validation_dataset, target_column=None, compute_all=False):
+def get_top_metric_by_validation(validation_dataset, target_column=None, compute_all=False, k=1):
     """
     Returns the top metric itself by validation score, not a dataframe
 
@@ -80,6 +110,8 @@ def get_top_metric_by_validation(validation_dataset, target_column=None, compute
         Whether to compute correlations with all columns or just the dedicated metric columns from the dataset. Default is False.
     target_column : str
         The target column to get the top metric for. If None, the top metric for all target columns will be returned.
+    k : int
+        The number of top metrics to return for each target column. Default is 1.
 
     Returns:
     --------
@@ -89,7 +121,7 @@ def get_top_metric_by_validation(validation_dataset, target_column=None, compute
     
     validation_data = calculate_correlation(validation_dataset, compute_all=compute_all)
 
-    return get_top_metric_by_validation_precomputed(validation_data, target_column)
+    return get_top_metric_by_validation_precomputed(validation_data, target_column, k=k)
 
 
 def plot_metric_target_scatterplot(dataset, metric_column, target_column):

@@ -1,8 +1,8 @@
 # %%
 from autometrics.dataset.datasets.simplification import SimpDA
-from autometrics.dataset.datasets.summeval import summeval
-from autometrics.dataset.datasets.primock57 import primock57
-from autometrics.dataset.datasets.helpsteer import helpsteer
+from autometrics.dataset.datasets.summeval.summeval import SummEval
+from autometrics.dataset.datasets.primock57.primock57 import Primock57
+from autometrics.dataset.datasets.helpsteer.helpsteer import HelpSteer
 
 from autometrics.util.analysis import display_top_5_metrics_by_validation, get_top_metric_by_validation, plot_metric_target_scatterplot
 from autometrics.evaluate.correlation import calculate_correlation
@@ -20,25 +20,29 @@ def get_top_metrics(dataset, bank=all_metrics):
 
     dev.add_metrics(bank)
     test.add_metrics(bank)
-    top_metrics = get_top_metric_by_validation(dev, test, False)
+    targets = test.get_target_columns()
+    mapping = {}
+    for target in targets:
+        mapping[target] = get_top_metric_by_validation(dev, target, False, 10)
+
     display_top_5_metrics_by_validation(dev, test, False)
     print("Top metrics for each validation set:")
-    print(top_metrics)
-    return top_metrics
-    
+    print(mapping)
+
+    return mapping
 
 # %%
-print("SimpDA")
-top_simpda = get_top_metrics(SimpDA())
+# print("SimpDA")
+# top_simpda = get_top_metrics(SimpDA())
 
-# %%
-print("SummEval")
-top_summeval = get_top_metrics(summeval())
+# # %%
+# print("SummEval")
+# top_summeval = get_top_metrics(SummEval())
 
 # %%
 print("Primock57")
-top_primock57 = get_top_metrics(primock57())
+top_primock57 = get_top_metrics(Primock57())
 
 # %%
 print("HelpSteer")
-top_helpsteer = get_top_metrics(helpsteer(), bank=reference_free_metrics)
+top_helpsteer = get_top_metrics(HelpSteer(), bank=reference_free_metrics)

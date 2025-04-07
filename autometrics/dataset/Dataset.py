@@ -4,6 +4,7 @@ import pandas as pd
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from autometrics.metrics.MultiMetric import MultiMetric
+from autometrics.metrics.Metric import Metric
 
 class Dataset(BaseModel):
     """
@@ -19,7 +20,7 @@ class Dataset(BaseModel):
     input_column: Optional[str] = None
     output_column: Optional[str] = None
     reference_columns: Optional[List[str]] = None
-    metrics: List[MultiMetric] = Field(default_factory=list)
+    metrics: List[Metric] = Field(default_factory=list)
 
     class Config:
         arbitrary_types_allowed = True
@@ -54,22 +55,21 @@ class Dataset(BaseModel):
     def get_reference_columns(self) -> Optional[List[str]]:
         return self.reference_columns
     
-    def get_metrics(self) -> List[MultiMetric]:
+    def get_metrics(self) -> List[Metric]:
         return self.metrics
     
     def set_dataframe(self, dataframe: pd.DataFrame):
         self.dataframe = dataframe
 
-    def add_metric(self, metric: MultiMetric, update_dataset: bool = True):
+    def add_metric(self, metric: Metric, update_dataset: bool = True):
         if isinstance(metric, MultiMetric):
             self.metrics.append(metric)
             for submetric_name in metric.get_submetric_names():
                 if submetric_name not in self.metric_columns:
                     self.metric_columns.append(submetric_name)
 
-                if self.dataframe is not None and update_dataset and submetric_name not in self.dataframe.columns:
-                    metric.predict(self, update_dataset=update_dataset)
-                    break
+            if self.dataframe is not None and update_dataset and any(submetric_name not in self.dataframe.columns for submetric_name in metric.get_submetric_names()):
+                metric.predict(self, update_dataset=update_dataset)
         else:
             self.metrics.append(metric)
             if metric.get_name() not in self.metric_columns:
@@ -77,7 +77,7 @@ class Dataset(BaseModel):
             if self.dataframe is not None and update_dataset and metric.get_name() not in self.dataframe.columns:
                 metric.predict(self, update_dataset=update_dataset)
 
-    def add_metrics(self, metrics: List[MultiMetric], update_dataset: bool = True):
+    def add_metrics(self, metrics: List[Metric], update_dataset: bool = True):
         for metric in metrics:
             self.add_metric(metric, update_dataset=update_dataset)
     
@@ -96,7 +96,7 @@ class Dataset(BaseModel):
             split_column = self.data_id_column
         if not split_column:
             warnings.warn("No split column specified. Splitting based on index which is not recommended. "
-                          "This means that we could be testing on data that is partially represented in the training set.")
+                          "This means that we could be testing on data that is partially represented in the training set due to rows with similar data but different indices.")
             items = np.arange(len(df))
         else:
             items = df[split_column].unique()
@@ -204,7 +204,7 @@ class Dataset(BaseModel):
             split_column = self.data_id_column
         if not split_column:
             warnings.warn("No split column specified. Splitting based on index which is not recommended. "
-                          "This means that we could be testing on data that is partially represented in the training set.")
+                          "This means that we could be testing on data that is partially represented in the training set due to rows with similar data but different indices.")
             items = np.arange(len(df))
         else:
             items = df[split_column].unique()
@@ -311,4 +311,19 @@ class Dataset(BaseModel):
             output_column=self.output_column,
             reference_columns=self.reference_columns,
             metrics=[]
+        )
+    
+    def copy(self) -> 'Dataset':
+        return Dataset(
+            dataframe=self.dataframe.copy(),
+            target_columns=self.target_columns.copy(),
+            ignore_columns=self.ignore_columns.copy(),
+            metric_columns=self.metric_columns.copy(),
+            name=self.name,
+            data_id_column=self.data_id_column,
+            model_id_column=self.model_id_column,
+            input_column=self.input_column,
+            output_column=self.output_column,
+            reference_columns=self.reference_columns.copy(),
+            metrics=[metric for metric in self.metrics]
         )

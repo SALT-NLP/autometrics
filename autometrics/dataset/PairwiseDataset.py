@@ -13,8 +13,6 @@ class PairwiseDataset(Dataset):
     """
 
     def __init__(self, dataframe: pd.DataFrame, target_columns_1: List[str], target_columns_2: List[str], ignore_columns: List[str], metric_columns_1: List[str], metric_columns_2: List[str], name: str, data_id_column: Optional[str] = None, model_id_column_1: Optional[str] = None, model_id_column_2: Optional[str] = None, input_column: Optional[str] = None, output_column_1: Optional[str] = None, output_column_2: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None):
-        super().__init__()
-
         assert len(target_columns_1) == len(target_columns_2), "Target columns for both models must be the same length"
         assert len(metric_columns_1) == len(metric_columns_2), "Metric columns for both models must be the same length"
 

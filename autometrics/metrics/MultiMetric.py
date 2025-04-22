@@ -25,6 +25,7 @@ class MultiMetric(Metric):
 
         results = []
         for i, o, r in zip(inputs, outputs, references):
+            
             results.append(self.calculate(i, o, r, **kwargs))
 
         # Swap the indices so that each submetric has its own list

@@ -25,7 +25,9 @@ def get_top_metrics(dataset, bank=all_metrics):
     for target in targets:
         mapping[target] = get_top_metric_by_validation(dev, target, False, 10)
 
-    display_top_5_metrics_by_validation(dev, test, False)
+    df = display_top_5_metrics_by_validation(dev, test, False)
+    print(df)
+    df.to_csv("outputs/" + dataset.name + "_top_metrics.csv")
     print("Top metrics for each validation set:")
     print(mapping)
 

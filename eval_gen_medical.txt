@@ -1,0 +1,14 @@
+Train size: 54 Validation size: 10 Test size: 20
+litellm_proxy/meta-llama/Meta-Llama-3.3-70b-Instruct
+             Top 1 Metric & Value  ...                         Top 3 Metric & Value
+grade  FKGL (-0.2404814448168607)  ...  Perplexity_gpt2-large (-0.1301628053236573)
+
+[1 rows x 3 columns]
+                                    Top 1 Metric & Value  ...                               Top 5 Metric & Value
+grade  Symptom severity and impact on daily life_Meta...  ...  Physical examination findings_Meta-Llama-3.3-7...
+
+[1 rows x 5 columns]
+                                    Top 1 Metric & Value  ...                               Top 5 Metric & Value
+grade  Symptom severity and impact on daily life_Meta...  ...  Treatment approaches and medication_Meta-Llama...
+
+[1 rows x 5 columns]

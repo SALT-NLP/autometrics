@@ -24,6 +24,6 @@ from autometrics.metrics.reference_free.UniEvalFact import UniEvalFact
 from autometrics.metrics.reference_free.Perplexity import Perplexity
 
 reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity()]
-reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity()]
+reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity(batch_size=2)]
 
 all_metrics = reference_based_metrics + reference_free_metrics

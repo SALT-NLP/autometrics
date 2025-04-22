@@ -11,6 +11,16 @@ class PairwiseDataset(Dataset):
     """
     Dataset class for handling and manipulating pairwise datasets.
     """
+    # target_columns_1: List[str] = Field(default_factory=list)
+    # target_columns_2: List[str] = Field(default_factory=list)
+    # metric_columns_1: List[str] = Field(default_factory=list)
+    # metric_columns_2: List[str] = Field(default_factory=list)
+    # model_id_column_1: Optional[str] = None
+    # model_id_column_2: Optional[str] = None
+    # output_column_1: Optional[str] = None
+    # output_column_2: Optional[str] = None
+    # model1_dataset: Optional[Dataset] = None
+    # model2_dataset: Optional[Dataset] = None
 
     def __init__(self, dataframe: pd.DataFrame, target_columns_1: List[str], target_columns_2: List[str], ignore_columns: List[str], metric_columns_1: List[str], metric_columns_2: List[str], name: str, data_id_column: Optional[str] = None, model_id_column_1: Optional[str] = None, model_id_column_2: Optional[str] = None, input_column: Optional[str] = None, output_column_1: Optional[str] = None, output_column_2: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None):
         assert len(target_columns_1) == len(target_columns_2), "Target columns for both models must be the same length"
@@ -27,8 +37,15 @@ class PairwiseDataset(Dataset):
         self.output_column_2 = output_column_2
 
         # Step 1: Create model1_dataset and model2_dataset by splitting the dataframe
-        model_1_df = dataframe[target_columns_1 + metric_columns_1 + [data_id_column, model_id_column_1, input_column, output_column_1] + reference_columns].copy()
-        model_2_df = dataframe[target_columns_2 + metric_columns_2 + [data_id_column, model_id_column_2, input_column, output_column_2] + reference_columns].copy()
+
+        model_1_columns = target_columns_1 + metric_columns_1 + [data_id_column, model_id_column_1, input_column, output_column_1] + reference_columns
+        model_2_columns = target_columns_2 + metric_columns_2 + [data_id_column, model_id_column_2, input_column, output_column_2] + reference_columns
+
+        model_1_columns = list(set(model_1_columns))
+        model_2_columns = list(set(model_2_columns))
+
+        model_1_df = dataframe[model_1_columns].copy()
+        model_2_df = dataframe[model_2_columns].copy()
 
         self.model1_dataset = Dataset(
             dataframe=model_1_df,
@@ -71,8 +88,9 @@ class PairwiseDataset(Dataset):
         self.metrics = metrics if metrics is not None else []
 
         # Combine the dataframes for the pairwise dataset
-        df = dataframe[data_id_column, input_column, reference_columns].copy()
-        df.columns = [data_id_column, input_column] + reference_columns
+        cols = [data_id_column, input_column] + reference_columns
+        df = dataframe[cols].copy()
+        df.columns = cols
         # add model_id, output, and target, and metric columns
         df["model_id"] = model_1_df[model_id_column_1].astype(str) + "-" + model_2_df[model_id_column_2].astype(str)
         df["output"] = "[\"" + model_1_df[output_column_1].astype(str) + "\",\"" + model_2_df[output_column_2].astype(str) + "\"]"
@@ -83,6 +101,25 @@ class PairwiseDataset(Dataset):
 
         self.dataframe = df
         self.original_dataframe = dataframe.copy()
+
+    def set_all_fields(self, dataframe: pd.DataFrame, target_columns_1: List[str], target_columns_2: List[str], ignore_columns: List[str], metric_columns_1: List[str], metric_columns_2: List[str], name: str, data_id_column: Optional[str] = None, model_id_column_1: Optional[str] = None, model_id_column_2: Optional[str] = None, input_column: Optional[str] = None, output_column_1: Optional[str] = None, output_column_2: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None):
+        self.dataframe = dataframe
+        self.original_dataframe = dataframe.copy()
+        self.target_columns_1 = target_columns_1
+        self.target_columns_2 = target_columns_2
+        self.ignore_columns = ignore_columns
+        self.metric_columns_1 = metric_columns_1
+        self.metric_columns_2 = metric_columns_2
+        self.name = name
+        self.data_id_column = data_id_column
+        self.model_id_column_1 = model_id_column_1
+        self.model_id_column_2 = model_id_column_2
+        self.input_column = input_column
+        self.output_column_1 = output_column_1
+        self.output_column_2 = output_column_2
+        self.reference_columns = reference_columns if reference_columns is not None else []
+        self.metrics = metrics if metrics is not None else []
+
 
     def set_dataframe(self, dataframe: pd.DataFrame):
         print("[WARNING] Setting dataframe directly. This is not recommended for pairwise datasets which have custom logic for handling data.")
@@ -361,10 +398,29 @@ class PairwiseDataset(Dataset):
             self.set_dataframe(df)
 
     def get_subset(self, size: int, seed: Optional[int] = None) -> 'PairwiseDataset':
-        df = self.get_dataframe()
+        df = self.get_dataframe() if len(self.metrics) > 0 else self.original_dataframe
         if seed:
             np.random.seed(seed)
-        subset_df = df.sample(n=size)
+        subset_df = df.sample(n=min(size, len(df)), random_state=seed)
+
+        if len(self.metrics) == 0:
+            return PairwiseDataset(
+                dataframe=subset_df,
+                target_columns_1=self.target_columns_1,
+                target_columns_2=self.target_columns_2,
+                ignore_columns=self.ignore_columns,
+                metric_columns_1=self.metric_columns_1,
+                metric_columns_2=self.metric_columns_2,
+                name=self.name,
+                data_id_column=self.data_id_column,
+                model_id_column_1=self.model_id_column_1,
+                model_id_column_2=self.model_id_column_2,
+                input_column=self.input_column,
+                output_column_1=self.output_column_1,
+                output_column_2=self.output_column_2,
+                reference_columns=self.reference_columns,
+                metrics=[]
+            )
 
         indices = subset_df.index
         model1_df = self.model1_dataset.get_dataframe().loc[indices].copy()
@@ -376,35 +432,79 @@ class PairwiseDataset(Dataset):
         model2_dataset = self.model2_dataset.copy()
         model2_dataset.set_dataframe(model2_df)
 
-        return PairwiseDataset(
+        output_dataset = PairwiseDataset(
             dataframe=subset_df,
-            target_columns=self.target_columns,
+            target_columns_1=self.target_columns_1,
+            target_columns_2=self.target_columns_2,
             ignore_columns=self.ignore_columns,
-            metric_columns=self.metric_columns,
+            metric_columns_1=self.metric_columns_1,
+            metric_columns_2=self.metric_columns_2,
             name=self.name,
             data_id_column=self.data_id_column,
-            model_id_column=self.model_id_column,
+            model_id_column_1=self.model_id_column_1,
+            model_id_column_2=self.model_id_column_2,
             input_column=self.input_column,
-            output_column=self.output_column,
+            output_column_1=self.output_column_1,
+            output_column_2=self.output_column_2,
             reference_columns=self.reference_columns,
-            metrics=self.metrics,
+            metrics=[],
+        )
+
+        output_dataset.set_all_fields(
+            dataframe=subset_df,
+            target_columns_1=self.target_columns_1,
+            target_columns_2=self.target_columns_2,
+            ignore_columns=self.ignore_columns,
+            metric_columns_1=self.metric_columns_1,
+            metric_columns_2=self.metric_columns_2,
+            name=self.name,
+            data_id_column=self.data_id_column,
+            model_id_column_1=self.model_id_column_1,
+            model_id_column_2=self.model_id_column_2,
+            input_column=self.input_column,
+            output_column_1=self.output_column_1,
+            output_column_2=self.output_column_2,
+            reference_columns=self.reference_columns,
+            metrics=[],
             model1_dataset=model1_dataset,
             model2_dataset=model2_dataset
         )
     
     def copy(self):
-        return PairwiseDataset(
+        new_dataset = PairwiseDataset(
             dataframe=self.dataframe.copy(),
-            target_columns=self.target_columns.copy(),
-            ignore_columns=self.ignore_columns.copy(),
-            metric_columns=self.metric_columns.copy(),
+            target_columns_1=self.target_columns_1,
+            target_columns_2=self.target_columns_2,
+            ignore_columns=self.ignore_columns,
+            metric_columns_1=self.metric_columns_1,
+            metric_columns_2=self.metric_columns_2,
             name=self.name,
             data_id_column=self.data_id_column,
-            model_id_column=self.model_id_column,
+            model_id_column_1=self.model_id_column_1,
+            model_id_column_2=self.model_id_column_2,
             input_column=self.input_column,
-            output_column=self.output_column,
-            reference_columns=self.reference_columns.copy(),
-            metrics=[metric for metric in self.metrics],
+            output_column_1=self.output_column_1,
+            output_column_2=self.output_column_2,
+            reference_columns=self.reference_columns,
+            metrics=[]
+        )
+        new_dataset.set_all_fields(
+            dataframe=self.dataframe.copy(),
+            target_columns_1=self.target_columns_1,
+            target_columns_2=self.target_columns_2,
+            ignore_columns=self.ignore_columns,
+            metric_columns_1=self.metric_columns_1,
+            metric_columns_2=self.metric_columns_2,
+            name=self.name,
+            data_id_column=self.data_id_column,
+            model_id_column_1=self.model_id_column_1,
+            model_id_column_2=self.model_id_column_2,
+            input_column=self.input_column,
+            output_column_1=self.output_column_1,
+            output_column_2=self.output_column_2,
+            reference_columns=self.reference_columns,
+            metrics=self.metrics,
             model1_dataset=self.model1_dataset.copy(),
             model2_dataset=self.model2_dataset.copy()
         )
+        return new_dataset

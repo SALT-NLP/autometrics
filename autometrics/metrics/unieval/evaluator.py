@@ -9,85 +9,89 @@ try:
 except LookupError:
     nltk.download('punkt_tab')
 
+
+def safe_sent_tokenize(text: str):
+    """
+    Like sent_tokenize, but if it returns an empty list (e.g. for '' or
+    no punctuation), we fall back to treating the entire text as one segment.
+    """
+    sents = sent_tokenize(text)
+    return sents if sents else [text]
+
+
 class SumEvaluator:
     def __init__(self, max_length=1024, device='cuda:0', cache_dir=None):
         """ Set up evaluator for text summarization """
-        self.scorer = UniEvaluator(model_name_or_path='MingZhong/unieval-sum', 
-                                   max_length=max_length, 
-                                   device=device, cache_dir=cache_dir)
+        self.scorer = UniEvaluator(
+            model_name_or_path='MingZhong/unieval-sum',
+            max_length=max_length,
+            device=device,
+            cache_dir=cache_dir
+        )
         self.task = 'summarization'
         self.dimensions = ['coherence', 'consistency', 'fluency', 'relevance']
-    
+
     def evaluate(self, data, dims=None, overall=True):
-        """
-            Get the scores of all the given dimensions
-
-            dims: A list of dimensions to be evaluated. If dims is None, SumEvaluator will evaluate
-                  four dimensions: coherence, consistency, fluency, relevance.
-
-            overall: indicates whether the overall score is to be calculated.
-                     Overall score can be customized to a combination of scores based on different
-                     dimensions. The default here is the average score of all the given dimensions.
-        """
         n_data = len(data)
         eval_scores = [{} for _ in range(n_data)]
-
-        if dims == None:
-            eval_dims = self.dimensions
-        else:
-            assert isinstance(dims, list)
-            eval_dims = dims
+        eval_dims = dims if dims is not None else self.dimensions
 
         for dim in eval_dims:
-            # print('Evaluating {} of {} samples !!!'.format(dim, n_data))
-
-            # Calculate average sentence-level scores for 'consistency' and 'fluency'
-            if dim == 'consistency' or dim == 'fluency':
+            # sentence‐level dims
+            if dim in ('consistency', 'fluency'):
                 src_list, output_list = [], []
-                n_sents = [] # the number of sentences in each generated summary
+                n_sents = []
                 for i in range(n_data):
-                    if dim == 'consistency':
-                        source = data[i]['source']
-                    else:
-                        source = ''
-                    system_outputs = sent_tokenize(data[i]['system_output'])
-                    n_sents.append(len(system_outputs))
-                    for j in range(len(system_outputs)):
+                    source = data[i]['source'] if dim == 'consistency' else ''
+                    # safe tokenize
+                    sents = safe_sent_tokenize(data[i]['system_output'])
+                    n_sents.append(len(sents))
+                    for sent in sents:
                         src_list.append(source)
-                        output_list.append(system_outputs[j])
-                input_list = add_question(dimension=dim, output=output_list, 
-                                          src=src_list, task=self.task)
-                sent_score = self.scorer.score(input_list)
-                
-                # Get average score for each sample
-                start_idx = 0
+                        output_list.append(sent)
+
+                inputs = add_question(
+                    dimension=dim,
+                    output=output_list,
+                    src=src_list,
+                    task=self.task
+                )
+                sent_scores = self.scorer.score(inputs)
+
+                # average back to per‐example
                 score = []
-                for cur_n_sent in n_sents:
-                    score.append(sum(sent_score[start_idx: start_idx + cur_n_sent]) / cur_n_sent)
-                    start_idx += cur_n_sent
-            
-            # Calculate summary-level score for 'coherence' and 'relevance'
-            elif dim == 'coherence' or dim == 'relevance':
+                idx = 0
+                for count in n_sents:
+                    chunk = sent_scores[idx: idx + count]
+                    score.append(sum(chunk) / count)
+                    idx += count
+
+            # summary‐level dims
+            elif dim in ('coherence', 'relevance'):
                 src_list, output_list, ref_list = [], [], []
                 for i in range(n_data):
                     src_list.append(data[i]['source'])
                     output_list.append(data[i]['system_output'])
                     if dim == 'relevance':
                         ref_list.append(data[i]['reference'])
-                input_list = add_question(dimension=dim, output=output_list, 
-                                          src=src_list, ref=ref_list, task=self.task)
-                score = self.scorer.score(input_list)
-            
-            # Please customize other dimensions here for summarization
+                inputs = add_question(
+                    dimension=dim,
+                    output=output_list,
+                    src=src_list,
+                    ref=ref_list,
+                    task=self.task
+                )
+                score = self.scorer.score(inputs)
+
             else:
-                raise NotImplementedError('The input format for this dimension is still undefined. \
-                                           Please customize it first.')
-            
+                raise NotImplementedError(
+                    f"Dimension '{dim}' not implemented for summarization."
+                )
+
             for i in range(n_data):
                 eval_scores[i][dim] = score[i]
 
-        # Customize your overall score here.
-        if overall == True:
+        if overall:
             for i in range(n_data):
                 eval_scores[i]['overall'] = np.mean(list(eval_scores[i].values()))
 
@@ -97,87 +101,78 @@ class SumEvaluator:
 class DialogEvaluator:
     def __init__(self, max_length=1024, device='cuda:0', cache_dir=None):
         """ Set up evaluator for dialogues """
-        self.scorer = UniEvaluator(model_name_or_path='MingZhong/unieval-dialog', 
-                                   max_length=max_length, 
-                                   device=device, cache_dir=cache_dir)
+        self.scorer = UniEvaluator(
+            model_name_or_path='MingZhong/unieval-dialog',
+            max_length=max_length,
+            device=device,
+            cache_dir=cache_dir
+        )
         self.task = 'dialogue'
-        self.dimensions = ['naturalness', 'coherence', 'engagingness', 
-                           'groundedness', 'understandability']
+        self.dimensions = [
+            'naturalness', 'coherence',
+            'engagingness', 'groundedness', 'understandability'
+        ]
 
     def evaluate(self, data, dims=None, overall=True):
-        """
-            Get the scores of all the given dimensions
-
-            dims: A list of dimensions to be evaluated. If dims is None, DialogEvaluator will evaluate
-                  five dimensions: naturalness, coherence, engagingness, groundedness and understandability.
-
-            overall: indicates whether the overall score is to be calculated.
-                     Overall score can be customized to a combination of scores based on different
-                     dimensions. The default here is the average score of all the given dimensions.
-        """
         n_data = len(data)
         eval_scores = [{} for _ in range(n_data)]
-
-        if dims == None:
-            eval_dims = self.dimensions
-        else:
-            assert isinstance(dims, list)
-            eval_dims = dims
+        eval_dims = dims if dims is not None else self.dimensions
 
         for dim in eval_dims:
-            # print('Evaluating {} of {} samples !!!'.format(dim, n_data))
-
-            # Calculate summation score for 'engagingness'
             if dim == 'engagingness':
-                src_list, output_list, context_list = [], [], []
-                n_sents = [] # the number of sentences in each generated response
+                src_list, output_list, ctx_list = [], [], []
+                n_sents = []
                 for i in range(n_data):
                     source = data[i]['source']
                     context = data[i]['context']
-                    system_outputs = sent_tokenize(data[i]['system_output'])
-                    n_sents.append(len(system_outputs))
-                    for j in range(len(system_outputs)):
+                    sents = safe_sent_tokenize(data[i]['system_output'])
+                    n_sents.append(len(sents))
+                    for sent in sents:
                         src_list.append(source)
-                        context_list.append(context)
-                        output_list.append(system_outputs[j])
-                input_list = add_question(dimension=dim, output=output_list, 
-                                          src=src_list, context=context_list, task=self.task)
-                sent_score = self.scorer.score(input_list)
-                
-                # Get the summation score for each sample
-                start_idx = 0
-                score = []
-                for cur_n_sent in n_sents:
-                    score.append(sum(sent_score[start_idx: start_idx + cur_n_sent]))
-                    start_idx += cur_n_sent
-            
-            # Calculate turn-level score for other dimensions
-            elif dim in ['naturalness', 'coherence', 'groundedness', 'understandability']:
-                src_list, output_list, context_list = [], [], []
-                for i in range(n_data):
-                    if dim == 'coherence':
-                        src_list.append(data[i]['source'])
-                    else:
-                        src_list.append('')
-                    output_list.append(data[i]['system_output'])
-                    if dim == 'groundedness':
-                        context_list.append(data[i]['context'])
-                    else:
-                        context_list.append('')
-                input_list = add_question(dimension=dim, output=output_list, 
-                                          src=src_list, context=context_list, task=self.task)
-                score = self.scorer.score(input_list)
+                        ctx_list.append(context)
+                        output_list.append(sent)
 
-            # Please customize other dimensions here for summarization
+                inputs = add_question(
+                    dimension=dim,
+                    output=output_list,
+                    src=src_list,
+                    context=ctx_list,
+                    task=self.task
+                )
+                sent_scores = self.scorer.score(inputs)
+
+                score = []
+                idx = 0
+                for count in n_sents:
+                    chunk = sent_scores[idx: idx + count]
+                    # here we sum (per original code)
+                    score.append(sum(chunk))
+                    idx += count
+
+            elif dim in ['naturalness', 'coherence', 'groundedness', 'understandability']:
+                src_list, output_list, ctx_list = [], [], []
+                for i in range(n_data):
+                    src_list.append(data[i]['source'] if dim == 'coherence' else '')
+                    output_list.append(data[i]['system_output'])
+                    ctx_list.append(data[i]['context'] if dim == 'groundedness' else '')
+
+                inputs = add_question(
+                    dimension=dim,
+                    output=output_list,
+                    src=src_list,
+                    context=ctx_list,
+                    task=self.task
+                )
+                score = self.scorer.score(inputs)
             else:
-                raise NotImplementedError('The input format for this dimension is still undefined. \
-                                           Please customize it first.')
-            
+                raise NotImplementedError(
+                    f"Dimension '{dim}' not implemented for dialogue."
+                )
+
             for i in range(n_data):
                 eval_scores[i][dim] = score[i]
 
-        # Customize your overall score here.
-        if overall == True:
+        if overall:
             for i in range(n_data):
                 eval_scores[i]['overall'] = np.mean(list(eval_scores[i].values()))
 
@@ -187,49 +182,35 @@ class DialogEvaluator:
 class D2tEvaluator:
     def __init__(self, max_length=1024, device='cuda:0', cache_dir=None):
         """ Set up evaluator for data-to-text """
-        self.scorer = UniEvaluator(model_name_or_path='MingZhong/unieval-sum', 
-                                   max_length=max_length, 
-                                   device=device, cache_dir=cache_dir)
+        self.scorer = UniEvaluator(
+            model_name_or_path='MingZhong/unieval-sum',
+            max_length=max_length,
+            device=device,
+            cache_dir=cache_dir
+        )
         self.task = 'data2text'
         self.dimensions = ['naturalness', 'informativeness']
 
     def evaluate(self, data, dims=None, overall=True):
-        """
-            Get the scores of all the given dimensions
-
-            dims: A list of dimensions to be evaluated. If dims is None, D2tEvaluator will evaluate
-                  two dimensions: naturalness and informativeness.
-
-            overall: indicates whether the overall score is to be calculated.
-                     Overall score can be customized to a combination of scores based on different
-                     dimensions. The default here is the average score of all the given dimensions.
-        """
         n_data = len(data)
         eval_scores = [{} for _ in range(n_data)]
-
-        if dims == None:
-            eval_dims = self.dimensions
-        else:
-            assert isinstance(dims, list)
-            eval_dims = dims
+        eval_dims = dims if dims is not None else self.dimensions
 
         for dim in eval_dims:
-            # print('Evaluating {} of {} samples !!!'.format(dim, n_data))
-
-            output_list, ref_list = [], []
-            for i in range(n_data):
-                output_list.append(data[i]['system_output'])
-                ref_list.append(data[i]['reference'])
-
-            input_list = add_question(dimension=dim, output=output_list, 
-                                      ref=ref_list, task=self.task)
-            score = self.scorer.score(input_list)
+            output_list = [d['system_output'] for d in data]
+            ref_list    = [d['reference']     for d in data]
+            inputs = add_question(
+                dimension=dim,
+                output=output_list,
+                ref=ref_list,
+                task=self.task
+            )
+            score = self.scorer.score(inputs)
 
             for i in range(n_data):
                 eval_scores[i][dim] = score[i]
 
-        # Customize your overall score here.
-        if overall == True:
+        if overall:
             for i in range(n_data):
                 eval_scores[i]['overall'] = np.mean(list(eval_scores[i].values()))
 
@@ -239,66 +220,71 @@ class D2tEvaluator:
 class FactEvaluator:
     def __init__(self, max_length=1024, device='cuda:0', cache_dir=None):
         """ Set up evaluator for factual consistency detection """
-        self.scorer = UniEvaluator(model_name_or_path='MingZhong/unieval-fact', 
-                                   max_length=max_length, 
-                                   device=device, cache_dir=cache_dir)
+        self.scorer = UniEvaluator(
+            model_name_or_path='MingZhong/unieval-fact',
+            max_length=max_length,
+            device=device,
+            cache_dir=cache_dir
+        )
         self.task = 'fact'
         self.dim = 'consistency'
-    
+
     def evaluate(self, data):
         """
-            Get the factual consistency score (only 1 dimension for this task)
+        Get the factual consistency score (only 1 dimension for this task).
         """
         n_data = len(data)
         eval_scores = [{} for _ in range(n_data)]
 
-        # print('Evaluating {} of {} samples !!!'.format(self.dim, n_data))
+        # 1) Flatten every sentence, while building a matching src_expanded.
+        output_list = []
+        src_expanded = []
+        n_sents = []
+        for i, sample in enumerate(data):
+            source = sample['source']
+            sents = safe_sent_tokenize(sample['system_output'])
+            n_sents.append(len(sents))
+            for sent in sents:
+                output_list.append(sent)
+                src_expanded.append(source)
 
-        # Calculate average sentence-level scores for facutal consistency
-        src_list, output_list = [], []
-        n_sents = [] # the number of sentences in the claim
-        for i in range(n_data):
-            source = data[i]['source']
-            system_outputs = sent_tokenize(data[i]['system_output'])
-            n_sents.append(len(system_outputs))
-            for j in range(len(system_outputs)):
-                src_list.append(source)
-                output_list.append(system_outputs[j])
-        input_list = add_question(dimension=self.dim, output=output_list, 
-                                  src=src_list, task=self.task)
-        sent_score = self.scorer.score(input_list)
-        
-        # Get average score for each sample
-        start_idx = 0
-        score = []
-        for cur_n_sent in n_sents:
-            score.append(sum(sent_score[start_idx: start_idx + cur_n_sent]) / cur_n_sent)
-            start_idx += cur_n_sent
-           
-        for i in range(n_data):
-            eval_scores[i][self.dim] = score[i]
+        # sanity check
+        assert len(output_list) == len(src_expanded), (
+            f"output_list ({len(output_list)}) != src_expanded ({len(src_expanded)})"
+        )
+
+        # 2) Build inputs and score every sentence
+        inputs = add_question(
+            dimension=self.dim,
+            output=output_list,
+            src=src_expanded,
+            task=self.task
+        )
+        sent_scores = self.scorer.score(inputs)
+
+        # 3) Re-aggregate per-example averages
+        scores = []
+        idx = 0
+        for count in n_sents:
+            # safe_sent_tokenize ensures count >= 1
+            chunk = sent_scores[idx: idx + count]
+            scores.append(sum(chunk) / count)
+            idx += count
+
+        # 4) Fill in the returns
+        for i, sc in enumerate(scores):
+            eval_scores[i][self.dim] = sc
 
         return eval_scores
+
 
 def get_evaluator(task, max_length=1024, device='cuda:0', cache_dir=None):
     assert task in ['summarization', 'dialogue', 'data2text', 'fact']
     if task == 'summarization':
-        return SumEvaluator(max_length=max_length,
-                            device=device,
-                            cache_dir=cache_dir)
-    elif task == 'dialogue':
-        return DialogEvaluator(max_length=max_length,
-                               device=device,
-                               cache_dir=cache_dir)
-    elif task == 'data2text':
-        return D2tEvaluator(max_length=max_length,
-                            device=device,
-                            cache_dir=cache_dir)
-    elif task == 'fact':
-        return FactEvaluator(max_length=max_length,
-                             device=device,
-                             cache_dir=cache_dir)
-    else:
-        raise NotImplementedError('Other tasks are not implemented, \
-                                   please customize specific tasks here.')
-    
+        return SumEvaluator(max_length, device, cache_dir)
+    if task == 'dialogue':
+        return DialogEvaluator(max_length, device, cache_dir)
+    if task == 'data2text':
+        return D2tEvaluator(max_length, device, cache_dir)
+    if task == 'fact':
+        return FactEvaluator(max_length, device, cache_dir)

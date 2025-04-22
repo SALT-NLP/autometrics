@@ -8,108 +8,139 @@ import numpy as np
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
 class BARTScorer:
-    def __init__(self, device='cuda:0', max_length=1024, checkpoint='facebook/bart-large-cnn'):
-        # Set up model
-        self.device = device
-        self.max_length = max_length
+    def __init__(
+        self,
+        device: str = None,
+        max_length: int = None,
+        checkpoint: str = "facebook/bart-large-cnn"
+    ):
+        # Set up tokenizer and model
         self.tokenizer = BartTokenizer.from_pretrained(checkpoint)
         self.model = BartForConditionalGeneration.from_pretrained(checkpoint)
         self.model.eval()
-        self.model.to(device)
+        # pick device
+        self.device = (
+            torch.device(device)
+            if device is not None
+            else torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        )
+        self.model.to(self.device)
 
-        # Set up loss
-        self.loss_fct = nn.NLLLoss(reduction='none', ignore_index=self.model.config.pad_token_id)
-        self.lsm = nn.LogSoftmax(dim=1)
+        # never exceed the model’s own max_position_embeddings
+        self.max_length = (
+            max_length
+            if max_length is not None
+            else self.tokenizer.model_max_length
+        )
 
-    def load(self, path=None):
-        """ Load model from paraphrase finetuning """
+        # loss & log‐softmax
+        self.loss_fct = nn.NLLLoss(
+            reduction="none", ignore_index=self.tokenizer.pad_token_id
+        )
+        self.lsm = nn.LogSoftmax(dim=-1)
+
+    def load(self, path: str = None):
+        """Load model weights (e.g. after paraphrase fine‑tuning)."""
         if path is None:
-            path = 'models/bart.pth'
-        self.model.load_state_dict(torch.load(path, map_location=self.device))
+            path = "models/bart.pth"
+        self.model.load_state_dict(
+            torch.load(path, map_location=self.device)
+        )
 
-    def score(self, srcs, tgts, batch_size=4):
-        """ Score a batch of examples """
+    def score(self, srcs: List[str], tgts: List[str], batch_size: int = 4):
+        """Score a batch of (source, target) pairs, returning log‑probability scores."""
         score_list = []
         for i in range(0, len(srcs), batch_size):
-            src_list = srcs[i: i + batch_size]
-            tgt_list = tgts[i: i + batch_size]
+            src_batch = srcs[i : i + batch_size]
+            tgt_batch = tgts[i : i + batch_size]
             try:
                 with torch.no_grad():
-                    encoded_src = self.tokenizer(
-                        src_list,
+                    # tokenize
+                    enc_src = self.tokenizer(
+                        src_batch,
                         max_length=self.max_length,
                         truncation=True,
                         padding=True,
-                        return_tensors='pt'
+                        return_tensors="pt",
                     )
-                    encoded_tgt = self.tokenizer(
-                        tgt_list,
+                    enc_tgt = self.tokenizer(
+                        tgt_batch,
                         max_length=self.max_length,
                         truncation=True,
                         padding=True,
-                        return_tensors='pt'
+                        return_tensors="pt",
                     )
-                    src_tokens = encoded_src['input_ids'].to(self.device)
-                    src_mask = encoded_src['attention_mask'].to(self.device)
 
-                    tgt_tokens = encoded_tgt['input_ids'].to(self.device)
-                    tgt_mask = encoded_tgt['attention_mask']
-                    tgt_len = tgt_mask.sum(dim=1).to(self.device)
+                    src_ids = enc_src.input_ids.to(self.device)
+                    src_mask = enc_src.attention_mask.to(self.device)
 
+                    tgt_ids = enc_tgt.input_ids.to(self.device)
+                    tgt_mask = enc_tgt.attention_mask.to(self.device)
+                    tgt_lens = tgt_mask.sum(dim=1).to(self.device)
+
+                    # now call BART with explicit decoder mask
                     output = self.model(
-                        input_ids=src_tokens,
+                        input_ids=src_ids,
                         attention_mask=src_mask,
-                        labels=tgt_tokens
+                        decoder_attention_mask=tgt_mask,
+                        labels=tgt_ids,
                     )
-                    logits = output.logits.view(-1, self.model.config.vocab_size)
-                    loss = self.loss_fct(self.lsm(logits), tgt_tokens.view(-1))
-                    loss = loss.view(tgt_tokens.shape[0], -1)
-                    loss = loss.sum(dim=1) / tgt_len
-                    curr_score_list = [-x.item() for x in loss]
-                    score_list += curr_score_list
 
-            except RuntimeError:
+                    # flatten logits and compute per‑token NLL
+                    logits = output.logits.view(-1, self.model.config.vocab_size)
+                    logp = self.lsm(logits)
+                    losses = self.loss_fct(logp, tgt_ids.view(-1))
+                    losses = losses.view(tgt_ids.size(0), -1)
+                    # average over true length
+                    curr_scores = [-(l.sum().item() / lgt) for l, lgt in zip(losses, tgt_lens)]
+                    score_list.extend(curr_scores)
+
+            except RuntimeError as e:
                 traceback.print_exc()
-                print(f'source: {src_list}')
-                print(f'target: {tgt_list}')
-                exit(0)
+                raise RuntimeError(
+                    f"Error scoring batch starting at index {i}: {e}"
+                ) from e
+
         return score_list
 
-    def multi_ref_score(self, srcs, tgts: List[List[str]], agg="mean", batch_size=4):
-        # Assert we have the same number of references
-        ref_nums = [len(x) for x in tgts]
-        if len(set(ref_nums)) > 1:
-            raise Exception("You have different number of references per test sample.")
+    def multi_ref_score(
+        self,
+        srcs: List[str],
+        tgts: List[List[str]],
+        agg: str = "mean",
+        batch_size: int = 4,
+    ):
+        # ensure uniform number of references
+        ref_counts = [len(r) for r in tgts]
+        if len(set(ref_counts)) > 1:
+            raise ValueError("All examples must have the same number of references.")
+        num_refs = ref_counts[0]
 
-        ref_num = len(tgts[0])
-        score_matrix = []
-        for i in range(ref_num):
-            curr_tgts = [x[i] for x in tgts]
-            scores = self.score(srcs, curr_tgts, batch_size)
-            score_matrix.append(scores)
+        # score each “column” of references
+        matrix = []
+        for idx in range(num_refs):
+            col = [refs[idx] for refs in tgts]
+            matrix.append(self.score(srcs, col, batch_size))
+        arr = np.array(matrix)  # shape (num_refs, batch_size)
         if agg == "mean":
-            score_list = np.mean(score_matrix, axis=0)
+            return list(arr.mean(axis=0))
         elif agg == "max":
-            score_list = np.max(score_matrix, axis=0)
+            return list(arr.max(axis=0))
         else:
-            raise NotImplementedError
-        return list(score_list)
+            raise ValueError(f"Unknown agg mode: {agg}")
 
-    def test(self, batch_size=3):
-        """ Test """
-        src_list = [
-            'This is a very good idea. Although simple, but very insightful.',
-            'Can I take a look?',
-            'Do not trust him, he is a liar.'
+    def test(self, batch_size: int = 3):
+        srcs = [
+            "This is a very good idea. Although simple, but very insightful.",
+            "Can I take a look?",
+            "Do not trust him, he is a liar.",
         ]
-
-        tgt_list = [
+        tgts = [
             "That's stupid.",
             "What's the problem?",
-            'He is trustworthy.'
+            "He is trustworthy.",
         ]
-
-        print(self.score(src_list, tgt_list, batch_size))
+        print(self.score(srcs, tgts, batch_size))
 
 
 class BARTScore(ReferenceBasedMetric):
@@ -142,7 +173,7 @@ Fine-tuning on downstream tasks (e.g., summarization, paraphrasing) and prompt e
 BARTScore is computed as:
 
 $$
-BARTScore = \sum _{t=1}^{m} \omega _{t} \log p( y _{t} \mid y _{\text{<}t}, x, \theta )
+BARTScore = \sum _{t=1}^{m} \omega _{t} \log p ( y _{t} \mid y _{\text{<}t}, x, \theta )
 $$
 
 where:
@@ -238,93 +269,92 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu  """
-
-    def __init__(self, batch_size=4, model='facebook/bart-large-cnn'):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.bart_scorer = BARTScorer(device=self.device, checkpoint=model)
+    def __init__(
+        self, batch_size: int = 4, model: str = "facebook/bart-large-cnn"
+    ):
+        super().__init__(
+            name=f"BARTScore_{model.split('/')[-1]}",
+            description=(
+                "BARTScore is a reference-based metric for evaluating text quality "
+                "using a pre-trained BART model to compute likelihoods."
+            ),
+        )
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
+        self.bart_scorer = BARTScorer(
+            device=str(self.device), max_length=None, checkpoint=model
+        )
         self.batch_size = batch_size
 
-        name = "BARTScore" + "_" + model.split("/")[-1]
-        description = "BARTScore is a reference-based metric for evaluating the quality of generated text. It uses a pre-trained BART model to compute the likelihood of the generated text given the reference text, providing a score that reflects the fluency and relevance of the generated content."
-
-        super().__init__(name, description)
-
-    def calculate(self, input, output, references=None, **kwargs):
-        """
-        Calculate BARTScore for the given input and output.
-        """
-        if references is None:
-            references = []
-
-        out = None
-        if len(references) > 1:
-            out = self.bart_scorer.multi_ref_score([output], [references], agg="max", batch_size=self.batch_size)
+    def calculate(self, input: str, output: str, references=None, **kwargs):
+        refs = references or []
+        if len(refs) > 1:
+            scores = self.bart_scorer.multi_ref_score(
+                [output], [refs], agg="max", batch_size=self.batch_size
+            )
         else:
-            out = self.bart_scorer.score([output], [references[0]], batch_size=self.batch_size)
+            # single-ref case
+            scores = self.bart_scorer.score(
+                [output], [refs[0] if refs else ""], batch_size=self.batch_size
+            )
+        return scores[0]
 
-        return out[0]
-    
-    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
-        """
-        Calculate BARTScore for the given inputs and outputs in batches.
-        """
-        if references is None:
-            references = [[] for _ in range(len(inputs))]
-
-        # BARTScore expects the multireferences to be passed with the same number of references.  This is not a requirement in our setting.
-        # Thus we must group the references by the number of references and compute the scores for each group.
-        ref_nums = [len(x) for x in references]
-
+    def calculate_batched(
+        self, inputs: List[str], outputs: List[str], references=None, **kwargs
+    ):
+        refs = references or [[] for _ in inputs]
+        # group by num refs to handle variable ref counts
         groups = {}
-        for i, ref_num in enumerate(ref_nums):
-            if ref_num not in groups:
-                groups[ref_num] = []
-            groups[ref_num].append(i)
+        for i, r in enumerate(refs):
+            groups.setdefault(len(r), []).append(i)
 
-        out = []
-        out_indices = []
-        for ref_num, indices in groups.items():
-            curr_outputs = [outputs[i] for i in indices]
-            curr_references = [references[i] for i in indices]
-
-            if ref_num > 1:
-                curr_out = self.bart_scorer.multi_ref_score(curr_outputs, curr_references, agg="max", batch_size=self.batch_size)
+        all_scores = [0] * len(outputs)
+        for ref_count, idxs in groups.items():
+            outs = [outputs[i] for i in idxs]
+            rfs = [refs[i] for i in idxs]
+            if ref_count > 1:
+                sc = self.bart_scorer.multi_ref_score(
+                    outs, rfs, agg="max", batch_size=self.batch_size
+                )
             else:
-                curr_out = self.bart_scorer.score(curr_outputs, curr_references[0], batch_size=self.batch_size)
+                # single‐ref or no-ref
+                single_refs = [r[0] if r else "" for r in rfs]
+                sc = self.bart_scorer.score(
+                    outs, single_refs, batch_size=self.batch_size
+                )
+            for idx, score in zip(idxs, sc):
+                all_scores[idx] = score
 
-            out.extend(curr_out)
-            out_indices.extend(indices)
+        return all_scores
 
-        # Reorder the scores to match the original order of the outputs
-        new_out = [0] * len(outputs)
-        for i, index in enumerate(out_indices):
-            new_out[index] = out[i]
 
-        return new_out
-    
 if __name__ == "__main__":
     # Example usage
-    unieval = BARTScore()
-    input = "Peter and Elizabeth took a taxi to attend the night party in the city. \
-             While in the party, Elizabeth collapsed and was rushed to the hospital."
-    output = "Peter and Elizabeth attend party city. Elizabeth rushed hospital."
-    references = ["Elizabeth was hospitalized after attending a party with Peter."]
-    scores = unieval.calculate(input, output, references)
-    print("BARTScore scores:", scores)
+    metric = BARTScore()
 
-    # Test batch processing
+    # single example
+    inp = (
+        "Peter and Elizabeth took a taxi to attend the night party in the city. "
+        "While in the party, Elizabeth collapsed and was rushed to the hospital."
+    )
+    out = "Peter and Elizabeth attend party city. Elizabeth rushed hospital."
+    refs = ["Elizabeth was hospitalized after attending a party with Peter."]
+    score = metric.calculate(inp, out, references=refs)
+    print("BARTScore:", score)
+
+    # batched examples
     inputs = [
-        "Peter and Elizabeth took a taxi to attend the night party in the city. \
-             While in the party, Elizabeth collapsed and was rushed to the hospital.",
-        "The cat sat on the mat."
+        inp,
+        "The cat sat on the mat.",
     ]
     outputs = [
-        "Peter and Elizabeth attend party city. Elizabeth rushed hospital.",
-        "The cat is on the mat."
+        out,
+        "The cat is on the mat.",
     ]
     references = [
         ["Elizabeth was hospitalized after attending a party with Peter."],
-        ["The cat sat on the mat.", "The cat is on the mat.", "The cat is on the rug."]
+        ["The cat sat on the mat.", "The cat is on the mat.", "The cat is on the rug."],
     ]
-    scores = unieval.calculate_batched(inputs, outputs, references)
-    print("UniEvalSum batch scores:", scores)
+    batch_scores = metric.calculate_batched(inputs, outputs, references=references)
+    print("BARTScore batch scores:", batch_scores)

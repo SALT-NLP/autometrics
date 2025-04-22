@@ -9,3 +9,4 @@ pyemd
 scikit-learn
 numpy
 levenshtein
+prometheus_eval

@@ -6,21 +6,34 @@ from typing import List, Optional
 from autometrics.metrics.MultiMetric import MultiMetric
 from autometrics.metrics.Metric import Metric
 
-class Dataset(BaseModel):
+class Dataset():
     """
     Dataset class for handling and manipulating datasets.
     """
-    dataframe: pd.DataFrame
-    target_columns: List[str]
-    ignore_columns: List[str]
-    metric_columns: List[str]
-    name: str
-    data_id_column: Optional[str] = None
-    model_id_column: Optional[str] = None
-    input_column: Optional[str] = None
-    output_column: Optional[str] = None
-    reference_columns: Optional[List[str]] = None
-    metrics: List[Metric] = Field(default_factory=list)
+    # dataframe: pd.DataFrame
+    # target_columns: List[str]
+    # ignore_columns: List[str]
+    # metric_columns: List[str]
+    # name: str
+    # data_id_column: Optional[str] = None
+    # model_id_column: Optional[str] = None
+    # input_column: Optional[str] = None
+    # output_column: Optional[str] = None
+    # reference_columns: Optional[List[str]] = None
+    # metrics: List[Metric] = Field(default_factory=list)
+
+    def __init__(self, dataframe: pd.DataFrame, target_columns: List[str], ignore_columns: List[str], metric_columns: List[str], name: str, data_id_column: Optional[str] = None, model_id_column: Optional[str] = None, input_column: Optional[str] = None, output_column: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None):
+        self.dataframe = dataframe
+        self.target_columns = target_columns
+        self.ignore_columns = ignore_columns
+        self.metric_columns = metric_columns
+        self.name = name
+        self.data_id_column = data_id_column
+        self.model_id_column = model_id_column
+        self.input_column = input_column
+        self.output_column = output_column
+        self.reference_columns = reference_columns
+        self.metrics = metrics if metrics else []
 
     class Config:
         arbitrary_types_allowed = True

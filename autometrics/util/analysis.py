@@ -22,8 +22,10 @@ def display_top_5_metrics_by_validation_precomputed(validation_data, test_data):
             # Format as (metric_abbr, val_corr, test_corr)
             top_correlations[target_column].append(f"{metric_abbr} ({test_corr})")
 
+    num_cols = min(5, max(len(v) for v in top_correlations.values()))
+
     # Create a DataFrame from the dictionary
-    df = pd.DataFrame.from_dict(top_correlations, orient='index', columns=[f'Top {i+1} Metric & Value' for i in range(5)])
+    df = pd.DataFrame.from_dict(top_correlations, orient='index', columns=[f'Top {i+1} Metric & Value' for i in range(num_cols)])
     
     return df
 

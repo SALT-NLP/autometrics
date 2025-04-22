@@ -1,0 +1,10 @@
+Train size: 140 Validation size: 140 Test size: 420
+litellm_proxy/meta-llama/Meta-Llama-3.3-70b-Instruct
+calculating scores...
+computing bert embedding.
+computing greedy matching.
+done in 3.82 seconds, 36.64 sentences/sec
+calculating scores...
+computing bert embedding.
+computing greedy matching.
+done in 1.98 seconds, 70.86 sentences/sec

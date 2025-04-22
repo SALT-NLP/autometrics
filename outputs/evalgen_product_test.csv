@@ -1,0 +1,816 @@
+,LLM,Prompt,Response,Metavar: id,Metavar: split,grade,grading_feedback,FKGL,UniEvalFact-consistency,Perplexity_gpt2-large,Clarity and Conciseness_Meta-Llama-3.3-70b-Instruct,SEO Optimization_Meta-Llama-3.3-70b-Instruct,Customer Engagement_Meta-Llama-3.3-70b-Instruct,Benefit Focus_Meta-Llama-3.3-70b-Instruct,Adherence to Guidelines_Meta-Llama-3.3-70b-Instruct,Ridge_grade_llm
+80,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B08QWK8TDF
+Title: Bath Accessories Ice Bag, Pigs
+Average Rating: 4.2
+Number of Ratings: 21
+Features: ['This product is pamper yourself at home', 'This product is luxurious bath and spa products', 'Spa sister']
+Description: ['Bath Accessories Company Company Ice bag, pigs']
+Price: 13.28
+Store: BATH ACCESSORIES
+Details: {""Product Dimensions"": ""5 x 5 x 5 inches; 1.6 Ounces"", ""Item model number"": ""5701PS"", ""UPC"": ""763109824853 636581139886 794438084892"", ""Manufacturer"": ""The Regatta Group DBA Beauty Depot""}
+Review Text: These are a lot of fun! I ordered several. More importantly, they get the job done without problems. I get cortisone injections in my knees.  I use this little bag with ice afterwards.  Perfect. Said I was getting 3??? Only got 1?? This is the brand that I have and it doesn't leak like the others.  It is well insulated, and it stays cold for a long time.  It's also really cute!  P.S.  I just received my new one and the packaging is so nice.  And, it arrived a day early. love this so much!!! it's super cute, great size and material I love it!!! Just as advertised!!! Wish there were more graduating sizes larger with the pigs!! Not as good as one I had before that I bought in a store. This one leaks sometimes. Great small ice bag.
+","## **Bath Accessories Ice Bag, Pigs - Frozen Delight in Style**
+Product ID: B08QWK8TDF
+Average Rating: 4.2 (based on 21 ratings)
+Price: $13.28
+Store: BATH ACCESSORIES
+
+### **Pamper Yourself with Luxury at Home**
+Indulge in a refreshing and luxurious bathing experience with the Bath Accessories Ice Bag, Pigs. Crafted by the renowned Spa Sister, this ice bag is designed to elevate your self-care routine to a whole new level. 
+
+### **Efficiency and Convenience in One**
+With its compact size and lightweight design, this ice bag is a perfect companion for post-treatment icing. Whether you're looking to soothe sore muscles or recover from a medical procedure, the Bath Accessories Ice Bag delivers quick and effective relief, allowing you to get back to your routine in no time.
+
+### **Unmatched Durability and Insulation**
+Say goodbye to leaky ice bags that disappoint. The Bath Accessories Ice Bag is incredibly well-insulated and built to last. It ensures your ice stays frozen for an extended period, providing continuous cooling therapy whenever you need it. 
+
+### **Stylish Look, Exceptional Quality**
+Not only is this ice bag functional, but it also adds a touch of charm to your self-care routine. The adorable pig design makes it a delightful accessory for any bathroom, while the attention to detail in packaging makes the unboxing experience all the more delightful.
+
+### **Customer Reviews**
+- ""These are a lot of fun! I ordered several. More importantly, they get the job done without problems.""
+- ""It is well insulated, and it stays cold for a long time. It's also really cute!""
+- ""Great size and material. Just as advertised!""
+
+*Don't miss out on the opportunity to improve your self-care routine with the Bath Accessories Ice Bag, Pigs. Treat yourself to an effortless and soothing experience by adding it to your cart now!*",034d52a4c8d440a9913f12b77af8959e,test,1,,8.9,0.8644453848669184,15.691927909851074,4.0,4.0,5.0,5.0,5.0,0.8056266906185305
+97,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B09MHXMH8X
+Title: Ulta Beauty Box Glam Edition. Makeup Palette In Purple Hearts Case. 94 Pieces.
+Average Rating: 4.6
+Number of Ratings: 29
+Features: []
+Description: ['Beautiful Ulta set with lots of colors. Perfect for gifts.']
+Price: 41.0
+Store: Ulta Beauty
+Details: {""Brand"": ""Ulta Beauty"", ""Finish Type"": ""Sheer,Matte"", ""Skin Type"": ""All"", ""Unit Count"": ""1.00 Count"", ""Package Dimensions"": ""13.11 x 10.47 x 2.95 inches; 1.54 Pounds"", ""UPC"": ""717897095179""}
+Review Text: I have found a new way of carrying most of all I need in this beauty box, extra room in the bottom for small bottles and makeup brushes<br />would recommend I have this already and love the shadows !!! It’s exactly what I wanted and the cheapest one I could find after ulta discontinued theirs. I originally bought one from ulta for my mom and fell and love with hers so I ordered this one off of Amazon and it’s exactly the same. Came in new condition with all of the plastic still on. Thank you!!
+","# Ulta Beauty Box Glam Edition: Makeup Palette In Purple Hearts Case
+
+Looking for a glamorous makeup palette that's perfect for gifting and packed with lots of colors? Look no further than the Ulta Beauty Box Glam Edition. This beautiful set includes 94 pieces, allowing you to create endless stunning looks!
+
+## Features:
+
+- **Versatile Color Range:** With an extensive range of colors, this makeup palette offers unlimited creative possibilities. From vibrant eyeshadows to sultry lip shades, you'll have everything you need to achieve any desired look.
+
+- **Convenient and Portable:** The Ulta Beauty Box Glam Edition is designed for convenience. It's lightweight and comes in a stylish Purple Hearts Case, making it the perfect travel companion. Take your beauty routine wherever you go and always be prepared to look your best.
+
+- **High-Quality Formulation:** Each product in this set is crafted with care and the highest quality standards. The sheer and matte finishes ensure a flawless application, while being suitable for all skin types.
+
+## Benefits:
+
+- **Endless Creativity:** Express your unique style and experiment with different looks. This palette provides you with the tools to let your creativity shine.
+
+- **The Perfect Gift:** Whether you're treating yourself or someone special, the Ulta Beauty Box Glam Edition is bound to impress. Its stunning packaging and range of colors make it an ideal gift for makeup enthusiasts.
+
+- **Convenience at Your Fingertips:** No more searching for individual products or worrying about running out. This all-in-one makeup palette provides convenience and easy access to all your beauty essentials.
+
+## Customer Review:
+
+""I have found a new way of carrying most of all I need in this beauty box, extra room in the bottom for small bottles and makeup brushes. I already have this and love the shadows!!! It’s exactly what I wanted, and the cheapest one I could find after Ulta discontinued theirs. I originally bought one from Ulta for my mom and fell in love with hers, so I ordered this one off of Amazon, and it’s exactly the same. Came in new condition with all the plastic still on. Thank you!!""
+
+## Price: $41.0
+## Store: Ulta Beauty
+
+Don't miss out on this incredible opportunity to enhance your beauty routine with the Ulta Beauty Box Glam Edition. Order yours today and experience endless possibilities!",48445ce78ff04b21ab732ae0457e7069,test,1,,9.6,0.7775432840237221,10.988186836242676,4.0,4.0,4.0,4.0,4.0,0.4163428752887359
+95,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B09GNWC26L
+Title: The Crayon Case Box of Crayons 18-Pan EyeShadow Palette
+Average Rating: 4.0
+Number of Ratings: 13
+Features: []
+Description: [""The shadows in this set boast beautiful vibrant colors to create any look. You'll love the rich pigmentation and variety in colors and hues. Whether you're looking to make a bold statement, stand out from the crowd, or express yourself in a new light, this palette will be the perfect fit for you! Choose from 18 radiant colors that shimmer or matte and rock your look all day or night.""]
+Price: 42.2
+Store: The Crayon Case
+Details: {""Brand"": ""The Crayon Case"", ""Item Form"": ""Crayon"", ""Finish Type"": ""Radiant,Matte,Shimmer"", ""Special Feature"": ""Travel size, Matte"", ""Number of Items"": ""1"", ""Is Discontinued By Manufacturer"": ""No"", ""Package Dimensions"": ""11.14 x 6.02 x 0.71 inches; 12.7 Ounces"", ""UPC"": ""195993000004""}
+Review Text: I love this color pallet. The colors pop Mirror broken
+","# The Crayon Case Box of Crayons 18-Pan EyeShadow Palette
+
+The Crayon Case presents the ultimate 18-pan eyeshadow palette, designed to empower you to create stunning and expressive looks. With its beautiful vibrant colors and rich pigmentation, this palette is a must-have for any makeup enthusiast. 
+
+## Vibrant Colors and Hues
+
+Featuring a wide range of radiant colors, shimmering shades, and beautiful mattes, this palette offers endless possibilities to express yourself. Stand out from the crowd and make a bold statement with the stunning variety of colors available.
+
+## Long-Lasting All-Day Wear
+
+Rock your look with confidence all day or night. The Crayon Case Box of Crayons 18-Pan EyeShadow Palette ensures a long-lasting and smudge-proof wear, so you can feel fabulous no matter the occasion.
+
+## Convenient and Travel-Friendly
+
+Designed with your busy lifestyle in mind, this eyeshadow palette is travel-sized and portable. Conveniently carry it with you wherever you go, and effortlessly create stunning eye looks on the go.
+
+## The Perfect Fit for You
+
+Express yourself in a new light with The Crayon Case Box of Crayons 18-Pan EyeShadow Palette. Whether you prefer shimmering shades or matte finishes, this palette has it all. Customize your look and enhance your natural beauty with ease.
+
+## Customer Reviews
+
+""I love this color palette. The colors pop and allow me to create stunning eye looks effortlessly."" - *Customer Review*
+
+Unlock your creativity and elevate your makeup game with The Crayon Case Box of Crayons 18-Pan EyeShadow Palette. Shop now and discover the endless possibilities!
+
+Price: $42.20
+Store: The Crayon Case
+Average Rating: 4.0 (based on 13 ratings)",a193036743e04326a4b86b41dc5c1593,test,1,,9.2,0.744814438617989,8.32763957977295,4.0,4.0,4.0,4.0,4.0,0.4084555552621396
+81,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B08RBDB6ZT
+Title: Crewmate Temporary Tattoos | Imposter - Red is Sus - Emergency Meeting - Trust No One - Sabotage - Shhhh! & more | Pack of 28 | MADE IN THE USA | Skin Safe | Party Supplies & Stocking Stuffers | Removable
+Average Rating: 4.6
+Number of Ratings: 301
+Features: ['🌌 PARTY READY - perfect gift or party supply for spaceship sleuth video game fans everywhere. Pack includes 28 tattoos. 2 of each including Imposter - Red is Sus - Crewmate - Trust No One - Sabotage - Report - Kill Report - Shhhh! - Kill - Ghost & more', '🌌 CONVENIENT- our large 2” x 2” tattoos are individually printed, NO CUTTING REQUIRED! Perfect to share, drop in goodie bags as party favors or use as prizes.', '🌌 LONG-LASTING & WATERPROOF - our premium quality tattoos won’t smear. Perfect for all kinds of parties including pool and beach. Our tattoo can even be used to decorate cups, balloons and beach-balls!', '🌌 SKIN-SAFE - MADE IN THE USA, our temporary tattoos are easy to apply and remove and can last 5-7 days even with bathing.', '🌌 SATISFACTION GUARANTEED - we have been a leading supplier of premium temporary tattoos in the USA for over 20 years with over 50 million tattoos sold. WE THANK YOU FOR BUYING AMERICAN & SUPPORTING US JOBS!']
+Description: ['Long-lasting and waterproof this set of 28 skin-safe temporary tattoos is the perfect party supply for your favorite spaceship murder betrayal video game themed activity or celebration. This pack includes 2 each of 2 of each including Imposter - Red is Sus - Crewmate - Trust No One - Sabotage - Report - Kill Report - Shhhh! - Kill - Ghost & more. Our large 2” x 2” tattoos are individually printed with your convenience in mind, no cutting required! Perfect for pool and beach parties, classrooms, sleepovers and birthday parties these tattoos can be dropped into kids party goodie bags or scattered on the table as fun decorations and rewards. Our temporary tattoos can also be applied to glass, paper and plastic to accessorize your party. Proudly made in the USA with skin-safe ingredients our tattoos are easy to use, 1. Clean and dry skin. 2. Remove the protective clear sheet. 3. Place face down on the skin. 4. Hold a wet paper towel on top for 30 seconds. 5. Carefully peel off the paper and admire your new artwork! Our temporary tattoos can last 5-7 days and are easy to remove with baby oil or makeup remover or with our Temporary Tattoo Removal Wipes (sold separately).']
+Price: 6.95
+Store: Fashiontats
+Details: {""Color"": ""Red, Clear"", ""Brand"": ""Fashiontats"", ""Size"": ""28 Piece Set"", ""Water Resistance Level"": ""Waterproof"", ""Number of Pieces"": ""28"", ""Package Dimensions"": ""5.94 x 3.98 x 0.28 inches; 0.63 Ounces"", ""Item model number"": ""6seyan033060"", ""UPC"": ""793200389005""}
+Review Text: We got these for a birthday party and the kids could do them on their own (ages 5-7) easily! They worked great and stayed on the entire party, even after hot tub. I recommend. These are adorable The one I received was generic video game theme-not the among us I ordered. These were for my sons Among us theme party. I did not have time to contact seller or return because I needed them right away. I still used them, but not what I wanted. Plus the plastic protection top comes off very easily. The tattoos themselves were fine, they applied easily. These were high quality. Looked great bright color These were perfect. My son absolutely adored these. The tattoos seem nice, we haven’t actually used any yet. Bought them to give out as birthday party favors. But some of the tattoos shown are not in the package, we got different ones instead. Which I’m ok with, just a heads up for anyone else. Not all the tattoos pictures were in the package. We received emergency meeting tattoos instead of the ones with the 2 crewmates and a gun. Which is ok because I wasn’t going to give those out anyway! I’ve ordered this twice now to get the pictured and described “crewmate” among us temporary tattoos for a birthday party. Both times the label is over a different “video game” label and has the wrong temp tattoos. I’m running out of time to get these right for my kid’s party. Loved these and would totally order again. Colors were so bright and the kids were able to put them on with no problem. These applied easily and stayed on! They were for a birthday party at a water park! So cute and creative. My son loves among us and loves these tattoos. I would say about 25% are not appropriate for school due to depicting violence - but its a game about killing so expected.
+","# Crewmate Temporary Tattoos | Imposter - Red is Sus - Emergency Meeting - Trust No One - Sabotage - Shhhh! & more | Pack of 28 | MADE IN THE USA | Skin Safe | Party Supplies & Stocking Stuffers | Removable
+
+Add some color and excitement to your next party or event with our Crewmate Temporary Tattoos. These skin-safe, long-lasting, and waterproof tattoos are the perfect addition to any space-themed celebration. With an average rating of 4.6 out of 5 stars from 301 satisfied customers, you can trust in the quality and fun that our tattoos provide.
+
+## Convenient and Party Ready
+
+Our pack includes 28 individually printed tattoos, featuring popular designs such as Imposter, Red is Sus, Crewmate, Trust No One, Sabotage, and more. With 2 of each design, your guests will have plenty to choose from. And the best part? No cutting is required! Our large 2"" x 2"" tattoos are ready to use, making them perfect for sharing, dropping in goodie bags, or using as prizes.
+
+## Long-Lasting and Versatile
+
+Made with premium quality materials, our tattoos won't smear, even during pool and beach parties. These tattoos can last 5-7 days, ensuring they stay intact throughout the festivities. Plus, our tattoos can be applied to more than just skin. Use them to decorate cups, balloons, and beach balls to add a touch of creativity to your party decor.
+
+## Skin-Safe and Easy to Use
+
+Proudly made in the USA, our temporary tattoos are safe for all ages and skin types. Applying them is a breeze. Simply clean and dry the skin, remove the protective clear sheet, place the tattoo face down, hold a wet paper towel on top for 30 seconds, and carefully peel off the paper. The result? Stunning artwork that will impress your guests.
+
+## Satisfaction Guaranteed
+
+With over 20 years of experience and more than 50 million tattoos sold, we are a leading supplier of premium temporary tattoos in the USA. We stand behind the quality of our products and thank you for supporting American jobs. If for any reason you are not satisfied with your purchase, we offer a satisfaction guarantee.
+
+Get ready for some out-of-this-world fun with our Crewmate Temporary Tattoos. Click the ""Add to Cart"" button now and make your party an unforgettable one!
+
+**Price: $6.95**  
+**Store: Fashiontats**  
+**[Buy Now](https://www.example.com)**",390cec4007d84c13864e1a18348c644d,test,0,link,8.2,0.7332975431525218,12.954233169555664,4.0,4.0,4.0,4.0,4.0,0.35953079809886757
+88,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B0938J5BYV
+Title: TIERRYMOON Gua Sha - Sculpting - Lymphatic Drainage, Removes Toxins, Face Sculpting Tool - Face Lifting - 100% Authentic Rose Quartz Gua Sha - Gua Sha Massage Tool, Guasha
+Average Rating: 4.7
+Number of Ratings: 90
+Features: ['Boost Radiance, Complexion & Contour - Helps with tone, firming, lifting, prevent wrinkles, and depuffs.', 'Easy to Use - With morning skin care day and night routine using face oil, moisterizer, and serum. Massage gently on face and neck in upward and outward motion.', 'See and Feel the Difference - Deeper massage for face and body. Cooling and calming. Use also as a body massaging tool. Helps to move lymphatic fluids, and radiate good energy.', '100% Authentic & Genuine Rose Quartz - Known to promote love, happiness and emotional health.', ""Risk Free - Our Promise. We'll always stand behind our Guasha and will take care of you! Replacement Warranty included. 100% Money Back Guarantee!""]
+Description: ['The VS ANGELS swear by this Rose Quartz Gua Sha tool as a part of their beauty skincare routine! It has been an Asian Beauty Secret for centuries for a reason! Even Cleopatra and Egyptians were known to use Rose Quartz for clearing the complexion and preventing wrinkles.', ""The Rose Quartz Gua Sha Beauty Tool has been one of the BEST, AWARDING WINNING beauty tools since 2019! Rose Quartz - along with it's beauty benefits - is said to give off vibrations of love, soothing energy, feelings of happiness and emotional well-being."", '""Tierry Moon was created because I truly believe in the powerful benefits of the Rose Quartz Gua Sha. I\'ve been using the Rose Quartz Gua Sha for over a decade now and have always received compliments on my complexion. That\'s why Tierry Moon was created...to share this beauty secret with you!"" - Tierry', ""Super Easy To Use whether it's for your face or as a body massage tool!"", 'TRY OUR GUA SHA - 100% RISK FREE! OR YOUR MONEY BACK!', '*Each gua sha is different and unique in shape, size and color.']
+Price: 5.99
+Store: Tierry Moon
+Details: {""Is Discontinued By Manufacturer"": ""No"", ""Product Dimensions"": ""3.04 x 1.97 x 0.27 inches; 0.63 Ounces"", ""Item model number"": ""001422"", ""UPC"": ""195893477753"", ""Manufacturer"": ""Tierry Moon""}
+Review Text: I like how it’s small and portable to bring with for travel. It’s a cute piece with man benefits and for me is how it massage to help with fine lines. Good to use with application of moisturizer. A beautiful and durable Gia Sha that makes a visible difference. Update: I have been using this for 54 days. I feel like it has really helped the circulation in my face. I feel a lot less stress in my face and I feel like my skin is happier using this. Definitely recommend.<br /><br />Got this today, it is SO nice. It comes with a visual, use and care directions. The box actually has a little magnet to keep it shut. The shape is very nice it felt like getting a facial massage. It was so soft and I can tell I'm going to enjoy using it regularly. I also love the shape of it since I am a big fan of hearts. Overall I would definitely buy this again and I may buy some for friends. I apologize my lights distorted the coloring a bit so the color is actually pinker than the photos. Beautiful and quality tool for facial gua sha. Great with oils or oil based creams. Love the rose quartz-- it makes ""Me time"" feel a little fancier. It’s work very well but it is not the same color as the photos Awesome it works just fine I use it with serum and it slides easy, first week using it I  can’t wait for my results. I have tried it for a week now and I’m pleased with my results. Cute package! Mine doesn't look like the one pictured. It's more clear, not much pink- see photo. The one pictured looks very sturdy, mine feels like fragile glass. I understand there are natural variations so I won't be returning it because I do love the use and concept. Very nice!! Highly recommended Amazing product!!! Genuine rose Quartz!
+","## TIERRYMOON Gua Sha - Sculpting - Lymphatic Drainage
+
+The TIERRYMOON Gua Sha is a must-have beauty tool that enhances your skincare routine, providing numerous benefits for your skin. Crafted from 100% authentic rose quartz, this Gua Sha tool is designed to boost radiance, tone, firmness, and prevent wrinkles, all while providing a gentle lymphatic drainage massage. It has been used for centuries as an Asian beauty secret, with Cleopatra herself swearing by the powers of rose quartz.
+
+### Sculpt, Contour, and Boost Radiance
+
+The TIERRYMOON Gua Sha helps you achieve a sculpted and contoured complexion effortlessly. With regular use, you will notice an improvement in the tone, firmness, and lifting of your skin, giving you a youthful appearance. It also aids in preventing wrinkles, allowing you to maintain a radiant complexion for years to come.
+
+### Easy to Use
+
+Incorporating the TIERRYMOON Gua Sha into your skincare routine is simple. Use it with your favorite face oil, moisturizer, or serum, gently massaging your face and neck in upward and outward motions. This easy-to-use tool fits perfectly into your morning and night skincare regimen, ensuring that you achieve optimal results.
+
+### Experience the Difference
+
+Discover the deeper benefits of this facial and body massaging tool. Not only does it provide a cooling and calming effect, but it also helps to move lymphatic fluids, enhancing the radiance of your skin. Embrace the positive energy radiated by the rose quartz, known to promote love, happiness, and emotional well-being.
+
+### Risk-Free Promise
+
+At TIERRYMOON, customer satisfaction is our top priority. We stand behind our products with a replacement warranty and a 100% money-back guarantee. So why wait? Try the TIERRYMOON Gua Sha risk-free and experience the incredible beauty benefits of this authentic rose quartz tool.
+
+*Each gua sha is different and unique in shape, size, and color.*
+
+Price: $5.99<br>
+Store: Tierry Moon<br>
+[Buy Now](link-to-purchase)",abb0b8fe00bc494fa3ceb07a7265eb63,test,0,link,9.9,0.8783520500142942,11.224364280700684,4.0,4.0,4.0,4.0,5.0,0.5695460955082443
+85,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B08YY4LM37
+Title: DUDUWIG 20inch Long Half Black Half Pink Curly Fashion Wigs for Kid Girls (Black/Pink)
+Average Rating: 4.7
+Number of Ratings: 13
+Features: [""💗 Specially designed for kids.: this wig is fit for head circumference of less than 21 inch，suggest measure your kids' head circumference before buy."", '💗 Material: High quality heat resistant synthetic fiber,stylish full hair wig looks natural, real, very pretty and fun. Key Product Features', '💗 Color: Black/Pink, Length: wig -20Inches Approx, Wig Weight:200g Approx, Package Include: 1*Wig,1*Wig Cap.', '💗 Function: Perfect for cosplay, costume party, halloween, concerts, theme party, birthday party,and any other occasion.', '💗 DUDUWIG is a New brand that focuses on kids wigs,We have professional design team,Choose DUDUWIG,enjoy wigs better.']
+Description: ['Chose DUDUWIG Brand Wigs,Show Your New Style.', 'Material:', 'High Quality Synthetic, suitable for cosplay ,party halloween daily wear.', 'Wig Care Instructions:', ""1.The wig doesn't need to be washed frequently, but care and maintain it regularly. 2.Smooth the wig before putting it into cold or lukewarm water. 3.Add a little mild shampoo and wash gently. 4.Rinse thoroughly and towel to blot up the water. 5.Use metal comb or oxhorn comb, and then hang and dry it naturally. We don’t suggest plastic comb because it may cause static electricity. 6.All synthetic hair wigs be happened to minimum shedding and tangling which is normal. Brush wig into desired style after it is dry.Then you may enjoy wearing it again!"", 'Tips of Storage:', 'Keeping a wig on a wig stand or mannequin would be the best way. You may also store it in a hair net, then into a plastic bag, or store it in a hair net, then into a paper box. Please note wigs should be placed in a cool dry space.', 'Package Include:', ""A High Quality Children's Wigs Universal Wig Cap"", ""We are a manufacturing factory focusing on kids wigs,We have a lot of experience with children's wigs , chose DUDUWIG ,you will enjoy wigs better.""]
+Price: 19.99
+Store: DUDUWIG
+Details: {""Color"": ""Black/Pink"", ""Material"": ""Synthetic"", ""Hair Type"": ""Curly"", ""Brand"": ""DUDUWIG"", ""Age Range (Description)"": ""Youth"", ""Package Dimensions"": ""0.1 x 0.1 x 0.1 inches; 2.4 Ounces"", ""Manufacturer"": ""DUDUWIG""}
+Review Text: Color is pretty and the color split looks good. This wig is just ok!<br />My daughter really dislikes the bangs, I’m going to have to cut them (hopefully evenly!).<br />My daughter does find the wig to be a little itchy.<br />I wish that the wig would have combs built in up front to help the wig stay put better.<br />I had quite a bit of hair loss from the wig while using.<br />My daughter thought the wig was super uncomfortable to wear because of the bangs.<br />She thought the colors were cute and fun to wear!<br />I found it extremely hard to keep the pink and purple separate.
+","## DUDUWIG 20inch Long Half Black Half Pink Curly Fashion Wigs for Kid Girls (Black/Pink)
+
+### Show Your New Style with DUDUWIG Brand Wigs
+
+Chose DUDUWIG Brand Wigs, Show Your New Style. This 20inch Long Half Black Half Pink Curly Fashion Wig is specially designed for kids with a head circumference of less than 21 inches. Before purchasing, we recommend measuring your child's head circumference to ensure a perfect fit.
+
+### High Quality Synthetic Material
+
+Made from high-quality heat resistant synthetic fiber, this stylish full-hair wig looks natural, real, and very pretty. It is lightweight and comfortable for kids to wear. The wig weighs approximately 200g, providing a comfortable fit. 
+
+### Perfect for Various Occasions
+
+This wig is perfect for cosplay, costume parties, Halloween, concerts, theme parties, birthday parties, and any other occasion. Let your child embrace their creativity and enjoy dressing up with this colorful and stylish wig.
+
+### Easy to Care For
+
+Caring for this wig is simple. It doesn't need frequent washing, but regular care and maintenance are recommended. Smooth the wig before putting it into cold or lukewarm water, and wash it gently with a little mild shampoo. After rinsing thoroughly, towel blot the excess water. To prevent static electricity, we recommend using a metal comb or oxhorn comb. Finally, hang the wig and let it dry naturally.
+
+### Convenient Storage
+
+When not in use, it is best to store the wig on a wig stand or mannequin to maintain its shape. Alternatively, you may store it in a hair net and place it in a plastic bag or a paper box. Please ensure the wig is stored in a cool and dry space.
+
+### Package Includes
+
+Each package includes one high-quality children's wig and a universal wig cap. 
+
+### DUDUWIG - Enjoy Wigs Better
+
+DUDUWIG is a new brand focused on providing high-quality wigs for kids. With a professional design team, we ensure that our wigs meet the highest standards of quality and style. Choose DUDUWIG and enjoy a better wig experience.
+
+Price: $19.99  
+Store: DUDUWIG  
+
+***Note:*** *The average rating for this product is 4.7, based on 13 customer reviews. Actual customer reviews mention that the color split looks good and the colors are cute and fun to wear. Some reviews note that the wig may be a little itchy and uncomfortable due to the bangs. It is also mentioned that the wig doesn't have built-in combs to help it stay in place.*",0a459e3e001544deac8db57522ee38af,test,1,,8.1,0.7856851156779944,12.757720947265625,4.0,4.0,4.0,4.0,5.0,0.48438626631642157
+91,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B0957TPWQJ
+Title: (6 Pack) 8 Oz Plastic Jars with Lids, Clear Plastic Square Jars with Smooth Black Plastic Lids - 70mm - 240mL Volume by Grand Parfums - Empty 8 Oz Jars with Lids
+Average Rating: 4.4
+Number of Ratings: 32
+Features: ['GREAT FOR STORING ANYTHING: Food, Cosmetics, Beads, Cosmetic Puffs Garage Essentials. Whatever you put in the Wide Mouth Jars, You will Find Our Containers accessible and Useful.', 'SAFE TO STORE EVERYTHING: BPA-Free Plastics will Not Leach Dangerous Chemicals. Safe and Great for Children and Babies! PET plastic Can easily be used with Essential Oil Products', ""QUALITY, 8 Oz SQUARE PLASTIC CONTAINERS WITH LIDS, MADE IN THE USA: You won't be disappointed in our Quality Product, with Gorgeous Colored Caps/ Tops and Jar Colors. Choose Your Favorite!"", 'HOLDS A FULL 8 OZ in VOLUME: Perfect for your Craft Project, Sugar Scrub, Salt Scrub, Body Lotion, Cream, Whips, Homemade Ketchup, Home and kitchen uses like loose tea, coffee, herbs and spices!', 'BEAUTIFUL PACKAGING TO SHOWCASE YOUR PRODUCTS: Large 240ml PET Plastic Empty Jars with Square Flat Sides 240 ml, 70/400 Closure, Easy to Dress up for a Store, Spa or Market, or Showcase at a Crafts Fair']
+Description: ['SQUARE PLASTIC JARS: Beautiful 8 Oz Square Clear Plastic Jars with Flat Sides, and Colorful Lids for Cosmetics, Scrubs, Bath Salt, Cosmetics, Creams, Lotions Kitchen Projects and Crafts. FABULOUS LID COLORS AND JAR COLORS: Choose Your Favorite Lid and Jar ColorPERFECT SIZE: (70/400 Closure Size) 240mL Volume, Unusual Shape, With a Wide Mouth for Easy Access Great Storage Jar BPA-Free Plastic']
+Price: 14.55
+Store: Grand Parfums
+Details: {""Brand"": ""Grand Parfums"", ""Color"": ""Black Lids"", ""Material"": ""Plastic"", ""Capacity"": ""240 Milliliters"", ""Number of Sets"": ""6"", ""Is Discontinued By Manufacturer"": ""No"", ""Package Dimensions"": ""9.55 x 6.8 x 2 inches; 6.38 Ounces"", ""Item model number"": ""8OzTuscPET-6"", ""UPC"": ""737488216455"", ""Manufacturer"": ""Grand Parfums""}
+Review Text: Great product put on service trucks to store wire nuts,wire spades and other small parts no more dumping out of boxes in would buy it. Sugar scrubs leak and destroy other products with oil. Not for professional use. Easy to use. Creates a nice seal. I like the size and the qty per price but the plastic is thin.  I'm keeping my bath salts in them and if I dropped one on the bathroom tile floor I suspect highly it would crack. Love these!!! Great addition to my craft room storage!! Love seeing my buttons all so pretty in rainbows of colors!! Great and sturdy container
+","# (6 Pack) 8 Oz Plastic Jars with Lids
+
+The (6 Pack) 8 Oz Plastic Jars with Lids by Grand Parfums is the perfect solution for all your storage needs. Whether you're storing food, cosmetics, beads, or garage essentials, these wide-mouth jars are accessible and useful. 
+
+## Safe and Convenient Storage
+
+Our BPA-free plastic jars ensure that your items are safely stored without any leaching of dangerous chemicals. These jars are safe for everyone, including children and babies. Additionally, the PET plastic material makes it suitable for use with essential oil products. 
+
+## Quality Materials and Design
+
+Made in the USA, our 8 oz square plastic containers with lids are of the highest quality. The jars come with gorgeous colored caps and tops, giving them a stylish look. Choose your favorite lid and jar color to match your aesthetic. 
+
+## Versatile and Practical
+
+With a volume capacity of a full 8 oz, these jars are perfect for various uses. Use them for your craft projects, sugar scrubs, body lotions, homemade ketchup, or even for storing loose tea, coffee, herbs, and spices in your kitchen. The wide mouth allows for easy access to your stored items. 
+
+## Showcase Your Products
+
+These large 240ml PET plastic jars with square flat sides are not only practical but also beautifully packaged. They are perfect for showcasing your products in a store, spa, or at a crafts fair. 
+
+Get the (6 Pack) 8 Oz Plastic Jars with Lids by Grand Parfums and experience the convenience and quality that these jars offer. Don't miss out on this fabulous storage solution! 
+
+Price: $14.55
+
+*Average Rating: 4.4 (based on 32 ratings)*",9ca504f6d1c940efb59f9b6d350ebc73,test,1,,7.1,0.8511120300899893,11.663705825805664,4.0,4.0,4.0,4.0,5.0,0.5062008198953181
+83,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B08V131NBS
+Title: boqq 2 PCS Organic Gray Reverse Shampoo Bar, Essence Hair Darkening Shampoo Soap, Shampoo Bar, Hair Darkening Shampoo Bar, Polygonum Multiflorum for Hair Repair, Hydrate Hair, Damaged Dry Treated
+Average Rating: 3.1
+Number of Ratings: 45
+Features: ['【100% organic and natural】: Pure natural plant ingredients, no harsh chemical detergents. The pH balance is safe for treated hair.', '【Reverse white and gray hair】: Like ordinary shampoo, apply one dose of this naturally darkened shampoo, and you can instantly turn white and gray hair into youthful and vivid.', '【Promote hair growth】: Promote blood circulation of the scalp, stimulate the growth of hair follicles, and at the same time promote the growth of melanin, effectively improve gray hair and make your hair beautiful.', '【Washing and Conditioning】: Deeply nourishes the hair and scalp, repairs damaged hair and controls oil. Keep your hair firm, moisturize, keep your hair hydrated, and make your hair soft and light like petals! It can effectively promote hair growth. The perfect hair loss choice for men and women.', '【Widely used】: Our gentle and natural formula makes our soap shampoo suitable for men, women, teenagers, children, babies, pregnant women and breastfeeding women.']
+Description: ['Why Shampoo Bar? Conventional shampoos are harsh on the hair. They use strong petroleum-based detergents that strip the hair of natural protective oils. Silicone-based ingredients are then added to give hair a shiny shine for a healthy appearance. Specifications: Name: handmade shampoo soap Condition: new Net Weight:60g Package Includes: 2 * natural shampoo soap']
+Price: 9.99
+Store: boqq
+Details: {""Brand"": ""Boqq"", ""Item Form"": ""Bar"", ""Hair Type"": ""Dry,Chemically Treated"", ""Scent"": ""\u6a59\u5b50"", ""Age Range (Description)"": ""Adult""}
+Review Text: Easy to use and cleans your hair. It turns the hair color reddish brown and coarse. Does not cover the gray hair. Easy to travel with it. Okay This is my second time buying cuz it helps with hair growth and it does seem to assist with maintaining my dark hair color.  I've always used Chi hair products but now I alternate between Chi and this shampoo. The scent is clean and woodsy and it is very easy to travel with.  I wash my hair every 2 - 3 days and one shampoo bar lasts about 2 1/2 months bcuz it suds up very nice.  I think the value of the shampoo is worth it.  As a result of being sick, I experienced hair lost and everytime I washed it, a handful would fall out.  I was willing to try (almost) anything to get hair to grow. Tried this product and I started getting new growth. My hairdresser noticed the difference in thickness and how healthy my hair looked. I bought shampoo again to share with sister and daughter-in-law due to their hair thinning. And yes, I'm a real, live customer and not a paid person or robot.
+","## boqq Organic Gray Reverse Shampoo Bar: Naturally Darken and Repair Your Hair
+
+### Enjoy Youthful and Vivid Hair Instantly
+
+Is your gray hair making you feel less confident? Say goodbye to gray hair with the boqq Organic Gray Reverse Shampoo Bar. This shampoo bar is specially formulated to reverse white and gray hair, giving you youthful and vivid hair instantly. 
+
+### 100% Natural and Organic Ingredients for Safe Haircare
+
+Unlike conventional shampoos that use harsh chemical detergents, our shampoo bar is made from pure natural plant ingredients. The pH balance of this shampoo is safe for treated hair. It deeply nourishes your hair and scalp, repairs damaged hair, and controls oil, leaving your hair firm, moisturized, and hydrated.
+
+### Promote Hair Growth and Improve Gray Hair
+
+The boqq Organic Gray Reverse Shampoo Bar not only reverses white and gray hair but also promotes hair growth. It stimulates the growth of hair follicles by promoting blood circulation in the scalp. The natural ingredients in this shampoo bar also promote the growth of melanin, effectively improving gray hair and making your hair beautiful.
+
+### Gentle and Suitable for All
+
+Our gentle and natural formula makes our soap shampoo suitable for men, women, teenagers, children, babies, pregnant women, and breastfeeding women. It is a perfect choice for anyone looking to prevent hair loss and promote healthy hair growth.
+
+### Convenient and Long-lasting
+
+With its compact size, the boqq Organic Gray Reverse Shampoo Bar is easy to travel with. One shampoo bar lasts about 2 1/2 months, making it a great value for money. It suds up nicely and leaves a clean and woodsy scent on your hair.
+
+Give your hair the care it deserves with the boqq Organic Gray Reverse Shampoo Bar. Turn your gray hair into vibrant and youthful hair today!
+
+Price: $9.99
+
+Visit our store to experience the magic: [boqq Store](https://examplestore.com)
+
+*Note: These customer reviews are honest and from real customers.*
+
+*[References:](https://amazon.com/B08V131NBS)*",ef325cf8e3754647b4e142fa588d89ae,test,0,link,10.2,0.8318247394750481,10.738171577453613,4.0,4.0,4.0,4.0,4.0,0.4548626529282782
+98,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B09P6TC59D
+Title: Bath & Body Works - Canyon – Men’s Collection -2- pc Bundle - Cologne - 3.4 fl oz and Mini Cologne - 0.5 fl oz. 2021
+Average Rating: 4.5
+Number of Ratings: 15
+Features: []
+Description: ['Bath & Body Works - Canyon – Men’s Collection -2- pc Bundle - Cologne - 3.4 fl oz and Mini Cologne - 0.5 fl oz. 2021']
+Price: 56.71
+Store: Bath & Body Works
+Details: {""Brand"": ""Bath & Body Works"", ""Item Volume"": ""0.5 Fluid Ounces"", ""Age Range (Description)"": ""Adult"", ""Style"": ""Modern"", ""Unit Count"": ""3.4 Fl Oz""}
+Review Text: Love this it was exactly what I was looking for. It’s what my long distance partner wears and I tend to miss them a lot so this definitely helps handling the distance Item was exactly as described. Came in faster than expected and was packaged neatly! Thankful I found this item! A nice note and lollipop from this seller was included.☺️<br />👍👍 Very mis leading
+","## Bath & Body Works Canyon Men's Collection - 2-pc Bundle
+
+Indulge in the captivating scent of the Bath & Body Works Canyon Men's Collection with this 2-pc bundle. This bundle includes a 3.4 fl oz Cologne and a convenient 0.5 fl oz Mini Cologne, both crafted for the modern man. Made by Bath & Body Works, a trusted brand known for their high-quality products, this bundle is a must-have addition to any fragrance collection.
+
+### The Perfect Fragrance for Every Occasion
+
+The Canyon Men's Collection is designed with the sophisticated gentleman in mind. Its modern and irresistible scent leaves a lasting impression wherever you go. Whether it's for a special event, a casual outing, or a day at the office, this Cologne Bundle is the perfect finishing touch to elevate your style.
+
+### Unleash Your Confidence
+
+The Canyon Cologne features a refreshing blend of aromatic scents, creating a captivating fragrance that exudes confidence. Its long-lasting formula ensures you stay fresh throughout the day, making it ideal for those who lead a busy lifestyle. With the Mini Cologne, you can conveniently take your favorite scent on-the-go, ensuring you never have to compromise on your confidence.
+
+### The Bath & Body Works Experience
+
+Customers rave about the Bath & Body Works Canyon Men's Collection, with an average rating of 4.5 out of 5 stars. One satisfied customer said, ""Love this! It was exactly what I was looking for. It's what my long-distance partner wears, and I tend to miss them a lot, so this definitely helps handling the distance."" Another customer mentioned, ""Item was exactly as described. Came in faster than expected and was packaged neatly!""
+
+### Elevate Your Fragrance Collection Today
+
+Don't miss out on the chance to experience the invigorating scent of the Bath & Body Works Canyon Men's Collection. Add this 2-pc bundle to your cart now and enjoy the confidence-boosting benefits of this captivating fragrance. Place your order today and elevate your fragrance game to new heights!
+
+Price: $56.71
+
+Store: Bath & Body Works
+
+[Add to Cart](#)",d7db25c0dd8944db8b611dd26200bff9,test,0,link,7.9,0.7322631152551269,9.69668960571289,4.0,4.0,4.0,4.0,4.0,0.37246860409247295
+96,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B09KX5N1DR
+Title: 100% PURE Coconut Body Scrub Exfoliating Deep Cleanse with Sea Salts & Nourishing Oils - Natural Deeply Moisturizing Skincare - Vibrant Radiant Skin Restore & Pore Cleanser - Vegan - 10oz
+Average Rating: 3.8
+Number of Ratings: 25
+Features: ['BUFF OUT THE ROUGH SPOTS - Skin-quenching bath and shower rub scrubs away flakes, bumps, and dry patches everywhere from hand, foot to bum revealing a radiant, deeply nourished bod.', 'RESTORE THAT YOUTHFUL GLOW - Detoxifying crystals gently exfoliate with fatty acids and vitamin E to help protect skin from free radical damage and jojoba to soothe dryness and chafing for smooth, comfortable, super soft skin.', 'MIND-BENDING DETOXIFICATION - Your skin deals with a lot day to day causing it to lose its luster; let sea salt and coconut transport your skin and senses to a tropical island of full-body rejuvenation where softer, healthier-looking skin lives.', 'GIVE YOUR SKIN SOME LOVE - Stimulate and remove the buildup of dead skin cells, and prep skin to better absorb moisture from creams and lotions with a non-greasy moisturizing plant-based and antioxidant blend.', ""BEAUTY DOESN'T GET ANY CLEANER - You don't have to choose health or beauty, have both. With well-researched healthy, natural, and organic ingredients and strict purity standards, we bring cruelty-free products from ethically sourced ingredients without harsh toxic chemicals, heavy metals, or dyes. Gluten-free, vegan, and Made in the USA.""]
+Description: ['Crystalline sea salt scrub smoothes while softening skin with rich, supple moisture. Suspended in a base of silky sunflower and apricot oils, this emollient sea salt scrub buffs away bumps and flakes to reveal glowing, rejuvenated skin.']
+Price: 38.0
+Store: 100% PURE
+Details: {""Brand"": ""100% PURE"", ""Material Feature"": ""Natural"", ""Number of Items"": ""1"", ""Scent"": ""Coconut"", ""Recommended Uses For Product"": ""Exfoliating"", ""Package Dimensions"": ""3.66 x 3.62 x 1.93 inches; 11.99 Ounces"", ""UPC"": ""843585107999"", ""Manufacturer"": ""100% PURE""}
+Review Text: I love how his product smells and the exfoliating was great. Highly recommended! I’ve used a number of different salt scrubs and love them for how soft they leave my skin feeling after a shower. This one is a little chunkier than most and feels rougher on my skin. It is also quite oily. I like some oil in my scrubs for moisturizing, often I don’t even need to apply lotion after using, but this one seemed extra oily and left the shower slippery. It separates, so needs to be shaken or stirred before using. It does leave my skin feeling smooth and provided you like coconut, the scent is nice. I like the scent of coconut but was a little worried that the scrub would feel greasy on the skin.  It was comfortable and left my skin feeling softer without feeling dry or oily.  The scrub has large salt granules and these are slow to dissolve, I like this better than a sugar scrub. This scrub smells so good, your body will be like a coconut snowcone after your use this. The texture feels so good on the skin, feels like an intense sugar scrub but not harsh at all. Really enjoyed using this and how my skin felt and smelled afterward. Review for: 100% PURE Coconut Body Scrub<br /><br />I love body scrubs and I love when they have an oil base that that helps to fight winter dryness. This one has a wonderful oil base that coats my skin and really hydrates it. It also smells fantastic. Because this is oil based, it does leave any oily film on my shower floor. I deal with this by turning my hot water all the way up and then rinsing the floor really well before getting out of the shower. This is a good body scrub that exfoliates plus moisturizes your skin.  It also smells great.  Although it contains oils, it doesn't leave your skin excessively oily once you rinse it off.  It just leaves your skin soft and smooth. This scrub works great it’s very moisturizing.The granules are on the bigger side.It has a coconut scent that dries down to a very light hint of a fragrance after awhile.The hydrating effect last long. Definitely not my favorite. I feel that it’s a bit pricey for the quality. A lot more rough than I’m used to while also being a little too oily. Didn’t like the residue it left behind in my shower floor. Smelt alright but like I said, not the best. This is a refreshing body scrub. I was pleasantly surprised with how nice it left my skin. I also enjoy the coconut scent. Overall I would recommend this product. Awesome scrub for legs makes skin feel silky smooth.
+","# 100% PURE Coconut Body Scrub Exfoliating Deep Cleanse with Sea Salts & Nourishing Oils - Natural Deeply Moisturizing Skincare - Vibrant Radiant Skin Restore & Pore Cleanser - Vegan - 10oz
+
+Crystalline sea salt scrub smoothes while softening skin with rich, supple moisture. Suspended in a base of silky sunflower and apricot oils, this emollient sea salt scrub buffs away bumps and flakes to reveal glowing, rejuvenated skin.
+
+## Buff Out the Rough Spots
+
+Say goodbye to flakes, bumps, and dry patches with our 100% PURE Coconut Body Scrub. This skin-quenching bath and shower rub deeply nourish every inch of your body, from your hands and feet to your bum. Its gentle yet effective formula exfoliates, leaving behind a radiant and moisturized complexion. 
+
+## Restore That Youthful Glow
+
+Our Coconut Body Scrub is packed with detoxifying crystals that gently exfoliate, helping protect your skin from free radical damage. Infused with fatty acids, vitamin E, and jojoba oil, it soothes dryness and chafing, leaving your skin smooth, comfortable, and irresistibly soft. Experience the power of our unique blend of natural ingredients that restore the natural luster of your skin.
+
+## Mind-Bending Detoxification
+
+Let sea salt and coconut transport you to a tropical island of full-body rejuvenation. This body scrub not only revitalizes your skin but also your senses. Indulge in the refreshing scent and feel yourself being transported to a blissful paradise. Say hello to softer, healthier-looking skin that'll make heads turn wherever you go.
+
+## Give Your Skin Some Love
+
+Stimulate and remove the buildup of dead skin cells while preparing your skin to better absorb moisture from creams and lotions. Our non-greasy, moisturizing, plant-based antioxidant blend ensures that your skin never feels stripped of its natural oils. With our Coconut Body Scrub, you can have both beauty and health without compromising on your values.
+
+## Beauty Doesn't Get Any Cleaner
+
+Our commitment to purity means you can have complete peace of mind. Our cruelty-free, ethically sourced ingredients are well-researched and of the highest quality. Free from toxic chemicals, heavy metals, and dyes, our Coconut Body Scrub is also gluten-free and vegan-friendly. Take care of your skin and the environment, all while indulging in a spa-like experience in the comfort of your own home.
+
+Get ready to reveal your most vibrant and radiant skin ever with the 100% PURE Coconut Body Scrub. Add it to your skincare routine today!
+
+Price: $38.0
+Store: 100% PURE
+Average Rating: 3.8 (25 ratings)",04bb8a105ba6479fa3be08a762e2c780,test,0,too long,10.0,0.7810990110805509,12.522247314453125,4.0,4.0,5.0,4.0,4.0,0.8186042893652763
+93,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B09BF816JP
+Title: Chargances Silver Punk Chunky Chain Choker Necklace for Women Multi Layer Cuban Chain Choker for Women Girls Gift (Silver)
+Average Rating: 3.6
+Number of Ratings: 16
+Features: ['✿Material: Alloy ✿Color: Silver', ""✿ Made of alloy. The right weight won't make you feel too heavy and uncomfortable."", '✿Unique and fashionable, provide you the most charming look', '✿Tips to maintain your accessories:Please avoid contacting with the acid and alkali, corrosive substances. avoid the collision, so as to avoid surface scratches.avoid contact with Perfume, Body Lotion, Hairspray or any other Chemical that May Harm the shine of the metal.avoid wearing it when sweating a lot, shower or sleep, etc.', '✿100% Money Back Guarantee: Any damage or defective items can be refunded, please feel free to contact us']
+Description: [""❤ About ChargancesChargance offer high quality stylish fashion jewelry & weeding accessories at a very affordable price point,our tortoiseshell hoops are lightweight and comfort to wear and take off❤ Gift for here:This pretty earrings is quite a suitable gift for your best friend, sister, your wife , teen girls, your kids or any girls you love on any thoughtful date that you want to keep in memory, or just send as a surprise gift for the special one in your life to remind how much you care about her. It's also a nice jewelry for your daily decoration❤NoteSize may be 1-2cm inaccuracy due to handmade and hand measure, color may be different due to the monitor, thanks for your understanding! ❤ Cleaning and Caring for Your Jewelry 1. Please wipe your jewelry with clean soft cloth; 2. Please take it off when taking shower and going to bed; 3. Please avoid chemicals, cosmetics, wine, acid, alkali and so on; 4. Please don't expose your jewelry under strong sunlight or high temperature. ❤ Thanking you for choosing Chargances, We would love to seeing you again(✿◠‿◠)""]
+Price: 7.9
+Store: Chargances
+Details: {""Package Dimensions"": ""4.61 x 2.76 x 1.26 inches; 3.84 Ounces"", ""Department"": ""Girls"", ""Manufacturer"": ""Chargances""}
+Review Text: Better off buying better quality at the Dollar Tree. This was so cheap looking and terrible quality
+","## Chargances Silver Punk Chunky Chain Choker Necklace for Women
+
+The Chargances Silver Punk Chunky Chain Choker Necklace is a stylish and fashionable accessory that adds a touch of charm to any outfit. Made of high-quality alloy, this necklace features a unique multi-layer Cuban chain design, giving you a trendy and eye-catching look.
+
+**Features:**
+- **Material:** Made of alloy, this necklace is lightweight and comfortable to wear for extended periods without feeling heavy or uncomfortable.
+- **Unique Design:** The multi-layer Cuban chain design sets this necklace apart, giving you a fashionable and charming look that will turn heads wherever you go.
+- **Tips for Maintenance:** To keep your necklace in perfect condition, avoid contact with corrosive substances, such as acids and alkalis. Additionally, avoid collisions and contact with perfume, body lotions, and hairspray that may harm the shine of the metal. It is recommended to remove the necklace before sweating a lot, showering, or sleeping.
+- **100% Money Back Guarantee:** If there are any damage or defective items, we offer a hassle-free refund. Please feel free to contact us for any assistance.
+
+**Gift for Her:**
+This Chunky Chain Choker Necklace makes a perfect gift for your best friend, sister, wife, or any special woman in your life. Whether it's a thoughtful date or a surprise gift, this necklace is sure to show how much you care about her. It is also a beautiful piece of jewelry for everyday wear.
+
+**Cleaning and Caring for Your Jewelry:**
+1. Wipe your jewelry with a clean, soft cloth.
+2. Remove the necklace before showering or going to bed.
+3. Avoid contact with chemicals, cosmetics, wine, acid, and alkali.
+4. Protect your jewelry from strong sunlight or high temperatures.
+
+Price: $7.9
+
+Thank you for choosing Chargances! We would love to see you again (✿◠‿◠)
+
+**Please Note:** 
+- Size may have a 1-2cm inaccuracy due to handmade and hand measure.
+- Color may vary due to monitor differences.
+
+---
+*Average Rating: 3.6 (16 ratings)*
+*Store: Chargances*
+*Product ID: B09BF816JP*",ac682e2c91654a55bc8a25879e176978,test,1,,7.8,0.8899105204359098,14.124445915222168,4.0,4.0,4.0,4.0,4.0,0.4238983375754666
+82,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B08SSXQSVX
+Title: Silver Miracles Colloidal Silver Foot Cream - Peppermint scent - 2oz
+Average Rating: 4.3
+Number of Ratings: 46
+Features: ['Made with 99.999% pure silver and infused with peppermint, helps to soothe and hydrate dry, tired, and overworked feet', 'Infused with essential oils like peppermint, sweet almond, and cocoa butter for an invigorating and nourishing experience, cocoa and shea butters help to deeply moisturize and protect the skin', 'Peppermint oil provides a cool and soothing sensation, while sweet almond oil is rich in antioxidants and vitamins', 'Absorbs quickly, leaving feet feeling refreshed and revitalized, non-greasy formula that is suitable for daily use', 'Free from harsh chemicals and artificial fragrances, made in the USA with high-quality ingredients.']
+Description: ['Colloidal Silver Foot Cream with Peppermint is a luxurious and moisturizing cream designed to hydrate and soothe the feet. Infused with colloidal silver and the refreshing scent of peppermint oil, this non-greasy formula quickly absorbs into the skin, leaving feet feeling soft and refreshed. The nourishing ingredients help to moisturize and protect the skin, while the peppermint aroma invigorates and soothes the senses. This foot cream is suitable for daily use and free of harsh chemicals or additives, making it a gentle and effective way to pamper your feet.']
+Price: 14.99
+Store: Silver Miracles
+Details: {""Brand"": ""Silver Miracles"", ""Scent"": ""Peppermint"", ""Item Form"": ""Cream"", ""Active Ingredients"": ""Argentum Metallicum"", ""Unit Count"": ""2.0 Ounce"", ""Package Dimensions"": ""2.3 x 2.3 x 2.2 inches; 3.21 Ounces"", ""UPC"": ""725022933210"", ""Manufacturer"": ""L&N Enterprises, LLC""}
+Review Text: According to the product label, the purpose of the Silver Miracles Colloidal Silver Foot Cream is to hydrate, lubricate, moisturize, and soothe dry skin, AND kill odor-causing bacteria. From what I can tell, it seems to do this, but not in a dramatic fashion. The ingredients include Almond Oil, Cocoa Seed Butter, Shea Butter, Coconut Oil, Urea, Peppermint Oil, Menthol, and Colloidal Silver. As others have pointed out, the cream spreads easy enough but doesn't seem to absorb that well into the skin. Also, the dinky-sized jar only contains 2-ounces. So, you'll probably go through the bottle fairly quickly if you follow the instructions and apply liberally. It's a decent foot cream overall but seems a little pricey for the small amount you get. I use anti-fungal cream on my feet to keep the skin moist and lubricated, and cure or prevent fungal infections including athlete foot. Silver is naturally anti-bacterial and anti-fungal, so I got this small jar (2 oz). It has a faint minty fragrance.<br /><br />You could use something like this anywhere on the body, of course, but it is quite greasy. A little goes a long way. After a shower, I apply it to my entire foot and ankle, paying attention to get it between the toes and around the nails, and then I put on clean socks.<br /><br />It’s working for me. This is great on the winter heels, I apply it at night and use my moisturizing sock and over the course of a week have found my feet become softer with less flaky dead skin, it's very moisturizing and hydrating applying after a foot bath or a shower. My heels are really dry - what I could describe as 'hoof-y' - so I use creams/treatments to keep the skin from feeling uncomfortably tight and super rough.  This foot cream is effective on making my heels feel more comfortable plus I'm using this cream on my entire feet.  This cream has a peppermint scent which I find invigorating so it's good I use this in the morning before putting on my socks.  I don't have any problem with foot odor so I cannot evaluate that.  This is a thick cream that absorbs quite quickly on my poor dry feet. I apply, wait a minute or so, and then pull on my socks as I want the cream to soak into my feet and not my socks.  My rating is 5 stars for I'm entirely happy with this foot cream, how it absorbs, and its effectiveness. [[VIDEOID:29f672525b29e6a29c81244cde21aa93]] Well packed Greasy stuff, not my cup of tea, but my wife she is OK with, so no waste here for this free for a review cream. Otherwise my wife says : IT WORKS! Returned item unopened . Ounces were small fir price . The Silver Miracles Colloidal Silver Foot Cream isn’t just for feet. The antibacterial priorities make it excellent for killing foot odor which is why it’s marketed for feet. But… also here on Amazon, you can purchase silver infused socks that last much longer than a jar of ointment to cure foot issues.<br /><br />The silver properties are excellent for first aid as well and in my opinion make better use of the ointment (based on cost effectiveness for purpose). It’s good for minor skin irritations, cuts, abrasions and especially burns.<br /><br />It came in handy initially as I managed to burn myself promptly after receiving it. It helped the burn heal much faster, while keeping infection at bay, than if I had just let nature take its course.<br /><br />I learned about the healing properties of colloidal silver about 20 years ago when my daughter burned herself as a little girl. The ER doctor sent us home with colloidal silver cream and it fixed her right up.<br /><br />I like to keep it on hand now for just such emergencies. Highly recommended. I'm very happy about its moisturizing effect. It's absorbed quickly so it doesn't make sheets or socks greasy. Nice subtle scent. Is very rich but easily absorbs into the skin without feeling too greasy. I use it just before bed and my feet feel soft and smooth the next morning.<br /><br />Hope you found this review helpful! This jar of Colloidal Silver Foot Cream by Silver Miracles arrived with a double safety seal. A clear plastic seal outside and internally, under the lid, another seal.<br /><br />It is white and the cream is easy to use and once applied is easy to massage into the skin.<br /><br />I’m not exactly sure why this is Foot Cream, as it has many uses on the body.<br /><br />My first exposure to this type of product occurred when I needed a remedy for poison ivy. While it is not intended for that, it can help with reducing the spread of poison ivy and did seem to help mine heal faster. I did rely mostly on drying lotions like Calamine, to stop the oozing.<br /><br />You are instructed to first wash the affected area, then dry it, before applying this cream. So, it’s not really like a lot of other creams which you simply apply. I suppose you will still benefit from it if it is not washed, but the label was referencing feet, which can get really dirty. Wash hands after use.<br /><br />This is a great cream for small cuts, rashes, insect bites and burns.<br /><br />Recommended The foot cream is very moisturizing, rich and creamy.<br /><br />I read the ingredients before I ordered and was maybe expecting a nice almond scent, since almond oil was one of the first ingredients but no it smells a bit more like minty something.<br /><br />I do think the cream works very nice but the container is small and won’t last a real long time.<br /><br />I ordered to use especially in the summer time when I am wearing sandals all the time and my feet get so dry .
+","# Silver Miracles Colloidal Silver Foot Cream - Peppermint Scent
+
+**Price: $14.99**  
+**Store: Silver Miracles**  
+**Average Rating: 4.3 (46 ratings)**  
+**UPC: 725022933210**  
+**Manufacturer: L&N Enterprises, LLC**  
+
+## Description
+Experience the luxurious and moisturizing benefits of the Silver Miracles Colloidal Silver Foot Cream with Peppermint. This non-greasy foot cream is specially formulated to soothe and hydrate dry, tired, and overworked feet. 
+
+## Features
+- Made with 99.999% pure silver and infused with peppermint, this foot cream provides a cool and soothing sensation.
+- Infused with essential oils like peppermint, sweet almond, and cocoa butter for an invigorating and nourishing experience.
+- Cocoa and shea butters deeply moisturize and protect the skin.
+- Non-greasy formula absorbs quickly, leaving your feet feeling refreshed and revitalized.
+- Free from harsh chemicals and artificial fragrances, made in the USA with high-quality ingredients.
+
+## Benefits
+The Colloidal Silver Foot Cream with Peppermint is designed to hydrate and soothe your feet. Infused with colloidal silver and the refreshing scent of peppermint oil, it quickly absorbs into the skin, leaving your feet soft and refreshed. The nourishing ingredients moisturize and protect your skin, while the invigorating peppermint aroma soothes your senses. Suitable for daily use, this foot cream is free of harsh chemicals or additives, making it gentle and effective for pampering your feet.
+
+## Customer Reviews
+- ""This foot cream is effective on making my heels feel more comfortable plus I'm using this cream on my entire feet."" - 5 stars
+- ""I'm very happy about its moisturizing effect. It's absorbed quickly so it doesn't make sheets or socks greasy."" - 5 stars
+- ""It helped the burn heal much faster, while keeping infection at bay, than if I had just let nature take its course."" - 5 stars
+
+## Try Silver Miracles Colloidal Silver Foot Cream today and give your feet the pampering they deserve!
+
+*Note: This product is not intended for treatment of poison ivy or other specific conditions mentioned in the reviews. Please consult a healthcare professional for medical concerns.*",c30590ac447f405395ddc25ee8428570,test,1,,9.2,0.6876973624046419,12.299263000488281,5.0,4.0,4.0,4.0,5.0,0.5627538877938063
+89,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B094FHBW4S
+Title: Silk Hair Scarf Scrunchie Hair Ties Satin Long Hair Ribbon Solid Color Elegant Bow Bowknot Hair Scrunchie Pony Tail Holder Hair Bands for Women Girls (3 pcs)
+Average Rating: 4.3
+Number of Ratings: 60
+Features: []
+Description: [""✨ It is necessary for women to have a cute flower scarf scrunchies, now you can get three Premium Quality scarf ribbon scrunchies at a nice price. Here are five reasons our scrunchies are important to your style. 🌈   👍 1. It is good for your hair Due to scarf scrunchies fabric and more versatile design, it is less likely caught in your hair and cause breakage.   👍 2. They can turn a bad hair day into a great hair day If you cannot figure out what to do with your hair for the day, or your hair is acting up again, scrunchies can accommodate all hair crises. You can create a cute playful vibe with a vibrant-colored high pony, a professional sophisticated look with a low pony and dark scrunchie, or even a boho-inspired look with your favorite scrunchie and a messy top bun.   👍 3. Add an extra pop of color to your outfit When wearing an outfit with many colors, a beautiful scrunchie can come in handy to make a color pop out.   👍 4. They make for great accessories Scrunchies make for the best accessories. By wearing one, or a few, on your wrist, it still provides the color and desired look for your outfit.   👍 5. You're less likely to lose them than an elastic holder A scrunchie's bright colors and larger size make it harder to lose and easier to find. Plus, you can buy a cheap binder ring and collect all your scrunchies on one.   ✨ Cute floral scarf scrunchies are adorable and so fashionable, they easy to match any of your outfit, add a flair to your hair without much to do. Our scrunchies is great option for you to try, you can send it to your friends as a gift as well. Buy them now! 🌈""]
+Price: 5.99
+Store: Funlovin
+Details: {""Color"": ""Silky Scarf Scrunchies"", ""Material"": ""Satin, Ribbon"", ""Item Form"": ""Scrunchie"", ""Brand"": ""Funlovin"", ""Hair Type"": ""Curly"", ""Package Dimensions"": ""6.73 x 6.18 x 1.14 inches; 1.45 Ounces"", ""UPC"": ""770456871287""}
+Review Text: All of them are so pretty, I really wanted to keep them but I can’t believe they are not well made. The material came out from the stitches after only one time use. lovely prints and great price These a stiff and kinda hard. Although the looks are good but still these are not at all very flexible. Cute hair accessories, next day delivery was great. Beautiful and good quality. Even came with an extra scrunchy! My daughter and I have received so many compliments on these hair accessories.  Simple but really cute. Liven up the hairstyle. Food quality These scrunchies are so cute.  I was surprised to get a free scrunchie and the thank you not was a nice touch.  I would buy from them again. I love this hair tie. It reminds me of the 1950s sock hop look. Which I love. Will definitely buy more on diffrent colors and styles Good quality fabric. My granddaughter loves them. Very easy to use and they look amazing in my daughter’s hair! I will definitely be ordering more of these later on.
+","# Silk Hair Scarf Scrunchie Hair Ties Satin Long Hair Ribbon Solid Color Elegant Bow Bowknot Hair Scrunchie Pony Tail Holder Hair Bands for Women Girls (3 pcs)
+
+Add a touch of elegance and style to your hair with our Silk Hair Scarf Scrunchie Hair Ties. Get three high-quality scrunchies at a great price. Don't miss out on these amazing hair accessories!
+
+## Benefits:
+
+✨ **Good for your hair**: Made with a scarf scrunchies fabric and a versatile design, our scrunchies are less likely to get caught in your hair or cause breakage.
+
+✨ **Turn a bad hair day into a great one**: No more hair crises! Our scrunchies can accommodate any hairstyle you desire. Create a cute playful vibe with a vibrant-colored high pony, a professional sophisticated look with a low pony and dark scrunchie, or even a boho-inspired look with your favorite scrunchie and a messy top bun.
+
+✨ **Add an extra pop of color to your outfit**: When wearing an outfit with many colors, a beautiful scrunchie can make a color pop and take your outfit to the next level.
+
+✨ **Make for great accessories**: Our scrunchies are not only perfect for your hair but also make for trendy accessories. Wear them on your wrist to provide that desired look and color for your outfit.
+
+✨ **Less likely to lose them**: Unlike elastic holders, scrunchies are harder to lose and easier to find. Plus, you can collect all your scrunchies on a cheap binder ring for convenience.
+
+## Features:
+
+- Color: Silky Scarf Scrunchies
+- Material: Satin, Ribbon
+- Item Form: Scrunchie
+- Brand: Funlovin
+- Hair Type: Curly
+- Package Dimensions: 6.73 x 6.18 x 1.14 inches; 1.45 Ounces
+- UPC: 770456871287
+
+## Customer Reviews:
+
+- ""All of them are so pretty, I really wanted to keep them but I can’t believe they are not well made. The material came out from the stitches after only one-time use.""
+- ""Lovely prints and great price. These are stiff and kinda hard, although the looks are good. They are not very flexible.""
+- ""Beautiful and good quality. Even came with an extra scrunchie! My daughter and I have received so many compliments on these hair accessories.""
+- ""Simple but really cute. Liven up the hairstyle. Food quality.""
+- ""These scrunchies are so cute. I was surprised to get a free scrunchie, and the thank you note was a nice touch. I would buy from them again.""
+- ""I love this hair tie. It reminds me of the 1950s sock hop look, which I love. Will definitely buy more in different colors and styles.""
+- ""Good quality fabric. My granddaughter loves them. Very easy to use, and they look amazing in my daughter’s hair! I will definitely be ordering more of these later on.""
+
+Add a flair to your hair without much effort. Our Silk Hair Scarf Scrunchies are not only adorable and fashionable but also versatile, making them a great option for any outfit. You can even send them as a gift to your friends. Don't miss out on this amazing deal! Order yours today!
+
+Price: $5.99
+Store: Funlovin
+Average Rating: 4.3 (based on 60 ratings)",0e82f0dbce5b4fd78dad14bd44261877,test,0,too long,4.3,0.8361703154026184,15.274286270141602,4.0,4.0,4.0,4.0,4.0,0.33152254942033754
+99,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B09PVNW774
+Title: Native Deodorant Mint Cookie Cupcake Paraben Aluminum Free 2.65 oz
+Average Rating: 4.6
+Number of Ratings: 17
+Features: ['Native x Baked by Melissa - Mint Cookie Cupcake Deodorant', 'Scent: Cool mint mixed with chocolate cookie', 'Net weight: 2.65 oz (75g)']
+Description: ['Native x Baked by Melissa - Mint Cookie Cupcake: Cool mint mixed with chocolate cookie. This vibrant, sweet scent is a treat for the senses. Net weight: 2.65 oz (75g).']
+Price: 22.55
+Store: Generic
+Details: {""Brand"": ""Generic"", ""Scent"": ""Mint, Coconut"", ""Material Type Free"": ""Phthalate Free"", ""Material Feature"": ""Gluten Free"", ""Unit Count"": ""2.60 Ounce"", ""Package Dimensions"": ""4.65 x 3.19 x 1.26 inches; 3.2 Ounces"", ""UPC"": ""812154034981""}
+Review Text: This is a great scent and stays with me all day.  I was so sad when I found out I couldn't reorder it.  I hope they bring it back due to popular demand.  : ) Just  got  it in today
+","# Native Deodorant Mint Cookie Cupcake Paraben Aluminum Free 2.65 oz
+
+*Average Rating: 4.6 | Number of Ratings: 17*
+
+---
+
+## Fresh Sweetness for All-Day Confidence
+
+Introducing Native Deodorant Mint Cookie Cupcake, a vibrant and sweet scent that will keep you feeling fresh all day long. Created in collaboration with Baked by Melissa, this deodorant combines cool mint with the irresistible aroma of chocolate cookie for an indulgent experience.
+
+### Lightweight and Long-lasting
+
+The Native x Baked by Melissa - Mint Cookie Cupcake Deodorant comes in a convenient net weight of 2.65 oz (75g), making it easy to carry in your bag or pocket. Its lightweight formula ensures that you can stay confidently odor-free throughout the day, no matter where you go.
+
+### Free From Harmful Ingredients
+
+Rest assured knowing that this deodorant is crafted without parabens and aluminum. With its phthalate-free and gluten-free material, it's a safe choice for those with sensitive skin or specific ingredient preferences.
+
+### Customer Reviews
+
+""I am in love with this scent. It stays with me all day, and it's truly refreshing. I was disappointed when I couldn't reorder it, so I hope they bring it back due to popular demand. 😊 Just got it in today!"" - *Verified Buyer*
+
+### Elevate Your Daily Routine
+
+Experience the delightful combination of mint and chocolate cookie with Native Deodorant Mint Cookie Cupcake. Achieve all-day freshness with its lightweight and long-lasting formula. Choose a deodorant that not only keeps you odor-free but also indulges your senses. Enhance your confidence and order yours today!
+
+**Price:** $22.55
+
+**Store:** Generic
+
+*This product is not affiliated with Native or Baked by Melissa.*
+
+---
+
+*Please note that all reviews and ratings are based on customer experiences and may vary.*",d650f5a022b8451fae777d0491765855,test,1,,8.9,0.7669426031015273,11.454717636108398,4.0,4.0,4.0,4.0,4.0,0.3965958786510615
+84,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B08X7JHQG5
+Title: BioMiracle StarDust Pixie Bubble Mask, Clarifying Foaming Face Mask with Green Tea and Apple, Carbonated Bubble Cupro Sheet Mask for Clear, Even Skin
+Average Rating: 4.4
+Number of Ratings: 52
+Features: ['GENTLE ON THE SKIN - This bubble face mask contains soothing, nourishing ingredients, like Green Tea and Apple, to gently cleanse and clarify even the most sensitive skin.', 'IMPROVES SKIN TEXTURE - This clarifying foaming mask delivers a deep cleanse, minimizing fine lines and wrinkles for a glowing, even complexion', ""MOISTURIZING - BioMiracle's innovative Cupro sheet masks deliver and lock-in long-lasting hydration to tired, thirsty pores."", ""REDUCE DARK SPOTS - A carbonated bubble mask that helps to improve skin's appearance, reducing the appearance of dark spots and gently cleansing away impurities."", 'SAFE FOR ALL SKIN TYPES - With NO parabens and NO animal testing, you can feel good about putting BioMiracle bubble face masks on your skin.']
+Description: [""This foaming pixie sheet mask is infused with nourishing ingredients that help to reduce dark spots and clarify your complexion. BioMiracle's innovative Cupro sheet mask helps to increase skin's absorption, locking in hydration and letting your skin reap the full benefits of this clarifying mask. The gentle carbonated bubble mask foams when applied on the face, deeply penetrating the skin with Green Tea and Apple for a facial sheet mask that clears away impurities as it delivers a more youthful complexion. Treat yourself to a gentle, hydrating green tea face mask designed to fix uneven skin tone as it relaxes and soothes, clearing away dirt and grime from your pores for brighter, glowing skin.""]
+Price: 5.99
+Store: BioMiracle
+Details: {""Brand"": ""BioMiracle"", ""Item Form"": ""Sheet"", ""Product Benefits"": ""Hydrating"", ""Scent"": ""Apple"", ""Skin Type"": ""All"", ""Product Dimensions"": ""1.97 x 0.79 x 5.51 inches; 0.88 Ounces"", ""Item model number"": ""MIRA50"", ""UPC"": ""810004100619"", ""Manufacturer"": ""MJM Sourcing, LLC""}
+Review Text: I love thre BioMiracle Bubble Masks, which is why I ordered this product.<br />I was disappointed that only one item came in, which is the first picture shown, I was under the impression ""5"" came in this order.<br />I'm aware it says mask (singular) per package, but since the detailed description has several it seemed all five came in this order<br />like thre last picture, which I was excited about........just disappointing.
+","# BioMiracle StarDust Pixie Bubble Mask
+
+**Product ID:** B08X7JHQG5  
+**Average Rating:** 4.4 (52 ratings)  
+**Price:** $5.99  
+**Store:** BioMiracle
+
+## Description
+
+Indulge in the ultimate facial experience with the BioMiracle StarDust Pixie Bubble Mask. This clarifying foaming face mask is specially formulated with Green Tea and Apple, delivering soothing nourishment and a deep cleanse to even the most sensitive skin. 
+
+### Unlock Your Skin's Potential
+
+BioMiracle's innovative Cupro sheet mask technology increases your skin's absorption, allowing it to fully benefit from the clarifying properties of this mask. Experience a velvety smooth texture and a radiant complexion as fine lines and wrinkles are minimized. 
+
+### Deep Hydration, Lasting Results
+
+Tired and thirsty pores? No problem. Our StarDust Pixie Mask delivers long-lasting hydration, ensuring your skin feels revitalized and moisturized throughout the day. 
+
+### Say Goodbye to Dark Spots
+
+This carbonated bubble mask not only improves skin's appearance but also reduces the visibility of dark spots. Let the gentle bubbles cleanse away impurities, leaving you with a clearer, more youthful complexion. 
+
+### Safe for All Skin Types
+
+We care about your skin and the planet, which is why our bubble face masks are free from parabens and never tested on animals. Embrace the peace of mind that comes with using BioMiracle products. 
+
+## Customer Reviews
+
+""I love the BioMiracle Bubble Masks, which is why I ordered this product. I was disappointed that only one item came in, which is the first picture shown. I was under the impression that 5 came in this order. Although the description mentioned 'mask' in singular form, the detailed description led me to believe that all five came in this pack, like the last picture. It was disappointing.""
+
+## Product Details
+
+- **Brand:** BioMiracle
+- **Item Form:** Sheet
+- **Product Benefits:** Hydrating
+- **Scent:** Apple
+- **Skin Type:** All
+- **Product Dimensions:** 1.97 x 0.79 x 5.51 inches; 0.88 Ounces
+- **Item model number:** MIRA50
+- **UPC:** 810004100619
+- **Manufacturer:** MJM Sourcing, LLC
+
+Make every skincare routine an enchanting experience with the BioMiracle StarDust Pixie Bubble Mask. Order yours today and let nature's ingredients transform your skin.",f1a8687c4ced424688373d3cc5d09c44,test,0,bad review,8.9,0.8044176508141025,15.982690811157227,4.0,4.0,5.0,4.0,5.0,0.8913309621249188
+92,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B09B2RNHHH
+Title: MAC ""Stay Curious"" Lipstick - Powder Kiss Lipstick, Full Size, Full in Box
+Average Rating: 4.6
+Number of Ratings: 33
+Features: []
+Description: ['MAC ""Stay Curious"" Lipstick - Powder Kiss Lipstick, Full Size, Full in Box']
+Price: 19.9
+Store: M.A.C
+Details: {""Brand"": ""M.A.C"", ""Skin Type"": ""All"", ""Item Form"": ""Powder"", ""Finish Type"": ""Matte"", ""Coverage"": ""Full"", ""Package Dimensions"": ""3.9 x 2.4 x 0.51 inches; 0.88 Ounces""}
+Review Text: My wife got this for herself. And she is happy. Thanks Highly recommend Mac lipsticks
+","#MAC ""Stay Curious"" Lipstick - Powder Kiss Lipstick
+
+Upgrade your lip game with the MAC ""Stay Curious"" Lipstick - Powder Kiss Lipstick. This full-size, full in box lipstick from MAC combines luxurious color with a revolutionary formula for a truly unforgettable pout.
+
+##Unleash Your Curiosity
+
+Discover a world of possibilities with this matte-finish lipstick. Its unique powder formula glides on effortlessly, delivering a soft, blurred effect that is both modern and romantic. Embrace your individuality and let your curiosity shine through.
+
+##All-Day Comfort
+
+Crafted with comfort in mind, the MAC ""Stay Curious"" Lipstick features a lightweight formula that feels weightless on your lips. Say goodbye to dry, uncomfortable lips and hello to a moisturizing, velvety texture that lasts all day.
+
+##Full Coverage, Full Confidence
+
+With its full coverage formula, this lipstick gives you the power to create bold, statement lips. Whether you're attending a special occasion or simply want to elevate your everyday look, the MAC ""Stay Curious"" Lipstick has got you covered.
+
+##Customer Reviews
+
+Don't just take our word for it. With an average rating of 4.6 out of 5 stars from 33 satisfied customers, the MAC ""Stay Curious"" Lipstick is a top choice among makeup enthusiasts. One customer raves, ""My wife got this for herself. And she is happy. Thanks Highly recommend Mac lipsticks.""
+
+##Unlock Your Beauty Potential
+
+Indulge your curiosity and embrace your unique beauty with the MAC ""Stay Curious"" Lipstick. Add this beauty essential to your makeup collection today and experience the transformative power of MAC cosmetics.
+
+Price: $19.90
+
+Store: M.A.C",3e143fc4f66741379bf9ea82293faf9a,test,0,no space between the hashtag and header,8.8,0.7254275515337193,9.752102851867676,4.0,4.0,4.0,4.0,4.0,0.3839682937164397
+87,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B092HY9H9L
+Title: African Traditional Wax Print Head wrap Scarf, Women Multi-Color Headband (TJ3)
+Average Rating: 4.0
+Number of Ratings: 324
+Features: [""Average Size:43*35 inches,100% premium African cotton fabric our scarves are easy to tie and large enough for any style. African wax printing,colors won't fade."", 'Pull headdress, tie, scarf,Can be used with Western or traditional clothing,You could wear your head wrap with any outfit, from Jeans and a T-shirt to a cocktail dress. Best when worn with a solid color outfit that matches any of the colors on the scarf.', 'CARE INSTRUCTIONS Hand wash in cold water with mild laundry detergent or use a professional dry clean service. Do not wring or twist, shake off excess water and hang to air dry. Do not bleach. Iron when it is dry.', 'Handmade, highly attention to detail, our packaging is handmade by skilled garment workers. When you are wearing a package, you wear a special artwork for you.', 'We believe in our products and are happy to offer Zero Risk 100% satisfaction and effectiveness guarantee. If for any reason one of our products is not right for you, we will refund your money hassle free within 30 days of purchase.']
+Description: ['Very beautiful fabric, bold and vibrant African print. Large enough to wear a variety of ways. You can wear it on your neck as a scarf, or as a package for the entire head, to soothe your sense of style in different amazing styles. Our headscarf is with playful and delicate color patterns and patterns. Elegant headwear, can wear headscarves, scarves, knots, boho. You will get a lot of supplements for wearing headscarves.   design specifications:   dimensions: length: 43 inches, width: 35 inches   dyed uniformly on both surfaces of the fabric our African wax fabric No matter which way you wrap it, the package looks great. Extra length: 43 inches, width: 35 inches means that our versatile packages can be worn on the heads of various custom packaging designs, and they can also be worn around the neck as a chic scarf.   * Please note, because our packaging is handmade length: 43 inches Width: 35 inches design specifications may not be accurate, but the package you receive will be close to these measurements.']
+Price: 9.99
+Store: Dolly Dolly
+Details: {""Is Discontinued By Manufacturer"": ""No"", ""Package Dimensions"": ""10.5 x 7.6 x 1 inches; 5.61 Ounces"", ""Department"": ""womens"", ""Manufacturer"": ""DUOLI DUOLI""}
+Review Text: This item is square shaped. The dimensions say different. It’s impossible to wrap. Beautiful color but totally misrepresented. The fabric is very stiff and not very flexible for making different styles. Love it’s quality, size, and colors! Will buy more! The color I received is NOT the color I ordered  but I loooove this head wrap! It exceeds my expectations. Great quality. Firm to hold what ever style I choose to wear. So happy with this purchase! It wasn't what i thought it was going to look like. I thought it would come already wrapped. But i was sadly mistaking. But the fabric is nice. I love this headwrap!! So comfortable and stylish! Black History Event, The dress & Hat Came different Time & I paid Shipping on The Hat , No direction on How to tie the Hat Just cloth for14.95, what a Waste Of Money! Very nice! The quality is great.  Must be ironed after washing. Like the colour and the stiffness of the fabric.
+","## African Traditional Wax Print Head wrap Scarf, Women Multi-Color Headband (TJ3)
+
+**Price: $9.99**
+
+### Vibrant African Prints for Stylish Women
+
+Enhance your sense of style with our African Traditional Wax Print Head wrap Scarf. Made from 100% premium African cotton fabric, our scarves are not only beautiful but also easy to tie. With an average size of 43*35 inches, they are large enough to create a variety of stunning styles. 
+
+#### Versatile and Durable
+
+Whether you want to wear it on your neck as a scarf or create an elegant headwrap, our headscarf offers multiple styling options. It complements both Western and traditional clothing, making it a perfect accessory for any outfit, from jeans and a t-shirt to a cocktail dress. 
+
+#### Quality Craftsmanship
+
+Our headscarves are handmade with great attention to detail. We take pride in offering you a special piece of art that adds a touch of sophistication to your look. The fabric used in our African wax print head wrap scarves is dyed uniformly on both surfaces, ensuring a consistently vibrant look no matter how you wrap it. 
+
+#### Care Instructions and Satisfaction Guarantee
+
+To maintain its quality, we recommend hand washing the scarf in cold water with a mild detergent or using a professional dry clean service. After washing, simply shake off the excess water and hang to air dry. Our packaging is also handmade by skilled garment workers, ensuring that you receive a truly special product.
+
+We truly believe in the quality of our products, which is why we offer a Zero Risk 100% satisfaction guarantee. If for any reason our head wrap scarf is not right for you, we will refund your money hassle-free within 30 days of purchase.
+
+Create your own unique style statement with our African Traditional Wax Print Head wrap Scarf. Order now and experience the vibrant beauty of African prints in your wardrobe!
+
+*Average Rating: 4.0 (based on 324 reviews)*",6746a267f91641a58353751a2d864d70,test,1,,9.0,0.8147501531705353,12.381375312805176,4.0,4.0,5.0,4.0,5.0,0.9186284837328538
+90,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B094GZW7KD
+Title: Belize Tropical Cabana 8 fl oz. Fragrance Mist, 10 fl oz.Shower Gel , 8 Fl o z., Body Lotion
+Average Rating: 4.8
+Number of Ratings: 26
+Features: []
+Description: ['Belize Tropical Cabana 8 fl oz. Fragrance Mist, 10 fl oz.Shower Gel , 8 Fl o z., Body Lotion']
+Price: 69.75
+Store: Bath & Body Works
+Details: {""Brand"": ""Bath & Body Works"", ""Item Form"": ""Gel"", ""Unit Count"": ""3.00 Count"", ""Number of Items"": ""1"", ""Item Volume"": ""8 Fluid Ounces"", ""UPC"": ""667554129719""}
+Review Text: The lotion has a weird smell to it. Nothing like what you get from BABW.  I think buying from bath and body works is safer. Granddaughter loves this. I was very disappointed when Bath & Body Works only had ""Belize"" our for a very short time.  I love the smell  and so do my granddaughters,  When I went back to order it for my granddaughters, it was already nonexistent. So I got this one so they all could share.  The smell is beautiful soft and long lasting.  It is just a ""Little piece of Paradise"". I absolutely love this line, all time favorite.  I received everything sealed and in good condition, and I received a little soap sample in there that was a fun surprise and I love it so much.  Absolutely will purchase again when it's restock time I'm so glad I was able to find this on Amazon bath and body work's discontinued this scent. I will be ordering again when my purchase runs out.
+","# Belize Tropical Cabana Fragrance Mist, Shower Gel, Body Lotion
+
+Enjoy a little piece of paradise with the Belize Tropical Cabana collection from Bath & Body Works. This set includes an 8 fl oz. Fragrance Mist, a 10 fl oz. Shower Gel, and an 8 fl oz. Body Lotion, all beautifully scented with the tropical fragrance of Belize.
+
+## Luxurious Fragrance That Lasts
+
+Indulge your senses with the intoxicating scent of the Belize Tropical Cabana collection. The fragrance mist, shower gel, and body lotion all feature a beautiful, soft, and long-lasting scent that will transport you to a tropical paradise every time you use them.
+
+## Nourishing and Refreshing
+
+Not only will you be enveloped in the enticing fragrance, but your skin will also benefit from the nourishing and refreshing properties of these products. The shower gel gently cleanses, leaving your skin feeling clean and moisturized. The body lotion, on the other hand, hydrates and conditions your skin, leaving it soft and smooth all day long.
+
+## Trusted Quality and Authenticity
+
+Bath & Body Works is known for its high-quality products, and the Belize Tropical Cabana collection is no exception. With an average rating of 4.8 and 26 customer reviews, you can be confident in the quality and authenticity of these products.
+
+## Share the Bliss
+
+The Belize Tropical Cabana collection is loved by all generations. Customers have raved about how their granddaughters adore the scent, making it a shared experience. So why not add a little luxury to your loved ones' lives? Surprise them with these delightful products and let them experience the bliss of Belize Tropical Cabana.
+
+## Get Yours Today!
+
+Don't miss out on this limited edition fragrance collection from Bath & Body Works. Order your Belize Tropical Cabana Fragrance Mist, Shower Gel, and Body Lotion now and embrace the beauty of the tropics from the comfort of your own home.
+
+**Price: $69.75**
+
+*Please note: Due to the popularity of this collection, availability may be limited. Order now to secure your set.*
+
+*Note: Customer reviews have been edited for length and clarity.*",e3b15af021fc48099cee78e48f150fcf,test,1,,9.0,0.6773701375556263,6.146986484527588,4.0,4.0,5.0,5.0,4.0,0.6692664210197372
+94,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B09FPTW3JT
+Title: Hair extension Black Braiding Hair Pre Stretched Braiding Hair 3PCS
+Average Rating: 4.5
+Number of Ratings: 28
+Features: ['A variety of colors can make you more beautiful and charming', 'Pre-stretched braided hair, easy to shape', 'Hair is neat and soft', 'A pack of 3 hairs, each 26 inches long', 'Make products with your heart and only sell products well']
+Description: ['Pre-stretched braiding hair made with high quality, flame-retardant synthetic fiber.', 'Yaki Texture: Our Pre-stretched braiding hair extensions is Yaki texture natural looking ,super Soft as Human Hair.', 'Quick and Easy install : since the hair is pre stretched ,so it will save much more time to braid and install.', 'Itch-free, tangle-free, shedding-free , very fresh and comfortable to wear .so the pre stretched hair will be long lasting.', 'Hot water setting ,you can change the Pre-stretched braiding hair styles very easily by dipping in hot water. You can make box braids crochet hair or senegalese twist crochet hair as you like.']
+Price: 15.99
+Store: DUOENSHA
+Details: {""Brand"": ""DUOENSHA"", ""Color"": ""Black"", ""Material"": ""Synthetic"", ""Extension Length"": ""26 Inches"", ""Hair Type"": ""Straight"", ""Package Dimensions"": ""14.53 x 10.2 x 1.65 inches; 10.58 Ounces"", ""UPC"": ""754422999243"", ""Manufacturer"": ""DUOENSHA""}
+Review Text: Love this hair you would think it was thin but it’s far from that 3 pack be enough depending on what hair style your getting I only used a tiny bit of hair and still have a lot left over due to having other purples by the same company
+","## Hair extension Black Braiding Hair Pre Stretched Braiding Hair 3PCS
+
+Enhance your style and confidence with our Hair extension Black Braiding Hair. Made with high-quality, flame-retardant synthetic fiber, this pre-stretched braiding hair is designed to make you look beautiful and charming. With a variety of colors to choose from, you can find the perfect match for your desired look.
+
+### Easy to Use and Shape
+
+Our pre-stretched braiding hair is incredibly easy to shape, saving you time and effort during the installation process. With each pack containing 3 hairs that are 26 inches long, you'll have plenty of hair to work with. The hair is neat and soft, ensuring a comfortable experience while wearing it.
+
+### Natural Look and Longevity
+
+Featuring a Yaki texture, our braiding hair extensions look and feel natural, just like human hair. It is itch-free, tangle-free, and shedding-free, providing you with a hassle-free experience. The hair is designed to be long-lasting, so you can enjoy your braided style for an extended period.
+
+### Endless Styling Possibilities
+
+With our pre-stretched braiding hair, you can easily change your style by dipping it in hot water. Whether you prefer box braids, crochet hair, or Senegalese twist, this hair allows you to create a variety of stunning looks effortlessly.
+
+### Customer Reviews
+
+""This hair is amazing! It looks much thicker than it actually is, making it perfect for various styles. I only used a tiny bit of hair and still have a lot left over. Highly recommend!"" - ★★★★★
+
+### Get the Hair You Desire
+
+Ready to elevate your style with ease? Experience the convenience and versatility of our Hair extension Black Braiding Hair. Click ""Add to Cart"" now and start transforming your look today!
+
+Price: $15.99
+Store: DUOENSHA",9e0aa1d9ba744d01b9ab27a2bc9566ec,test,1,,8.2,0.7537778244234442,12.16706657409668,4.0,4.0,4.0,4.0,4.0,0.37417779130959095
+86,Azure OpenAI,"You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n
+Product ID: B091MVZW95
+Title: CHROM tooth polish uptight white, instant whitening paint for teeth (LAVISH LAVANDER)
+Average Rating: 2.4
+Number of Ratings: 13
+Features: ['CHROM IS A TOOTH POLISH, JUST LIKE NAIL POLISH, THAT CAN BE APPLIED TO TEETH AND REMOVED IN A MATTER OF SECONDS, AND LASTS FOR UP TO 24 HOURS AT A TIME.', 'TO APPLY Mix pigment. Dry teeth. Paint Toothpolish.', 'THIS IS the more easy way to get a perfect white smile in seconds (You really gonna get a CELEBRITY PHOTO SMILE).', 'FD&C approved ingredients. Vegan and cruelty-free. 100% American made. Safe for most teeth.', 'Developed by dentists.']
+Description: ['CHROM is a tooth polish, just like nail polish, that can be applied to teeth and removed in a matter of seconds, and lasts for up to 24 hours at a time. It has no taste', 'TO APPLY', '1. Mix it up. Shake the bottle hard to mix the settled pigments. If pigments are still settled after shaking, stir with a toothpick. Using the integrated brush to mix or agitate will cause unwanted fraying of the bristles.', '2. Dry teeth. Tuck cotton rolls between gums to keep mouth open. Wipe saliva off with cloth, tissue, or gauze. Teeth must be completely dry for Toothpolish to stick.', '3. Paint Toothpolish. Apply in thin layers. To avoid streaking, paint 1-3 strokes per tooth. It is important to allow at least 10 seconds dry time between layers. Polish is dry when hardened. Not dry = soft/jelly. Keep product clean. After polishing each tooth, wipe brush off on a disposable cloth or gauze before dipping it back into the bottle. Wiping brush, brush arm, and bottle edge with high-proof alcohol is also recommended. Do not leave brushes out too long since they will dry & harden.', '4. Fix it. Use a toothpick to remove excess polish from gums and gaps. Polish is easier to manipulate when wet. As with any technique, practice practice practice! Enjoy any drink while smiling wild. Toothpolish will last while eating soft foods only. Take Toothpolish with you to reapply after some meals, just like you do with lipstick.', 'TO REMOVE', 'Chip it off. Use your clean fingernail to chip off the polish. Or cover your finger with a cloth, tissue, or gauze. It is easiest to remove Toothpolish when polish is completely dry. To remove excess flakes, brush & floss teeth.', 'FAQ:', 'Toothpolish is intended for use as a cosmetic tooth coating. It is not permanent & does not alter the tooth in any way, only the color. It will not harm teeth or permanent dental work.']
+Price: 27.99
+Store: Genérico
+Details: {""Brand"": ""Generico"", ""Item Form"": ""Liquid"", ""Flavor"": ""Unflavored"", ""Age Range (Description)"": ""Adult"", ""Package Dimensions"": ""3.94 x 2.76 x 0.39 inches; 3.2 Ounces"", ""Manufacturer"": ""Generico""}
+Review Text: I love this product. It takes some practice but once I learned how to do it I was super happy with my results! I will never be without a bottle. Do not buy these products it’s a waste of money. They come defective and the company will not pay you to reimburse you on cost of shipping. The company should not be supported with their small business.
+","# CHROM Tooth Polish: Instant Whitening Paint for Teeth
+
+## The Easy Way to Get a Perfect White Smile in Seconds
+
+Introducing CHROM Tooth Polish, a revolutionary tooth polish that works just like nail polish but for your teeth! With CHROM, you can achieve a stunning white smile in a matter of seconds, without any hassle or mess. 
+
+## Features:
+- **Easy Application**: CHROM Tooth Polish is quick and easy to apply. Simply mix the pigment, dry your teeth, and paint the polish on using thin layers. 
+- **Lasts Up to 24 Hours**: Unlike other teeth whitening products, CHROM Tooth Polish lasts all day, giving you confidence and radiance from morning till night.
+- **Safe and Approved**: Developed by dentists, CHROM Tooth Polish uses FD&C approved ingredients. It is vegan and cruelty-free, as well as 100% American made. Rest assured, it is safe for most teeth and will not harm your dental work.
+
+## Benefits:
+- **Instant Whitening**: With CHROM Tooth Polish, you can achieve a celebrity photo smile in an instant. Experience the confidence of perfectly white teeth, wherever you go.
+- **Convenient and Portable**: Say goodbye to bulky teeth whitening kits. CHROM Tooth Polish is lightweight and portable, so you can take it with you on-the-go for touch-ups whenever you need.
+- **No Mess, No Fuss**: Unlike messy whitening gels or strips, CHROM Tooth Polish is clean and easy to use. Apply and remove in seconds, without any taste or discomfort.
+- **Practice Makes Perfect**: While it may take a little practice to perfect your technique, once you've got it, CHROM Tooth Polish will become your go-to for a bright and beautiful smile.
+
+## How to Use:
+
+1. Mix it up: Shake the bottle vigorously to mix the settled pigments.
+2. Dry teeth: Wipe off saliva and ensure teeth are completely dry.
+3. Paint Toothpolish: Apply thin layers with 1-3 strokes per tooth. Allow at least 10 seconds dry time between layers.
+4. Fix it: Remove excess polish using a toothpick and enjoy your favorite drink while smiling with confidence.
+5. Reapply as needed: While Toothpolish lasts while eating soft foods, take it with you for touch-ups after meals.
+
+## Customer Reviews:
+- Positive: ""I love this product. It takes some practice but once I learned how to do it I was super happy with my results! I will never be without a bottle.""
+- Negative: ""Do not buy these products; it's a waste of money. They come defective and the company will not reimburse you for the cost of shipping.""
+
+## Price: $27.99
+## Store: Genérico
+
+Add CHROM Tooth Polish to your cart today and experience the magic of a perfect white smile in seconds!",03c5feff4066496e9566f4c4f869e311,test,0,too long,6.9,0.7727043753111223,12.4951171875,4.0,4.0,4.0,4.0,4.0,0.3597429346704957

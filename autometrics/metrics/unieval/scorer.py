@@ -7,7 +7,9 @@ class UniEvaluator:
     def __init__(self, model_name_or_path, max_length=1024, device='cuda:0', cache_dir=None):
         """ Set up model """
         self.device = device
-        self.max_length = max_length
+        # never exceed what the tokenizer/model actually supports
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, cache_dir=cache_dir)
+        self.max_length = min(max_length, self.tokenizer.model_max_length)
 
         self.config = AutoConfig.from_pretrained(model_name_or_path, cache_dir=cache_dir)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, cache_dir=cache_dir)

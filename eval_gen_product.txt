@@ -1,0 +1,13 @@
+litellm_proxy/meta-llama/Meta-Llama-3.3-70b-Instruct
+                                  Top 1 Metric & Value  ...                          Top 3 Metric & Value
+grade  UniEvalFact-consistency (-0.008714783093600034)  ...  Perplexity_gpt2-large (-0.09586261402960038)
+
+[1 rows x 3 columns]
+                                    Top 1 Metric & Value  ...                             Top 5 Metric & Value
+grade  Adherence to Guidelines_Meta-Llama-3.3-70b-Ins...  ...  UniEvalFact-consistency (-0.008714783093600034)
+
+[1 rows x 5 columns]
+                                    Top 1 Metric & Value  ...                             Top 5 Metric & Value
+grade  Adherence to Guidelines_Meta-Llama-3.3-70b-Ins...  ...  UniEvalFact-consistency (-0.008714783093600034)
+
+[1 rows x 5 columns]

@@ -1,4 +1,3 @@
-# Regression.py
 import numpy as np
 from autometrics.aggregator.Aggregator import Aggregator
 
@@ -50,6 +49,12 @@ class Regression(Aggregator):
         input_columns = self.get_input_columns()
         X = df[input_columns]
 
+        # —— clip any +/-inf or too large values in X before predict
+        X_clean = X.replace([np.inf, -np.inf], np.nan)
+        mins = X_clean.min()
+        maxs = X_clean.max()
+        X = X.clip(lower=mins, upper=maxs, axis=1).fillna(0)
+
         y_pred = self.model.predict(X)
 
         if update_dataset:
@@ -57,13 +62,13 @@ class Regression(Aggregator):
             dataset.set_dataframe(df)
 
         return y_pred
-
+    
     def identify_important_metrics(self):
-        """
+        '''
             Identify the most important metrics depending on the model.
             For linear models: Use coefficients.
             For tree-based models: Use feature importances.
-        """
+        '''
         metric_columns = self.get_input_columns()
 
         # Linear models (Ridge, Lasso, ElasticNet, PLS)

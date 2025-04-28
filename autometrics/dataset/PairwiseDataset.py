@@ -89,6 +89,9 @@ class PairwiseDataset(Dataset):
 
         # Combine the dataframes for the pairwise dataset
         cols = [data_id_column, input_column] + reference_columns
+
+        cols = list(set(cols)) # Ensure unique columns
+
         df = dataframe[cols].copy()
         df.columns = cols
         # add model_id, output, and target, and metric columns

@@ -19,6 +19,13 @@ def get_default_formatter(dataset):
         if not references or len(references) == 0:
             return f"«Input ({input_column}): «{row[input_column]}»\nOutput ({output_column}): «{row[output_column]}»»"
         
+        if len(references) != len(reference_columns):
+            print(f"Warning: Expected {len(reference_columns)} references, but found {len(references)} in row {row.name}.")
+            print("references:", references)
+            print("reference_columns:", reference_columns)
+
+            raise ValueError(f"Expected {len(reference_columns)} references, but found {len(references)} in row {row.name}. Please check your dataset.")
+        
         ref_str = "\n".join([f"Reference {i+1} ({reference_columns[i]}): «{ref}»" for i, ref in enumerate(references)])
         return f"«Input ({input_column}): «{row[input_column]}»\n{ref_str}\nOutput ({output_column}): «{row[output_column]}»»"
     

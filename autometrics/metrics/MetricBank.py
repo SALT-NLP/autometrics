@@ -18,12 +18,14 @@ from autometrics.metrics.reference_based.StringSimilarity import LevenshteinRati
 from autometrics.metrics.reference_based.StringSimilarity import HammingDistance
 from autometrics.metrics.reference_based.StringSimilarity import JaroSimilarity
 from autometrics.metrics.reference_based.StringSimilarity import JaroWinklerSimilarity
+from autometrics.metrics.reference_based.ParaScore import ParaScore
 
 from autometrics.metrics.reference_free.FKGL import FKGL
 from autometrics.metrics.reference_free.UniEvalFact import UniEvalFact
 from autometrics.metrics.reference_free.Perplexity import Perplexity
+from autometrics.metrics.reference_free.ParaScoreFree import ParaScoreFree
 
-reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity()]
-reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity(batch_size=2)]
+reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), ParaScore()]
+reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree()]
 
 all_metrics = reference_based_metrics + reference_free_metrics

@@ -10,3 +10,4 @@ scikit-learn
 numpy
 levenshtein
 prometheus_eval
+parascore==1.0.5

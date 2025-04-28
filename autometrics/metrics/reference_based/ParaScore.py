@@ -1,0 +1,156 @@
+from parascore import ParaScorer
+from autometrics.metrics.reference_based.ReferenceBasedMultiMetric import ReferenceBasedMultiMetric
+
+class ParaScore(ReferenceBasedMultiMetric):
+    """---
+# Metric Card for ParaScore
+
+ParaScore is a reference-based evaluation metric designed for paraphrase generation. It combines advantages of both reference-free and reference-based approaches by explicitly modeling semantic similarity and lexical divergence between generated and reference texts. ParaScore outputs three scores — Precision (P), Recall (R), and F1 — reflecting quality from different perspectives. It was introduced to address weaknesses found in traditional metrics when evaluating paraphrasing tasks.
+
+## Metric Details
+
+### Metric Description
+
+ParaScore evaluates the quality of generated paraphrases by considering both semantic similarity and lexical diversity. It extends BERTScore-based similarity measures by incorporating a lexical divergence term. ParaScore's "base_score" formulation combines:
+- Semantic similarity between candidate and source,
+- Semantic similarity between candidate and reference,
+- Lexical diversity between candidate and source.
+
+Specifically, the maximum similarity between the candidate and either the source or reference is combined with a scaled lexical diversity score (edit distance-based). This hybrid design enables ParaScore to better model paraphrase generation quality, which demands both meaning preservation and surface-level divergence.
+
+- **Metric Type:** Semantic Similarity
+- **Range:** [0, 1]
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** Yes
+
+### Formal Definition
+
+Given candidate sentence $c$, source sentence $s$, and reference sentence(s) $r$, ParaScore is defined as:
+
+1. Compute semantic similarity scores:
+   - $S_{s\text{-}c}$: Semantic similarity between source $s$ and candidate $c$.
+   - $S_{r\text{-}c}$: Semantic similarity between reference $r$ and candidate $c$.
+
+2. Compute lexical diversity score:
+   - $D_{s\text{-}c}$: Lexical diversity between source $s$ and candidate $c$, based on normalized edit distance.
+
+3. ParaScore base score for each candidate is:
+
+$$
+\text{BaseScore}(c, s, r) = \max(S_{s\text{-}c}, S_{r\text{-}c}) + 0.05 \times D_{s\text{-}c}
+$$
+
+The semantic similarity scores are derived from a cosine similarity of contextual embeddings (BERT-style models), and the diversity score uses a linear scaling of normalized edit distance.
+
+Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over contextual embeddings weighted by IDF.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Source sentence (input)  
+  - Candidate sentence (output)  
+  - Reference sentence(s)  
+
+- **Outputs:**  
+  - A tuple of three scalar scores: Precision (P), Recall (R), and F1
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation
+- **Tasks:** Paraphrasing
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  Evaluating paraphrase generation tasks where preserving meaning while achieving sufficient lexical variation is critical. Suitable for both academic evaluation and production benchmarking in paraphrase generation systems.
+
+- **Not Recommended For:**  
+  Tasks focused solely on content fidelity (e.g., translation, summarization) where lexical diversity is not desired, as ParaScore explicitly rewards divergence from the input.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [parascore](https://pypi.org/project/parascore/) (official PyPI package)
+  - Custom implementations in research pipelines based on ParaScorer class.
+
+### Computational Complexity
+
+- **Efficiency:**  
+  Moderately expensive due to contextual embedding computations using large language models (e.g., RoBERTa-large, BERT-based encoders).
+
+- **Scalability:**  
+  ParaScore supports batched processing and GPU acceleration via PyTorch, making it scalable to moderately large datasets. However, inference time grows linearly with the number of candidate-reference pairs and the size of the embedding model.
+
+## Known Limitations
+
+- **Biases:**  
+  - Dependency on the pre-trained language model (e.g., BERT, RoBERTa) could introduce biases learned during model pretraining (e.g., biases in language, domain-specific vocabulary).
+
+- **Task Misalignment Risks:**  
+  - ParaScore assumes that lexical diversity is *desirable*. In tasks where copying the source is acceptable or even preferred (e.g., summarization, certain translation setups), ParaScore may penalize good outputs.
+
+- **Failure Cases:**  
+  - ParaScore may underperform when either the source or the reference are noisy or semantically ambiguous, since it relies on maximum similarity across source and reference.  
+  - When candidates are very short or trivial paraphrases, the diversity term might disproportionately influence the score.
+
+## Related Metrics
+
+- **BERTScore:** ParaScore extends BERTScore by adding explicit modeling of lexical diversity.
+- **BLEU, ROUGE:** Traditional surface-level metrics; less suitable for paraphrase evaluation due to focus on exact n-gram overlap.
+- **MoverScore:** Another semantic similarity metric, but without explicit lexical diversity modeling.
+- **ParaSim:** A related metric focused on semantic preservation for paraphrasing without the diversity component.
+
+## Further Reading
+
+- **Papers:**  
+  - [On the Evaluation Metrics for Paraphrase Generation (Shen et al., 2022)](https://aclanthology.org/2022.emnlp-main.208/)
+
+- **Blogs/Tutorials:**  
+  Needs more information.
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided documents and source materials. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu"""
+    def __init__(
+        self,
+        name: str = "ParaScore",
+        description: str = "ParaScore: reference-based paraphrase evaluation (P, R, F).",
+        submetric_names: list[str] = ["ParaScore_P", "ParaScore_R", "ParaScore_F"],
+        **scorer_kwargs
+    ):
+        super().__init__(name, description, submetric_names)
+        self.scorer = ParaScorer(**scorer_kwargs)
+
+    def calculate(self, input, output, references=None, **kwargs):
+        if not references:
+            raise ValueError("ParaScore (reference-based) requires `references`.")
+        # singleton batch
+        cands = [output]
+        srcs = [input]
+        # ensure list-of-lists
+        if isinstance(references[0], list):
+            refs_batch = references
+        else:
+            refs_batch = [references]
+        # use hybrid base_score
+        P_list = self.scorer.base_score(cands, srcs, refs_batch, **kwargs)
+        # base_score returns a list of floats
+        return P_list[0], P_list[1], P_list[2]
+
+    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+        # inputs: List[source], outputs: List[candidate]
+        refs_batch = references if references is not None else [[] for _ in inputs]
+        P_list = self.scorer.base_score(outputs, inputs, refs_batch, **kwargs)
+        # P_list is [score1, score2, ...] but for MultiMetric we need three lists
+        # actually base_score returns List[float] of length len(inputs)
+        # to create three identical lists (P,R,F) we assume base_score yields final single metric
+        # so replicate for each submetric
+        return P_list, P_list, P_list

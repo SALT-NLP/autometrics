@@ -102,3 +102,11 @@ Traceback (most recent call last):
     assert lang is not None or model_type is not None, "Either lang or model_type should be specified"
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: Either lang or model_type should be specified
+Traceback (most recent call last):
+  File "/projects/m000076/mryan0/autometrics/design2code.py", line 1, in <module>
+    from autometrics.dataset.datasets import Design2Code
+  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/datasets/__init__.py", line 4, in <module>
+    from .evalgen.evalgen import EvalGen, EvalGenProduct, EvalGenMedical
+  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/datasets/evalgen/evalgen.py", line 4, in <module>
+    from sklearn.model_selection import KFold
+ModuleNotFoundError: No module named 'sklearn'

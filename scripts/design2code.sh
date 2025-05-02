@@ -28,10 +28,10 @@ export DSPY_CACHEDIR=/scratch/m000076/mryan0/autometrics/dspy_cache
 # # TODO: Uncomment the following line to launch the server (ADD BACK IN 4 GPUs INSTEAD OF 1)
 # python -m sglang.launch_server --model-path $model --port $port --host 0.0.0.0 --tp 4 --dtype bfloat16 --mem-fraction-static 0.9 --trust-remote-code --allow-auto-truncate &
 
-# conda activate autometrics
+conda activate autometrics
 
 # Takes up to 7 minutes to load
-sleep 420
-export CUDA_VISIBLE_DEVICES=0 # Use only one GPU for the evaluation
+# sleep 420
+# export CUDA_VISIBLE_DEVICES=0 # Use only one GPU for the evaluation
 
 python design2code.py > design2code.txt

@@ -1,0 +1,104 @@
+[2025-04-28 21:20:31] server_args=ServerArgs(model_path='meta-llama/Llama-3.3-70B-Instruct', tokenizer_path='meta-llama/Llama-3.3-70B-Instruct', tokenizer_mode='auto', load_format='auto', trust_remote_code=True, dtype='bfloat16', kv_cache_dtype='auto', quantization_param_path=None, quantization=None, context_length=None, device='cuda', served_model_name='meta-llama/Llama-3.3-70B-Instruct', chat_template=None, is_embedding=False, revision=None, skip_tokenizer_init=False, host='0.0.0.0', port=7410, mem_fraction_static=0.9, max_running_requests=None, max_total_tokens=None, chunked_prefill_size=8192, max_prefill_tokens=16384, schedule_policy='lpm', schedule_conservativeness=1.0, cpu_offload_gb=0, prefill_only_one_req=False, tp_size=4, stream_interval=1, stream_output=False, random_seed=1037618750, constrained_json_whitespace_pattern=None, watchdog_timeout=300, download_dir=None, base_gpu_id=0, log_level='info', log_level_http=None, log_requests=False, show_time_cost=False, enable_metrics=False, decode_log_interval=40, api_key=None, file_storage_pth='sglang_storage', enable_cache_report=False, dp_size=1, load_balance_method='round_robin', ep_size=1, dist_init_addr=None, nnodes=1, node_rank=0, json_model_override_args='{}', lora_paths=None, max_loras_per_batch=8, attention_backend='flashinfer', sampling_backend='flashinfer', grammar_backend='outlines', speculative_draft_model_path=None, speculative_algorithm=None, speculative_num_steps=5, speculative_num_draft_tokens=64, speculative_eagle_topk=8, enable_double_sparsity=False, ds_channel_config_path=None, ds_heavy_channel_num=32, ds_heavy_token_num=256, ds_heavy_channel_type='qk', ds_sparse_decode_threshold=4096, disable_radix_cache=False, disable_jump_forward=False, disable_cuda_graph=False, disable_cuda_graph_padding=False, disable_outlines_disk_cache=False, disable_custom_all_reduce=False, disable_mla=False, disable_overlap_schedule=False, enable_mixed_chunk=False, enable_dp_attention=False, enable_ep_moe=False, enable_torch_compile=False, torch_compile_max_bs=32, cuda_graph_max_bs=160, cuda_graph_bs=None, torchao_config='', enable_nan_detection=False, enable_p2p_check=False, triton_attention_reduce_in_fp32=False, triton_attention_num_kv_splits=8, num_continuous_decode_steps=1, delete_ckpt_after_loading=False, enable_memory_saver=False, allow_auto_truncate=True, enable_custom_logit_processor=False, tool_call_parser=None, enable_hierarchical_cache=False)
+[2025-04-28 21:20:43 TP1] Init torch distributed begin.
+[2025-04-28 21:20:43 TP0] Init torch distributed begin.
+[2025-04-28 21:20:43 TP3] Init torch distributed begin.
+[2025-04-28 21:20:43 TP2] Init torch distributed begin.
+[2025-04-28 21:20:44 TP0] sglang is using nccl==2.21.5
+[2025-04-28 21:20:44 TP2] sglang is using nccl==2.21.5
+[2025-04-28 21:20:44 TP3] sglang is using nccl==2.21.5
+[2025-04-28 21:20:44 TP1] sglang is using nccl==2.21.5
+[2025-04-28 21:20:46 TP3] Load weight begin. avail mem=77.19 GB
+[2025-04-28 21:20:46 TP2] Load weight begin. avail mem=76.72 GB
+[2025-04-28 21:20:46 TP1] Load weight begin. avail mem=76.72 GB
+[2025-04-28 21:20:46 TP0] Load weight begin. avail mem=76.81 GB
+[2025-04-28 21:20:47 TP1] Using model weights format ['*.safetensors']
+[2025-04-28 21:20:47 TP3] Using model weights format ['*.safetensors']
+[2025-04-28 21:20:47 TP0] Using model weights format ['*.safetensors']
+[2025-04-28 21:20:47 TP2] Using model weights format ['*.safetensors']
+Loading safetensors checkpoint shards:   0% Completed | 0/30 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:   3% Completed | 1/30 [00:01<00:44,  1.53s/it]
+Loading safetensors checkpoint shards:   7% Completed | 2/30 [00:03<00:49,  1.78s/it]
+Loading safetensors checkpoint shards:  10% Completed | 3/30 [00:05<00:56,  2.09s/it]
+Loading safetensors checkpoint shards:  13% Completed | 4/30 [00:08<00:54,  2.08s/it]
+Loading safetensors checkpoint shards:  17% Completed | 5/30 [00:10<00:52,  2.09s/it]
+Loading safetensors checkpoint shards:  20% Completed | 6/30 [00:11<00:47,  1.97s/it]
+Loading safetensors checkpoint shards:  23% Completed | 7/30 [00:14<00:47,  2.05s/it]
+Loading safetensors checkpoint shards:  27% Completed | 8/30 [00:16<00:46,  2.12s/it]
+Loading safetensors checkpoint shards:  30% Completed | 9/30 [00:18<00:45,  2.18s/it]
+Loading safetensors checkpoint shards:  33% Completed | 10/30 [00:20<00:42,  2.13s/it]
+Loading safetensors checkpoint shards:  37% Completed | 11/30 [00:22<00:40,  2.13s/it]
+Loading safetensors checkpoint shards:  40% Completed | 12/30 [00:24<00:37,  2.09s/it]
+Loading safetensors checkpoint shards:  43% Completed | 13/30 [00:26<00:34,  2.02s/it]
+Loading safetensors checkpoint shards:  47% Completed | 14/30 [00:28<00:31,  1.97s/it]
+Loading safetensors checkpoint shards:  50% Completed | 15/30 [00:30<00:30,  2.03s/it]
+Loading safetensors checkpoint shards:  53% Completed | 16/30 [00:31<00:22,  1.61s/it]
+Loading safetensors checkpoint shards:  57% Completed | 17/30 [00:33<00:21,  1.69s/it]
+Loading safetensors checkpoint shards:  60% Completed | 18/30 [00:35<00:21,  1.79s/it]
+Loading safetensors checkpoint shards:  63% Completed | 19/30 [00:36<00:19,  1.78s/it]
+Loading safetensors checkpoint shards:  67% Completed | 20/30 [00:38<00:18,  1.86s/it]
+Loading safetensors checkpoint shards:  70% Completed | 21/30 [00:40<00:16,  1.84s/it]
+Loading safetensors checkpoint shards:  73% Completed | 22/30 [00:42<00:15,  1.90s/it]
+Loading safetensors checkpoint shards:  77% Completed | 23/30 [00:45<00:14,  2.13s/it]
+Loading safetensors checkpoint shards:  80% Completed | 24/30 [00:48<00:13,  2.29s/it]
+Loading safetensors checkpoint shards:  83% Completed | 25/30 [00:50<00:12,  2.42s/it]
+Loading safetensors checkpoint shards:  87% Completed | 26/30 [00:53<00:10,  2.50s/it]
+Loading safetensors checkpoint shards:  90% Completed | 27/30 [00:56<00:08,  2.72s/it]
+Loading safetensors checkpoint shards:  93% Completed | 28/30 [00:59<00:05,  2.79s/it]
+Loading safetensors checkpoint shards:  97% Completed | 29/30 [01:02<00:02,  2.74s/it]
+Loading safetensors checkpoint shards: 100% Completed | 30/30 [01:05<00:00,  2.81s/it]
+Loading safetensors checkpoint shards: 100% Completed | 30/30 [01:05<00:00,  2.18s/it]
+
+[2025-04-28 21:21:54 TP0] Load weight end. type=LlamaForCausalLM, dtype=torch.bfloat16, avail mem=43.89 GB
+[2025-04-28 21:21:54 TP1] Load weight end. type=LlamaForCausalLM, dtype=torch.bfloat16, avail mem=43.80 GB
+[2025-04-28 21:21:54 TP2] Load weight end. type=LlamaForCausalLM, dtype=torch.bfloat16, avail mem=43.80 GB
+[2025-04-28 21:21:54 TP3] Load weight end. type=LlamaForCausalLM, dtype=torch.bfloat16, avail mem=44.26 GB
+[2025-04-28 21:21:55 TP0] KV Cache is allocated. K size: 18.02 GB, V size: 18.02 GB.
+[2025-04-28 21:21:55 TP3] KV Cache is allocated. K size: 18.02 GB, V size: 18.02 GB.
+[2025-04-28 21:21:55 TP2] KV Cache is allocated. K size: 18.02 GB, V size: 18.02 GB.
+[2025-04-28 21:21:55 TP1] KV Cache is allocated. K size: 18.02 GB, V size: 18.02 GB.
+[2025-04-28 21:21:55 TP0] Memory pool end. avail mem=6.64 GB
+[2025-04-28 21:21:55 TP3] Memory pool end. avail mem=7.01 GB
+[2025-04-28 21:21:55 TP2] Memory pool end. avail mem=6.54 GB
+[2025-04-28 21:21:55 TP1] Memory pool end. avail mem=6.54 GB
+[2025-04-28 21:21:55 TP0] Capture cuda graph begin. This can take up to several minutes.
+[2025-04-28 21:21:55 TP3] Capture cuda graph begin. This can take up to several minutes.
+[2025-04-28 21:21:55 TP2] Capture cuda graph begin. This can take up to several minutes.
+[2025-04-28 21:21:55 TP1] Capture cuda graph begin. This can take up to several minutes.
+  0%|          | 0/23 [00:00<?, ?it/s]  4%|▍         | 1/23 [00:08<03:11,  8.72s/it]  9%|▊         | 2/23 [00:09<01:19,  3.80s/it] 13%|█▎        | 3/23 [00:09<00:45,  2.28s/it] 17%|█▋        | 4/23 [00:09<00:28,  1.50s/it] 22%|██▏       | 5/23 [00:10<00:19,  1.07s/it] 26%|██▌       | 6/23 [00:10<00:13,  1.24it/s] 30%|███       | 7/23 [00:10<00:10,  1.55it/s] 35%|███▍      | 8/23 [00:11<00:08,  1.87it/s] 39%|███▉      | 9/23 [00:11<00:06,  2.15it/s] 43%|████▎     | 10/23 [00:11<00:05,  2.38it/s] 48%|████▊     | 11/23 [00:12<00:04,  2.57it/s] 52%|█████▏    | 12/23 [00:12<00:04,  2.75it/s] 57%|█████▋    | 13/23 [00:12<00:03,  2.88it/s] 61%|██████    | 14/23 [00:12<00:03,  2.99it/s] 65%|██████▌   | 15/23 [00:13<00:02,  3.08it/s] 70%|██████▉   | 16/23 [00:13<00:02,  3.11it/s] 74%|███████▍  | 17/23 [00:13<00:01,  3.17it/s] 78%|███████▊  | 18/23 [00:14<00:01,  3.16it/s] 83%|████████▎ | 19/23 [00:14<00:01,  3.15it/s] 87%|████████▋ | 20/23 [00:14<00:00,  3.19it/s] 91%|█████████▏| 21/23 [00:15<00:00,  3.22it/s] 96%|█████████▌| 22/23 [00:15<00:00,  3.22it/s]100%|██████████| 23/23 [00:15<00:00,  3.21it/s]100%|██████████| 23/23 [00:15<00:00,  1.46it/s]
+[2025-04-28 21:22:11 TP2] Registering 3703 cuda graph addresses
+[2025-04-28 21:22:11 TP1] Registering 3703 cuda graph addresses
+[2025-04-28 21:22:11 TP3] Registering 3703 cuda graph addresses
+[2025-04-28 21:22:11 TP0] Registering 3703 cuda graph addresses
+[2025-04-28 21:22:11 TP3] Capture cuda graph end. Time elapsed: 15.87 s
+[2025-04-28 21:22:11 TP1] Capture cuda graph end. Time elapsed: 15.87 s
+[2025-04-28 21:22:11 TP2] Capture cuda graph end. Time elapsed: 15.87 s
+[2025-04-28 21:22:11 TP0] Capture cuda graph end. Time elapsed: 15.87 s
+[2025-04-28 21:22:12 TP2] max_total_num_tokens=472417, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=2049, context_len=131072
+[2025-04-28 21:22:12 TP1] max_total_num_tokens=472417, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=2049, context_len=131072
+[2025-04-28 21:22:12 TP0] max_total_num_tokens=472417, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=2049, context_len=131072
+[2025-04-28 21:22:12 TP3] max_total_num_tokens=472417, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=2049, context_len=131072
+[2025-04-28 21:22:13] INFO:     Started server process [4124080]
+[2025-04-28 21:22:13] INFO:     Waiting for application startup.
+[2025-04-28 21:22:13] INFO:     Application startup complete.
+[2025-04-28 21:22:13] INFO:     Uvicorn running on http://0.0.0.0:7410 (Press CTRL+C to quit)
+[2025-04-28 21:22:13 TP0] Prefill batch. #new-seq: 1, #new-token: 7, #cached-token: 0, cache hit rate: 0.00%, token usage: 0.00, #running-req: 0, #queue-req: 0
+[2025-04-28 21:22:28] The server is fired up and ready to roll!
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/ParaScore.py:5: SyntaxWarning: invalid escape sequence '\m'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/ParaScoreFree.py:5: SyntaxWarning: invalid escape sequence '\o'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/INFORMRewardModel.py:74: SyntaxWarning: invalid escape sequence '\l'
+  """---
+Traceback (most recent call last):
+  File "/projects/m000076/mryan0/autometrics/design2code.py", line 7, in <module>
+    from autometrics.metrics.MetricBank import all_metrics
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/MetricBank.py", line 29, in <module>
+    reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), ParaScore()]
+                                                                                                                                                                                                                                                                          ^^^^^^^^^^^
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/ParaScore.py", line 130, in __init__
+    self.scorer = ParaScorer(**scorer_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/parascore/scorer.py", line 64, in __init__
+    assert lang is not None or model_type is not None, "Either lang or model_type should be specified"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Either lang or model_type should be specified

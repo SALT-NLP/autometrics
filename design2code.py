@@ -21,7 +21,7 @@ train, dev, test = dataset.get_splits(train_ratio=0.2, val_ratio=0.2, seed=42, m
 print("Train size:", len(train.dataframe), "Validation size:", len(dev.dataframe), "Test size:", len(test.dataframe))
 
 # %%
-llama33_70b = dspy.LM("litellm_proxy/meta-llama/Meta-Llama-3.3-70b-Instruct", api_base="http://localhost:7410/v1", api_key="None")
+llama33_70b = dspy.LM("litellm_proxy/meta-llama/Meta-Llama-3.3-70b-Instruct", api_base="http://future-hgx-2:7410/v1", api_key="None")
 
 dspy.settings.configure(lm=llama33_70b)
 

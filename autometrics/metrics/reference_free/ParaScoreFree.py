@@ -132,6 +132,13 @@ where:
         **scorer_kwargs
     ):
         super().__init__(name, description, submetric_names)
+
+        if "lang" not in scorer_kwargs:
+            scorer_kwargs["lang"] = "en"
+
+        if "model_type" not in scorer_kwargs:
+            scorer_kwargs["model_type"] = "bert-base-uncased"
+            
         self.scorer = ParaScorer(**scorer_kwargs)
 
     def calculate(self, input, output, **kwargs):

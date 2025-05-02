@@ -25,8 +25,9 @@ from autometrics.metrics.reference_free.UniEvalFact import UniEvalFact
 from autometrics.metrics.reference_free.Perplexity import Perplexity
 from autometrics.metrics.reference_free.ParaScoreFree import ParaScoreFree
 from autometrics.metrics.reference_free.INFORMRewardModel import INFORMRewardModel
+from autometrics.metrics.reference_free.PRMRewardModel import MathProcessRewardModel
 
 reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), ParaScore()]
-reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel()]
+reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel(), MathProcessRewardModel()]
                           
 all_metrics = reference_based_metrics + reference_free_metrics

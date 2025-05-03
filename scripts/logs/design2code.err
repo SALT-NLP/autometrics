@@ -165,3 +165,44 @@ Traceback (most recent call last):
   File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/SummaQA.py", line 1, in <module>
     import spacy
 ModuleNotFoundError: No module named 'spacy'
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.2.5 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/projects/m000076/mryan0/autometrics/design2code.py", line 7, in <module>
+    from autometrics.metrics.MetricBank import all_metrics
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/MetricBank.py", line 8, in <module>
+    from autometrics.metrics.reference_based.MOVERScore import MOVERScore
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/MOVERScore.py", line 6, in <module>
+    from pyemd import emd, emd_with_flow
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/pyemd/__init__.py", line 74, in <module>
+    from .emd import emd, emd_with_flow, emd_samples
+Traceback (most recent call last):
+  File "/projects/m000076/mryan0/autometrics/design2code.py", line 7, in <module>
+    from autometrics.metrics.MetricBank import all_metrics
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/MetricBank.py", line 8, in <module>
+    from autometrics.metrics.reference_based.MOVERScore import MOVERScore
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/MOVERScore.py", line 6, in <module>
+    from pyemd import emd, emd_with_flow
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/pyemd/__init__.py", line 74, in <module>
+    from .emd import emd, emd_with_flow, emd_samples
+  File "src/pyemd/emd.pyx", line 1, in init pyemd.emd
+ImportError: numpy.core.multiarray failed to import (auto-generated because you didn't call 'numpy.import_array()' after cimporting numpy; use '<void>numpy._import_array' to disable if you are certain you don't need it).
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/DistinctNGram.py:8: SyntaxWarning: invalid escape sequence '\d'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/FastTextToxicity.py:9: SyntaxWarning: invalid escape sequence '\h'
+  """---
+Traceback (most recent call last):
+  File "/projects/m000076/mryan0/autometrics/design2code.py", line 7, in <module>
+    from autometrics.metrics.MetricBank import all_metrics
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/MetricBank.py", line 31, in <module>
+    from autometrics.metrics.reference_free.FastTextToxicity import FastTextToxicity
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/FastTextToxicity.py", line 2, in <module>
+    import fasttext
+ModuleNotFoundError: No module named 'fasttext'

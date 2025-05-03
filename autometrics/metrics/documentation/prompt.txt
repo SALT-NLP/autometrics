@@ -68,7 +68,7 @@ R_{\text{BERT}} = \frac{\sum_{x_i \in x} \text{idf}(x_i) \cdot \max_{\hat{x}_j \
 $$
 ```
 
-	6. Citation: It is imperative that you do NOT make this up.  If the user does not explicitly provide the bibtex citation for the metric then you must say [More Information Needed]
+	6. Citation: It is imperative that you do NOT make this up.  If the user does not explicitly provide the bibtex citation for the metric then you must say [More Information Needed].  If a citation is provided you must copy it EXACTLY.  Do NOT try to simplify any of the components such as the author list with an ellipsis.
 
 ## Categorical Suggestions for Consistency
 

@@ -110,3 +110,34 @@ Traceback (most recent call last):
   File "/projects/m000076/mryan0/autometrics/autometrics/dataset/datasets/evalgen/evalgen.py", line 4, in <module>
     from sklearn.model_selection import KFold
 ModuleNotFoundError: No module named 'sklearn'
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/ParaScore.py:5: SyntaxWarning: invalid escape sequence '\m'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/YiSi.py:62: SyntaxWarning: invalid escape sequence '\i'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/ParaScoreFree.py:5: SyntaxWarning: invalid escape sequence '\o'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/PRMRewardModel.py:9: SyntaxWarning: invalid escape sequence '\d'
+  """---
+Downloading shards:   0%|          | 0/30 [00:00<?, ?it/s]Downloading shards:   3%|▎         | 1/30 [00:57<27:58, 57.89s/it]Downloading shards:   7%|▋         | 2/30 [01:56<27:05, 58.04s/it]Downloading shards:  10%|█         | 3/30 [03:20<31:29, 69.98s/it]Downloading shards:  13%|█▎        | 4/30 [05:43<42:49, 98.81s/it]Downloading shards:  17%|█▋        | 5/30 [08:19<49:50, 119.64s/it]Downloading shards:  20%|██        | 6/30 [10:01<45:21, 113.38s/it]Downloading shards:  23%|██▎       | 7/30 [10:59<36:34, 95.40s/it] Downloading shards:  27%|██▋       | 8/30 [11:29<27:19, 74.52s/it]Downloading shards:  30%|███       | 9/30 [12:00<21:22, 61.09s/it]Downloading shards:  33%|███▎      | 10/30 [12:55<19:40, 59.05s/it]Downloading shards:  37%|███▋      | 11/30 [13:53<18:35, 58.72s/it]Downloading shards:  40%|████      | 12/30 [15:37<21:44, 72.49s/it]Downloading shards:  43%|████▎     | 13/30 [16:36<19:25, 68.58s/it]Downloading shards:  47%|████▋     | 14/30 [17:39<17:46, 66.68s/it]Downloading shards:  50%|█████     | 15/30 [18:38<16:06, 64.42s/it]Downloading shards:  53%|█████▎    | 16/30 [20:06<16:40, 71.46s/it]Downloading shards:  57%|█████▋    | 17/30 [21:01<14:25, 66.54s/it]Downloading shards:  60%|██████    | 18/30 [22:00<12:51, 64.25s/it]Downloading shards:  63%|██████▎   | 19/30 [22:58<11:27, 62.52s/it]Downloading shards:  67%|██████▋   | 20/30 [24:45<12:38, 75.82s/it]Downloading shards:  70%|███████   | 21/30 [26:36<12:58, 86.52s/it]Downloading shards:  73%|███████▎  | 22/30 [29:00<13:50, 103.77s/it]Downloading shards:  77%|███████▋  | 23/30 [31:04<12:48, 109.77s/it]Downloading shards:  80%|████████  | 24/30 [32:16<09:50, 98.47s/it] Downloading shards:  83%|████████▎ | 25/30 [33:13<07:10, 86.03s/it]Downloading shards:  87%|████████▋ | 26/30 [34:09<05:07, 76.94s/it]Downloading shards:  90%|█████████ | 27/30 [36:27<04:45, 95.27s/it]Downloading shards:  93%|█████████▎| 28/30 [36:53<02:28, 74.47s/it]Downloading shards:  97%|█████████▋| 29/30 [53:55<05:58, 358.78s/it]Downloading shards: 100%|██████████| 30/30 [53:58<00:00, 251.92s/it]Downloading shards: 100%|██████████| 30/30 [53:58<00:00, 107.94s/it]
+Traceback (most recent call last):
+  File "/projects/m000076/mryan0/autometrics/design2code.py", line 7, in <module>
+    from autometrics.metrics.MetricBank import all_metrics
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/MetricBank.py", line 32, in <module>
+    reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel(), MathProcessRewardModel()]
+                                                                                                ^^^^^^^^^^^^^^^^^^^
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/INFORMRewardModel.py", line 208, in __init__
+    self._load_model()
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/INFORMRewardModel.py", line 212, in _load_model
+    self.model = INFORMForSequenceClassification.from_pretrained(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/modeling_utils.py", line 262, in _wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/modeling_utils.py", line 4179, in from_pretrained
+    config = cls._autoset_attn_implementation(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/modeling_utils.py", line 1575, in _autoset_attn_implementation
+    cls._check_and_enable_flash_attn_2(
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/modeling_utils.py", line 1710, in _check_and_enable_flash_attn_2
+    raise ImportError(f"{preface} the package flash_attn seems to be not installed. {install_message}")
+ImportError: FlashAttention2 has been toggled on, but it cannot be used due to the following error: the package flash_attn seems to be not installed. Please refer to the documentation of https://huggingface.co/docs/transformers/perf_infer_gpu_one#flashattention-2 to install Flash Attention 2.

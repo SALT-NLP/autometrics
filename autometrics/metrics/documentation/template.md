@@ -67,6 +67,10 @@
 - **Papers:** {{ papers | default("[More Information Needed]", true) }}
 - **Blogs/Tutorials:** {{ blogs | default("[More Information Needed]", true) }}
 
+## Citation
+
+{{ bibtex_citation | default("[More Information Needed]", true) }}
+
 ## Metric Card Authors
 
 - **Authors:** {{ metric_authors | default("[More Information Needed]", true) }}  

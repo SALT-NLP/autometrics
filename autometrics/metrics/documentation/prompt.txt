@@ -68,6 +68,8 @@ R_{\text{BERT}} = \frac{\sum_{x_i \in x} \text{idf}(x_i) \cdot \max_{\hat{x}_j \
 $$
 ```
 
+	6. Citation: It is imperative that you do NOT make this up.  If the user does not explicitly provide the bibtex citation for the metric then you must say [More Information Needed]
+
 ## Categorical Suggestions for Consistency
 
 Note: These suggestions are not exhaustive. While you should prioritize using the categories listed here for consistency, you may add new categories if the metric clearly warrants them.
@@ -194,6 +196,10 @@ These describe what the metric requires for evaluation:
 - **Papers:** {{ papers | default("[More Information Needed]", true) }}
 - **Blogs/Tutorials:** {{ blogs | default("[More Information Needed]", true) }}
 
+## Citation
+
+{{ bibtex_citation | default("[More Information Needed]", true) }}
+
 ## Metric Card Authors
 
 - **Authors:** {{ metric_authors | default("[More Information Needed]", true) }}
@@ -302,6 +308,29 @@ where:
 - **Blogs/Tutorials:**  
   - [Understanding BLEU](https://machinelearningmastery.com/calculate-bleu-score-for-text-python/)  
   - [SacreBLEU Documentation](https://github.com/mjpost/sacrebleu)
+
+## Citation
+
+`
+@inproceedings{papineni-etal-2002-bleu,
+    title = "{B}leu: a Method for Automatic Evaluation of Machine Translation",
+    author = "Papineni, Kishore  and
+      Roukos, Salim  and
+      Ward, Todd  and
+      Zhu, Wei-Jing",
+    editor = "Isabelle, Pierre  and
+      Charniak, Eugene  and
+      Lin, Dekang",
+    booktitle = "Proceedings of the 40th Annual Meeting of the Association for Computational Linguistics",
+    month = jul,
+    year = "2002",
+    address = "Philadelphia, Pennsylvania, USA",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/P02-1040/",
+    doi = "10.3115/1073083.1073135",
+    pages = "311--318"
+}
+`
 
 ## Metric Card Authors
 

@@ -98,6 +98,29 @@ where:
   - [Understanding BLEU](https://machinelearningmastery.com/calculate-bleu-score-for-text-python/)  
   - [SacreBLEU Documentation](https://github.com/mjpost/sacrebleu)
 
+## Citation
+
+```
+@inproceedings{papineni-etal-2002-bleu,
+    title = "{B}leu: a Method for Automatic Evaluation of Machine Translation",
+    author = "Papineni, Kishore  and
+      Roukos, Salim  and
+      Ward, Todd  and
+      Zhu, Wei-Jing",
+    editor = "Isabelle, Pierre  and
+      Charniak, Eugene  and
+      Lin, Dekang",
+    booktitle = "Proceedings of the 40th Annual Meeting of the Association for Computational Linguistics",
+    month = jul,
+    year = "2002",
+    address = "Philadelphia, Pennsylvania, USA",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/P02-1040/",
+    doi = "10.3115/1073083.1073135",
+    pages = "311--318"
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

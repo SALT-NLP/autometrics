@@ -311,7 +311,6 @@ where:
 
 ## Citation
 
-`
 @inproceedings{papineni-etal-2002-bleu,
     title = "{B}leu: a Method for Automatic Evaluation of Machine Translation",
     author = "Papineni, Kishore  and
@@ -330,7 +329,6 @@ where:
     doi = "10.3115/1073083.1073135",
     pages = "311--318"
 }
-`
 
 ## Metric Card Authors
 

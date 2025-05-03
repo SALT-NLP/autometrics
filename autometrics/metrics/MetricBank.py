@@ -10,14 +10,13 @@ from autometrics.metrics.reference_based.BARTScore import BARTScore
 from autometrics.metrics.reference_based.UniEvalDialogue import UniEvalDialogue
 from autometrics.metrics.reference_based.UniEvalSum import UniEvalSum
 from autometrics.metrics.reference_based.CIDEr import CIDEr
-# from autometrics.metrics.reference_based.METEOR import METEOR
-# from autometrics.metrics.reference_based.QUAC import QUAC
+from autometrics.metrics.reference_based.METEOR import METEOR
 from autometrics.metrics.reference_based.StringSimilarity import LevenshteinDistance
 from autometrics.metrics.reference_based.StringSimilarity import LevenshteinRatio
-# from autometrics.metrics.reference_based.StringSimilarity import JaccardSimilarity
 from autometrics.metrics.reference_based.StringSimilarity import HammingDistance
 from autometrics.metrics.reference_based.StringSimilarity import JaroSimilarity
 from autometrics.metrics.reference_based.StringSimilarity import JaroWinklerSimilarity
+from autometrics.metrics.reference_based.StringSimilarity import JaccardDistance
 from autometrics.metrics.reference_based.ParaScore import ParaScore
 from autometrics.metrics.reference_based.YiSi import YiSi
 
@@ -29,7 +28,7 @@ from autometrics.metrics.reference_free.INFORMRewardModel import INFORMRewardMod
 from autometrics.metrics.reference_free.PRMRewardModel import MathProcessRewardModel
 from autometrics.metrics.reference_free.SummaQA import SummaQA
 
-reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), ParaScore(), YiSi()]
+reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), JaccardDistance(), ParaScore(), YiSi()]
 reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel(), MathProcessRewardModel(), SummaQA()]
                           
 all_metrics = reference_based_metrics + reference_free_metrics

@@ -27,8 +27,16 @@ from autometrics.metrics.reference_free.ParaScoreFree import ParaScoreFree
 from autometrics.metrics.reference_free.INFORMRewardModel import INFORMRewardModel
 from autometrics.metrics.reference_free.PRMRewardModel import MathProcessRewardModel
 from autometrics.metrics.reference_free.SummaQA import SummaQA
+from autometrics.metrics.reference_free.DistinctNGram import DistinctNGram
+from autometrics.metrics.reference_free.FastTextToxicity import FastTextToxicity
+from autometrics.metrics.reference_free.FastTextNSFW import FastTextNSFW
+from autometrics.metrics.reference_free.FastTextEducationalValue import FastTextEducationalValue
 
 reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), JaccardDistance(), ParaScore(), YiSi()]
-reference_free_metrics = [FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel(), MathProcessRewardModel(), SummaQA()]
+reference_free_metrics = [
+    FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel(),
+    MathProcessRewardModel(), SummaQA(), DistinctNGram(), FastTextToxicity(), FastTextNSFW(),
+    FastTextEducationalValue(),
+]
                           
 all_metrics = reference_based_metrics + reference_free_metrics

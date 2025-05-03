@@ -141,3 +141,27 @@ Traceback (most recent call last):
   File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/modeling_utils.py", line 1710, in _check_and_enable_flash_attn_2
     raise ImportError(f"{preface} the package flash_attn seems to be not installed. {install_message}")
 ImportError: FlashAttention2 has been toggled on, but it cannot be used due to the following error: the package flash_attn seems to be not installed. Please refer to the documentation of https://huggingface.co/docs/transformers/perf_infer_gpu_one#flashattention-2 to install Flash Attention 2.
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/BLEU.py:5: SyntaxWarning: invalid escape sequence '\c'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/METEOR.py:6: SyntaxWarning: invalid escape sequence '\c'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/StringSimilarity.py:28: SyntaxWarning: invalid escape sequence '\i'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/StringSimilarity.py:286: SyntaxWarning: invalid escape sequence '\s'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/StringSimilarity.py:412: SyntaxWarning: invalid escape sequence '\l'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/StringSimilarity.py:531: SyntaxWarning: invalid escape sequence '\l'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/StringSimilarity.py:678: SyntaxWarning: invalid escape sequence '\c'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/SummaQA.py:117: SyntaxWarning: invalid escape sequence '\{'
+  """---
+Traceback (most recent call last):
+  File "/projects/m000076/mryan0/autometrics/design2code.py", line 7, in <module>
+    from autometrics.metrics.MetricBank import all_metrics
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/MetricBank.py", line 29, in <module>
+    from autometrics.metrics.reference_free.SummaQA import SummaQA
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/SummaQA.py", line 1, in <module>
+    import spacy
+ModuleNotFoundError: No module named 'spacy'

@@ -12,3 +12,5 @@ levenshtein
 prometheus_eval
 parascore==1.0.5
 flash-attn
+fasttext
+platformdirs

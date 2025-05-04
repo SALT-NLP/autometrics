@@ -31,12 +31,19 @@ from autometrics.metrics.reference_free.DistinctNGram import DistinctNGram
 from autometrics.metrics.reference_free.FastTextToxicity import FastTextToxicity
 from autometrics.metrics.reference_free.FastTextNSFW import FastTextNSFW
 from autometrics.metrics.reference_free.FastTextEducationalValue import FastTextEducationalValue
+from autometrics.metrics.reference_free.SelfBLEU import SelfBLEU
 
-reference_based_metrics = [BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(), UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), LevenshteinDistance(), LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), JaccardDistance(), ParaScore(), YiSi()]
+reference_based_metrics = [
+    BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(),
+    UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), LevenshteinDistance(), LevenshteinRatio(),
+    HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), JaccardDistance(),
+    ParaScore(), YiSi()
+]
+
 reference_free_metrics = [
     FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel(),
     MathProcessRewardModel(), SummaQA(), DistinctNGram(), FastTextToxicity(), FastTextNSFW(),
-    FastTextEducationalValue(),
+    FastTextEducationalValue(), SelfBLEU(),
 ]
                           
 all_metrics = reference_based_metrics + reference_free_metrics

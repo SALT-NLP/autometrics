@@ -20,6 +20,8 @@ from autometrics.metrics.reference_based.StringSimilarity import JaccardDistance
 from autometrics.metrics.reference_based.ParaScore import ParaScore
 from autometrics.metrics.reference_based.YiSi import YiSi
 from autometrics.metrics.reference_based.MAUVE import MAUVE
+from autometrics.metrics.reference_based.PseudoPARENT import PseudoPARENT
+from autometrics.metrics.reference_based.NIST import NIST
 
 from autometrics.metrics.reference_free.FKGL import FKGL
 from autometrics.metrics.reference_free.UniEvalFact import UniEvalFact
@@ -40,7 +42,8 @@ reference_based_metrics = [
     BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(),
     UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), LevenshteinDistance(), LevenshteinRatio(),
     HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), JaccardDistance(),
-    ParaScore(), YiSi(), MAUVE(),
+    ParaScore(), YiSi(), MAUVE(), PseudoPARENT(),
+    NIST(),
 ]
 
 reference_free_metrics = [

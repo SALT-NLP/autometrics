@@ -151,8 +151,8 @@ FastText
         self,
         name: str = "FastTextEducationalValue",
         description: str = "fastText classifier for educational value scoring (Low/Mid/High)",
-        repo_id: str = "kenhktsui/llm-data-textbook-quality-fasttext-classifer-v2",
-        filename: str = "fasttext_educational_value.bin",
+        repo_id: str = "kenhktsui/llm-data-textbook-quality-fasttext-classifier-v2",
+        filename: str = "model_quantized.bin",
         persistent: bool = True,
         data_dir: str = None
     ):

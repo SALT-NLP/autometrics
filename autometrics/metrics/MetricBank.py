@@ -26,8 +26,8 @@ from autometrics.metrics.reference_based.IBLEU import IBLEU
 from autometrics.metrics.reference_based.UpdateROUGE import UpdateROUGE
 from autometrics.metrics.reference_based.BLEURT import BLEURT
 from autometrics.metrics.reference_based.LENS import LENSMetric
-from autometrics.metrics.reference_based.LENS_SALSA import LENS_SALSA
 from autometrics.metrics.reference_based.CharCut import CharCut
+from autometrics.metrics.reference_based.InfoLM import InfoLM
 
 from autometrics.metrics.reference_free.FKGL import FKGL
 from autometrics.metrics.reference_free.UniEvalFact import UniEvalFact
@@ -45,22 +45,21 @@ from autometrics.metrics.reference_free.FactCC import FactCC
 from autometrics.metrics.reference_free.Toxicity import Toxicity
 from autometrics.metrics.reference_free.GRMRewardModel import GRMRewardModel
 from autometrics.metrics.reference_free.Sentiment import Sentiment
+from autometrics.metrics.reference_free.LENS_SALSA import LENS_SALSA
 
 reference_based_metrics = [
     BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(),
-    UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), BLEURT(), LevenshteinDistance(), LevenshteinRatio(),
-    HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), JaccardDistance(),
-    ParaScore(), YiSi(), MAUVE(), PseudoPARENT(), NIST(), IBLEU(), UpdateROUGE(),
-    LENSMetric(), LENS_SALSA(),
-    CharCut(),
+    UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), BLEURT(), LevenshteinDistance(),
+    LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), 
+    JaccardDistance(), ParaScore(), YiSi(), MAUVE(), PseudoPARENT(), NIST(), IBLEU(),
+    UpdateROUGE(), LENSMetric(), CharCut(), InfoLM(),
 ]
 
 reference_free_metrics = [
     FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel(),
     MathProcessRewardModel(), SummaQA(), DistinctNGram(), FastTextToxicity(), FastTextNSFW(),
-    FastTextEducationalValue(), SelfBLEU(), FactCC(), Toxicity(),
-    Sentiment(),
-    GRMRewardModel(),
+    FastTextEducationalValue(), SelfBLEU(), FactCC(), Toxicity(), Sentiment(), GRMRewardModel(),
+    LENS_SALSA(),
 ]
                           
 all_metrics = reference_based_metrics + reference_free_metrics

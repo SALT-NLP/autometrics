@@ -7,3 +7,4 @@ done in 3.90 seconds, 35.89 sentences/sec
 calculating scores...
 computing bert embedding.
 computing greedy matching.
+done in 2.20 seconds, 63.55 sentences/sec

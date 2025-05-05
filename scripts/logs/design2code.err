@@ -1,0 +1,74 @@
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/LENS.py:7: SyntaxWarning: invalid escape sequence '\m'
+  """---
+The tokenizer class you load from this checkpoint is not the same type as the class this function is called from. It may result in unexpected tokenization. 
+The tokenizer class you load from this checkpoint is 'BleurtSPTokenizer'. 
+The class this function is called from is 'BertTokenizer'.
+Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files:  25%|██▌       | 1/4 [00:00<00:01,  2.15it/s]Fetching 4 files:  75%|███████▌  | 3/4 [00:20<00:07,  7.46s/it]Fetching 4 files: 100%|██████████| 4/4 [00:20<00:00,  5.07s/it]
+/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/pytorch_lightning/core/saving.py:165: UserWarning: Found keys that are not in the model state dict but in the checkpoint: ['encoder.model.embeddings.position_ids']
+  rank_zero_warn(
+Loading checkpoint shards:   0%|          | 0/30 [00:00<?, ?it/s]Loading checkpoint shards:   3%|▎         | 1/30 [00:02<01:09,  2.40s/it]Loading checkpoint shards:   7%|▋         | 2/30 [00:04<01:07,  2.42s/it]Loading checkpoint shards:  10%|█         | 3/30 [00:07<01:06,  2.46s/it]Loading checkpoint shards:  13%|█▎        | 4/30 [00:09<01:04,  2.46s/it]Loading checkpoint shards:  17%|█▋        | 5/30 [00:12<01:00,  2.42s/it]Loading checkpoint shards:  20%|██        | 6/30 [00:14<00:57,  2.38s/it]Loading checkpoint shards:  23%|██▎       | 7/30 [00:16<00:54,  2.36s/it]Loading checkpoint shards:  27%|██▋       | 8/30 [00:19<00:52,  2.38s/it]Loading checkpoint shards:  30%|███       | 9/30 [00:21<00:50,  2.40s/it]Loading checkpoint shards:  33%|███▎      | 10/30 [00:24<00:47,  2.39s/it]Loading checkpoint shards:  37%|███▋      | 11/30 [00:26<00:45,  2.37s/it]Loading checkpoint shards:  40%|████      | 12/30 [00:27<00:37,  2.11s/it]Loading checkpoint shards:  43%|████▎     | 13/30 [00:28<00:26,  1.54s/it]Loading checkpoint shards:  47%|████▋     | 14/30 [00:28<00:18,  1.15s/it]Loading checkpoint shards:  50%|█████     | 15/30 [00:28<00:13,  1.15it/s]Loading checkpoint shards:  53%|█████▎    | 16/30 [00:28<00:09,  1.47it/s]Loading checkpoint shards:  57%|█████▋    | 17/30 [00:29<00:07,  1.83it/s]Loading checkpoint shards:  60%|██████    | 18/30 [00:29<00:05,  2.22it/s]Loading checkpoint shards:  63%|██████▎   | 19/30 [00:29<00:04,  2.61it/s]Loading checkpoint shards:  67%|██████▋   | 20/30 [00:29<00:03,  2.97it/s]Loading checkpoint shards:  70%|███████   | 21/30 [00:29<00:02,  3.28it/s]Loading checkpoint shards:  73%|███████▎  | 22/30 [00:30<00:02,  3.54it/s]Loading checkpoint shards:  77%|███████▋  | 23/30 [00:30<00:01,  3.76it/s]Loading checkpoint shards:  80%|████████  | 24/30 [00:30<00:01,  3.92it/s]Loading checkpoint shards:  83%|████████▎ | 25/30 [00:30<00:01,  4.05it/s]Loading checkpoint shards:  87%|████████▋ | 26/30 [00:31<00:00,  4.15it/s]Loading checkpoint shards:  90%|█████████ | 27/30 [00:31<00:00,  4.19it/s]Loading checkpoint shards:  93%|█████████▎| 28/30 [00:31<00:00,  4.24it/s]Loading checkpoint shards:  97%|█████████▋| 29/30 [00:31<00:00,  4.27it/s]Loading checkpoint shards: 100%|██████████| 30/30 [00:31<00:00,  4.35it/s]Loading checkpoint shards: 100%|██████████| 30/30 [00:31<00:00,  1.07s/it]
+WARNING:accelerate.big_modeling:Some parameters are on the meta device because they were offloaded to the cpu.
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  3.43it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  3.56it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00,  3.73it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  3.67it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  3.64it/s]
+Some weights of the model checkpoint at Qwen/Qwen2.5-Math-PRM-7B were not used when initializing Qwen2ForProcessRewardModel: {'lm_head.weight'}
+- This IS expected if you are initializing Qwen2ForProcessRewardModel from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing Qwen2ForProcessRewardModel from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of the model checkpoint at bert-large-uncased-whole-word-masking-finetuned-squad were not used when initializing BertForQuestionAnswering: ['bert.pooler.dense.bias', 'bert.pooler.dense.weight']
+- This IS expected if you are initializing BertForQuestionAnswering from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForQuestionAnswering from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of the model checkpoint at cardiffnlp/twitter-roberta-base-sentiment-latest were not used when initializing RobertaForSequenceClassification: ['roberta.pooler.dense.bias', 'roberta.pooler.dense.weight']
+- This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Downloading shards:   0%|          | 0/2 [00:00<?, ?it/s]Downloading shards:  50%|█████     | 1/2 [01:02<01:02, 62.61s/it]Downloading shards: 100%|██████████| 2/2 [01:41<00:00, 48.66s/it]Downloading shards: 100%|██████████| 2/2 [01:41<00:00, 50.76s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:01<00:01,  1.98s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.31s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.41s/it]
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['roberta.pooler.dense.bias', 'roberta.pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/3 [00:00<?, ?it/s]  0%|          | 0/3 [00:02<?, ?it/s]
+Traceback (most recent call last):
+  File "/projects/m000076/mryan0/autometrics/design2code.py", line 35, in <module>
+    train.add_metrics(all_metrics)
+  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/Dataset.py", line 95, in add_metrics
+    self.add_metric(metric, update_dataset=update_dataset)
+  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/PairwiseDataset.py", line 132, in add_metric
+    self.model1_dataset.add_metric(metric, update_dataset=update_dataset)
+  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/Dataset.py", line 85, in add_metric
+    metric.predict(self, update_dataset=update_dataset)
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py", line 57, in predict
+    results = self.calculate_batched(inputs, outputs, references)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/BERTScore.py", line 191, in calculate_batched
+    return compute_bertscore(inputs, outputs, references, model=self.model, type="all")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/BERTScore.py", line 17, in compute_bertscore
+    (P, R, F), _ = bert_score.score(all_cands, all_refs, lang="en", return_hash=True, verbose=True, idf=False,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/bert_score/score.py", line 123, in score
+    all_preds = bert_cos_score_idf(
+                ^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/bert_score/utils.py", line 616, in bert_cos_score_idf
+    embs, masks, padded_idf = get_bert_embedding(
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/bert_score/utils.py", line 455, in get_bert_embedding
+    batch_embedding = bert_encode(
+                      ^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/bert_score/utils.py", line 351, in bert_encode
+    out = model(x, attention_mask=attention_mask, output_hidden_states=all_layers)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/models/roberta/modeling_roberta.py", line 912, in forward
+    embedding_output = self.embeddings(
+                       ^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/models/roberta/modeling_roberta.py", line 125, in forward
+    embeddings = inputs_embeds + token_type_embeddings
+                 ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 128.00 MiB. GPU 0 has a total capacity of 79.20 GiB of which 18.62 MiB is free. Including non-PyTorch memory, this process has 79.18 GiB memory in use. Of the allocated memory 78.20 GiB is allocated by PyTorch, and 389.73 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

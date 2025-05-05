@@ -27,6 +27,7 @@ from autometrics.metrics.reference_based.UpdateROUGE import UpdateROUGE
 from autometrics.metrics.reference_based.BLEURT import BLEURT
 from autometrics.metrics.reference_based.LENS import LENSMetric
 from autometrics.metrics.reference_based.LENS_SALSA import LENS_SALSA
+from autometrics.metrics.reference_based.CharCut import CharCut
 
 from autometrics.metrics.reference_free.FKGL import FKGL
 from autometrics.metrics.reference_free.UniEvalFact import UniEvalFact
@@ -51,6 +52,7 @@ reference_based_metrics = [
     HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), JaccardDistance(),
     ParaScore(), YiSi(), MAUVE(), PseudoPARENT(), NIST(), IBLEU(), UpdateROUGE(),
     LENSMetric(), LENS_SALSA(),
+    CharCut(),
 ]
 
 reference_free_metrics = [

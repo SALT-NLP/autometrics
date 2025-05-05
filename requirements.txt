@@ -20,3 +20,4 @@ faiss-cpu
 mauve-text
 beautifulsoup4
 bleurt-pytorch
+lens-metric

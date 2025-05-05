@@ -457,3 +457,62 @@ TypeError: "hypothesis" expects pre-tokenized hypothesis (Iterable[str]): <!DOCT
 </div>
 </body>
 </html>
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/METEOR.py:8: SyntaxWarning: invalid escape sequence '\c'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/NIST.py:5: SyntaxWarning: invalid escape sequence '\d'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/IBLEU.py:5: SyntaxWarning: invalid escape sequence '\c'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/UpdateROUGE.py:10: SyntaxWarning: invalid escape sequence '\h'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/BLEURT.py:7: SyntaxWarning: invalid escape sequence '\h'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/GRMRewardModel.py:7: SyntaxWarning: invalid escape sequence '\m'
+  """---
+/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_free/Sentiment.py:8: SyntaxWarning: invalid escape sequence '\h'
+  """---
+The tokenizer class you load from this checkpoint is not the same type as the class this function is called from. It may result in unexpected tokenization. 
+The tokenizer class you load from this checkpoint is 'BleurtSPTokenizer'. 
+The class this function is called from is 'BertTokenizer'.
+Traceback (most recent call last):
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/tokenization_utils_base.py", line 2292, in _from_pretrained
+    tokenizer = cls(*init_inputs, **init_kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/models/bert/tokenization_bert.py", line 114, in __init__
+    if not os.path.isfile(vocab_file):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen genericpath>", line 30, in isfile
+TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/projects/m000076/mryan0/autometrics/design2code.py", line 7, in <module>
+    from autometrics.metrics.MetricBank import all_metrics
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/MetricBank.py", line 48, in <module>
+    UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), BLEURT(), LevenshteinDistance(), LevenshteinRatio(),
+                                                        ^^^^^^^^
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/BLEURT.py", line 160, in __init__
+    self._load_model()
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/BLEURT.py", line 166, in _load_model
+    self.tokenizer = BleurtTokenizer.from_pretrained(self.model_name)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/bleurt_pytorch/bleurt/tokenization_bleurt.py", line 27, in from_pretrained
+    return BleurtTokenizerFast.from_pretrained(pretrained_model_name_or_path, *init_inputs, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/tokenization_utils_base.py", line 2052, in from_pretrained
+    return cls._from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/tokenization_utils_base.py", line 2090, in _from_pretrained
+    slow_tokenizer = (cls.slow_tokenizer_class)._from_pretrained(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/tokenization_utils_base.py", line 2293, in _from_pretrained
+    except import_protobuf_decode_error():
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/tokenization_utils_base.py", line 87, in import_protobuf_decode_error
+    raise ImportError(PROTOBUF_IMPORT_ERROR.format(error_message))
+ImportError: 
+ requires the protobuf library but it was not found in your environment. Checkout the instructions on the
+installation page of its repo: https://github.com/protocolbuffers/protobuf/tree/master/python#installation and follow the ones
+that match your environment. Please note that you may need to restart your runtime after installation.
+

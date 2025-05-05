@@ -1,6 +1,8 @@
 from nltk.translate.meteor_score import meteor_score
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 from typing import List, Union
+import re
+from bs4 import BeautifulSoup
 
 class METEOR(ReferenceBasedMetric):
     """---
@@ -159,4 +161,16 @@ $$
                   **kwargs) -> float:
         """Compute METEOR between output and references."""
         refs = references if isinstance(references, list) else [references]
-        return meteor_score(refs, output) 
+        # Tokenize: if it's an HTML page, extract visible text via BeautifulSoup; otherwise simple split
+        def tokenize_text(text: str) -> List[str]:
+            # detect HTML by looking for <html lang=> tag
+            if re.search(r'<html\s+lang=.*</html>', text, flags=re.IGNORECASE | re.DOTALL):
+                soup = BeautifulSoup(text, 'html.parser')
+                visible = soup.get_text(separator=' ')
+                return visible.split()
+            else:
+                return text.split()
+
+        tokens_output = tokenize_text(output)
+        tokens_refs = [tokenize_text(ref) for ref in refs]
+        return meteor_score(tokens_refs, tokens_output) 

@@ -301,3 +301,159 @@ You should probably TRAIN this model on a down-stream task to be able to use it 
   0%|          | 0/3 [00:00<?, ?it/s]100%|██████████| 3/3 [00:00<00:00, 44.27it/s]
 Token indices sequence length is longer than the specified maximum sequence length for this model (65913 > 512). Running this sequence through the model will result in indexing errors
 DistilBertSdpaAttention is used but `torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True` or `head_mask`. Falling back to the manual attention implementation, but specifying the manual implementation will be required from Transformers version v5.0.0 onwards. This warning can be removed using the argument `attn_implementation="eager"` when loading the model.
+Passing a tuple of `past_key_values` is deprecated and will be removed in Transformers v4.48.0. You should pass an instance of `EncoderDecoderCache` instead, e.g. `past_key_values=EncoderDecoderCache.from_legacy_cache(past_key_values)`.
+Traceback (most recent call last):
+  File "/projects/m000076/mryan0/autometrics/design2code.py", line 35, in <module>
+    train.add_metrics(all_metrics)
+  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/Dataset.py", line 95, in add_metrics
+    self.add_metric(metric, update_dataset=update_dataset)
+  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/PairwiseDataset.py", line 132, in add_metric
+    self.model1_dataset.add_metric(metric, update_dataset=update_dataset)
+  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/Dataset.py", line 91, in add_metric
+    metric.predict(self, update_dataset=update_dataset)
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py", line 56, in predict
+    results = self.calculate_batched(inputs, outputs, references)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/Metric.py", line 29, in calculate_batched
+    results.append(self.calculate(i, o, r, **kwargs))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/METEOR.py", line 162, in calculate
+    return meteor_score(refs, output) 
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/nltk/translate/meteor_score.py", line 397, in meteor_score
+    return max(
+           ^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/nltk/translate/meteor_score.py", line 398, in <genexpr>
+    single_meteor_score(
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/nltk/translate/meteor_score.py", line 326, in single_meteor_score
+    enum_hypothesis, enum_reference = _generate_enums(
+                                      ^^^^^^^^^^^^^^^^
+  File "/users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/nltk/translate/meteor_score.py", line 33, in _generate_enums
+    raise TypeError(
+TypeError: "hypothesis" expects pre-tokenized hypothesis (Iterable[str]): <!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Yoga Sutra Study Resource</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+  .header {
+    background-image: url('rick.jpg');
+    padding: 20px;
+    text-align: center;
+    color: white;
+  }
+  .header h1 {
+    margin: 0;
+    font-size: 36px;
+    text-transform: uppercase;
+  }
+  .header p {
+    margin: 10px 0;
+  }
+  .nav {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+  }
+  .nav a {
+    color: white;
+    text-decoration: none;
+    padding: 0 10px;
+  }
+  .content {
+    padding: 20px;
+  }
+  .content h2 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+  .content p {
+    color: #666;
+    line-height: 1.6;
+  }
+  .content .sutra {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .content .sutra h3 {
+    margin-top: 0;
+  }
+  .content .sutra p {
+    margin-bottom: 0;
+  }
+  .footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+  .footer a {
+    color: white;
+    text-decoration: none;
+    padding: 0 10px;
+  }
+</style>
+</head>
+<body>
+<div class="header">
+<h1>atha yoga nusasanam</h1>
+<p>the online yoga sutra study resource</p>
+</div>
+<div class="nav">
+<a href="#">HOME</a> |
+    <a href="#">BROWSE PADAS</a> |
+    <a href="#">BROWSE SUTRAS</a> |
+    <a href="#">SEARCH SUTRAS</a>
+</div>
+<div class="content">
+<h2>Single sutra review</h2>
+<p>Study a single sutra by selecting the pada (chapter) and then the sutra (verse).</p>
+<select>
+<option>Select Pada</option>
+<option>1 - Samadhi Pada</option>
+<option>2 - Sadhana Pada</option>
+<option>3 - Vibhuti Pada</option>
+<option>4 - Kaivalya Pada</option>
+</select>
+<button>View</button>
+<div class="sutra">
+<h3>All translations and transliterations for Yoga Sutra 2:27</h3>
+<p><strong>Source:</strong> Sanskrit transliteration from The Yoga Sutras of Patanjali (Sri Swami Satchidananda)</p>
+<p>TASYA SAPTADHA PRANTABHUMIH PRAJNA.</p>
+<p><strong>Source:</strong> English translation from The Yoga Sutras of Patanjali (Sri Swami Satchidananda)</p>
+<p>One's wisdom in the final stage is sevenfold. [One experiences the end of 1) desire to know anything more; 2) desire to stay away from any thing; 3) desire to gain anything new; 4) desire to do anything; 5) sorrow; 6) fear; 7) delusion.]</p>
+<p><strong>Source:</strong> Sanskrit transliteration from Light on the Yoga Sutras of Patanjali (B.K.S. Iyengar)</p>
+<p>tasya saptadha prantabhumih prajna</p>
+<p><strong>Source:</strong> English translation from Light on the Yoga Sutras of Patanjali (B.K.S. Iyengar)</p>
+<p>Through this unbroken flow of discriminative awareness, one gains perfect knowledge which has seven spheres.</p>
+<p><strong>Source:</strong> How to Know God: The Yoga Aphorisms of Patanjali (Swami Prabhavananda, Christopher Isherwood)</p>
+<p>The experiencer gains this knowledge in seven stages, advancing toward the highest.</p>
+<p><strong>Source:</strong> English translation from The Heart of Yoga (T.K.V. Desikachar)</p>
+<p>The attainment of clarity is a gradual process.</p>
+<p><strong>Source:</strong> Sanskrit transliteration of the Yoga Sutras of Patanjali (Swami Jnaneshvara Bharati)</p>
+<p>tasya saptadha pranta bhumih prajna</p>
+<p><strong>Source:</strong> English translation of the Yoga Sutras of Patanjali (Swami Jnaneshvara Bharati)</p>
+<p>Seven kinds of ultimate insight come to one who has attained this degree of discrimination.</p>
+</div>
+<p>Yoga has endured and evolved as the result of devoted practice and study over generations. For those who continue in such tradition, this website exists to serve you.</p>
+</div>
+<div class="footer">
+<a href="#">ATHAYOGANUSASANAM.COM</a> |
+    <a href="#">HOME</a> |
+    <a href="#">GIVE FEEDBACK</a>
+</div>
+</body>
+</html>

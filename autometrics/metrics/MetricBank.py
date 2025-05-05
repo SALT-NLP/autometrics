@@ -26,6 +26,7 @@ from autometrics.metrics.reference_based.IBLEU import IBLEU
 from autometrics.metrics.reference_based.UpdateROUGE import UpdateROUGE
 from autometrics.metrics.reference_based.BLEURT import BLEURT
 from autometrics.metrics.reference_based.LENS import LENSMetric
+from autometrics.metrics.reference_based.LENS_SALSA import LENS_SALSA
 
 from autometrics.metrics.reference_free.FKGL import FKGL
 from autometrics.metrics.reference_free.UniEvalFact import UniEvalFact
@@ -49,7 +50,7 @@ reference_based_metrics = [
     UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), BLEURT(), LevenshteinDistance(), LevenshteinRatio(),
     HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), JaccardDistance(),
     ParaScore(), YiSi(), MAUVE(), PseudoPARENT(), NIST(), IBLEU(), UpdateROUGE(),
-    LENSMetric(),
+    LENSMetric(), LENS_SALSA(),
 ]
 
 reference_free_metrics = [

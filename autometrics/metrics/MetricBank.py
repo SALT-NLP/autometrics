@@ -34,6 +34,7 @@ from autometrics.metrics.reference_free.FastTextNSFW import FastTextNSFW
 from autometrics.metrics.reference_free.FastTextEducationalValue import FastTextEducationalValue
 from autometrics.metrics.reference_free.SelfBLEU import SelfBLEU
 from autometrics.metrics.reference_free.FactCC import FactCC
+from autometrics.metrics.reference_free.Toxicity import Toxicity
 
 reference_based_metrics = [
     BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(),
@@ -45,8 +46,7 @@ reference_based_metrics = [
 reference_free_metrics = [
     FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel(),
     MathProcessRewardModel(), SummaQA(), DistinctNGram(), FastTextToxicity(), FastTextNSFW(),
-    FastTextEducationalValue(), SelfBLEU(),
-    FactCC(),
+    FastTextEducationalValue(), SelfBLEU(), FactCC(), Toxicity(),
 ]
                           
 all_metrics = reference_based_metrics + reference_free_metrics

@@ -3,6 +3,10 @@ import re
 import fasttext
 from platformdirs import user_data_dir
 from huggingface_hub import hf_hub_download
+try:
+    from huggingface_hub.constants import HF_HUB_CACHE
+except ImportError:
+    HF_HUB_CACHE = None
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 from typing import List, Union
 
@@ -10,7 +14,7 @@ class FastTextEducationalValue(ReferenceFreeMetric):
     """---
 # Metric Card for FastTextEducationalValue
 
-FastTextEducationalValue is a reference-free classification-based metric that evaluates the educational quality of generated text. It uses a FastText classifier trained to predict three levels of educational value—Low, Mid, and High—and outputs an expected value score by taking a weighted sum over the classifier’s label probabilities. This metric is particularly useful for content filtering, ranking, or prioritizing educational materials in generative settings, especially when no reference output is available.
+FastTextEducationalValue is a reference-free classification-based metric that evaluates the educational quality of generated text. It uses a FastText classifier trained to predict three levels of educational value—Low, Mid, and High—and outputs an expected value score by taking a weighted sum over the classifier's label probabilities. This metric is particularly useful for content filtering, ranking, or prioritizing educational materials in generative settings, especially when no reference output is available.
 
 ## Metric Details
 
@@ -93,7 +97,7 @@ $$
   - Not suitable for measuring depth of reasoning or factual accuracy  
 
 - **Failure Cases:**  
-  - [Needs more information]  
+  - [Needs more information]
 
 ## Related Metrics
 
@@ -156,7 +160,15 @@ FastText
         self.repo_id = repo_id
         self.filename = filename
         self.persistent = persistent
-        base_dir = data_dir or user_data_dir("autometrics")
+        # Determine cache directory: use provided data_dir, else prefer HF_HUB_CACHE, else fallback to user_data_dir
+        if data_dir:
+            base_dir = data_dir
+        else:
+            hf_cache_root = HF_HUB_CACHE
+            if hf_cache_root:
+                base_dir = os.path.join(hf_cache_root, "autometrics")
+            else:
+                base_dir = user_data_dir("autometrics")
         os.makedirs(base_dir, exist_ok=True)
         self.cache_dir = base_dir
         self.model = None

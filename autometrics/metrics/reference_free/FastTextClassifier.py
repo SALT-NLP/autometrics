@@ -4,6 +4,11 @@ import requests
 from platformdirs import user_data_dir
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 from typing import List
+try:
+    from huggingface_hub.constants import HF_HUB_CACHE
+except ImportError:
+    HF_HUB_CACHE = None
+
 class FastTextClassifier(ReferenceFreeMetric):
     """
     Base class for fastText-based reference-free classification metrics.
@@ -22,7 +27,16 @@ class FastTextClassifier(ReferenceFreeMetric):
         self.model_url = model_url
         self.negative_label = negative_label
         self.persistent = persistent
-        base_dir = data_dir or user_data_dir("autometrics")
+        # Determine data directory: use provided data_dir,
+        # else prefer HuggingFace hub cache if available, else fallback to user_data_dir
+        if data_dir:
+            base_dir = data_dir
+        else:
+            hf_cache_root = HF_HUB_CACHE
+            if hf_cache_root:
+                base_dir = os.path.join(hf_cache_root, "autometrics")
+            else:
+                base_dir = user_data_dir("autometrics")
         os.makedirs(base_dir, exist_ok=True)
         self.model_path = os.path.join(base_dir, os.path.basename(self.model_url))
         self.model = None

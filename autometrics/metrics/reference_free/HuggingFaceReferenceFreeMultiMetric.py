@@ -55,15 +55,50 @@ class HuggingFaceReferenceFreeMultiMetric(ReferenceFreeMultiMetric):
 
     def calculate_batched(self, inputs: List[str], outputs: List[str], references=None, **kwargs):
         """
-        Batch evaluation: loops over each output and calls calculate(), assembling submetric lists.
+        Batch evaluation with fallback: test on first 2 outputs; if vectorized runs (returns lists of length 2), apply to full batch,
+        else fallback to per-sample calculate loop.
         """
-        # Prepare references list aligning with outputs
-        refs_list = references if references is not None else [None] * len(outputs)
-        # Initialize output lists for each submetric
+        self._load_metric()
+        refs = references if references is not None else [None] * len(outputs)
+        # Try vectorized compute for first two items
         sub_results = [[] for _ in self.submetric_keys]
-        # Evaluate each sample
-        for out, ref in zip(outputs, refs_list):
-            vals = self.calculate(None, out, ref, **kwargs)
+        if len(outputs) >= 2:
+            try:
+                # Compute first two
+                small_preds = outputs[:2]
+                small_args = {**self.compute_kwargs, **kwargs, 'predictions': small_preds}
+                if references is not None:
+                    small_args['references'] = refs[:2]
+                small_res = self.metric.compute(**small_args)
+                # Validate and store first two
+                ok = True
+                for idx, key in enumerate(self.submetric_keys):
+                    val2 = small_res.get(key)
+                    if not (isinstance(val2, (list, tuple)) and len(val2) == 2):
+                        ok = False
+                        break
+                    sub_results[idx].extend([float(v) for v in val2])
+                if ok:
+                    # Compute remaining items
+                    if len(outputs) > 2:
+                        rest_preds = outputs[2:]
+                        rest_args = {**self.compute_kwargs, **kwargs, 'predictions': rest_preds}
+                        if references is not None:
+                            rest_args['references'] = refs[2:]
+                        rest_res = self.metric.compute(**rest_args)
+                        for idx, key in enumerate(self.submetric_keys):
+                            val_rest = rest_res.get(key)
+                            if isinstance(val_rest, (list, tuple)) and len(val_rest) == len(rest_preds):
+                                sub_results[idx].extend([float(v) for v in val_rest])
+                            else:
+                                for out in rest_preds:
+                                    sub_results[idx].append(self.calculate(None, out, None, **kwargs)[idx])
+                    return sub_results
+            except Exception:
+                pass
+        # Fallback: per-sample
+        for inp, out, ref in zip(inputs, outputs, refs):
+            vals = self.calculate(inp, out, ref, **kwargs)
             for idx, v in enumerate(vals):
                 sub_results[idx].append(v)
         return sub_results 

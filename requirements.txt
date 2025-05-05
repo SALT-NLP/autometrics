@@ -19,3 +19,4 @@ evaluate
 faiss-cpu
 mauve-text
 beautifulsoup4
+bleurt-pytorch

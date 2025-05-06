@@ -24,10 +24,14 @@ def get_docs(folderpath):
 
     return md_files, docs
 
-RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
-document_ids, docs = get_docs("../autometrics/metrics/documentation/")
-index_path = RAG.index(
-    index_name="all_metrics",
-    collection=docs,
-    document_ids=document_ids,
-)
+if __name__ == "__main__":
+
+    RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
+    document_ids, docs = get_docs("../autometrics/metrics/documentation/")
+    index_path = RAG.index(
+        index_name="all_metrics",
+        collection=docs,
+        document_ids=document_ids,
+    )
+
+    print(f"Index created at: {index_path}")

@@ -8,7 +8,7 @@ class SelfBLEU(ReferenceFreeMetric):
     """---
 # Metric Card for Self-BLEU
 
-Self-BLEU is a reference-based diversity metric used in text generation tasks. It quantifies the similarity of each generated sentence to the rest of the generated outputs using the BLEU score, treating each sentence in turn as the hypothesis and the others as the reference. Lower Self-BLEU scores indicate higher diversity, making it useful for detecting mode collapse in generative models.
+Self-BLEU is a reference-free diversity metric used in text generation tasks. It quantifies the similarity of each generated sentence to the rest of the generated outputs using the BLEU score, treating each sentence in turn as the hypothesis and the others as the reference. Lower Self-BLEU scores indicate higher diversity, making it useful for detecting mode collapse in generative models.
 
 ## Metric Details
 
@@ -19,7 +19,7 @@ Self-BLEU evaluates the diversity of a set of generated sentences by measuring t
 - **Metric Type:** Diversity  
 - **Range:** 0 to 1  
 - **Higher is Better?:** No  
-- **Reference-Based?:** Yes  
+- **Reference-Based?:** No  
 - **Input-Required?:** No  
 
 ### Formal Definition

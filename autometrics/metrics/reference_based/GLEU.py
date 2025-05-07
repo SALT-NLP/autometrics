@@ -233,11 +233,11 @@ The final score is symmetrical with respect to hypothesis and reference, making 
 ### Inputs and Outputs
 
 - **Inputs:**  
-- Hypothesis sentence (generated text)  
-- Reference sentence(s) (gold-standard text)  
+  - Hypothesis sentence (generated text)  
+  - Reference sentence(s) (gold-standard text)  
 
 - **Outputs:**  
-- A scalar score in the range [0, 1], where 1 indicates a perfect match.
+  - A scalar score in the range [0, 1], where 1 indicates a perfect match.
 
 ## Intended Use
 
@@ -249,36 +249,36 @@ The final score is symmetrical with respect to hypothesis and reference, making 
 ### Applicability and Limitations
 
 - **Best Suited For:**  
-Sentence-level evaluation in structured tasks where precision and recall over n-grams are meaningful indicators of quality, such as translation.  
+  Sentence-level evaluation in structured tasks where precision and recall over n-grams are meaningful indicators of quality, such as translation.  
 
 - **Not Recommended For:**  
-Creative or open-ended text generation tasks where semantic similarity or diversity is more relevant than surface-level n-gram overlap.
+  Creative or open-ended text generation tasks where semantic similarity or diversity is more relevant than surface-level n-gram overlap.
 
 ## Metric Implementation
 
 ### Reference Implementations
 
 - **Libraries/Packages:**  
-- [NLTK GLEU Implementation](https://github.com/nltk/nltk/blob/develop/nltk/translate/gleu_score.py)  
+  - [NLTK GLEU Implementation](https://github.com/nltk/nltk/blob/develop/nltk/translate/gleu_score.py)  
 
 ### Computational Complexity
 
 - **Efficiency:**  
-Efficient for sentence-level evaluation, as it requires simple n-gram matching and aggregation.
+  Efficient for sentence-level evaluation, as it requires simple n-gram matching and aggregation.
 
 - **Scalability:**  
-Scales well for batch evaluations but may be computationally expensive for larger corpora due to repeated n-gram matching.
+  Scales well for batch evaluations but may be computationally expensive for larger corpora due to repeated n-gram matching.
 
 ## Known Limitations
 
 - **Biases:**  
-Penalizes valid paraphrases or semantically equivalent outputs that differ in n-gram overlap.  
+  Penalizes valid paraphrases or semantically equivalent outputs that differ in n-gram overlap.  
 
 - **Task Misalignment Risks:**  
-Designed for tasks with a single correct output structure; performs poorly for evaluating diverse or creative responses.  
+  Designed for tasks with a single correct output structure; performs poorly for evaluating diverse or creative responses.  
 
 - **Failure Cases:**  
-- GLEU may not adequately evaluate cases where semantic preservation is more important than lexical overlap.
+  - GLEU may not adequately evaluate cases where semantic preservation is more important than lexical overlap.
 
 ## Related Metrics
 
@@ -289,10 +289,10 @@ Designed for tasks with a single correct output structure; performs poorly for e
 ## Further Reading
 
 - **Papers:**  
-- [Google’s Neural Machine Translation System (Wu et al., 2016)](https://arxiv.org/pdf/1609.08144v2.pdf)  
+  - [Google’s Neural Machine Translation System (Wu et al., 2016)](https://arxiv.org/pdf/1609.08144v2.pdf)  
 
 - **Blogs/Tutorials:**  
-- Needs more information
+  - Needs more information  
 
 ## Citation
 
@@ -312,9 +312,8 @@ Designed for tasks with a single correct output structure; performs poorly for e
 
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
-Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
-- **Contact:** mryan0@stanford.edu
-	"""
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu"""
 
 	def __init__(self, name="GLEU", description="GLEU is a sentence-level metric that computes the minimum of precision and recall of n-grams.  It is meant to resolve some of the issues with BLEU when used at the sentence level."):
 		super().__init__(name, description)

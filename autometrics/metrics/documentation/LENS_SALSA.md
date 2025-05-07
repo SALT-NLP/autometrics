@@ -30,7 +30,7 @@ Let:
 Then, LENS_SALSA computes the final score using a regression model (MLP):
 
 $$
-\text{LENS\_SALSA}(x, \hat{x}) = \text{MLP}(f(E(x, \hat{x}, A)))
+\text{LENS SALSA}(x, \hat{x}) = \text{MLP}(f(E(x, \hat{x}, A)))
 $$
 
 The model is trained using human-annotated quality scores from simplification corpora.

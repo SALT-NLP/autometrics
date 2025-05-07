@@ -20,7 +20,7 @@ UniEvalSum evaluates text summaries by converting evaluation into a Boolean QA p
 - **Metric Type:** Semantic Similarity, Reference-Free, Multi-Dimensional Evaluation
 - **Range:** [0,1] for all dimensions  
 - **Higher is Better?:** Yes  
-- **Reference-Based?:** Mixed (Reference required for relevance, but not for other dimensions)  
+- **Reference-Based?:** Yes (Reference required for relevance, but not for other dimensions)  
 - **Input-Required?:** Yes  
 
 ### Formal Definition

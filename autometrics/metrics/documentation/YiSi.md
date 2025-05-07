@@ -1,7 +1,7 @@
 ---
 # Metric Card for YiSi-2
 
-YiSi-2 is a semantic machine translation evaluation and quality estimation metric designed for cross-lingual assessment without requiring a reference translation. It measures the semantic similarity between the source sentence and the machine-translated output using bilingual word embeddings, optionally incorporating shallow semantic structures through semantic role labeling.
+YiSi-2 is a semantic machine translation evaluation and quality estimation metric designed for cross-lingual assessment. It measures the semantic similarity between the source sentence and the machine-translated output using bilingual word embeddings, optionally incorporating shallow semantic structures through semantic role labeling.
 
 ## Metric Details
 
@@ -14,7 +14,7 @@ Lexical similarity between tokens is computed using cosine similarity of their e
 - **Metric Type:** Semantic Similarity
 - **Range:** 0 to 1
 - **Higher is Better?:** Yes
-- **Reference-Based?:** No
+- **Reference-Based?:** Yes
 - **Input-Required?:** Yes
 
 ### Formal Definition
@@ -64,7 +64,7 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
 ### Applicability and Limitations
 
 - **Best Suited For:**  
-  - MT quality estimation when no reference translation is available  
+  - MT quality estimation
   - Cross-lingual evaluation between languages with shared multilingual embeddings
 
 - **Not Recommended For:**  

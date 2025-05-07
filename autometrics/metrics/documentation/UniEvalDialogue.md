@@ -12,7 +12,7 @@ UniEvalDialogue evaluates dialogue responses by **converting evaluation into a B
 - **Metric Type:** Semantic Similarity, Reference-Free, Multi-Dimensional Evaluation  
 - **Range:** [0,1] for all dimensions  
 - **Higher is Better?:** Yes  
-- **Reference-Based?:** No (except for engagingness, which may require factual context)  
+- **Reference-Based?:** Yes (groundedness and engagingness require factual context)
 - **Input-Required?:** Yes  
 
 ### Formal Definition

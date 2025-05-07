@@ -104,6 +104,20 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
 - **Blogs/Tutorials:**  
   - [Stephen Diehl – Process Reward Models](https://www.stephendiehl.com/posts/process-reward-models.html)
 
+## Citation
+
+```
+@misc{zhang2025lessonsdevelopingprocessreward,
+      title={The Lessons of Developing Process Reward Models in Mathematical Reasoning}, 
+      author={Zhenru Zhang and Chujie Zheng and Yangzhen Wu and Beichen Zhang and Runji Lin and Bowen Yu and Dayiheng Liu and Jingren Zhou and Junyang Lin},
+      year={2025},
+      eprint={2501.07301},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2501.07301}, 
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

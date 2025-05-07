@@ -109,7 +109,6 @@ The final score is symmetrical with respect to hypothesis and reference, making 
       url={https://arxiv.org/abs/1609.08144}, 
 }
 ```
-```
 
 ## Metric Card Authors
 

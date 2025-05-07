@@ -101,6 +101,17 @@ where:
 - **Blogs/Tutorials:**  
   - None officially provided. (Needs more information)
 
+## Citation
+
+```
+@misc{INF-ORM-Llama3.1-70B, 
+      url={[https://huggingface.co/infly/INF-ORM-Llama3.1-70B](https://huggingface.co/infly/INF-ORM-Llama3.1-70B)},
+      title={INF-ORM-Llama3.1-70B},
+      year={2024},
+      author={Minghao Yang, Chao Qu, Xiaoyu Tan}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

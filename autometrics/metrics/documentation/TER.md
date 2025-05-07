@@ -97,7 +97,27 @@ Where:
 ## Further Reading
 
 - **Papers:**  
-  - [A Study of Translation Edit Rate with Targeted Human Annotation (Snover et al., 2006)](https://www.mt-archive.info/AMTA-2006-Snover.pdf)  
+  - [A Study of Translation Edit Rate with Targeted Human Annotation (Snover et al., 2006)](https://aclanthology.org/2006.amta-papers.25.pdf)
+
+## Citation
+
+```
+@inproceedings{snover-etal-2006-study,
+    title = "A Study of Translation Edit Rate with Targeted Human Annotation",
+    author = "Snover, Matthew  and
+      Dorr, Bonnie  and
+      Schwartz, Rich  and
+      Micciulla, Linnea  and
+      Makhoul, John",
+    booktitle = "Proceedings of the 7th Conference of the Association for Machine Translation in the Americas: Technical Papers",
+    month = aug # " 8-12",
+    year = "2006",
+    address = "Cambridge, Massachusetts, USA",
+    publisher = "Association for Machine Translation in the Americas",
+    url = "https://aclanthology.org/2006.amta-papers.25/",
+    pages = "223--231"
+}
+```
 
 ## Metric Card Authors
 

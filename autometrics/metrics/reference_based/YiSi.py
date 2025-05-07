@@ -62,7 +62,7 @@ class YiSi(ReferenceBasedMetric):
     """---
 # Metric Card for YiSi-2
 
-YiSi-2 is a semantic machine translation evaluation and quality estimation metric designed for cross-lingual assessment without requiring a reference translation. It measures the semantic similarity between the source sentence and the machine-translated output using bilingual word embeddings, optionally incorporating shallow semantic structures through semantic role labeling.
+YiSi-2 is a semantic machine translation evaluation and quality estimation metric designed for cross-lingual assessment. It measures the semantic similarity between the source sentence and the machine-translated output using bilingual word embeddings, optionally incorporating shallow semantic structures through semantic role labeling.
 
 ## Metric Details
 
@@ -75,7 +75,7 @@ Lexical similarity between tokens is computed using cosine similarity of their e
 - **Metric Type:** Semantic Similarity
 - **Range:** 0 to 1
 - **Higher is Better?:** Yes
-- **Reference-Based?:** No
+- **Reference-Based?:** Yes
 - **Input-Required?:** Yes
 
 ### Formal Definition
@@ -125,7 +125,7 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
 ### Applicability and Limitations
 
 - **Best Suited For:**  
-  - MT quality estimation when no reference translation is available  
+  - MT quality estimation
   - Cross-lingual evaluation between languages with shared multilingual embeddings
 
 - **Not Recommended For:**  
@@ -176,6 +176,40 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
 
 - **Blogs/Tutorials:**  
   - [MachineTranslate YiSi Overview](https://machinetranslate.org/metrics#yisi)
+
+## Citation
+
+```
+@inproceedings{lo-2019-yisi,
+    title = "{Y}i{S}i - a Unified Semantic {MT} Quality Evaluation and Estimation Metric for Languages with Different Levels of Available Resources",
+    author = "Lo, Chi-kiu",
+    editor = "Bojar, Ond{\v{r}}ej  and
+      Chatterjee, Rajen  and
+      Federmann, Christian  and
+      Fishel, Mark  and
+      Graham, Yvette  and
+      Haddow, Barry  and
+      Huck, Matthias  and
+      Yepes, Antonio Jimeno  and
+      Koehn, Philipp  and
+      Martins, Andr{\'e}  and
+      Monz, Christof  and
+      Negri, Matteo  and
+      N{\'e}v{\'e}ol, Aur{\'e}lie  and
+      Neves, Mariana  and
+      Post, Matt  and
+      Turchi, Marco  and
+      Verspoor, Karin",
+    booktitle = "Proceedings of the Fourth Conference on Machine Translation (Volume 2: Shared Task Papers, Day 1)",
+    month = aug,
+    year = "2019",
+    address = "Florence, Italy",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W19-5358/",
+    doi = "10.18653/v1/W19-5358",
+    pages = "507--513"
+}
+```
 
 ## Metric Card Authors
 

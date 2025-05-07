@@ -117,6 +117,18 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
 - **Blogs/Tutorials:**  
   - [Hugging Face Model Page](https://huggingface.co/ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1)
 
+## Citation
+
+```
+@misc{chen2025ldl,
+  author       = {Shikai Chen and Jin Yuan and Yang Zhang and Zhongchao Shi and Jianping Fan and Xin Geng and Yong Rui},
+  title        = {LDL-Reward-Gemma-2-27B-v0.1},
+  year         = {2025},
+  howpublished = {\url{https://huggingface.co/ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1}},
+  note         = {Hugging Face Model Repository},
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

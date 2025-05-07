@@ -102,10 +102,38 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
 ## Further Reading
 
 - **Papers:**  
-  - [Towards a Unified Multi-Dimensional Evaluator for Text Generation (Zhong et al., 2022)](https://arxiv.org/abs/2210.07197)  
+  - [Towards a Unified Multi-Dimensional Evaluator for Text Generation (Zhong et al., 2022)](https://aclanthology.org/2022.emnlp-main.131.pdf)
 
 - **Blogs/Tutorials:**  
-  - [UniEval GitHub Documentation](https://github.com/maszhongming/UniEval)  
+  - [UniEval GitHub Documentation](https://github.com/maszhongming/UniEval)
+
+## Citation
+
+```
+@inproceedings{zhong-etal-2022-towards,
+    title = "Towards a Unified Multi-Dimensional Evaluator for Text Generation",
+    author = "Zhong, Ming  and
+      Liu, Yang  and
+      Yin, Da  and
+      Mao, Yuning  and
+      Jiao, Yizhu  and
+      Liu, Pengfei  and
+      Zhu, Chenguang  and
+      Ji, Heng  and
+      Han, Jiawei",
+    editor = "Goldberg, Yoav  and
+      Kozareva, Zornitsa  and
+      Zhang, Yue",
+    booktitle = "Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.emnlp-main.131/",
+    doi = "10.18653/v1/2022.emnlp-main.131",
+    pages = "2023--2038"
+}
+```
 
 ## Metric Card Authors
 

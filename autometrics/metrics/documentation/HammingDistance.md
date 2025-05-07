@@ -96,6 +96,21 @@ where $\mathbf{1}\{ s_i \neq t_i \}$ is an indicator function that equals 1 if $
 - **Blogs/Tutorials:**  
   - [Hamming Distance - Wikipedia](https://en.wikipedia.org/wiki/Hamming_distance)
 
+## Citation
+
+```
+@article{hamming1950error,
+  title={Error detecting and error correcting codes},
+  author={Hamming, Richard W},
+  journal={The Bell system technical journal},
+  volume={29},
+  number={2},
+  pages={147--160},
+  year={1950},
+  publisher={Nokia Bell Labs}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan

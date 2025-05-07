@@ -133,6 +133,22 @@ where $1 \leq i \leq |s_1|$, $1 \leq j \leq |s_2|$, and typically $w_{ins} = w_{
 - **Blogs/Tutorials:**  
   - [Levenshtein Distance Documentation](https://rapidfuzz.github.io/Levenshtein/index.html)
 
+## Citation
+
+```
+@article{levenshtein1965binary,
+  author       = {В.~И.~Левенштейн},
+  title        = {Двоичные коды с исправлением выпадений, вставок и замещений символов},
+  journal      = {Доклады Академии Наук СССР},
+  year         = {1965},
+  volume       = {163},
+  number       = {4},
+  pages        = {845--848},
+  url          = {http://mi.mathnet.ru/dan31411},
+  note         = {English translation: \emph{Binary Codes Capable of Correcting Deletions, Insertions, and Reversals}, \emph{Soviet Physics Doklady}, vol. 10, pp. 707, 1966.}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan
@@ -256,6 +272,22 @@ where $|s_1|$ and $|s_2|$ denote the lengths of the sequences $s_1$ and $s_2$, r
   
 - **Blogs/Tutorials:**  
   - [Levenshtein Python Module Documentation](https://rapidfuzz.github.io/Levenshtein/index.html)
+
+## Citation
+
+```
+@article{levenshtein1965binary,
+  author       = {В.~И.~Левенштейн},
+  title        = {Двоичные коды с исправлением выпадений, вставок и замещений символов},
+  journal      = {Доклады Академии Наук СССР},
+  year         = {1965},
+  volume       = {163},
+  number       = {4},
+  pages        = {845--848},
+  url          = {http://mi.mathnet.ru/dan31411},
+  note         = {English translation: \emph{Binary Codes Capable of Correcting Deletions, Insertions, and Reversals}, \emph{Soviet Physics Doklady}, vol. 10, pp. 707, 1966.}
+}
+```
 
 ## Metric Card Authors
 
@@ -381,6 +413,21 @@ where $\mathbf{1}\{ s_i \neq t_i \}$ is an indicator function that equals 1 if $
 - **Blogs/Tutorials:**  
   - [Hamming Distance - Wikipedia](https://en.wikipedia.org/wiki/Hamming_distance)
 
+## Citation
+
+```
+@article{hamming1950error,
+  title={Error detecting and error correcting codes},
+  author={Hamming, Richard W},
+  journal={The Bell system technical journal},
+  volume={29},
+  number={2},
+  pages={147--160},
+  year={1950},
+  publisher={Nokia Bell Labs}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan
@@ -501,6 +548,24 @@ $$
   
 - **Blogs/Tutorials:**  
   - [Jaro and Jaro-Winkler Similarity - GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
+
+## Citation
+
+```
+@article{3ebd50ca-85b6-3914-bf38-759fcad3ed72,
+ ISSN = {01621459, 1537274X},
+ URL = {http://www.jstor.org/stable/2289924},
+ author = {Matthew A. Jaro},
+ journal = {Journal of the American Statistical Association},
+ number = {406},
+ pages = {414--420},
+ publisher = {[American Statistical Association, Taylor & Francis, Ltd.]},
+ title = {Advances in Record-Linkage Methodology as Applied to Matching the 1985 Census of Tampa, Florida},
+ urldate = {2025-05-07},
+ volume = {84},
+ year = {1989}
+}
+```
 
 ## Metric Card Authors
 
@@ -646,6 +711,17 @@ where:
   
 - **Blogs/Tutorials:**  
   - [Jaro and Jaro-Winkler Similarity - GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
+
+## Citation
+
+```
+@article{winkler1990string,
+  title={String comparator metrics and enhanced decision rules in the fellegi-sunter model of record linkage.},
+  author={Winkler, William E},
+  year={1990},
+  publisher={ERIC}
+}
+```
 
 ## Metric Card Authors
 

@@ -91,7 +91,21 @@ Each F-score or precision is computed based on the comparison of n-grams in the 
 ## Further Reading
 
 - **Papers:**  
-  - [Optimizing Statistical Machine Translation for Text Simplification (Xu et al., 2016)](https://github.com/cocoxu/simplification/)  
+  - [Optimizing Statistical Machine Translation for Text Simplification (Xu et al., 2016)](https://github.com/cocoxu/simplification/)
+
+## Citation
+
+```
+@article{Xu-EtAl:2016:TACL,
+  author = {Wei Xu and Courtney Napoles and Ellie Pavlick and Quanze Chen and Chris Callison-Burch},
+  title = {Optimizing Statistical Machine Translation for Text Simplification},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume = {4},
+  year = {2016},
+  url = {https://cocoxu.github.io/publications/tacl2016-smt-simplification.pdf},
+  pages = {401--415}
+}
+```
 
 ## Metric Card Authors
 

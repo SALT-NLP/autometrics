@@ -116,6 +116,40 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
 - **Blogs/Tutorials:**  
   - [MachineTranslate YiSi Overview](https://machinetranslate.org/metrics#yisi)
 
+## Citation
+
+```
+@inproceedings{lo-2019-yisi,
+    title = "{Y}i{S}i - a Unified Semantic {MT} Quality Evaluation and Estimation Metric for Languages with Different Levels of Available Resources",
+    author = "Lo, Chi-kiu",
+    editor = "Bojar, Ond{\v{r}}ej  and
+      Chatterjee, Rajen  and
+      Federmann, Christian  and
+      Fishel, Mark  and
+      Graham, Yvette  and
+      Haddow, Barry  and
+      Huck, Matthias  and
+      Yepes, Antonio Jimeno  and
+      Koehn, Philipp  and
+      Martins, Andr{\'e}  and
+      Monz, Christof  and
+      Negri, Matteo  and
+      N{\'e}v{\'e}ol, Aur{\'e}lie  and
+      Neves, Mariana  and
+      Post, Matt  and
+      Turchi, Marco  and
+      Verspoor, Karin",
+    booktitle = "Proceedings of the Fourth Conference on Machine Translation (Volume 2: Shared Task Papers, Day 1)",
+    month = aug,
+    year = "2019",
+    address = "Florence, Italy",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W19-5358/",
+    doi = "10.18653/v1/W19-5358",
+    pages = "507--513"
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

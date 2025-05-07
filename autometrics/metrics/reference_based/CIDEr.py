@@ -335,6 +335,22 @@ with uniform weights $w_n = \frac{1}{N}$ (typically $N=4$).
 - **Blogs/Tutorials:**  
   - Documentation and tutorials available on the coco-caption GitHub repository
 
+## Citation
+
+```
+@INPROCEEDINGS{7299087,
+  author={Vedantam, Ramakrishna and Zitnick, C. Lawrence and Parikh, Devi},
+  booktitle={2015 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 
+  title={CIDEr: Consensus-based image description evaluation}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={4566-4575},
+  keywords={Measurement;Protocols;Accuracy;Training;Testing;Silicon;Correlation},
+  doi={10.1109/CVPR.2015.7299087}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

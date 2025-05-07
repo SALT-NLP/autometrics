@@ -117,6 +117,23 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
 - **Blogs/Tutorials:**  
   - [BARTScore GitHub Documentation](https://github.com/neulab/BARTScore)  
 
+## Citation
+
+```
+@inproceedings{10.5555/3540261.3542349,
+   author = {Yuan, Weizhe and Neubig, Graham and Liu, Pengfei},
+   title = {BARTSCORE: evaluating generated text as text generation},
+   year = {2021},
+   isbn = {9781713845393},
+   publisher = {Curran Associates Inc.},
+   address = {Red Hook, NY, USA},
+   booktitle = {Proceedings of the 35th International Conference on Neural Information Processing Systems},
+   articleno = {2088},
+   numpages = {15},
+   series = {NIPS '21}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

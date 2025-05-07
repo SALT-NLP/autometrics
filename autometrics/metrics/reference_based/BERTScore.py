@@ -162,15 +162,26 @@ Baseline rescaling adjusts scores to lie within [0, 1].
   - [BERTScore: Evaluating Text Generation with BERT (Zhang et al., 2020)](https://arxiv.org/abs/1904.09675)  
 
 - **Blogs/Tutorials:**  
-  - [BERTScore GitHub Documentation](https://github.com/Tiiiger/bert_score)  
+  - [BERTScore GitHub Documentation](https://github.com/Tiiiger/bert_score) 
+  
+## Citation
+
+```
+@inproceedings{Zhang2020BERTScore,
+   title={BERTScore: Evaluating Text Generation with BERT},
+   author={Tianyi Zhang* and Varsha Kishore* and Felix Wu* and Kilian Q. Weinberger and Yoav Artzi},
+   booktitle={International Conference on Learning Representations},
+   year={2020},
+   url={https://openreview.net/forum?id=SkeHuCVFDr}
+}
+```
 
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
-- **Contact:** mryan0@stanford.edu
-"""
+- **Contact:** mryan0@stanford.edu"""
 
     def __init__(self, model="roberta-large"):
         name = "BERTScore_" + model

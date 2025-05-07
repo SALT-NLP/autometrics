@@ -292,7 +292,21 @@ Designed for tasks with a single correct output structure; performs poorly for e
 - [Google’s Neural Machine Translation System (Wu et al., 2016)](https://arxiv.org/pdf/1609.08144v2.pdf)  
 
 - **Blogs/Tutorials:**  
-- Needs more information  
+- Needs more information
+
+## Citation
+
+```
+@misc{wu2016googlesneuralmachinetranslation,
+      title={Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation}, 
+      author={Yonghui Wu and Mike Schuster and Zhifeng Chen and Quoc V. Le and Mohammad Norouzi and Wolfgang Macherey and Maxim Krikun and Yuan Cao and Qin Gao and Klaus Macherey and Jeff Klingner and Apurva Shah and Melvin Johnson and Xiaobing Liu and Łukasz Kaiser and Stephan Gouws and Yoshikiyo Kato and Taku Kudo and Hideto Kazawa and Keith Stevens and George Kurian and Nishant Patil and Wei Wang and Cliff Young and Jason Smith and Jason Riesa and Alex Rudnick and Oriol Vinyals and Greg Corrado and Macduff Hughes and Jeffrey Dean},
+      year={2016},
+      eprint={1609.08144},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/1609.08144}, 
+}
+```
 
 ## Metric Card Authors
 

@@ -105,6 +105,33 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
   - [MoverScore GitHub README](https://github.com/AIPHES/emnlp19-moverscore)  
   - [Evaluating Text Generation with MoverScore](https://arxiv.org/pdf/1909.02622.pdf)
 
+## Citation
+
+```
+@inproceedings{zhao-etal-2019-moverscore,
+    title = "{M}over{S}core: Text Generation Evaluating with Contextualized Embeddings and Earth Mover Distance",
+    author = "Zhao, Wei  and
+      Peyrard, Maxime  and
+      Liu, Fei  and
+      Gao, Yang  and
+      Meyer, Christian M.  and
+      Eger, Steffen",
+    editor = "Inui, Kentaro  and
+      Jiang, Jing  and
+      Ng, Vincent  and
+      Wan, Xiaojun",
+    booktitle = "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)",
+    month = nov,
+    year = "2019",
+    address = "Hong Kong, China",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/D19-1053/",
+    doi = "10.18653/v1/D19-1053",
+    pages = "563--578",
+    abstract = "A robust evaluation metric has a profound impact on the development of text generation systems. A desirable metric compares system output against references based on their semantics rather than surface forms. In this paper we investigate strategies to encode system and reference texts to devise a metric that shows a high correlation with human judgment of text quality. We validate our new metric, namely MoverScore, on a number of text generation tasks including summarization, machine translation, image captioning, and data-to-text generation, where the outputs are produced by a variety of neural and non-neural systems. Our findings suggest that metrics combining contextualized representations with a distance measure perform the best. Such metrics also demonstrate strong generalization capability across tasks. For ease-of-use we make our metrics available as web service."
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

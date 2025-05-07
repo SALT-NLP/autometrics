@@ -113,6 +113,29 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
 - **Blogs/Tutorials:**  
   Needs more information.
 
+## Citation
+
+```
+@inproceedings{shen-etal-2022-evaluation,
+    title = "On the Evaluation Metrics for Paraphrase Generation",
+    author = "Shen, Lingfeng  and
+      Liu, Lemao  and
+      Jiang, Haiyun  and
+      Shi, Shuming",
+    editor = "Goldberg, Yoav  and
+      Kozareva, Zornitsa  and
+      Zhang, Yue",
+    booktitle = "Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.emnlp-main.208/",
+    doi = "10.18653/v1/2022.emnlp-main.208",
+    pages = "3178--3190",
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

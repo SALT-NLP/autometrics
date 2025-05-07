@@ -108,6 +108,33 @@ Scales well for datasets of varying sizes due to its simple character and word n
 - **Blogs/Tutorials:**  
 - SacreBLEU Documentation: [CHRF++ details](https://github.com/mjpost/sacrebleu)
 
+## Citation
+
+## Citation
+
+```
+@inproceedings{popovic-2015-chrf,
+    title = "chr{F}: character n-gram {F}-score for automatic {MT} evaluation",
+    author = "Popovi{\'c}, Maja",
+    editor = "Bojar, Ond{\v{r}}ej  and
+      Chatterjee, Rajan  and
+      Federmann, Christian  and
+      Haddow, Barry  and
+      Hokamp, Chris  and
+      Huck, Matthias  and
+      Logacheva, Varvara  and
+      Pecina, Pavel",
+    booktitle = "Proceedings of the Tenth Workshop on Statistical Machine Translation",
+    month = sep,
+    year = "2015",
+    address = "Lisbon, Portugal",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W15-3049/",
+    doi = "10.18653/v1/W15-3049",
+    pages = "392--395"
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

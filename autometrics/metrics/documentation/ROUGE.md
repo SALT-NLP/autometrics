@@ -147,6 +147,22 @@ ROUGE-LSum extends ROUGE-L to the summary level by treating newlines as sentence
   - [ROUGE How-To](http://kavita-ganesan.com/rouge-howto)  
   - [ROUGE in Hugging Face](https://huggingface.co/docs/evaluate)  
 
+## Citation
+
+```
+@inproceedings{lin-2004-rouge,
+    title = "{ROUGE}: A Package for Automatic Evaluation of Summaries",
+    author = "Lin, Chin-Yew",
+    booktitle = "Text Summarization Branches Out",
+    month = jul,
+    year = "2004",
+    address = "Barcelona, Spain",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W04-1013/",
+    pages = "74--81"
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

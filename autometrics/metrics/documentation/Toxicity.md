@@ -28,16 +28,19 @@ where $P(y = \text{"toxic"} \mid x; \theta)$ is the probability assigned by a cl
 For a set of predictions $[x_1, x_2, ..., x_n]$, the metric may return:
 
 - **No aggregation (default):**
+
   $$
-  \text{Toxicity}
+  [\text{Toxicity}(x _i)]_{i=1}^{n}
   $$
 
 - **Maximum aggregation:**
+
   $$
   \max _{i=1}^n \text{Toxicity}(x _i)
   $$
 
 - **Ratio aggregation (given a threshold $t$):**
+
   $$
   \frac{1}{n} \sum _{i=1}^n \mathbb{1}[\text{Toxicity}(x _i) \geq t]
   $$

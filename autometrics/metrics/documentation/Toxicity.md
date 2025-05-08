@@ -25,11 +25,11 @@ $$
 
 where $P(y = \text{"toxic"} \mid x; \theta)$ is the probability assigned by a classifier (parameterized by $\theta$) to the "toxic" label.
 
-For a set of predictions $\{x_1, x_2, ..., x_n\}$, the metric may return:
+For a set of predictions $[x_1, x_2, ..., x_n]$, the metric may return:
 
 - **No aggregation (default):**
   $$
-  \left{\text{Toxicity}(x_i)\right}_{i=1}^n
+  [\text{Toxicity}(x_i)]_{i=1}^n
   $$
 
 - **Maximum aggregation:**

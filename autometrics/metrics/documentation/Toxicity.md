@@ -30,7 +30,7 @@ For a set of predictions $[x_1, x_2, ..., x_n]$, the metric may return:
 - **No aggregation (default):**
 
 $$
-\{\text{Toxicity}(x _i)\} _{i=1}^{n}
+[\text{Toxicity}(x _i)] _{i=1}^{n}
 $$
 
 - **Maximum aggregation:**

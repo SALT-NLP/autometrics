@@ -22,7 +22,7 @@ class Dataset():
     # reference_columns: Optional[List[str]] = None
     # metrics: List[Metric] = Field(default_factory=list)
 
-    def __init__(self, dataframe: pd.DataFrame, target_columns: List[str], ignore_columns: List[str], metric_columns: List[str], name: str, data_id_column: Optional[str] = None, model_id_column: Optional[str] = None, input_column: Optional[str] = None, output_column: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None):
+    def __init__(self, dataframe: pd.DataFrame, target_columns: List[str], ignore_columns: List[str], metric_columns: List[str], name: str, data_id_column: Optional[str] = None, model_id_column: Optional[str] = None, input_column: Optional[str] = None, output_column: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None, task_description: Optional[str] = None):
         self.dataframe = dataframe
         self.target_columns = target_columns
         self.ignore_columns = ignore_columns
@@ -34,7 +34,7 @@ class Dataset():
         self.output_column = output_column
         self.reference_columns = reference_columns
         self.metrics = metrics if metrics else []
-
+        self.task_description = task_description
     class Config:
         arbitrary_types_allowed = True
     
@@ -250,7 +250,8 @@ class Dataset():
                 input_column=self.input_column,
                 output_column=self.output_column,
                 reference_columns=self.reference_columns,
-                metrics=[]
+                metrics=[],
+                task_description=self.task_description
             )
             split_train_dataset = Dataset(
                 dataframe=non_split_df,
@@ -263,7 +264,8 @@ class Dataset():
                 input_column=self.input_column,
                 output_column=self.output_column,
                 reference_columns=self.reference_columns,
-                metrics=[]
+                metrics=[],
+                task_description=self.task_description
             )
             split_datasets.append((split_train_dataset, split_val_dataset))
 
@@ -278,7 +280,8 @@ class Dataset():
             input_column=self.input_column,
             output_column=self.output_column,
             reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=[],
+            task_description=self.task_description
         )
         test_dataset = Dataset(
             dataframe=test_df,
@@ -291,21 +294,36 @@ class Dataset():
             input_column=self.input_column,
             output_column=self.output_column,
             reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=[],
+            task_description=self.task_description
         )
 
         return split_datasets, train_dataset, test_dataset
     
     def calculate_metrics(self, update_dataset: bool = True, **kwargs):
         for metric in self.metrics:
-            if metric.get_name() not in self.get_metric_columns():
-                metric.predict(self, update_dataset=update_dataset, **kwargs)
+            self.get_metric_values(metric, update_dataset=update_dataset, **kwargs)
 
-            df = self.get_dataframe()
+    def get_metric_values(self, metric: Metric, update_dataset: bool = True, **kwargs):
+        if metric.get_name() not in self.get_metric_columns() and update_dataset:
+            metric.predict(self, update_dataset=update_dataset, **kwargs)
 
-            for i, row in df.iterrows():
-                if metric.get_name() not in row:
-                    metric.calculate_row(row, self, update_dataset=update_dataset)
+        df = self.get_dataframe()
+
+        if update_dataset:
+            for _, row in df.iterrows():
+                if isinstance(metric, MultiMetric):
+                    for submetric_name in metric.get_submetric_names():
+                        if submetric_name not in row:
+                            metric.calculate_row(row, self, update_dataset=update_dataset)
+                else:
+                    if metric.get_name() not in row:
+                        metric.calculate_row(row, self, update_dataset=update_dataset)
+
+        if isinstance(metric, MultiMetric):
+            return df[metric.get_submetric_names()]
+        else:
+            return df[metric.get_name()]
 
     def get_subset(self, size: int, seed: Optional[int] = None) -> 'Dataset':
         df = self.get_dataframe()
@@ -323,7 +341,8 @@ class Dataset():
             input_column=self.input_column,
             output_column=self.output_column,
             reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=[],
+            task_description=self.task_description
         )
     
     def copy(self) -> 'Dataset':
@@ -338,5 +357,9 @@ class Dataset():
             input_column=self.input_column,
             output_column=self.output_column,
             reference_columns=self.reference_columns.copy(),
-            metrics=[metric for metric in self.metrics]
+            metrics=[metric for metric in self.metrics],
+            task_description=self.task_description
         )
+    
+    def get_task_description(self) -> Optional[str]:
+        return self.task_description

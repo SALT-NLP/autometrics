@@ -100,13 +100,15 @@ class EvalGen(Dataset):
         
         else:
             return super().get_kfold_splits(k, split_column, seed)
-    
+
 class EvalGenProduct(EvalGen):
     def __init__(self, path='./autometrics/dataset/datasets/evalgen/product.csv'):
         super().__init__(path)
         self.name = "evalgen_product"
+        self.task_description = """You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n"""
 
 class EvalGenMedical(EvalGen):
     def __init__(self, path='./autometrics/dataset/datasets/evalgen/medical.csv'):
         super().__init__(path)
         self.name = "evalgen_medical"
+        self.task_description = """You are extracting insights from some medical records. The records contain a medical note and a dialogue between a doctor and a patient. You need to extract values for the following: Chief complaint, History of present illness, Physical examination, Symptoms experienced by the patient, New medications prescribed or changed, including dosages (N/A if not provided), and Follow-up instructions (N/A if not provided). Your answer should not include any personal identifiable information (PII) such as name, age, gender, or ID. Use "the patient" instead of their name, for example. Return your answer as a bullet list, where each bullet is formatted like `chief complaint: xx.` If there is no value for the key, the value should be `N/A`. Keep your response around 150 words (you may have to summarize some extracted values to stay within the word limit)."""

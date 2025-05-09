@@ -22,3 +22,5 @@ beautifulsoup4
 bleurt-pytorch
 lens-metric
 torchmetrics
+plotly
+sqlite==3.43.0

@@ -164,3 +164,5 @@ cython_debug/
 # Avoid committing Shreya's dataset
 /autometrics/dataset/datasets/evalgen/medical.csv
 /autometrics/dataset/datasets/evalgen/product.csv
+
+.litellm_cache

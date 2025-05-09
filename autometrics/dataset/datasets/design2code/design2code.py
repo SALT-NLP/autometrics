@@ -26,6 +26,7 @@ class Design2Code(PairwiseDataset):
         output_column_1 = "html1"
         output_column_2 = "html2"
         reference_columns = ['ref_html']
+        task_description = """You are an expert web developer who specializes in HTML and CSS. A user will provide you with a screenshot of a webpage. You need to return a single html file that uses HTML and CSS to reproduce the given website. Include all CSS code in the HTML file itself. If it involves any images, use "rick.jpg" as the placeholder. Some images on the webpage are replaced with a blue rectangle as the placeholder, use "rick.jpg" for those as well. Do not hallucinate any dependencies to external files. You do not need to include JavaScript scripts for dynamic interactions. Pay attention to things like size, text, position, and color of all the elements, as well as the overall layout. Respond with the content of the HTML+CSS file."""
 
         metrics = []
 
@@ -33,5 +34,5 @@ class Design2Code(PairwiseDataset):
                          ignore_columns=ignore_columns, metric_columns_1=metric_columns_1, metric_columns_2=metric_columns_2,
                          name=name, data_id_column=data_id_column, model_id_column_1=model_id_column_1, model_id_column_2=model_id_column_2,
                          input_column=input_column, output_column_1=output_column_1, output_column_2=output_column_2,
-                         reference_columns=reference_columns, metrics=metrics)
+                         reference_columns=reference_columns, metrics=metrics, task_description=task_description)
 

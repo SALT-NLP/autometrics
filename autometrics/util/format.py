@@ -11,8 +11,9 @@ def get_default_formatter(dataset):
     if not output_column:
         raise ValueError("Output column not found in dataset.  When constructing your Dataset please provide output_column.")
 
-    def default_formatter(row):
-        references = row[reference_columns]
+    def default_formatter(row_tuple):
+        _, row = row_tuple  # Unpack the tuple from iterrows()
+        references = [row[col] for col in reference_columns]
 
         references = [ref for ref in references if ref is not None]
 

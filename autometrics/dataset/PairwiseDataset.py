@@ -22,7 +22,7 @@ class PairwiseDataset(Dataset):
     # model1_dataset: Optional[Dataset] = None
     # model2_dataset: Optional[Dataset] = None
 
-    def __init__(self, dataframe: pd.DataFrame, target_columns_1: List[str], target_columns_2: List[str], ignore_columns: List[str], metric_columns_1: List[str], metric_columns_2: List[str], name: str, data_id_column: Optional[str] = None, model_id_column_1: Optional[str] = None, model_id_column_2: Optional[str] = None, input_column: Optional[str] = None, output_column_1: Optional[str] = None, output_column_2: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None):
+    def __init__(self, dataframe: pd.DataFrame, target_columns_1: List[str], target_columns_2: List[str], ignore_columns: List[str], metric_columns_1: List[str], metric_columns_2: List[str], name: str, data_id_column: Optional[str] = None, model_id_column_1: Optional[str] = None, model_id_column_2: Optional[str] = None, input_column: Optional[str] = None, output_column_1: Optional[str] = None, output_column_2: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None, task_description: Optional[str] = None):
         assert len(target_columns_1) == len(target_columns_2), "Target columns for both models must be the same length"
         assert len(metric_columns_1) == len(metric_columns_2), "Metric columns for both models must be the same length"
 
@@ -35,7 +35,7 @@ class PairwiseDataset(Dataset):
         self.model_id_column_2 = model_id_column_2
         self.output_column_1 = output_column_1
         self.output_column_2 = output_column_2
-
+        self.task_description = task_description
         # Step 1: Create model1_dataset and model2_dataset by splitting the dataframe
 
         model_1_columns = target_columns_1 + metric_columns_1 + [data_id_column, model_id_column_1, input_column, output_column_1] + reference_columns
@@ -58,7 +58,8 @@ class PairwiseDataset(Dataset):
             input_column=input_column,
             output_column=output_column_1,
             reference_columns=reference_columns,
-            metrics=metrics
+            metrics=metrics,
+            task_description=task_description
         )
 
         self.model2_dataset = Dataset(
@@ -72,7 +73,8 @@ class PairwiseDataset(Dataset):
             input_column=input_column,
             output_column=output_column_2,
             reference_columns=reference_columns,
-            metrics=metrics
+            metrics=metrics,
+            task_description=task_description
         )
 
         # Step 2: Set the dataframe and other attributes for the PairwiseDataset to be a combination of the two datasets
@@ -86,7 +88,7 @@ class PairwiseDataset(Dataset):
         self.output_column = "output"  # Set a common output column for the pairwise dataset
         self.reference_columns = reference_columns
         self.metrics = metrics if metrics is not None else []
-
+        self.task_description = task_description
         # Combine the dataframes for the pairwise dataset
         cols = [data_id_column, input_column] + reference_columns
 
@@ -105,7 +107,7 @@ class PairwiseDataset(Dataset):
         self.dataframe = df
         self.original_dataframe = dataframe.copy()
 
-    def set_all_fields(self, dataframe: pd.DataFrame, target_columns_1: List[str], target_columns_2: List[str], ignore_columns: List[str], metric_columns_1: List[str], metric_columns_2: List[str], name: str, data_id_column: Optional[str] = None, model_id_column_1: Optional[str] = None, model_id_column_2: Optional[str] = None, input_column: Optional[str] = None, output_column_1: Optional[str] = None, output_column_2: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None):
+    def set_all_fields(self, dataframe: pd.DataFrame, target_columns_1: List[str], target_columns_2: List[str], ignore_columns: List[str], metric_columns_1: List[str], metric_columns_2: List[str], name: str, data_id_column: Optional[str] = None, model_id_column_1: Optional[str] = None, model_id_column_2: Optional[str] = None, input_column: Optional[str] = None, output_column_1: Optional[str] = None, output_column_2: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None, task_description: Optional[str] = None):
         self.dataframe = dataframe
         self.original_dataframe = dataframe.copy()
         self.target_columns_1 = target_columns_1
@@ -122,7 +124,7 @@ class PairwiseDataset(Dataset):
         self.output_column_2 = output_column_2
         self.reference_columns = reference_columns if reference_columns is not None else []
         self.metrics = metrics if metrics is not None else []
-
+        self.task_description = task_description
 
     def set_dataframe(self, dataframe: pd.DataFrame):
         print("[WARNING] Setting dataframe directly. This is not recommended for pairwise datasets which have custom logic for handling data.")
@@ -208,7 +210,8 @@ class PairwiseDataset(Dataset):
             output_column_1=self.output_column_1,
             output_column_2=self.output_column_2,
             reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=[],
+            task_description=self.task_description
         )
         val_dataset = PairwiseDataset(
             dataframe=val_df,
@@ -225,7 +228,8 @@ class PairwiseDataset(Dataset):
             output_column_1=self.output_column_1,
             output_column_2=self.output_column_2,
             reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=[],
+            task_description=self.task_description
         )
         test_dataset = PairwiseDataset(
             dataframe=test_df,
@@ -242,7 +246,8 @@ class PairwiseDataset(Dataset):
             output_column_1=self.output_column_1,
             output_column_2=self.output_column_2,
             reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=[],
+            task_description=self.task_description
         )
         
         if max_size:
@@ -324,7 +329,8 @@ class PairwiseDataset(Dataset):
                 output_column_1=self.output_column_1,
                 output_column_2=self.output_column_2,
                 reference_columns=self.reference_columns,
-                metrics=[]
+                metrics=[],
+                task_description=self.task_description
             )
             split_train_dataset = PairwiseDataset(
                 dataframe=non_split_df,
@@ -341,7 +347,8 @@ class PairwiseDataset(Dataset):
                 output_column_1=self.output_column_1,
                 output_column_2=self.output_column_2,
                 reference_columns=self.reference_columns,
-                metrics=[]
+                metrics=[],
+                task_description=self.task_description
             )
             split_datasets.append((split_train_dataset, split_val_dataset))
 
@@ -360,7 +367,8 @@ class PairwiseDataset(Dataset):
             output_column_1=self.output_column_1,
             output_column_2=self.output_column_2,
             reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=[],
+            task_description=self.task_description
         )
         test_dataset = PairwiseDataset( 
             dataframe=test_df,
@@ -377,28 +385,45 @@ class PairwiseDataset(Dataset):
             output_column_1=self.output_column_1,
             output_column_2=self.output_column_2,
             reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=[],
+            task_description=self.task_description
         )
 
         return split_datasets, train_dataset, test_dataset
     
     def calculate_metrics(self, update_dataset: bool = True, **kwargs):
         for metric in self.metrics:
-            if metric.get_name() not in self.get_metric_columns():
-                self.add_metric(metric, update_dataset=update_dataset)
+            self.get_metric_values(metric, update_dataset=update_dataset, **kwargs)
 
-            df = self.get_dataframe()
+    def get_metric_values(self, metric: Metric, update_dataset: bool = True, **kwargs):
+        if update_dataset and metric.get_name() not in self.get_metric_columns():
+            metric.predict(self.model1_dataset, update_dataset=update_dataset, **kwargs)
+            metric.predict(self.model2_dataset, update_dataset=update_dataset, **kwargs)
 
-            for i, row in df.iterrows():
-                if metric.get_name() not in row:
-                    res1 = metric.calculate_row(row, self.model1_dataset, update_dataset=update_dataset)
-                    res2 = metric.calculate_row(row, self.model2_dataset, update_dataset=update_dataset)
-
-                    if update_dataset:
-                        df.at[i, metric.get_name()] = res1 - res2
+        df = self.get_dataframe()
 
         if update_dataset:
+            for i, row in df.iterrows():
+                if isinstance(metric, MultiMetric):
+                    for j, submetric_name in enumerate(metric.get_submetric_names()):
+                        if submetric_name not in row:
+                            res_set1 = metric.calculate_row(row, self.model1_dataset, update_dataset=update_dataset)
+                            res_set2 = metric.calculate_row(row, self.model2_dataset, update_dataset=update_dataset)
+
+                            df.at[i, submetric_name] = res_set1[j] - res_set2[j]
+
+                else:
+                    if metric.get_name() not in row:
+                        res1 = metric.calculate_row(row, self.model1_dataset, update_dataset=update_dataset)
+                        res2 = metric.calculate_row(row, self.model2_dataset, update_dataset=update_dataset)
+                        df.at[i, metric.get_name()] = res1 - res2
+
             self.set_dataframe(df)
+
+        if isinstance(metric, MultiMetric):
+            return df[metric.get_submetric_names()]
+        else:
+            return df[metric.get_name()]
 
     def get_subset(self, size: int, seed: Optional[int] = None) -> 'PairwiseDataset':
         df = self.get_dataframe() if len(self.metrics) > 0 else self.original_dataframe
@@ -422,7 +447,8 @@ class PairwiseDataset(Dataset):
                 output_column_1=self.output_column_1,
                 output_column_2=self.output_column_2,
                 reference_columns=self.reference_columns,
-                metrics=[]
+                metrics=[],
+                task_description=self.task_description
             )
 
         indices = subset_df.index
@@ -451,6 +477,7 @@ class PairwiseDataset(Dataset):
             output_column_2=self.output_column_2,
             reference_columns=self.reference_columns,
             metrics=[],
+            task_description=self.task_description
         )
 
         output_dataset.set_all_fields(
@@ -470,7 +497,8 @@ class PairwiseDataset(Dataset):
             reference_columns=self.reference_columns,
             metrics=[],
             model1_dataset=model1_dataset,
-            model2_dataset=model2_dataset
+            model2_dataset=model2_dataset,
+            task_description=self.task_description
         )
     
     def copy(self):
@@ -489,7 +517,8 @@ class PairwiseDataset(Dataset):
             output_column_1=self.output_column_1,
             output_column_2=self.output_column_2,
             reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=[],
+            task_description=self.task_description
         )
         new_dataset.set_all_fields(
             dataframe=self.dataframe.copy(),
@@ -508,6 +537,7 @@ class PairwiseDataset(Dataset):
             reference_columns=self.reference_columns,
             metrics=self.metrics,
             model1_dataset=self.model1_dataset.copy(),
-            model2_dataset=self.model2_dataset.copy()
+            model2_dataset=self.model2_dataset.copy(),
+            task_description=self.task_description
         )
         return new_dataset

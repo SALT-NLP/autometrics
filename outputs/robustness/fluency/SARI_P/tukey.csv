@@ -1,0 +1,11 @@
+,group1,group2,meandiff,p-adj,lower,upper,reject
+0,original,same_obvious,0.0735,0.68,-0.0796,0.2266,False
+1,original,same_subtle,-0.0499,0.8985,-0.203,0.1032,False
+2,original,worse_obvious,-0.0777,0.4313,-0.2027,0.0473,False
+3,original,worse_subtle,-0.0463,0.8477,-0.1713,0.0787,False
+4,same_obvious,same_subtle,-0.1234,0.1778,-0.2765,0.0297,False
+5,same_obvious,worse_obvious,-0.1512,0.009,-0.2762,-0.0262,True
+6,same_obvious,worse_subtle,-0.1197,0.0677,-0.2448,0.0053,False
+7,same_subtle,worse_obvious,-0.0278,0.9733,-0.1528,0.0972,False
+8,same_subtle,worse_subtle,0.0036,1.0,-0.1214,0.1287,False
+9,worse_obvious,worse_subtle,0.0314,0.8655,-0.057,0.1198,False

@@ -1,7 +1,7 @@
 from autometrics.metrics.Metric import Metric
 from autometrics.dataset.Dataset import Dataset
 from abc import ABC, abstractmethod
-
+import os
 class Experiment(ABC):
 
     def __init__(self, name: str, description: str, metrics: list[Metric], output_dir: str, train_dataset: Dataset, val_dataset: Dataset, test_dataset: Dataset, seed: int = 42, **kwargs):
@@ -15,6 +15,9 @@ class Experiment(ABC):
         self.seed = seed
         self.kwargs = kwargs
         self.results = {}
+
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
 
     def __init__(self, name: str, description: str, metrics: list[Metric], output_dir: str, dataset: Dataset, seed: int = 42, should_split: bool = True, **kwargs):
         self.name = name
@@ -30,12 +33,18 @@ class Experiment(ABC):
         self.seed = seed
         self.kwargs = kwargs
         self.results = {}
+
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+
     @abstractmethod
     def run(self, print_results: bool = False):
         pass
 
     def save_results(self):
         for key, value in self.results.items():
+            full = os.path.join(self.output_dir, key)
+            os.makedirs(os.path.dirname(full), exist_ok=True)
             value.save(self.output_dir, key)
 
 class ExperimentRunner:

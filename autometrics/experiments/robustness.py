@@ -5,10 +5,18 @@ from autometrics.util.format import get_default_formatter
 from autometrics.dataset.Dataset import Dataset
 from autometrics.metrics.MultiMetric import MultiMetric
 import pandas as pd
-from autometrics.experiments.results import TabularResult
+from autometrics.experiments.results import TabularResult, FigureResult, PlotlyResult
 import litellm
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
+import numpy as np
+import hashlib
+from sklearn.preprocessing import MinMaxScaler
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 litellm.suppress_debug_info = True
 
@@ -185,6 +193,200 @@ class ProducePerturbations(dspy.Module):
             "perturbed_same_obvious": overall_same_obvious,
             "strategies": perturbation_strategies
         }
+# --- ANALYSIS HELPERS -------------------------------------------------------
+
+# 1) Bump Matplotlib font sizes globally
+plt.rcParams.update({
+    'font.size': 16,
+    'axes.titlesize': 18,
+    'axes.labelsize': 16,
+    'xtick.labelsize': 14,
+    'ytick.labelsize': 14
+})
+
+def _get_metric_cols(metric_objs):
+    """Expand Metric and MultiMetric into a list of column names."""
+    cols = []
+    for m in metric_objs:
+        if hasattr(m, 'get_submetric_names'):
+            cols.extend(m.get_submetric_names())
+        else:
+            cols.append(m.get_name())
+    return cols
+
+def _normalize_df(df, cols):
+    """Min-max normalize specified columns to [0,1]."""
+    df_norm = df.copy()
+    df_norm[cols] = MinMaxScaler().fit_transform(df_norm[cols])
+    return df_norm
+
+def _get_tukey_clusters(groups, tukey):
+    """Union-find clusters of groups that Tukey HSD does NOT reject."""
+    parent = {g: g for g in groups}
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[rb] = ra
+    for row in tukey.summary().data[1:]:
+        g1, g2, *_, reject = row
+        if not reject:
+            union(g1, g2)
+    clusters = {}
+    for g in groups:
+        root = find(g)
+        clusters.setdefault(root, []).append(g)
+    return clusters
+
+def _do_anova_tukey(df_norm, col, dimension, results):
+    """Run ANOVA + Tukey HSD, save tables, return the Tukey object."""
+    # ANOVA
+    model = ols(f"{col} ~ C(group)", data=df_norm).fit()
+    anova_tbl = sm.stats.anova_lm(model, typ=2)
+    results[f"{dimension}/{col}/anova"] = TabularResult(anova_tbl)
+    # Tukey HSD
+    mc = MultiComparison(df_norm[col], df_norm['group'])
+    tukey = mc.tukeyhsd(alpha=0.05)
+    tukey_df = pd.DataFrame(data=tukey.summary().data[1:], columns=tukey.summary().data[0])
+    results[f"{dimension}/{col}/tukey"] = TabularResult(tukey_df)
+    return tukey
+
+def _plot_bar_mpl(df_norm, col, dimension, tukey, results):
+    """Static bar chart colored by Tukey clusters."""
+    groups = ['original','same_subtle','same_obvious','worse_subtle','worse_obvious']
+    means = df_norm.groupby('group')[col].mean().reindex(groups)
+    ci95  = 1.96 * df_norm.groupby('group')[col].sem().reindex(groups)
+    clusters = _get_tukey_clusters(groups, tukey)
+    roots   = list(clusters.keys())
+    cmap    = plt.get_cmap('tab10')
+    colors  = [cmap(roots.index(next(r for r,m in clusters.items() if g in m))) for g in groups]
+
+    fig, ax = plt.subplots(figsize=(8,6))
+    x = np.arange(len(groups))
+    ax.bar(x, means, yerr=ci95, capsize=5, color=colors)
+    ax.axhline(means['original'], ls='--', color='gray')
+    ax.set_xticks(x)
+    ax.set_xticklabels([g.replace('_',' ').title() for g in groups], rotation=30)
+    ax.set_ylabel(f"Normalized {col}")
+    ax.set_title(f"{col} vs Perturbation Type ({dimension.capitalize()})")
+    plt.tight_layout()
+    results[f"{dimension}/{col}/bar"] = FigureResult(fig)
+
+def _plot_bar_plotly(df_norm, col, dimension, tukey, results):
+    """Interactive Plotly bar chart, no legend, cluster-colored."""
+    groups = ['original','same_subtle','same_obvious','worse_subtle','worse_obvious']
+    means = df_norm.groupby('group')[col].mean().reindex(groups)
+    ci95  = 1.96 * df_norm.groupby('group')[col].sem().reindex(groups)
+    clusters = _get_tukey_clusters(groups, tukey)
+    roots = list(clusters.keys())
+    cmap = plt.get_cmap('tab10')
+    group_color = {}
+    for idx, root in enumerate(roots):
+        for g in clusters[root]:
+            r, g_, b, a = [int(255*x) for x in cmap(idx)]
+            group_color[g] = f"rgba({r},{g_},{b},{a})"
+
+    fig = go.Figure()
+    for g in groups:
+        fig.add_trace(go.Bar(
+            x=[g.replace('_',' ').title()],
+            y=[means[g]],
+            error_y=dict(type='data', array=[ci95[g]]),
+            marker_color=group_color[g],
+            showlegend=False
+        ))
+    # dashed line at original mean
+    fig.add_shape(dict(
+        type='line', x0=-0.5, x1=len(groups)-0.5,
+        y0=means['original'], y1=means['original'],
+        line=dict(color='gray', dash='dash')
+    ))
+    fig.update_layout(
+        title=f"{col} vs Perturbation Type ({dimension.capitalize()})",
+        xaxis_title="Perturbation Type",
+        yaxis_title=f"Normalized {col}",
+        barmode='group',
+        font=dict(size=16),
+        showlegend=False
+    )
+    results[f"{dimension}/{col}/bar_interactive"] = PlotlyResult(fig)
+
+def _build_summary(df_norm, cols):
+    """Compute sensitivity & stability summary for given cols."""
+    recs = []
+    orig = df_norm[df_norm['group']=='original']
+    for col in cols:
+        for g in ['worse_subtle','worse_obvious']:
+            part   = df_norm[df_norm['group']==g]
+            merged = pd.merge(part[['sample_id',col]], orig[['sample_id',col]],
+                              on='sample_id', suffixes=('_p','_o'))
+            sens   = (merged[f"{col}_o"] - merged[f"{col}_p"]).mean()
+            recs.append({'metric':col, f'sensitivity_{g}': sens})
+        for g in ['same_subtle','same_obvious']:
+            part   = df_norm[df_norm['group']==g]
+            merged = pd.merge(part[['sample_id',col]], orig[['sample_id',col]],
+                              on='sample_id', suffixes=('_p','_o'))
+            stab   = 1 - np.abs(merged[f"{col}_o"] - merged[f"{col}_p"]).mean()
+            recs.append({'metric':col, f'stability_{g}': stab})
+    return pd.DataFrame(recs).groupby('metric').first().reset_index()
+
+def _plot_scatter_mpl(summary_df, dimension, results):
+    """Static scatter of avg stability vs avg sensitivity."""
+    fig, ax = plt.subplots(figsize=(8,6))
+    for _, r in summary_df.iterrows():
+        x = np.mean([r['stability_same_subtle'], r['stability_same_obvious']])
+        y = np.mean([r['sensitivity_worse_subtle'], r['sensitivity_worse_obvious']])
+        ax.scatter(x, y, s=200, marker='o', color='tab:blue', zorder=5)
+        ax.annotate(r['metric'], xy=(x,y), xytext=(-4,4),
+                    textcoords='offset points', fontsize=14, ha='right', va='bottom')
+    ax.set_xlabel("Avg Stability")
+    ax.set_ylabel("Avg Sensitivity")
+    ax.set_title(f"Stability vs Sensitivity ({dimension.capitalize()})")
+    plt.tight_layout()
+    results[f"{dimension}/scatter"] = FigureResult(fig)
+
+def _plot_scatter_plotly(summary_df, dimension, results):
+    """Interactive scatter of avg stability vs avg sensitivity with legend."""
+    fig = go.Figure()
+    for _, r in summary_df.iterrows():
+        x = np.mean([r['stability_same_subtle'], r['stability_same_obvious']])
+        y = np.mean([r['sensitivity_worse_subtle'], r['sensitivity_worse_obvious']])
+        fig.add_trace(go.Scatter(
+            x=[x], y=[y],
+            mode='markers+text',
+            name=r['metric'],
+            text=[r['metric']],
+            textposition='top left',
+            marker=dict(size=14)
+        ))
+    fig.update_layout(
+        title=f"Stability vs Sensitivity ({dimension.capitalize()})",
+        xaxis_title="Average Stability",
+        yaxis_title="Average Sensitivity",
+        font=dict(size=16)
+    )
+    results[f"{dimension}/scatter_interactive"] = PlotlyResult(fig)
+
+def analyze_and_plot(df: pd.DataFrame, metric_objs: list, dimension: str, results: dict):
+    """
+    Orchestrates normalization, ANOVA/Tukey, bar & scatter plots (static + interactive).
+    """
+    cols    = _get_metric_cols(metric_objs)
+    df_norm = _normalize_df(df, cols)
+    # 1) ANOVA/Tukey + bar plots
+    for col in cols:
+        tukey = _do_anova_tukey(df_norm, col, dimension, results)
+        _plot_bar_mpl(df_norm, col, dimension, tukey, results)
+        _plot_bar_plotly(df_norm, col, dimension, tukey, results)
+    # 2) Summary table + scatter
+    summary_df = _build_summary(df_norm, cols)
+    results[f"{dimension}/sens_stab"] = TabularResult(summary_df)
+    _plot_scatter_mpl(summary_df, dimension, results)
+    _plot_scatter_plotly(summary_df, dimension, results)
 
 class RobustnessExperiment(Experiment):
 
@@ -269,13 +471,13 @@ class RobustnessExperiment(Experiment):
                 # First, generate the perturbations
                 perturbations = produce_perturbations(task=test_dataset.get_task_description(), dimension=column, dataset=test_dataset)
                 df = self._produce_perturbation_scores(test_dataset, perturbations)
-                self.results[f"full_table_{column}"] = TabularResult(df)
+                self.results[f"{column}/full_table"] = TabularResult(df)
 
                 if print_results:
                     print(df)
 
-        print("TODO: The rest of the experiment is not implemented yet.")
-        return
+                df['sample_id'] = df['input'].str.strip().str.lower().apply(lambda x: hashlib.md5(x.encode()).hexdigest())
+                analyze_and_plot(df, self.metrics, column, self.results)
 
 if __name__ == "__main__":
 
@@ -294,7 +496,7 @@ if __name__ == "__main__":
         name="Robustness Experiment",
         description="An experiment to test the robustness of the model",
         metrics=[BLEU(), SARI()],
-        output_dir="outputs",
+        output_dir="outputs/robustness",
         dataset=dataset
     )
 

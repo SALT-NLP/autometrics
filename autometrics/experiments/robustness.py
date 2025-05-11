@@ -8,6 +8,7 @@ import pandas as pd
 from autometrics.experiments.results import TabularResult
 import litellm
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor
 
 litellm.suppress_debug_info = True
 
@@ -37,17 +38,17 @@ Dimension: Meaning Preservation"""
 
 class PerturbWorse(dspy.Signature):
     """You will be given:  
-• A Task description  
-• A Dimension to prioritize when perturbing outputs  
-• The Example Input, optional Example Reference, and Model Output  
-• A perturbation_strength value ("subtle" or "obvious")  
-• A list of perturbation_strategies to apply  
+    • A Task description  
+    • A Dimension to prioritize when perturbing outputs  
+    • The Example Input, optional Example Reference, and Model Output  
+    • A perturbation_strength value ("subtle" or "obvious")  
+    • A list of perturbation_strategies to apply  
 
 Instructions:  
 Your goal is to apply each strategy to the Model Output and produce a degraded version that specifically harms performance along the given Dimension, using the specified strength.  
 Under the heading **Perturbed Outputs:**, return exactly one perturbed output per strategy.  
-- For **subtle** strength, introduce minimal distortion.  
-- For **obvious** strength, introduce more pronounced degradation.  
+    - For **subtle** strength, introduce minimal distortion.  
+    - For **obvious** strength, introduce more pronounced degradation.  
 Do **not** include any reasoning, explanations, or examples -- only the perturbed text."""
     task: str = dspy.InputField(description="The task that the model was originally trying to complete")
     dimension: str = dspy.InputField(description="The dimension to prioritize for the perturbation (this should be the aspect of the model output that is most impacted by the perturbation)")
@@ -59,76 +60,131 @@ Do **not** include any reasoning, explanations, or examples -- only the perturbe
     perturbed_outputs: list[str] = dspy.OutputField(description="Perturbed text that is worse than the original model output.  Produce one perturbed output per strategy.")
 
 class PerturbSame(dspy.Signature):
-    """You will be given:  
-• A Task description  
-• A Dimension to preserve when perturbing outputs  
-• The Example Input, optional Example Reference, and Model Output  
-• A perturbation_strength value ("subtle" or "obvious")  
-• A list of perturbation_strategies to apply  
+    """You will be given:
+    • A Task description  
+    • A Dimension to preserve when perturbing outputs  
+    • The Example Input, optional Example Reference, and Model Output  
+    • A perturbation_strength value ("subtle" or "obvious")  
 
-Instructions:  
-Your goal is to produce a perturbed version of the model output that specifically preserves performance along the given Dimension, using the specified strength.  
-Under the heading **Perturbed Output:**, return exactly one perturbed output.
-- For **subtle** strength, introduce minimal distortion.  
-- For **obvious** strength, introduce more pronounced degradation.  
-Do **not** include any reasoning, explanations, or examples -- only the perturbed text."""
+Instructions:
+Apply a perturbation to the Model Output that **maintains** performance on the specified Dimension.
+Under the heading **Perturbed Output:** return exactly one string:
+    - For **subtle** strength, apply a minimal change that does not impair the target Dimension.
+    - For **obvious** strength, apply a more noticeable change that still keeps the target Dimension intact.
+Some examples of types of perturbations would include: rephrasing, reordering, replacing words with synonyms, stylistic changes, etc. that do not impair the target Dimension.
+If any change would harm the specified Dimension, simply return the original Model Output.
+After producing your original plan/reasoning do **not** include any more reasoning, explanations, or examples -- only the perturbed text."""
     task: str = dspy.InputField(description="The task that the model was originally trying to complete")
-    dimension: str = dspy.InputField(description="The dimension to preserve for the perturbation (this should be the aspect of the model output that is most impacted by the perturbation)")
     input: str = dspy.InputField(description="The input provided to the model")
     references: Union[list[str], None] = dspy.InputField(description="The references of good outputs (may be None)")
     model_output: str = dspy.InputField(description="The output produced by the model")
     perturbation_strength: Literal["subtle", "obvious"] = dspy.InputField(description="The strength of the perturbation (subtle or obvious)")
+    dimension: str = dspy.InputField(description="The aspect of the model output that MUST be preserved in quality")
     perturbed_output: str = dspy.OutputField(description="Perturbed text that preserves performance along the given Dimension.")
 
 class ProducePerturbations(dspy.Module):
 
-    def __init__(self, num_examples: int = 3, formatter: Callable = None):
+    def __init__(self, num_examples: int = 3, formatter: Callable = None, max_workers: int = None):
         self.generate_perturbation_strategies: GeneratePerturbationStrategies = dspy.ChainOfThought(GeneratePerturbationStrategies)
         self.perturb_worse: PerturbWorse = dspy.Predict(PerturbWorse)
-        self.perturb_same: PerturbSame = dspy.Predict(PerturbSame)
+        self.perturb_same: PerturbSame = dspy.ChainOfThought(PerturbSame)
         self.num_examples = num_examples
         self.formatter = formatter
+        self.max_workers = max_workers if max_workers is not None else 1
 
     def forward(self, task: str, dimension: str, dataset: Dataset):
-
+        # --- setup formatter and examples ---
         if self.formatter is None:
             self.formatter = get_default_formatter(dataset)
 
-        sampled_rows = dataset.get_dataframe().sample(self.num_examples) if self.num_examples < len(dataset.get_dataframe()) else dataset.get_dataframe()
-        formatted_rows = [self.formatter(row) for row in sampled_rows.iterrows()]
+        df = dataset.get_dataframe()
+        sampled_rows = df.sample(self.num_examples) if self.num_examples < len(df) else df
+        formatted_rows = [ self.formatter(row) for row in sampled_rows.iterrows() ]
 
-        perturbation_strategies = self.generate_perturbation_strategies(task=task, dimension=dimension, example_sets=formatted_rows).perturbation_strategies
+        # generate your list of strategies once
+        perturbation_strategies = self.generate_perturbation_strategies(
+            task=task,
+            dimension=dimension,
+            example_sets=formatted_rows
+        ).perturbation_strategies
 
-        overall_perturbed_worse_subtle = []
-        overall_perturbed_worse_obvious = []
-        overall_perturbed_same_subtle = []
-        overall_perturbed_same_obvious = []
+        # extract column names once
+        input_col = dataset.get_input_column()
+        output_col = dataset.get_output_column()
+        ref_cols = dataset.get_reference_columns()
 
-        for _, row in tqdm(dataset.get_dataframe().iterrows(), total=len(dataset.get_dataframe())):
-            inp = row[dataset.get_input_column()]
-            references = row[dataset.get_reference_columns()]
-            model_output = row[dataset.get_output_column()]
+        # convert DataFrame into list of plain dicts for easy pickling
+        records = df.to_dict('records')
 
-            perturbed_worse_subtle = self.perturb_worse(task=task, dimension=dimension, input=inp, references=references, model_output=model_output, perturbation_strength="subtle", perturbation_strategies=perturbation_strategies).perturbed_outputs
-            perturbed_worse_obvious = self.perturb_worse(task=task, dimension=dimension, input=inp, references=references, model_output=model_output, perturbation_strength="obvious", perturbation_strategies=perturbation_strategies).perturbed_outputs
+        # prepare accumulators
+        overall_worse_subtle, overall_worse_obvious = [], []
+        overall_same_subtle, overall_same_obvious   = [], []
 
-            perturbed_same_subtle = self.perturb_same(task=task, dimension=dimension, input=inp, references=references, model_output=model_output, perturbation_strength="subtle", perturbation_strategies=perturbation_strategies).perturbed_output
-            perturbed_same_obvious = self.perturb_same(task=task, dimension=dimension, input=inp, references=references, model_output=model_output, perturbation_strength="obvious", perturbation_strategies=perturbation_strategies).perturbed_output
+        # define worker
+        def _process(record):
+            inp = record[input_col]
+            refs = [record[c] for c in ref_cols]
+            out = record[output_col]
 
-            overall_perturbed_worse_subtle.append(perturbed_worse_subtle)
-            overall_perturbed_worse_obvious.append(perturbed_worse_obvious)
-            overall_perturbed_same_subtle.append(perturbed_same_subtle)
-            overall_perturbed_same_obvious.append(perturbed_same_obvious)
+            res_worse_subtle = self.perturb_worse(
+                task=task,
+                dimension=dimension,
+                input=inp,
+                references=refs,
+                model_output=out,
+                perturbation_strength="subtle",
+                perturbation_strategies=perturbation_strategies
+            ).perturbed_outputs
 
-        results = {
-            "perturbed_worse_subtle": overall_perturbed_worse_subtle,
-            "perturbed_worse_obvious": overall_perturbed_worse_obvious,
-            "perturbed_same_subtle": overall_perturbed_same_subtle,
-            "perturbed_same_obvious": overall_perturbed_same_obvious,
+            res_worse_obvious = self.perturb_worse(
+                task=task,
+                dimension=dimension,
+                input=inp,
+                references=refs,
+                model_output=out,
+                perturbation_strength="obvious",
+                perturbation_strategies=perturbation_strategies
+            ).perturbed_outputs
+
+            res_same_subtle = self.perturb_same(
+                task=task,
+                dimension=dimension,
+                input=inp,
+                references=refs,
+                model_output=out,
+                perturbation_strength="subtle"
+            ).perturbed_output
+
+            res_same_obvious = self.perturb_same(
+                task=task,
+                dimension=dimension,
+                input=inp,
+                references=refs,
+                model_output=out,
+                perturbation_strength="obvious"
+            ).perturbed_output
+
+            return res_worse_subtle, res_worse_obvious, res_same_subtle, res_same_obvious
+
+        # spin up thread‐pool and collect results
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            for worse_subtle, worse_obvious, same_subtle, same_obvious in tqdm(
+                executor.map(_process, records),
+                total=len(records),
+                desc="perturbing examples"
+            ):
+                overall_worse_subtle.append(worse_subtle)
+                overall_worse_obvious.append(worse_obvious)
+                overall_same_subtle.append(same_subtle)
+                overall_same_obvious.append(same_obvious)
+
+        return {
+            "perturbed_worse_subtle": overall_worse_subtle,
+            "perturbed_worse_obvious": overall_worse_obvious,
+            "perturbed_same_subtle": overall_same_subtle,
+            "perturbed_same_obvious": overall_same_obvious,
             "strategies": perturbation_strategies
         }
-
-        return results
 
 class RobustnessExperiment(Experiment):
 
@@ -138,8 +194,6 @@ class RobustnessExperiment(Experiment):
                                                                                      perturbations["perturbed_same_subtle"], \
                                                                                      perturbations["perturbed_same_obvious"], \
                                                                                      perturbations["strategies"]
-                
-        amt_to_eval = (len(strategies) * 2) + 2
         
         inputs = dataset.get_dataframe()[dataset.get_input_column()].tolist()
         reference_columns = dataset.get_reference_columns()
@@ -172,8 +226,6 @@ class RobustnessExperiment(Experiment):
 
         df = pd.DataFrame(data)
 
-        df.to_csv("df.csv", index=False)
-
         for metric in self.metrics:
             original_values = dataset.get_metric_values(metric)
             true_outputs = dataset.get_dataframe()[dataset.get_output_column()]
@@ -181,10 +233,10 @@ class RobustnessExperiment(Experiment):
             results = metric.calculate_batched(df["input"], df["model_output"], [[df[ref_col].iloc[i] for ref_col in reference_columns] for i in range(len(df))])
 
             # Check if the metric is a multi-metric
-            if type(results[0]) == list and isinstance(metric, MultiMetric):
+            if isinstance(results, (list, tuple)) and isinstance(metric, MultiMetric):
                 for i, submetric_name in enumerate(metric.get_submetric_names()):
-                    data[submetric_name] = results[i]
-                    data[submetric_name].extend(original_values[i])
+                    data[submetric_name] = list(results[i])
+                    data[submetric_name].extend(original_values[submetric_name])
             else:
                 data[metric.get_name()] = results
                 data[metric.get_name()].extend(original_values)
@@ -199,13 +251,13 @@ class RobustnessExperiment(Experiment):
         df = pd.DataFrame(data)
         return df
 
-    def run(self, print_results: bool = False, num_demonstration_examples: int = 3, max_eval_examples: int = 30):
+    def run(self, print_results: bool = False, num_demonstration_examples: int = 3, max_eval_examples: int = 30, max_workers: int = 8):
 
         test_dataset = self.test_dataset
         if max_eval_examples < len(test_dataset.get_dataframe()):
             test_dataset = test_dataset.get_subset(max_eval_examples, seed=self.seed)
 
-        produce_perturbations = ProducePerturbations(num_examples=num_demonstration_examples)
+        produce_perturbations = ProducePerturbations(num_examples=num_demonstration_examples, max_workers=max_workers)
 
         if self.kwargs.get("lm"):
             self.lm = self.kwargs.get("lm")
@@ -229,6 +281,7 @@ if __name__ == "__main__":
 
     from autometrics.dataset.datasets.simplification.simplification import SimpDA
     from autometrics.metrics.reference_based.BLEU import BLEU
+    from autometrics.metrics.reference_based.SARI import SARI
     import os
 
 
@@ -240,7 +293,7 @@ if __name__ == "__main__":
     experiment = RobustnessExperiment(
         name="Robustness Experiment",
         description="An experiment to test the robustness of the model",
-        metrics=[BLEU()],
+        metrics=[BLEU(), SARI()],
         output_dir="outputs",
         dataset=dataset
     )

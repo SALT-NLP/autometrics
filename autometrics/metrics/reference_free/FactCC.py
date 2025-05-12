@@ -139,7 +139,7 @@ where $f$ is the classification function learned by the model, trained on synthe
         batch_size: int = 8,
         persistent: bool = True
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, model_name=model_name, device=device, batch_size=batch_size, persistent=persistent)
         self.model_name = model_name
         self.device = torch.device(device) if device is not None else torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.batch_size = batch_size
@@ -148,6 +148,8 @@ where $f$ is the classification function learned by the model, trained on synthe
         self.model = None
         if self.persistent:
             self._load_model()
+
+        self.exclude_from_cache_key('model_name', 'device', 'batch_size', 'persistent')
 
     def _load_model(self):
         if self.model is None:
@@ -164,7 +166,7 @@ where $f$ is the classification function learned by the model, trained on synthe
             self.model = None
             self.tokenizer = None
 
-    def calculate(self, input_text: str, output: str, references=None, **kwargs) -> float:
+    def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs) -> float:
         # Lazy load
         if self.model is None:
             self._load_model()
@@ -188,7 +190,7 @@ where $f$ is the classification function learned by the model, trained on synthe
             self._unload_model()
         return score
 
-    def calculate_batched(self, inputs: list, outputs: list, references=None, **kwargs) -> list:
+    def _calculate_batched_impl(self, inputs: list, outputs: list, references=None, **kwargs) -> list:
         # Lazy load
         if self.model is None:
             self._load_model()

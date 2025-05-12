@@ -205,7 +205,7 @@ where:
         batch_size: int = 2,
         persistent: bool = True
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, model_name=model_name, torch_dtype=torch_dtype, device_map=device_map, attn_implementation=attn_implementation, num_labels=num_labels, batch_size=batch_size, persistent=persistent)
         self.model_name = model_name
         self.torch_dtype = torch_dtype
         self.device_map = device_map
@@ -219,6 +219,8 @@ where:
 
         if self.persistent:
             self._load_model()
+
+        self.exclude_from_cache_key('model_name', 'device_map', 'attn_implementation', 'batch_size', 'persistent')
 
     def _load_model(self):
         if self.model is None:
@@ -240,7 +242,7 @@ where:
             self.model = None
             self.tokenizer = None
 
-    def calculate(self, input: str, output: str, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, **kwargs) -> float:
         # ensure model & tokenizer loaded
         if self.model is None:
             self._load_model()
@@ -263,7 +265,7 @@ where:
 
         return score
 
-    def calculate_batched(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
         if self.model is None:
             self._load_model()
 

@@ -147,16 +147,19 @@ The model is trained using human-annotated quality scores from simplification co
         model_id: str = "davidheineman/lens-salsa",
         batch_size: int = 16,
         devices: List[int] = None,
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, model_id=model_id, batch_size=batch_size, devices=devices, persistent=persistent, **kwargs)
         self.model_id = model_id
         self.batch_size = batch_size
         self.devices = devices
         self.persistent = persistent
         self.model = None
         if self.persistent:
-            self._load_model()
+          self._load_model()
+
+        self.exclude_from_cache_key('batch_size', 'devices', 'persistent')
 
     def _load_model(self):
         """Download SALSA checkpoint and load the LENS_SALSA model."""
@@ -171,7 +174,7 @@ The model is trained using human-annotated quality scores from simplification co
             torch.cuda.empty_cache()
             self.model = None
 
-    def calculate(self,
+    def _calculate_impl(self,
                   input: str,
                   output: str,
                   references: Union[List[str], None] = None,
@@ -194,7 +197,7 @@ The model is trained using human-annotated quality scores from simplification co
             self._unload_model()
         return result
 
-    def calculate_batched(self,
+    def _calculate_batched_impl(self,
                           inputs: List[str],
                           outputs: List[str],
                           references: Union[List[List[str]], None] = None,

@@ -321,7 +321,7 @@ This method provides a **more realistic** evaluation of model fluency while effi
             "In the context of language models, it quantifies how well the model predicts a sequence of words. "
             "Lower perplexity indicates better performance."
         )
-        super().__init__(name, description)
+        super().__init__(name, description, model_id=model, batch_size=batch_size, stride=stride, progress_bar=progress_bar)
         self.model_name = model
         self.batch_size = batch_size
         self.stride = stride
@@ -334,7 +334,9 @@ This method provides a **more realistic** evaluation of model fluency while effi
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
-    def calculate(self, input, output, references=None, **kwargs):
+        self.exclude_from_cache_key('batch_size', 'progress_bar')
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate the perplexity for a single document.
         Assumes `input` is a string.
@@ -351,7 +353,7 @@ This method provides a **more realistic** evaluation of model fluency while effi
         )
         return perplexities[0]
 
-    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
         Calculate perplexities for a batch of documents.
         Assumes `inputs` is a list of strings.

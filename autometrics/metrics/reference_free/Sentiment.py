@@ -165,9 +165,10 @@ $$
         torch_dtype = torch.float32,
         device_map: Union[str, dict] = None,
         batch_size: int = 8,
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, model_name=model_name, torch_dtype=torch_dtype, device_map=device_map, batch_size=batch_size, persistent=persistent, **kwargs)
         self.model_name = model_name
         self.torch_dtype = torch_dtype
         self.device_map = device_map
@@ -179,6 +180,8 @@ $$
         self.config = None
         if self.persistent:
             self._load_model()
+
+        self.exclude_from_cache_key('batch_size', 'device_map', 'persistent')
 
     def _load_model(self):
         """Load tokenizer, model, and config."""
@@ -215,7 +218,7 @@ $$
                 tokens.append(t)
         return " ".join(tokens)
 
-    def calculate(self, input: str, output: str, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, **kwargs) -> float:
         """Compute sentiment regression for a single text."""
         if self.model is None:
             self._load_model()
@@ -231,7 +234,7 @@ $$
             self._unload_model()
         return score
 
-    def calculate_batched(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
         """Compute sentiment regression for batches of texts."""
         if self.model is None:
             self._load_model()

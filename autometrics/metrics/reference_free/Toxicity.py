@@ -178,7 +178,8 @@ $$
         description: str = "Toxicity score via HF Evaluate measurement",
         metric_id: str = "toxicity",
         score_key: str = "toxicity",
-        load_kwargs: dict = None
+        load_kwargs: dict = None,
+        **kwargs
     ):
         # Default: use module_type measurement for toxicity
         if load_kwargs is None:
@@ -189,5 +190,6 @@ $$
             metric_id=metric_id,
             score_key=score_key,
             load_kwargs=load_kwargs,
-            compute_kwargs={}
+            compute_kwargs={},
+            **kwargs
         ) 

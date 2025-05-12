@@ -14,8 +14,6 @@ Based on code by Wei Xu
 https://github.com/cocoxu/simplification
 """
 
-# SARI has complex n-gram calculations that could benefit from caching
-DEFAULT_USE_CACHE = True
 
 def is_subsequence(str1, str2):
 	m = len(str1)
@@ -228,12 +226,7 @@ SARI is a metric designed specifically for evaluating text simplification system
 
 ### Metric Description
 
-SARI evaluates text simplification by considering three operations:
-1. **Keep:** Preserving important words from the source
-2. **Delete:** Removing unnecessary words
-3. **Add:** Adding new words that improve readability
-
-The final score is a weighted average of these three components, with each component being evaluated using precision and recall.
+SARI evaluates text simplification by considering three types of operations: additions, deletions, and retention of n-grams. It computes precision and recall for these operations by comparing the system output to both the input and the reference simplified texts. SARI is particularly suited for simplification tasks as it explicitly rewards edits that improve readability while maintaining semantic correctness.
 
 - **Metric Type:** Surface-Level Similarity
 - **Range:** 0 to 1
@@ -243,166 +236,117 @@ The final score is a weighted average of these three components, with each compo
 
 ### Formal Definition
 
-For each operation (keep, delete, add), SARI computes precision and recall:
+SARI is computed as the arithmetic mean of F-scores for the addition and retention operations, along with the precision of the deletion operation:
 
 $$
-\text{Precision} = \frac{\text{Correct Operations}}{\text{Total Operations}}
+SARI = \frac{1}{3}(F_{add} + F_{keep} + P_{del})
 $$
 
-$$
-\text{Recall} = \frac{\text{Correct Operations}}{\text{Required Operations}}
-$$
+Where:
+- $F_{add}$: F-score for addition operations
+- $F_{keep}$: F-score for keeping relevant text
+- $P_{del}$: Precision for deletion operations  
 
-The F1 score for each operation is then computed as:
-
-$$
-F1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
-$$
-
-The final SARI score is:
-
-$$
-\text{SARI} = \frac{\text{Keep-F1} + \text{Delete-F1} + \text{Add-F1}}{3}
-$$
+Each F-score or precision is computed based on the comparison of n-grams in the input, system output, and references.
 
 ### Inputs and Outputs
 
 - **Inputs:**  
-  - Source text (complex)
-  - System output (simplified)
-  - Reference simplifications
-  
+- Source text (original, complex input text)  
+- Candidate text (simplified text from the system)  
+- Reference texts (simplified human-created texts)  
+
 - **Outputs:**  
-  - SARI score (0-1)
-  - Component scores for keep, delete, and add operations
+- Scalar SARI score (range: 0 to 1)
 
 ## Intended Use
 
 ### Domains and Tasks
 
-- **Domain:** Text Generation
-- **Tasks:** Text Simplification
+- **Domain:** Text Generation  
+- **Tasks:**  
+- Text Simplification  
 
 ### Applicability and Limitations
 
 - **Best Suited For:**  
-  - Evaluating text simplification systems
-  - Comparing different simplification approaches
-  
+- Text simplification tasks where changes to the text, such as paraphrasing, deletions, or additions, are expected to enhance readability.  
+
 - **Not Recommended For:**  
-  - General text generation tasks
-  - Tasks where preserving exact wording is crucial
+- Open-ended or creative text generation tasks where diversity and semantic similarity matter more than lexical transformation.
 
 ## Metric Implementation
 
 ### Reference Implementations
 
 - **Libraries/Packages:**  
-  - [SARI GitHub Repository](https://github.com/cocoxu/simplification)
+- [SARI Implementation in LENS Repository](https://github.com/Yao-Dou/LENS/blob/master/experiments/meta_evaluation/metrics/sari.py)  
 
 ### Computational Complexity
 
 - **Efficiency:**  
-  - Requires computing n-gram overlaps between source, output, and references
-  - Complexity scales with text length and number of references
-  
+SARI is computationally efficient, with complexity similar to BLEU, as it involves n-gram extraction and comparison.  
+
 - **Scalability:**  
-  - Can handle multiple references
-  - Performance may degrade with very long texts
+SARI scales well across datasets with multiple references, leveraging n-gram matching for simplicity evaluation.
 
 ## Known Limitations
 
 - **Biases:**  
-  - May favor conservative simplifications that keep more words
-  - Does not account for semantic preservation
-  
+- SARI may over-penalize outputs that do not align well with reference texts, particularly in cases where valid simplifications are not covered by references.  
+
 - **Task Misalignment Risks:**  
-  - May not correlate well with human judgments for creative simplifications
-  - Does not consider grammaticality or fluency
-  
+- SARI is unsuitable for tasks that emphasize semantic similarity over structural changes, such as summarization or machine translation.  
+
 - **Failure Cases:**  
-  - May give high scores to oversimplified text
-  - May penalize valid simplifications that use different wording
+- It can struggle with highly creative or diverse simplifications where multiple equally valid outputs are possible.
 
 ## Related Metrics
 
-- **BLEU:** Measures n-gram overlap with references
-- **ROUGE:** Evaluates recall of n-grams
-- **METEOR:** Considers synonymy and stemming
+- **BLEU:** Measures surface similarity but does not compare outputs with the input text.  
+- **FKBLEU:** Combines BLEU with the Flesch-Kincaid readability metric for simplification tasks.  
+- **ROUGE:** Suitable for summarization but less relevant for simplification.  
 
 ## Further Reading
 
 - **Papers:**  
-  - [Optimizing Statistical Machine Translation for Text Simplification (Xu et al., 2016)](https://www.aclweb.org/anthology/Q16-1029/)
+- [Optimizing Statistical Machine Translation for Text Simplification (Xu et al., 2016)](https://github.com/cocoxu/simplification/)  
 
 ## Citation
 
 ```
-@article{xu-etal-2016-optimizing,
-    title = "Optimizing Statistical Machine Translation for Text Simplification",
-    author = "Xu, Wei  and
-      Napoles, Courtney  and
-      Pavlick, Ellie  and
-      Chen, Quanze  and
-      Callison-Burch, Chris",
-    journal = "Transactions of the Association for Computational Linguistics",
-    volume = "4",
-    year = "2016",
-    url = "https://www.aclweb.org/anthology/Q16-1029",
-    doi = "10.1162/tacl_a_00098",
-    pages = "401--415"
+@article{Xu-EtAl:2016:TACL,
+  author = {Wei Xu and Courtney Napoles and Ellie Pavlick and Quanze Chen and Chris Callison-Burch},
+  title = {Optimizing Statistical Machine Translation for Text Simplification},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume = {4},
+  year = {2016},
+  url = {https://cocoxu.github.io/publications/tacl2016-smt-simplification.pdf},
+  pages = {401--415}
 }
 ```
 
 ## Metric Card Authors
 
-- **Authors:** Michael J. Ryan
+- **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
-  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.
-- **Contact:** mryan0@stanford.edu"""
-
-	def __init__(self, name="SARI", description="SARI (System output Against References and against the Input sentence) is a metric for evaluating text simplification systems. It measures the quality of a simplification by comparing it to both the original complex text and reference simplifications."):
-		super().__init__(name, description, ["SARI-Keep", "SARI-Delete", "SARI-Add", "SARI-Final"])
-		self.use_cache = DEFAULT_USE_CACHE
-
-	def calculate(self, input, output, references=None, **kwargs):
+Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+	"""
+	
+	# SARI is fast enough without caching
+	DEFAULT_USE_CACHE = False
+	
+	def __init__(self, name="SARI", description="SARI evaluates the quality of text simplification by comparing the system output against both the original and simplified reference texts. It measures how well words are added, deleted, and kept appropriately, rewarding edits that improve readability while preserving meaning.", **kwargs):
+		super().__init__(name, description, submetric_names=["SARI_P", "SARI_F"], **kwargs)
+		
+	def _calculate_impl(self, input, output, references=None, **kwargs):
 		"""
-		Calculate SARI scores for the given input and output.
+		Actual implementation of the SARI metric
 		"""
 		if references is None:
 			references = []
-
-		if len(references) > 1:
-			references = [references[0]]
-
-		# Check cache if enabled
-		if self.use_cache:
-			cache_key = (input, output, tuple(references))
-			if cache_key in self._cache:
-				return self._cache[cache_key]
-
-		# Calculate scores
-		keep_score, (del_precision, del_recall, del_f1), add_score, (final_precision, final_f1) = SARIsent(input, output, references)
-
-		# Store in cache if enabled
-		if self.use_cache:
-			self._cache[cache_key] = [keep_score, del_f1, add_score, final_f1]
-
-		return [keep_score, del_f1, add_score, final_f1]
-
-	def calculate_batched(self, inputs, outputs, references=None, **kwargs):
-		"""
-		Calculate SARI scores for the given inputs and outputs in batches.
-		"""
-		if references is None:
-			references = [[] for _ in range(len(inputs))]
-
-		results = []
-		for input, output, refs in zip(inputs, outputs, references):
-			results.append(self.calculate(input, output, refs))
-
-		# Transpose results to get scores by metric
-		results = list(zip(*results))
-		results = [list(result) for result in results]
-
-		return results
+		
+		keep, dels, add, final = SARIsent(input, output, references)
+		
+		return final

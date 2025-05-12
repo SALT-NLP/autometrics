@@ -268,7 +268,8 @@ $$
         name: str = 'SummaQA',
         description: str = 'QA-based summary evaluation via entity cloze and BERT QA',
         spacy_model: str = 'en_core_web_sm',
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
         super().__init__(name, description, submetric_names=['avg_prob', 'avg_fscore'])
         self.spacy_model = spacy_model
@@ -277,6 +278,8 @@ $$
         self.qa: QA_Metric = None
         if self.persistent:
             self._init_models()
+
+        self.exclude_from_cache_key('persistent')
 
     def _init_models(self):
         self.qg = QG_masked(self.spacy_model)
@@ -287,7 +290,7 @@ $$
         self.qg = None
         self.qa = None
 
-    def calculate(self, input_text: str, output: str, references=None, **kwargs) -> Tuple[float, float]:
+    def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs) -> Tuple[float, float]:
         # Lazy init
         if self.qg is None or self.qa is None:
             self._init_models()
@@ -302,7 +305,7 @@ $$
             self._unload_models()
         return (avg_prob, avg_fscore)
 
-    def calculate_batched(
+    def _calculate_batched_impl(
         self,
         inputs: List[str],
         outputs: List[str],

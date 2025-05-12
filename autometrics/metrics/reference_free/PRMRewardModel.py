@@ -130,9 +130,10 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
         description: str = "Process Reward Model Qwen2.5-Math-PRM-7B sentence-based min/max/mean",
         model_name: str = "Qwen/Qwen2.5-Math-PRM-7B",
         device_map=None,
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description, submetric_names=["min", "max", "mean"])
+        super().__init__(name, description, submetric_names=["min", "max", "mean"], model_id=model_name, device_map=device_map, persistent=persistent, **kwargs)
         self.model_name = model_name
         self.device_map = device_map
         self.persistent = persistent
@@ -141,6 +142,8 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
         self.model = None
         if self.persistent:
             self._load_model()
+
+        self.exclude_from_cache_key('device_map', 'persistent')
 
     def _load_model(self):
         if self.model is None:
@@ -177,7 +180,7 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
             all_scores_res.append(positive_probs.cpu().tolist())
         return all_scores_res
 
-    def calculate(self, input_text: str, output: str, references=None, **kwargs) -> Tuple[float, float, float]:
+    def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs) -> Tuple[float, float, float]:
         # Lazy load model if needed
         if self.model is None:
             self._load_model()

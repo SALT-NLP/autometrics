@@ -123,13 +123,14 @@ Each BLEU computation typically uses uniform $n$-gram weights (e.g., unigram to 
         name: str = "SelfBLEU",
         description: str = "Self-BLEU diversity metric: avg BLEU each sentence vs rest",
         gram: int = 3,
-        sample_size: int = 500
+        sample_size: int = 500,
+        **kwargs
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, gram=gram, sample_size=sample_size, **kwargs)
         self.gram = gram
         self.sample_size = sample_size
 
-    def calculate(self, input_text: str, output: str, references=None, **kwargs) -> float:
+    def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs) -> float:
         """
         Compute Self-BLEU within a single generated output by treating each sentence as hypothesis
         and the other sentences as references.

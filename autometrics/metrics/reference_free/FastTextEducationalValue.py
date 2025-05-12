@@ -154,9 +154,10 @@ FastText
         repo_id: str = "kenhktsui/llm-data-textbook-quality-fasttext-classifier-v2",
         filename: str = "model_quantized.bin",
         persistent: bool = True,
-        data_dir: str = None
+        data_dir: str = None,
+        **kwargs
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, repo_id=repo_id, filename=filename, persistent=persistent, data_dir=data_dir, **kwargs)
         self.repo_id = repo_id
         self.filename = filename
         self.persistent = persistent
@@ -175,6 +176,8 @@ FastText
         if self.persistent:
             self._load_model()
 
+        self.exclude_from_cache_key('persistent', 'data_dir')
+
     def _load_model(self):
         # Download via HF if not cached
         model_path = hf_hub_download(
@@ -187,7 +190,7 @@ FastText
     def _unload_model(self):
         self.model = None
 
-    def calculate(
+    def _calculate_impl(
         self,
         input_text: str,
         output: str,
@@ -218,7 +221,7 @@ FastText
             self._unload_model()
         return float(score)
 
-    def calculate_batched(
+    def _calculate_batched_impl(
         self,
         inputs: List[str],
         outputs: List[str],

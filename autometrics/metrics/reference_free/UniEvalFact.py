@@ -150,22 +150,22 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu  """
 
-    def __init__(self):
+    def __init__(self, device: str = "cuda", **kwargs):
         name = "UniEvalFact"
         description = "UniEvalFact is a metric for evaluating the factual consistency of generated text. It uses a pre-trained model to assess the factuality of the content, providing a score that indicates how well the generated text aligns with factual information. This metric is useful for tasks where factual accuracy is crucial, such as summarization and dialogue generation."
         self.submetrics = ["consistency"]
 
         self.task = 'fact'
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(device)
         self.evaluator = get_evaluator(self.task, device=self.device)
         
-        super().__init__(name, description, ["UniEvalFact-" + submetric for submetric in self.submetrics])
+        super().__init__(name, description, ["UniEvalFact-" + submetric for submetric in self.submetrics], device=device, **kwargs)
 
     def _parse_unieval(self, result):
       results = [result[submetric] for submetric in self.submetrics]
       return results
     
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate UniEvalFact scores for the given input and output.
         """
@@ -177,7 +177,7 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
         
         return self._parse_unieval(eval_scores[0])
     
-    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
         Calculate UniEvalFact scores for the given inputs and outputs in batches.
         """

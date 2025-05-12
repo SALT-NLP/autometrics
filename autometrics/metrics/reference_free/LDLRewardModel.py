@@ -325,7 +325,7 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
         batch_size: int = 2,
         persistent: bool = True
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, model_name=model_name, device_map=device_map, batch_size=batch_size, persistent=persistent)
         self.model_name = model_name
         self.device_map = device_map
         self.batch_size = batch_size
@@ -335,6 +335,8 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
         self.tokenizer: Optional[AutoTokenizer] = None
         if self.persistent:
             self._load_model()
+
+        self.exclude_from_cache_key('model_name', 'device_map', 'batch_size', 'persistent')
 
     def _load_model(self):
         if self.model is None:
@@ -353,7 +355,7 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
             self.model = None
             self.tokenizer = None
 
-    def calculate(self, input: str, output: str, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, **kwargs) -> float:
         if self.model is None:
             self._load_model()
         conv = [{"role": "user", "content": input}, {"role": "assistant", "content": output}]
@@ -364,7 +366,7 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
             self._unload_model()
         return score
 
-    def calculate_batched(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
         if self.model is None:
             self._load_model()
         all_scores: List[float] = []

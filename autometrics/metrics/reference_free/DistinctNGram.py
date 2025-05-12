@@ -141,15 +141,16 @@ $$
         self,
         n_values: List[int] = [1, 2, 3, 4],
         name: str = "DistinctNGram",
-        description: str = "Proportion of distinct n-grams (default n=1..4) as a measure of text diversity"
+        description: str = "Proportion of distinct n-grams (default n=1..4) as a measure of text diversity",
+        **kwargs
     ):
         submetric_names = [f"distinct_{n}" for n in n_values]
-        super().__init__(name, description, submetric_names=submetric_names)
+        super().__init__(name, description, submetric_names=submetric_names, n_values=n_values, **kwargs)
         self.n_values = n_values
         # Ensure punkt tokenizer is available
         nltk.download('punkt', quiet=True)
 
-    def calculate(
+    def _calculate_impl(
         self,
         input_text: str,
         output: str,

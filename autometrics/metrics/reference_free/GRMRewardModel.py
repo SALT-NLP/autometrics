@@ -143,7 +143,7 @@ where $h_l^{+}, h_l^{-}$ are the hidden states at layer $l$ for the preferred an
         batch_size: int = 1,
         persistent: bool = True
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, model_name=model_name, torch_dtype=torch_dtype, device_map=device_map, batch_size=batch_size, persistent=persistent)
         self.model_name = model_name
         self.torch_dtype = torch_dtype
         self.device_map = device_map
@@ -154,6 +154,8 @@ where $h_l^{+}, h_l^{-}$ are the hidden states at layer $l$ for the preferred an
         self.model = None
         if self.persistent:
             self._load_model()
+
+        self.exclude_from_cache_key('model_name', 'device_map', 'batch_size', 'persistent')
 
     def _load_model(self):
         """Load tokenizer and model into memory."""
@@ -176,7 +178,7 @@ where $h_l^{+}, h_l^{-}$ are the hidden states at layer $l$ for the preferred an
             self.model = None
             self.tokenizer = None
 
-    def calculate(self, input: str, output: str, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, **kwargs) -> float:
         """
         Score a single input-output pair.
         """
@@ -198,7 +200,7 @@ where $h_l^{+}, h_l^{-}$ are the hidden states at layer $l$ for the preferred an
             self._unload_model()
         return score
 
-    def calculate_batched(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
         """
         Score batches of input-output pairs.
         """

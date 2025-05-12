@@ -155,7 +155,7 @@ where:
         submetric_names: list[str] = ["ParaScoreFree_P", "ParaScoreFree_R", "ParaScoreFree_F"],
         **scorer_kwargs
     ):
-        super().__init__(name, description, submetric_names)
+        super().__init__(name, description, submetric_names, **scorer_kwargs)
 
         if "lang" not in scorer_kwargs:
             scorer_kwargs["lang"] = "en"
@@ -165,14 +165,14 @@ where:
             
         self.scorer = ParaScorer(**scorer_kwargs)
 
-    def calculate(self, input, output, **kwargs):
+    def _calculate_impl(self, input, output, **kwargs):
         cands = [output]
         srcs = [input]
         P, R, F = self.scorer.free_score(cands, srcs, **kwargs)
         # tensors of shape (1,)
         return float(P[0].cpu().item()), float(R[0].cpu().item()), float(F[0].cpu().item())
 
-    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         P, R, F = self.scorer.free_score(outputs, inputs, **kwargs)
         # return three lists
         return P.cpu().tolist(), R.cpu().tolist(), F.cpu().tolist()

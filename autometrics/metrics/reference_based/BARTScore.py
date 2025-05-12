@@ -162,7 +162,7 @@ BARTScore conceptualizes evaluation as a text generation problem, assessing how 
 - **Recall ($h \to r$)**: Assesses how easily the reference could be generated from the hypothesis.
 - **F-score ($r \leftrightarrow h$)**: Computes an average of Precision and Recall.
 
-Fine-tuning on downstream tasks (e.g., summarization, paraphrasing) and prompt engineering further enhance BARTScore’s adaptability to different domains.
+Fine-tuning on downstream tasks (e.g., summarization, paraphrasing) and prompt engineering further enhance BARTScore's adaptability to different domains.
 
 - **Metric Type:** Semantic Similarity  
 - **Range:** $(-\infty, 0]$ (log-probabilities, higher is better)  
@@ -292,20 +292,32 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
     def __init__(
         self, batch_size: int = 4, model: str = "facebook/bart-large-cnn"
     ):
+        # Get device
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
+        
+        # Pass all parameters explicitly to parent constructor for caching
         super().__init__(
             name=f"BARTScore_{model.split('/')[-1]}",
             description=(
                 "BARTScore is a reference-based metric for evaluating text quality "
                 "using a pre-trained BART model to compute likelihoods."
             ),
+            batch_size=batch_size,
+            model=model,
+            device=str(self.device)  # Include device as string
         )
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        
+        # Initialize scorer
         self.bart_scorer = BARTScorer(
             device=str(self.device), max_length=None, checkpoint=model
         )
         self.batch_size = batch_size
+        
+        # Exclude device from cache key as it doesn't affect results, just computation method
+        # Likewise, exclude batch_size as it doesn't affect results in theory
+        self.exclude_from_cache_key('device', 'batch_size')
 
     def calculate(self, input: str, output: str, references=None, **kwargs):
         refs = references or []

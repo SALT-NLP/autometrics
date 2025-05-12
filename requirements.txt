@@ -25,3 +25,4 @@ torchmetrics
 plotly
 sqlite==3.43.0
 statsmodels
+diskcache

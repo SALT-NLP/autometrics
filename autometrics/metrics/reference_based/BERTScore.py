@@ -183,31 +183,40 @@ Baseline rescaling adjusts scores to lie within [0, 1].
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
 
-    def __init__(self, model="roberta-large"):
+    def __init__(self, model="roberta-large", **kwargs):
         name = "BERTScore_" + model
         description = "BERTScore is a metric that computes the similarity between two sentences using a pre-trained BERT model. It is based on the cosine similarity between the embeddings of the two sentences."
         self.model = model
 
         submetrics = ["P", "R", "F"]
         
-        super().__init__(name, description, [f"BERTScore{submetric}_{model}" for submetric in submetrics])
+        # Pass model parameter explicitly to parent constructor for caching
+        super().__init__(
+            name=name, 
+            description=description, 
+            model=model,  # Pass model param explicitly for caching
+            submetric_names=[f"BERTScore{submetric}_{model}" for submetric in submetrics], 
+            **kwargs
+        )
         
-    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+        # No need to explicitly register parameters anymore - they're automatically included in cache key
+        
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
-        Calculate the BERTScore for a batch of inputs and outputs.
+        Actual implementation of BERTScore batch calculation
         """
         if references is None:
             references = [None] * len(inputs)
 
         return compute_bertscore(inputs, outputs, references, model=self.model, type="all")
     
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
-        Calculate the BERTScore for a single input/output pair.
+        Actual implementation of BERTScore for a single input/output pair
         """
         if references is None:
             references = []
 
-        p,r,f = compute_bertscore([input], [output], [references], model=self.model, type="all")
+        p, r, f = compute_bertscore([input], [output], [references], model=self.model, type="all")
         return p[0], r[0], f[0]
 

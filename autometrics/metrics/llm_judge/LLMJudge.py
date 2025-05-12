@@ -42,7 +42,23 @@ def grade_row(row, axis, llm, formatter, task_description):
     
 class LLMJudge(Metric):
     def __init__(self, name, description, model, dataset, evaluation_axis, formatter=None, task_description=None):
-        super().__init__(name, description)
+        # Convert model to string representation for caching if needed
+        if hasattr(model, 'model'):
+            model_str = str(model.model)
+        else:
+            model_str = str(model)
+            
+        # Pass all parameters explicitly to parent constructor for caching
+        super().__init__(
+            name=name, 
+            description=description,
+            model=model,  # The actual model object
+            model_str=model_str,  # String representation for caching
+            dataset=dataset,
+            evaluation_axis=evaluation_axis,
+            task_description=task_description
+        )
+        
         self.model = model
         if formatter is None:
             self.formatter = get_default_formatter(dataset)
@@ -52,6 +68,9 @@ class LLMJudge(Metric):
         self.task_description = task_description
         self.evaluation_axis = evaluation_axis
         
+        # Exclude dataset from cache key as it doesn't affect results directly
+        self.exclude_from_cache_key('dataset')
+
     def calculate(self, input, output, references=None, **kwargs):
         row = {self.dataset.get_input_column(): input, self.dataset.get_output_column(): output}
         if references is not None:

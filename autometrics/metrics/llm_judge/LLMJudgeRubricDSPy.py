@@ -60,7 +60,7 @@ class LLMJudgeRubricDSPy(Metric):
         # Exclude non-affecting parameters from cache key
         self.exclude_from_cache_key('dataset', 'judge_api_base')
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if self.task_description:
             input = self.task_description + "\n\n" + input
 
@@ -81,7 +81,7 @@ class LLMJudgeRubricDSPy(Metric):
         
         return int(score.group())
 
-    def calculate_batched(self, inputs, outputs, references=None, num_workers=64, **kwargs):
+    def _calculate_batched_impl(self, inputs, outputs, references=None, num_workers=64, **kwargs):
         """
         Calculate scores using multi-threading, ensuring results are in the correct order.
         Each input/output pair is processed individually in parallel, and results are ordered correctly.

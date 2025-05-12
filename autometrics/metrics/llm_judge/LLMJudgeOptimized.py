@@ -72,7 +72,7 @@ class LLMAsAJudge(dspy.Module):
 
 class LLMJudgeOptimized(Metric):
     # TODO: Better output prompt path
-    def __init__(self, name, description, model, train_dataset, formatter=None, task_description=None, target_column=None, eval_function_name='inverse_distance', custom_eval_function=None, load_prompt=None, optimize=True, output_prompt_path='output_prompt.dspy', metric_name=None):
+    def __init__(self, name, description, model, train_dataset, formatter=None, task_description=None, target_column=None, eval_function_name='inverse_distance', custom_eval_function=None, load_prompt=None, optimize=True, output_prompt_path='output_prompt.json', metric_name=None):
         self.eval_function = None
         if custom_eval_function is not None:
             self.eval_function = custom_eval_function
@@ -128,10 +128,10 @@ class LLMJudgeOptimized(Metric):
             self.program = optimized_program
 
 
-        super().__init__(name, description)
-        pass
+        super().__init__(name, description, model=model, train_dataset=train_dataset, formatter=formatter, task_description=task_description, target_column=target_column, eval_function_name=eval_function_name, custom_eval_function=custom_eval_function, load_prompt=load_prompt, optimize=optimize, output_prompt_path=output_prompt_path, metric_name=metric_name)
+        self.exclude_from_cache_key('output_prompt_path')
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         row = {self.dataset.get_input_column(): input, self.dataset.get_output_column(): output}
         if references is not None:
             for i, ref in enumerate(references):

@@ -127,10 +127,9 @@ class LLMJudgeNormalizeOptimized(Metric):
             self.program = optimized_program
 
 
-        super().__init__(name, description)
-        pass
+        super().__init__(name, description, model=model, train_dataset=train_dataset, formatter=formatter, task_description=task_description, target_column=target_column, eval_function_name=eval_function_name, custom_eval_function=custom_eval_function, load_prompt=load_prompt, optimize=optimize, output_prompt_path=output_prompt_path, metric_name=metric_name, attempts=attempts, examples_per_range=examples_per_range, seed=seed)
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         row = {self.dataset.get_input_column(): input, self.dataset.get_output_column(): output}
         if references is not None:
             for i, ref in enumerate(references):

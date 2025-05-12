@@ -155,16 +155,29 @@ where $1 \leq i \leq |s_1|$, $1 \leq j \leq |s_2|$, and typically $w_{ins} = w_{
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, weights=(1, 1, 1), processor=None, score_cutoff=None, aggregation="min"):
+
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, weights=(1, 1, 1), processor=None, score_cutoff=None, aggregation="min", **kwargs):
         metric_name = f"LevenshteinDistance_{aggregation}"
         description = "Computes the Levenshtein distance between the candidate and reference strings."
-        super().__init__(metric_name, description)
+
+        super().__init__(
+            name=metric_name,
+            description=description,
+            weights=weights,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.weights = weights
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
             return 0  # No references; assume zero distance.
         w = kwargs.get("weights", self.weights)
@@ -295,19 +308,30 @@ where $|s_1|$ and $|s_2|$ denote the lengths of the sequences $s_1$ and $s_2$, r
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, processor=None, score_cutoff=None, aggregation="max"):
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, processor=None, score_cutoff=None, aggregation="max", **kwargs):
         metric_name = f"LevenshteinRatio_{aggregation}"
         description = "Computes the normalized Levenshtein ratio between the candidate and reference strings."
-        super().__init__(metric_name, description)
+        super().__init__(
+            name=metric_name,
+            description=description,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
-            return 1.0  # Identical string yields ratio 1.
+            return 0  # No references; assume zero similarity.
         proc = kwargs.get("processor", self.processor)
         cutoff = kwargs.get("score_cutoff", self.score_cutoff)
+        # Compute ratio for each reference.
         ratios = [
             ratio(output, ref, processor=proc, score_cutoff=cutoff)
             for ref in references
@@ -434,21 +458,33 @@ where $\mathbf{1}\{ s_i \neq t_i \}$ is an indicator function that equals 1 if $
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, pad=True, processor=None, score_cutoff=None, aggregation="min"):
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, pad=True, processor=None, score_cutoff=None, aggregation="min", **kwargs):
         metric_name = f"HammingDistance_{aggregation}"
         description = "Computes the Hamming distance between the candidate and reference strings."
-        super().__init__(metric_name, description)
+        super().__init__(
+            name=metric_name,
+            description=description,
+            pad=pad,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.pad = pad
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
-            return 0
+            return 0  # No references; assume zero distance.
         pad = kwargs.get("pad", self.pad)
         proc = kwargs.get("processor", self.processor)
         cutoff = kwargs.get("score_cutoff", self.score_cutoff)
+        # Compute distance for each reference.
         distances = [
             hamming(output, ref, pad=pad, processor=proc, score_cutoff=cutoff)
             for ref in references
@@ -573,19 +609,30 @@ $$
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, processor=None, score_cutoff=None, aggregation="max"):
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, processor=None, score_cutoff=None, aggregation="max", **kwargs):
         metric_name = f"JaroSimilarity_{aggregation}"
         description = "Computes the Jaro similarity between the candidate and reference strings."
-        super().__init__(metric_name, description)
+        super().__init__(
+            name=metric_name,
+            description=description,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
-            return 0.0
+            return 0  # No references; assume zero similarity.
         proc = kwargs.get("processor", self.processor)
         cutoff = kwargs.get("score_cutoff", self.score_cutoff)
+        # Compute similarity for each reference.
         similarities = [
             jaro(output, ref, processor=proc, score_cutoff=cutoff)
             for ref in references
@@ -729,23 +776,35 @@ where:
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, prefix_weight=0.1, processor=None, score_cutoff=None, aggregation="max"):
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, prefix_weight=0.1, processor=None, score_cutoff=None, aggregation="max", **kwargs):
         metric_name = f"JaroWinklerSimilarity_{aggregation}"
         description = "Computes the Jaro-Winkler similarity between the candidate and reference strings."
-        super().__init__(metric_name, description)
+        super().__init__(
+            name=metric_name,
+            description=description,
+            prefix_weight=prefix_weight,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.prefix_weight = prefix_weight
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
-            return 0.0
-        prefix_weight = kwargs.get("prefix_weight", self.prefix_weight)
+            return 0  # No references; assume zero similarity.
+        weight = kwargs.get("prefix_weight", self.prefix_weight)
         proc = kwargs.get("processor", self.processor)
         cutoff = kwargs.get("score_cutoff", self.score_cutoff)
+        # Compute similarity for each reference.
         similarities = [
-            jaro_winkler(output, ref, prefix_weight=prefix_weight, processor=proc, score_cutoff=cutoff)
+            jaro_winkler(output, ref, prefix_weight=weight, processor=proc, score_cutoff=cutoff)
             for ref in references
         ]
         return _aggregate(similarities, self.aggregation)
@@ -878,19 +937,26 @@ Where:
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, aggregation: str = "min"):
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, aggregation: str = "min", **kwargs):
         metric_name = f"JaccardDistance_{aggregation}"
-        description = "Jaccard distance between candidate and reference strings using NLTK"
-        super().__init__(metric_name, description)
+        description = "Computes the Jaccard distance between the candidate and reference strings."
+        super().__init__(
+            name=metric_name,
+            description=description,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
-        """Compute Jaccard distance between output and each reference and aggregate."""
-        if not references:
-            return 0.0
-        # Treat strings as sets of characters
-        distances = []
-        for ref in references:
-            dist = jaccard_distance(set(output), set(ref))
-            distances.append(dist)
+    def _calculate_impl(self, input, output, references=None, **kwargs):
+        if references is None or len(references) == 0:
+            return 0  # No references; assume zero distance.
+        # Compute distance for each reference.
+        distances = [
+            jaccard_distance(set(output.split()), set(ref.split()))
+            for ref in references
+        ]
         return _aggregate(distances, self.aggregation)

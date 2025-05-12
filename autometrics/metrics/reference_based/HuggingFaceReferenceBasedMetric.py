@@ -12,9 +12,18 @@ class HuggingFaceReferenceBasedMetric(ReferenceBasedMetric):
         description: str,
         metric_id: str,
         score_key: str = "score",
-        load_kwargs: dict = None
+        load_kwargs: dict = None,
+        **kwargs
     ):
-        super().__init__(name, description)
+        # Pass ALL parameters to parent constructor
+        super().__init__(
+            name=name,
+            description=description,
+            metric_id=metric_id,
+            score_key=score_key,
+            load_kwargs=load_kwargs,
+            **kwargs
+        )
         self.metric_id = metric_id
         self.score_key = score_key
         self.load_kwargs = load_kwargs or {}
@@ -24,7 +33,7 @@ class HuggingFaceReferenceBasedMetric(ReferenceBasedMetric):
         if self.metric is None:
             self.metric = load(self.metric_id, **self.load_kwargs)
 
-    def calculate(self, input: str, output: str, references=None, **kwargs):
+    def _calculate_impl(self, input: str, output: str, references=None, **kwargs):
         self._load_metric()
         # Expect references as list of strings
         refs = references if isinstance(references[0], list) or isinstance(references[0], tuple) else references
@@ -33,7 +42,7 @@ class HuggingFaceReferenceBasedMetric(ReferenceBasedMetric):
         # broadcast scalar to single entry
         return float(val) if not isinstance(val, (list, tuple)) else float(val[0])
 
-    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
         Batch evaluation with probe: test first two samples for vectorization, then only compute remainder.
         """
@@ -60,13 +69,15 @@ class HuggingFaceReferenceBasedMetric(ReferenceBasedMetric):
                             scores.extend([float(v) for v in val_rest])
                         else:
                             # fallback for each remaining
-                            for out, ref in zip(rest_preds, rest_refs):
-                                scores.append(self.calculate(None, out, ref, **kwargs))
+                            for i, (out, ref) in enumerate(zip(rest_preds, rest_refs)):
+                                # Use the parent's calculate method to leverage caching
+                                scores.append(super().calculate(inputs[i+2] if i+2 < len(inputs) else None, out, ref, **kwargs))
                     return scores
             except Exception:
                 pass
         # Fallback to per-sample for entire batch
         scores = []
-        for inp, out, ref in zip(inputs, outputs, refs):
-            scores.append(self.calculate(inp, out, ref, **kwargs))
+        for i, (inp, out, ref) in enumerate(zip(inputs, outputs, refs)):
+            # Use the parent's calculate method to leverage caching
+            scores.append(super().calculate(inp, out, ref, **kwargs))
         return scores 

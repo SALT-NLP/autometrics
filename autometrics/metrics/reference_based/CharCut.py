@@ -141,6 +141,15 @@ A score of 0 indicates perfect match; 1 indicates maximal divergence.
         description: str = "CharCut metric computing character-level cuts for MT.",
         metric_id: str = "charcut",
         score_key: str = "charcut_mt",
-        load_kwargs: dict = None
+        load_kwargs: dict = None,
+        **kwargs
     ):
-        super().__init__(name, description, metric_id, score_key, load_kwargs) 
+        # Pass ALL parameters to parent constructor
+        super().__init__(
+            name=name,
+            description=description,
+            metric_id=metric_id,
+            score_key=score_key,
+            load_kwargs=load_kwargs,
+            **kwargs
+        ) 

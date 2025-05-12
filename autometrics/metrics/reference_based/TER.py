@@ -134,7 +134,7 @@ Where:
         super().__init__(name, description)
         self.metric = ter()
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate the metric
         """

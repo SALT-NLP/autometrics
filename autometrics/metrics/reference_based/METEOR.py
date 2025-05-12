@@ -154,7 +154,7 @@ $$
                  description: str = "METEOR score for machine translation evaluation (NLTK)"):
         super().__init__(name, description)
 
-    def calculate(self,
+    def _calculate_impl(self,
                   input: str,
                   output: str,
                   references: Union[List[str], str],

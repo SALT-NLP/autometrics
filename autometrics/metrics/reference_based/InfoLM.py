@@ -109,7 +109,7 @@ These divergences are computed over distributions derived from MLM logits, optio
 ## Related Metrics
 
 - **BERTScore:** Embedding-based similarity metric that compares contextual token embeddings using cosine similarity  
-- **MoverScore:** Uses Earth Mover’s Distance over contextual embeddings  
+- **MoverScore:** Uses Earth Mover's Distance over contextual embeddings  
 - **BLEURT:** Supervised metric leveraging BERT with task-specific fine-tuning
 
 ## Further Reading
@@ -163,7 +163,7 @@ These divergences are computed over distributions derived from MLM logits, optio
         self.num_threads = num_threads
         self.verbose = verbose
 
-    def calculate(self, input: str, output: str, references=None, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
         """
         Compute InfoLM score for one hypothesis-reference pair.
         """

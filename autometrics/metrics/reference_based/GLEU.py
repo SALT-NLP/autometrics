@@ -27,7 +27,7 @@ def sentence_gleu(references, hypothesis, min_len=1, max_len=4):
 		Stephan Gouws, Yoshikiyo Kato, Taku Kudo, Hideto Kazawa, Keith Stevens,
 		George Kurian, Nishant Patil, Wei Wang, Cliff Young, Jason Smith,
 		Jason Riesa, Alex Rudnick, Oriol Vinyals, Greg Corrado, Macduff Hughes,
-		Jeffrey Dean. (2016) Google’s Neural Machine Translation System:
+		Jeffrey Dean. (2016) Google's Neural Machine Translation System:
 		Bridging the Gap between Human and Machine Translation.
 		eprint arXiv:1609.08144. https://arxiv.org/pdf/1609.08144v2.pdf
 		Retrieved on 27 Oct 2016.
@@ -289,7 +289,7 @@ The final score is symmetrical with respect to hypothesis and reference, making 
 ## Further Reading
 
 - **Papers:**  
-  - [Google’s Neural Machine Translation System (Wu et al., 2016)](https://arxiv.org/pdf/1609.08144v2.pdf)  
+  - [Google's Neural Machine Translation System (Wu et al., 2016)](https://arxiv.org/pdf/1609.08144v2.pdf)  
 
 - **Blogs/Tutorials:**  
   - Needs more information  
@@ -315,12 +315,15 @@ The final score is symmetrical with respect to hypothesis and reference, making 
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
 
-	def __init__(self, name="GLEU", description="GLEU is a sentence-level metric that computes the minimum of precision and recall of n-grams.  It is meant to resolve some of the issues with BLEU when used at the sentence level."):
-		super().__init__(name, description)
+	# GLEU is fast enough without caching
+	DEFAULT_USE_CACHE = False
+
+	def __init__(self, name="GLEU", description="GLEU is a sentence-level metric that computes the minimum of precision and recall of n-grams.  It is meant to resolve some of the issues with BLEU when used at the sentence level.", **kwargs):
+		super().__init__(name, description, **kwargs)
 		
-	def calculate(self, input, output, references=None, **kwargs):
+	def _calculate_impl(self, input, output, references=None, **kwargs):
 		"""
-        Calculate the metric
+		Actual implementation of the GLEU metric
 		"""
 		if references is None:
 			references = [] 

@@ -168,4 +168,11 @@ where $c$ is a scaling factor (default: 5), and AUC is the area under the curve 
             score_key="mauve",
             load_kwargs={},
         )
-        self.persistent = persistent 
+        self.persistent = persistent
+        self.exclude_from_cache_key("persistent")
+        
+    def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
+        """
+        Compute MAUVE score for one example.
+        """
+        return super()._calculate_impl(input, output, references, **kwargs) 

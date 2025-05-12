@@ -228,7 +228,7 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
         device: str = 'cuda',
         persistent: bool = True
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, model_name=model_name, alpha=alpha, batch_size=batch_size, max_input_length=max_input_length, device=device, persistent=persistent)
         self.model_name = model_name
         self.alpha = alpha
         self.batch_size = batch_size
@@ -239,6 +239,8 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
         self.model = None
         if self.persistent:
             self._initialize_metric()
+
+        self.exclude_from_cache_key('model_name', 'batch_size', 'device', 'persistent')
 
     def _initialize_metric(self):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
@@ -271,15 +273,15 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
             return_tensors='pt', max_length=self.max_input_length
         ).to(self.device)
 
-    def calculate(self, input: str, output: str, references: Union[List[str], str], **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, references: Union[List[str], str], **kwargs) -> float:
         # Delegate to batched
         refs = references if isinstance(references, list) else [references]
-        score = self.calculate_batched([input], [output], [refs], **kwargs)[0]
+        score = self._calculate_batched_impl([input], [output], [refs], **kwargs)[0]
         if not self.persistent:
             self._unload_model()
         return score
 
-    def calculate_batched(self,
+    def _calculate_batched_impl(self,
                           inputs: List[str],
                           outputs: List[str],
                           references: List[Union[List[str], str]],

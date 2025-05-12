@@ -138,12 +138,13 @@ Where:
     def __init__(self,
                  name: str = "iBLEU",
                  description: str = "iBLEU metric combining BLEU score to references and a self-BLEU penalty for diversity.",
-                 alpha: float = 0.9):
-        super().__init__(name, description)
+                 alpha: float = 0.9,
+                 **kwargs):
+        super().__init__(name, description, alpha=alpha, **kwargs)
         self.metric = bleu()
         self.alpha = alpha
 
-    def calculate(self, input: str, output: str, references=None, alpha: float = None, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, references=None, alpha: float = None, **kwargs) -> float:
         """
         Calculate the iBLEU score for a hypothesis.
 

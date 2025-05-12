@@ -13,11 +13,11 @@ NIST is an automatic evaluation metric for machine translation that measures n-g
 
 NIST (National Institute of Standards and Technology) is a reference-based evaluation metric designed to measure the quality of machine translation outputs. It modifies BLEU in two important ways:
 
-1. **Informativeness Weighting**: Rather than giving equal weight to all matched n-grams, NIST emphasizes rarer (and thus more informative) n-grams. The intuition is that correct generation of uncommon phrases like “interesting calculations” should be rewarded more than very frequent ones like “on the”.
+1. **Informativeness Weighting**: Rather than giving equal weight to all matched n-grams, NIST emphasizes rarer (and thus more informative) n-grams. The intuition is that correct generation of uncommon phrases like "interesting calculations" should be rewarded more than very frequent ones like "on the".
 
-2. **Modified Brevity Penalty**: BLEU’s brevity penalty is replaced with a smoother version that reduces the sensitivity of the score to minor length differences between system output and reference translations. This avoids disproportionately penalizing outputs that are valid but slightly shorter than references.
+2. **Modified Brevity Penalty**: BLEU's brevity penalty is replaced with a smoother version that reduces the sensitivity of the score to minor length differences between system output and reference translations. This avoids disproportionately penalizing outputs that are valid but slightly shorter than references.
 
-The NIST score is computed as an arithmetic mean over n-gram information contributions, in contrast to BLEU’s geometric mean of n-gram precisions.
+The NIST score is computed as an arithmetic mean over n-gram information contributions, in contrast to BLEU's geometric mean of n-gram precisions.
 
 - **Metric Type:** Surface-Level Similarity  
 - **Range:** Unbounded, typically non-negative and upper-bounded by dataset characteristics  
@@ -114,7 +114,7 @@ where $\beta$ is a constant (typically chosen so that penalty = 0.5 when $L_\tex
 ## Further Reading
 
 - **Papers:**  
-  - Doddington, George. “Automatic Evaluation of Machine Translation Quality Using N-gram Co-Occurrence Statistics.” *HLT 2002*.  
+  - Doddington, George. "Automatic Evaluation of Machine Translation Quality Using N-gram Co-Occurrence Statistics." *HLT 2002*.  
   - [NIST MT Evaluations](https://www.nist.gov/speech/tests/mt)
 
 - **Blogs/Tutorials:**  
@@ -149,10 +149,10 @@ where $\beta$ is a constant (typically chosen so that penalty = 0.5 when $L_\tex
                  name: str = "NIST",
                  description: str = "NIST score for machine translation (NLTK implementation).",
                  n: int = 5):
-        super().__init__(name, description)
+        super().__init__(name, description, n=n)
         self.default_n = n
 
-    def calculate(self, input: str, output: str, references=None, n=None, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, references=None, n=None, **kwargs) -> float:
         """
         Calculate the NIST score for a single hypothesis and its references.
 

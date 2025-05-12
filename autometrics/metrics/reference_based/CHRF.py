@@ -143,11 +143,16 @@ Portions of this metric card were drafted with assistance from OpenAI's ChatGPT,
 - **Contact:** mryan0@stanford.edu
     """
 
-    def __init__(self, name="CHRF", description="chrF++ is a metric for evaluating machine translation quality that uses character and word n-gram F-scores to assess similarity between translations and references. It captures both fine-grained character-level details and word-level structure, making it effective for languages with rich morphology."):
-        super().__init__(name, description)
+    def __init__(self, name="CHRF", description="chrF++ is a metric for evaluating machine translation quality that uses character and word n-gram F-scores to assess similarity between translations and references. It captures both fine-grained character-level details and word-level structure, making it effective for languages with rich morphology.", **kwargs):
+        # Pass ALL parameters to parent constructor
+        super().__init__(
+            name=name,
+            description=description,
+            **kwargs
+        )
         self.metric = chrf()
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate the metric
         """

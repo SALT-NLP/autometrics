@@ -12,9 +12,19 @@ class HuggingFaceReferenceFreeMetric(ReferenceFreeMetric):
         metric_id: str,
         score_key: str = None,
         load_kwargs: dict = None,
-        compute_kwargs: dict = None
+        compute_kwargs: dict = None,
+        **kwargs
     ):
-        super().__init__(name, description)
+        # Pass ALL parameters to parent constructor
+        super().__init__(
+            name=name,
+            description=description,
+            metric_id=metric_id,
+            score_key=score_key,
+            load_kwargs=load_kwargs,
+            compute_kwargs=compute_kwargs,
+            **kwargs
+        )
         self.metric_id = metric_id
         self.score_key = score_key
         self.load_kwargs = load_kwargs or {}
@@ -25,7 +35,7 @@ class HuggingFaceReferenceFreeMetric(ReferenceFreeMetric):
         if self.metric is None:
             self.metric = load(self.metric_id, **self.load_kwargs)
 
-    def calculate(self, input_text: str, output: str, references=None, **kwargs) -> float:
+    def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs) -> float:
         self._load_metric()
         # single prediction
         compute_args = {**self.compute_kwargs, **kwargs, 'predictions': [output]}
@@ -36,7 +46,7 @@ class HuggingFaceReferenceFreeMetric(ReferenceFreeMetric):
             return float(val[0])
         return float(val)
 
-    def calculate_batched(self, inputs, outputs, references=None, **kwargs) -> list:
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs) -> list:
         self._load_metric()
         scores = []
         # Try vectorized compute for first two items
@@ -58,15 +68,16 @@ class HuggingFaceReferenceFreeMetric(ReferenceFreeMetric):
                         if isinstance(val_rest, (list, tuple)) and len(val_rest) == len(rest_preds):
                             scores.extend([float(v) for v in val_rest])
                         else:
-                            for out in rest_preds:
-                                scores.append(self.calculate(None, out, None, **kwargs))
+                            # fallback for each remaining
+                            for i, out in enumerate(rest_preds):
+                                # Use the parent's calculate method to leverage caching
+                                scores.append(super().calculate(inputs[i+2] if i+2 < len(inputs) else None, out, None, **kwargs))
                     return scores
             except Exception:
                 pass
-        # Fallback to full batch or scalar broadcast
-        compute_args = {**self.compute_kwargs, **kwargs, 'predictions': outputs}
-        result = self.metric.compute(**compute_args)
-        val = result.get(self.score_key)
-        if isinstance(val, (list, tuple)):
-            return [float(v) for v in val]
-        return [float(val)] * len(outputs) 
+        # Fallback to per-sample for entire batch
+        scores = []
+        for i, (inp, out) in enumerate(zip(inputs, outputs)):
+            # Use the parent's calculate method to leverage caching
+            scores.append(super().calculate(inp, out, None, **kwargs))
+        return scores 

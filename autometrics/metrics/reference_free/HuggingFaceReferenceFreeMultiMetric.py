@@ -14,9 +14,20 @@ class HuggingFaceReferenceFreeMultiMetric(ReferenceFreeMultiMetric):
         metric_id: str,
         submetric_keys: List[str],
         load_kwargs: dict = None,
-        compute_kwargs: dict = None
+        compute_kwargs: dict = None,
+        **kwargs
     ):
-        super().__init__(name, description, submetric_names=submetric_keys)
+        # Pass ALL parameters to parent constructor
+        super().__init__(
+            name=name,
+            description=description,
+            submetric_names=submetric_keys,
+            metric_id=metric_id,
+            submetric_keys=submetric_keys,
+            load_kwargs=load_kwargs,
+            compute_kwargs=compute_kwargs,
+            **kwargs
+        )
         self.metric_id = metric_id
         self.submetric_keys = submetric_keys
         self.load_kwargs = load_kwargs or {}
@@ -27,7 +38,7 @@ class HuggingFaceReferenceFreeMultiMetric(ReferenceFreeMultiMetric):
         if self.metric is None:
             self.metric = load(self.metric_id, **self.load_kwargs)
 
-    def calculate(self, input_text: str, output: str, references=None, **kwargs):
+    def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs):
         """
         Compute submetrics for a single output by calling the underlying HF evaluate metric.
         """
@@ -53,52 +64,74 @@ class HuggingFaceReferenceFreeMultiMetric(ReferenceFreeMultiMetric):
                 values.append(float(val))
         return tuple(values)
 
-    def calculate_batched(self, inputs: List[str], outputs: List[str], references=None, **kwargs):
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], references=None, **kwargs):
         """
         Batch evaluation with fallback: test on first 2 outputs; if vectorized runs (returns lists of length 2), apply to full batch,
         else fallback to per-sample calculate loop.
         """
         self._load_metric()
-        refs = references if references is not None else [None] * len(outputs)
-        # Try vectorized compute for first two items
-        sub_results = [[] for _ in self.submetric_keys]
+        
+        # For empty batch, return empty list of tuples
+        if not outputs:
+            return []
+            
+        # Try vectorized compute for first two items to test if metric supports batching
         if len(outputs) >= 2:
             try:
-                # Compute first two
-                small_preds = outputs[:2]
-                small_args = {**self.compute_kwargs, **kwargs, 'predictions': small_preds}
+                # Test with first two items
+                test_preds = outputs[:2]
+                args = {'predictions': test_preds}
                 if references is not None:
-                    small_args['references'] = refs[:2]
-                small_res = self.metric.compute(**small_args)
-                # Validate and store first two
-                ok = True
-                for idx, key in enumerate(self.submetric_keys):
-                    val2 = small_res.get(key)
-                    if not (isinstance(val2, (list, tuple)) and len(val2) == 2):
-                        ok = False
+                    if isinstance(references[0], list) and not isinstance(references[0][0], str):
+                        # list of lists of references
+                        test_refs = references[:2]
+                        args['references'] = test_refs
+                    else:
+                        # single list of references
+                        args['references'] = [references[:2]]
+                args.update(self.compute_kwargs)
+                args.update(kwargs)
+                result = self.metric.compute(**args)
+                
+                # Check if result contains lists of length 2 for all keys
+                all_batch_results = True
+                for key in self.submetric_keys:
+                    val = result.get(key)
+                    if not isinstance(val, (list, tuple)) or len(val) != 2:
+                        all_batch_results = False
                         break
-                    sub_results[idx].extend([float(v) for v in val2])
-                if ok:
-                    # Compute remaining items
-                    if len(outputs) > 2:
-                        rest_preds = outputs[2:]
-                        rest_args = {**self.compute_kwargs, **kwargs, 'predictions': rest_preds}
-                        if references is not None:
-                            rest_args['references'] = refs[2:]
-                        rest_res = self.metric.compute(**rest_args)
-                        for idx, key in enumerate(self.submetric_keys):
-                            val_rest = rest_res.get(key)
-                            if isinstance(val_rest, (list, tuple)) and len(val_rest) == len(rest_preds):
-                                sub_results[idx].extend([float(v) for v in val_rest])
-                            else:
-                                for out in rest_preds:
-                                    sub_results[idx].append(self.calculate(None, out, None, **kwargs)[idx])
-                    return sub_results
+                
+                if all_batch_results:
+                    # Metric supports batching, apply to full batch
+                    full_args = {'predictions': outputs}
+                    if references is not None:
+                        if isinstance(references[0], list) and not isinstance(references[0][0], str):
+                            full_args['references'] = references
+                        else:
+                            full_args['references'] = [references]
+                    full_args.update(self.compute_kwargs)
+                    full_args.update(kwargs)
+                    full_result = self.metric.compute(**full_args)
+                    
+                    # Prepare list of tuples in same order as submetric_keys
+                    batch_results = []
+                    for i in range(len(outputs)):
+                        item_values = []
+                        for key in self.submetric_keys:
+                            val = full_result.get(key)
+                            item_values.append(float(val[i]))
+                        batch_results.append(tuple(item_values))
+                    return batch_results
             except Exception:
+                # Vectorized approach failed, fallback to per-item
                 pass
-        # Fallback: per-sample
-        for inp, out, ref in zip(inputs, outputs, refs):
-            vals = self.calculate(inp, out, ref, **kwargs)
-            for idx, v in enumerate(vals):
-                sub_results[idx].append(v)
-        return sub_results 
+                
+        # Fallback to per-sample calculation
+        results = []
+        for i, (inp, out) in enumerate(zip(inputs, outputs)):
+            ref = None
+            if references is not None:
+                ref = references[i] if i < len(references) else None
+            # Use the parent's calculate method to leverage caching
+            results.append(super().calculate(inp, out, ref, **kwargs))
+        return results 

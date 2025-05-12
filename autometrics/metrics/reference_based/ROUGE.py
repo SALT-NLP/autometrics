@@ -208,7 +208,7 @@ ROUGE-LSum extends ROUGE-L to the summary level by treating newlines as sentence
         
         super().__init__(name, description, self.combinations)
     
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate ROUGE scores for the given input and output.
         """

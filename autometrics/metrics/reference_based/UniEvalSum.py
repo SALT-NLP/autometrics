@@ -188,7 +188,7 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
       results = [result[submetric] for submetric in self.submetrics]
       return results
     
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate UniEvalSum scores for the given input and output.
         """
@@ -206,7 +206,7 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
         
         return self._parse_unieval(eval_scores[0])
     
-    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
         Calculate UniEvalSum scores for the given inputs and outputs in batches.
         """

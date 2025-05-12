@@ -177,12 +177,14 @@ The final score is the maximum $F$ across all references $R_i$.
         max_order=4,
         n_jobs=-1,
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, lambda_weight=lambda_weight, smoothing=smoothing, max_order=max_order)
         self.lambda_weight = lambda_weight
         self.smoothing = smoothing
         self.max_order = max_order
         self.n_jobs = mp.cpu_count() if n_jobs < 0 else n_jobs
-
+        
+        self.exclude_from_cache_key("n_jobs")
+        
     def tokenize(self, text: str):
         if not text:
             return []
@@ -265,6 +267,9 @@ The final score is the maximum $F$ across all references $R_i$.
         p = self._precision(pred_toks, ref_tok_lists, table_values)
         r = self._recall(pred_toks, ref_tok_lists, table_values)
         return 2 * p * r / (p + r + 1e-8)
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):
+        return self.parent(input, output, references or [])
 
     def calculate(self, input, output, references=None, **kwargs):
         return self.parent(input, output, references or [])

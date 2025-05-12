@@ -149,17 +149,16 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
         submetric_names: list[str] = ["ParaScore_P", "ParaScore_R", "ParaScore_F"],
         **scorer_kwargs
     ):
-        super().__init__(name, description, submetric_names)
-
         if "lang" not in scorer_kwargs:
             scorer_kwargs["lang"] = "en"
 
         if "model_type" not in scorer_kwargs:
             scorer_kwargs["model_type"] = "bert-base-uncased"
 
+        super().__init__(name, description, submetric_names, model_type=scorer_kwargs["model_type"], lang=scorer_kwargs["lang"], **scorer_kwargs)
         self.scorer = ParaScorer(**scorer_kwargs)
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if not references:
             raise ValueError("ParaScore (reference-based) requires `references`.")
         # singleton batch

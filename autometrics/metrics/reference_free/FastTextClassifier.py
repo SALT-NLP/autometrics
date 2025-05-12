@@ -21,9 +21,19 @@ class FastTextClassifier(ReferenceFreeMetric):
         model_url: str,
         negative_label: str,
         persistent: bool = True,
-        data_dir: str = None
+        data_dir: str = None,
+        **kwargs
     ):
-        super().__init__(name, description)
+        # Pass ALL parameters to parent constructor
+        super().__init__(
+            name=name,
+            description=description,
+            model_url=model_url,
+            negative_label=negative_label,
+            persistent=persistent,
+            data_dir=data_dir,
+            **kwargs
+        )
         self.model_url = model_url
         self.negative_label = negative_label
         self.persistent = persistent
@@ -40,6 +50,10 @@ class FastTextClassifier(ReferenceFreeMetric):
         os.makedirs(base_dir, exist_ok=True)
         self.model_path = os.path.join(base_dir, os.path.basename(self.model_url))
         self.model = None
+        
+        # Exclude parameters that don't affect results from cache key
+        self.exclude_from_cache_key('persistent', 'data_dir')
+        
         if self.persistent:
             self._load_model()
 
@@ -60,7 +74,7 @@ class FastTextClassifier(ReferenceFreeMetric):
         # fastText has no explicit unload; dereference
         self.model = None
 
-    def calculate(self, input_text: str, output: str, references=None, **kwargs) -> float:
+    def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs) -> float:
         # Lazy load if needed
         if self.model is None:
             self._load_model()
@@ -74,20 +88,22 @@ class FastTextClassifier(ReferenceFreeMetric):
             self._unload_model()
         return score 
     
-    def calculate_batched(self, input_texts: List[str], output_texts: List[str], references=None, **kwargs) -> List[float]:
+    def _calculate_batched_impl(self, input_texts: List[str], output_texts: List[str], references=None, **kwargs) -> List[float]:
         # Lazy load if needed
         if self.model is None:
             self._load_model()
-
-        if references is None:
-            references = [None] * len(input_texts)
         
-        scores = []
-        for input_text, output_text, reference in zip(input_texts, output_texts, references):
-            score = self.calculate(input_text, output_text, reference)
-            scores.append(score)
-
+        results = []
+        for output in output_texts:
+            text = output.replace("\n", " ")
+            labels, probs = self.model.predict(text)
+            label = labels[0].replace("__label__", "")
+            score = float(probs[0])
+            if label == self.negative_label:
+                score = -score
+            results.append(score)
+            
         if not self.persistent:
             self._unload_model()
-
-        return scores
+            
+        return results

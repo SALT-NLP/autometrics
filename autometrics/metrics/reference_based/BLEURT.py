@@ -145,9 +145,21 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         model_name: str = "lucadiliello/BLEURT-20",
         torch_dtype = torch.float32,
         batch_size: int = 2,
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description)
+        # Pass ALL parameters to parent constructor
+        super().__init__(
+            name=name,
+            description=description,
+            model_name=model_name,
+            torch_dtype=torch_dtype,
+            batch_size=batch_size,
+            persistent=persistent,
+            **kwargs
+        )
+        
+        # Store parameters as instance variables
         self.model_name = model_name
         self.torch_dtype = torch_dtype
         self.batch_size = batch_size
@@ -156,6 +168,10 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         self.config = None
         self.tokenizer = None
         self.model = None
+        
+        # Exclude parameters that don't affect results from cache key
+        self.exclude_from_cache_key('persistent', 'batch_size', 'device')
+        
         if self.persistent:
             self._load_model()
 
@@ -179,7 +195,7 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
             self.tokenizer = None
             self.config = None
 
-    def calculate(self,
+    def _calculate_impl(self,
                   input: str,
                   output: str,
                   references=None,
@@ -204,7 +220,7 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
             self._unload_model()
         return score
 
-    def calculate_batched(self,
+    def _calculate_batched_impl(self,
                           inputs_list: List[str],
                           outputs_list: List[str],
                           references=None,

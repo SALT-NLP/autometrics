@@ -36,7 +36,7 @@ $$
 \text{LENS}(C, S, R) = \sum _{k=1}^K w_k \cdot f_k(C, S, R)
 $$
 
-where $f_k$ is the $k$-th expert head’s output.
+where $f_k$ is the $k$-th expert head's output.
 
 ### Inputs and Outputs
 
@@ -144,7 +144,7 @@ where $f_k$ is the $k$-th expert head’s output.
         devices: List[int] = None,
         persistent: bool = True
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, model_id=model_id, rescale=rescale, batch_size=batch_size, devices=devices, persistent=persistent)
         self.model_id = model_id
         self.rescale = rescale
         self.batch_size = batch_size
@@ -153,6 +153,8 @@ where $f_k$ is the $k$-th expert head’s output.
         self.model = None
         if self.persistent:
             self._load_model()
+
+        self.exclude_from_cache_key("batch_size", "devices", "persistent")
 
     def _load_model(self):
         """Download checkpoint and load the LENS model."""
@@ -167,7 +169,7 @@ where $f_k$ is the $k$-th expert head’s output.
             torch.cuda.empty_cache()
             self.model = None
 
-    def calculate(self, input: str, output: str, references: List[str], **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, references: List[str], **kwargs) -> float:
         """
         Compute LENS score for one example.
         """
@@ -184,7 +186,7 @@ where $f_k$ is the $k$-th expert head’s output.
             self._unload_model()
         return result
 
-    def calculate_batched(
+    def _calculate_batched_impl(
         self,
         inputs: List[str],
         outputs: List[str],

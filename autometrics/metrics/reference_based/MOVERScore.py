@@ -25,7 +25,7 @@ class MOVERScore(ReferenceBasedMetric):
     """---
 # Metric Card for MoverScore
 
-MoverScore is a semantic similarity metric for evaluating generated text, leveraging contextualized embeddings (such as BERT) and Earth Mover’s Distance (EMD) to measure the alignment between system outputs and reference texts. It is designed to capture semantic similarity beyond lexical overlap and has been shown to achieve a high correlation with human judgments across tasks like machine translation, summarization, image captioning, and data-to-text generation.
+MoverScore is a semantic similarity metric for evaluating generated text, leveraging contextualized embeddings (such as BERT) and Earth Mover's Distance (EMD) to measure the alignment between system outputs and reference texts. It is designed to capture semantic similarity beyond lexical overlap and has been shown to achieve a high correlation with human judgments across tasks like machine translation, summarization, image captioning, and data-to-text generation.
 
 ## Metric Details
 
@@ -41,7 +41,7 @@ MoverScore measures text similarity by computing the minimum cost required to mo
   
 ### Formal Definition
 
-MoverScore extends **Word Mover’s Distance (WMD)** by incorporating contextualized embeddings. Given a generated sentence $x$ and a reference sentence $y$, let $x_n$ and $y_n$ represent their n-grams. The distance between these sentences is computed as:
+MoverScore extends **Word Mover's Distance (WMD)** by incorporating contextualized embeddings. Given a generated sentence $x$ and a reference sentence $y$, let $x_n$ and $y_n$ represent their n-grams. The distance between these sentences is computed as:
 
 $$
 \text{WMD}(x _{n}, y _{n}) = \min _{F} \sum _{i,j} C _{ij} F _{ij}
@@ -115,7 +115,7 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
   
 ## Related Metrics
 
-- **BERTScore:** Similar to MoverScore but relies on cosine similarity rather than Earth Mover’s Distance.
+- **BERTScore:** Similar to MoverScore but relies on cosine similarity rather than Earth Mover's Distance.
 - **BLEU, ROUGE:** Traditional surface-level n-gram overlap metrics, which MoverScore seeks to improve upon.
 - **CIDEr, METEOR:** Alternative semantic similarity-based evaluation metrics.
 
@@ -177,8 +177,8 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         name = "MOVERScore_" + model_name
         description = "MOVERScore is a metric that computes the similarity between two sentences using a pre-trained BERT model. It is based on the cosine similarity between the embeddings of the two sentences, and it uses the Earth Mover's Distance (EMD) to compute the distance between the two sets of embeddings."
         
-        super().__init__(name, description)
-
+        super().__init__(name, description, model_name=model_name, device=device)
+        self.exclude_from_cache_key("device")
 
     def truncate(self, tokens):
         if len(tokens) > self.tokenizer.model_max_length - 2:
@@ -370,7 +370,7 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
 
         return corpus_score
     
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate the metric
         """

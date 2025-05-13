@@ -49,10 +49,13 @@ class Metric(ABC):
             # Include seed in cache path if provided
             seed_suffix = f"_{seed}" if seed is not None else ""
             cache_path = os.path.join(cache_dir, f"{name}{seed_suffix}")
+            # Ensure cache_size_limit and cache_ttl have appropriate default values
+            size_limit = cache_size_limit if cache_size_limit is not None else 10e9  # Default to 10GB
+            ttl = cache_ttl if cache_ttl is not None else 0  # Default to no expiration (0)
             self._cache = Cache(
                 cache_path,
-                size_limit=cache_size_limit,  # Uses LRU eviction when limit is reached
-                timeout=cache_ttl             # Time-based expiration
+                size_limit=size_limit,  # Uses LRU eviction when limit is reached
+                timeout=ttl             # Time-based expiration
             )
 
     def exclude_from_cache_key(self, *param_names):

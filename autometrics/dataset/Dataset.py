@@ -329,7 +329,18 @@ class Dataset():
         df = self.get_dataframe()
         if seed:
             np.random.seed(seed)
-        subset_df = df.sample(n=size)
+            
+        # Cap the size to the number of rows in the dataframe to prevent sampling errors
+        actual_size = min(size, len(df))
+        if actual_size < size:
+            warnings.warn(f"Requested subset size {size} is larger than available data ({len(df)} rows). Using all available data.")
+            
+        # If we're using all data, no need to sample
+        if actual_size == len(df):
+            subset_df = df.copy()
+        else:
+            subset_df = df.sample(n=actual_size)
+            
         return Dataset(
             dataframe=subset_df,
             target_columns=self.target_columns,
@@ -356,7 +367,7 @@ class Dataset():
             model_id_column=self.model_id_column,
             input_column=self.input_column,
             output_column=self.output_column,
-            reference_columns=self.reference_columns.copy(),
+            reference_columns=self.reference_columns.copy() if self.reference_columns is not None else None,
             metrics=[metric for metric in self.metrics],
             task_description=self.task_description
         )

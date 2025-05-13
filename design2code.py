@@ -4,7 +4,11 @@ from autometrics.aggregator.regression import Ridge
 from autometrics.generator.LLMJudgeProposer import LLMJudgeProposer
 import dspy
 import litellm
-from autometrics.metrics.MetricBank import all_metrics
+# from autometrics.metrics.MetricBank import all_metrics
+from autometrics.metrics.reference_based.BLEU import BLEU
+from autometrics.metrics.reference_based.SARI import SARI
+
+all_metrics = [BLEU(), SARI()]
 
 litellm.suppress_debug_info = True
 
@@ -38,6 +42,8 @@ for target_column in dataset.target_columns:
 
 df = display_top_5_metrics_by_validation(dev, test, True)
 print(df)
+
+exit(0)
 df.to_csv("outputs/" + dataset.name + "_top_metrics.csv")
 
 # %%

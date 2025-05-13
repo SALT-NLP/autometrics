@@ -12,10 +12,10 @@ class Design2Code(PairwiseDataset):
 
         df = pd.DataFrame(ds['train'])
 
-        target_columns_1 = ["win1"]
-        target_columns_2 = ["win2"]
+        # Combine target columns into a single list
+        target_columns = ["win1", "win2"]
         ignore_columns = ["id", "ref_image", "ref_html", "model1", "model2", "image1", "image2", "html1", "html2", "win1", "win2", "tie"]
-        metric_columns_1, metric_columns_2 = [], []
+        metric_columns = []
 
         name = "Design2Code"
 
@@ -30,9 +30,18 @@ class Design2Code(PairwiseDataset):
 
         metrics = []
 
-        super().__init__(dataframe=df, target_columns_1=target_columns_1, target_columns_2=target_columns_2,
-                         ignore_columns=ignore_columns, metric_columns_1=metric_columns_1, metric_columns_2=metric_columns_2,
-                         name=name, data_id_column=data_id_column, model_id_column_1=model_id_column_1, model_id_column_2=model_id_column_2,
-                         input_column=input_column, output_column_1=output_column_1, output_column_2=output_column_2,
-                         reference_columns=reference_columns, metrics=metrics, task_description=task_description)
+        super().__init__(dataframe=df, 
+                         target_columns=target_columns,
+                         ignore_columns=ignore_columns, 
+                         metric_columns=metric_columns,
+                         name=name, 
+                         data_id_column=data_id_column, 
+                         model_id_column_1=model_id_column_1, 
+                         model_id_column_2=model_id_column_2,
+                         input_column=input_column, 
+                         output_column_1=output_column_1, 
+                         output_column_2=output_column_2,
+                         reference_columns=reference_columns, 
+                         metrics=metrics, 
+                         task_description=task_description)
 

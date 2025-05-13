@@ -165,4 +165,7 @@ cython_debug/
 /autometrics/dataset/datasets/evalgen/medical.csv
 /autometrics/dataset/datasets/evalgen/product.csv
 
+# Avoid committing Yijia's dataset
+/autometrics/dataset/datasets/cogym/cogym.csv
+
 .litellm_cache

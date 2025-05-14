@@ -1,0 +1,10 @@
+Total rows: 107
+Rows with NO missing values: 33
+Rows where ONLY agentFeedback is missing: 29
+Rows with outcomeRating but no outcome value: 0
+
+Overall average per rating type:
+agentRating            3.719626
+communicationRating    3.171875
+outcomeRating          3.703125
+Overall average across all ratings: 3.532

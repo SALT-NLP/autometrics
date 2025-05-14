@@ -169,3 +169,5 @@ cython_debug/
 /autometrics/dataset/datasets/cogym/cogym.csv
 
 .litellm_cache
+
+.autometrics_cache/

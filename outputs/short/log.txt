@@ -1,0 +1,158 @@
+2025-05-15 14:20:01,977 [short|init] RSS=704.2 MB
+2025-05-15 14:20:01,978 [short|before_create] RSS=704.2 MB
+2025-05-15 14:20:01,979 MEMORY [BERTScore.__init__ START model=roberta-large, persistent=False]: RAM 704.24 MB, GPU 0.00 MB
+2025-05-15 14:20:02,384 MEMORY [BERTScore.__init__ END model=roberta-large, persistent=False]: RAM 705.21 MB, GPU 0.00 MB
+2025-05-15 14:20:02,385 [short|after_create] RSS=705.2 MB
+2025-05-15 14:20:02,386 --- diff for short|after_create ---
+2025-05-15 14:20:02,386 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:636: size=1300 B (+1300 B), count=24 (+24), average=54 B
+2025-05-15 14:20:02,387 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:2431: size=1176 B (+1176 B), count=17 (+17), average=69 B
+2025-05-15 14:20:02,387 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:2438: size=980 B (+980 B), count=15 (+15), average=65 B
+2025-05-15 14:20:02,388 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:623: size=728 B (+728 B), count=8 (+8), average=91 B
+2025-05-15 14:20:02,389 /projects/m000076/mryan0/autometrics/autometrics/metrics/Metric.py:42: size=728 B (+728 B), count=2 (+2), average=364 B
+2025-05-15 14:20:02,389 [short|after_gen] RSS=705.2 MB
+2025-05-15 14:20:02,391 --- diff for short|after_gen ---
+2025-05-15 14:20:02,391 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:115: size=4640 B (+4640 B), count=58 (+58), average=80 B
+2025-05-15 14:20:02,392 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:193: size=2736 B (+2736 B), count=57 (+57), average=48 B
+2025-05-15 14:20:02,392 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:558: size=1584 B (+1528 B), count=29 (+28), average=55 B
+2025-05-15 14:20:02,393 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:2431: size=1128 B (+1128 B), count=16 (+16), average=70 B
+2025-05-15 14:20:02,393 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:2438: size=932 B (+932 B), count=14 (+14), average=67 B
+2025-05-15 14:20:02,404 [short|before_calc1] RSS=705.5 MB
+2025-05-15 14:20:02,410 MEMORY [BERTScore._calculate_impl START]: RAM 705.49 MB, GPU 0.00 MB
+2025-05-15 14:20:02,410 Model not loaded, calling _load_model
+2025-05-15 14:20:02,410 MEMORY [BERTScore._load_model START]: RAM 705.49 MB, GPU 0.00 MB
+2025-05-15 14:20:02,411 MEMORY [BERTScore._load_model END]: RAM 705.49 MB, GPU 0.00 MB
+2025-05-15 14:20:02,412 MEMORY [compute_bertscore START - 1 samples]: RAM 705.49 MB, GPU 0.00 MB
+2025-05-15 14:20:02,412 Input size: 67 chars, Output size: 71 chars, References size: 103 chars
+2025-05-15 14:20:02,413 MEMORY [compute_bertscore before bert_score.score call]: RAM 705.49 MB, GPU 0.00 MB
+2025-05-15 14:20:02,413 Calling bert_score.score with method=compare_to_reference, model=roberta-large
+2025-05-15 14:20:04,667 MEMORY [compute_bertscore after bert_score.score call]: RAM 805.20 MB, GPU 0.00 MB
+2025-05-15 14:20:04,667 compute_bertscore completed in 2.25 seconds
+2025-05-15 14:20:04,668 MEMORY [compute_bertscore END - 1 samples]: RAM 805.20 MB, GPU 0.00 MB
+2025-05-15 14:20:04,669 compute_bertscore completed in 2.26 seconds
+2025-05-15 14:20:04,669 Not persistent, unloading model
+2025-05-15 14:20:04,670 MEMORY [BERTScore._unload_model START]: RAM 805.20 MB, GPU 0.00 MB
+2025-05-15 14:20:04,849 MEMORY [BERTScore._unload_model END]: RAM 805.20 MB, GPU 0.00 MB
+2025-05-15 14:20:04,850 MEMORY [BERTScore._calculate_impl END]: RAM 805.20 MB, GPU 0.00 MB
+2025-05-15 14:20:04,868 [short|after_calc1] RSS=805.2 MB
+2025-05-15 14:20:04,983 --- diff for short|after_calc1 ---
+2025-05-15 14:20:04,983 <frozen importlib._bootstrap_external>:752: size=3952 KiB (+3952 KiB), count=19543 (+19543), average=207 B
+2025-05-15 14:20:04,984 <frozen abc>:106: size=206 KiB (+206 KiB), count=680 (+680), average=310 B
+2025-05-15 14:20:04,985 <frozen importlib._bootstrap_external>:1652: size=171 KiB (+171 KiB), count=469 (+469), average=372 B
+2025-05-15 14:20:04,985 <frozen importlib._bootstrap_external>:128: size=115 KiB (+115 KiB), count=687 (+687), average=172 B
+2025-05-15 14:20:04,986 <frozen importlib._bootstrap_external>:1644: size=100 KiB (+100 KiB), count=1720 (+1720), average=60 B
+2025-05-15 14:20:05,125 [short|before_calc2] RSS=805.2 MB
+2025-05-15 14:20:05,134 MEMORY [BERTScore._calculate_impl START]: RAM 805.21 MB, GPU 0.00 MB
+2025-05-15 14:20:05,134 Model not loaded, calling _load_model
+2025-05-15 14:20:05,135 MEMORY [BERTScore._load_model START]: RAM 805.21 MB, GPU 0.00 MB
+2025-05-15 14:20:05,136 MEMORY [BERTScore._load_model END]: RAM 805.21 MB, GPU 0.00 MB
+2025-05-15 14:20:05,136 MEMORY [compute_bertscore START - 1 samples]: RAM 805.21 MB, GPU 0.00 MB
+2025-05-15 14:20:05,137 Input size: 26 chars, Output size: 56 chars, References size: 83 chars
+2025-05-15 14:20:05,138 MEMORY [compute_bertscore before bert_score.score call]: RAM 805.21 MB, GPU 0.00 MB
+2025-05-15 14:20:05,138 Calling bert_score.score with method=compare_to_reference, model=roberta-large
+2025-05-15 14:20:06,748 MEMORY [compute_bertscore after bert_score.score call]: RAM 837.14 MB, GPU 0.00 MB
+2025-05-15 14:20:06,749 compute_bertscore completed in 1.61 seconds
+2025-05-15 14:20:06,750 MEMORY [compute_bertscore END - 1 samples]: RAM 837.14 MB, GPU 0.00 MB
+2025-05-15 14:20:06,750 compute_bertscore completed in 1.61 seconds
+2025-05-15 14:20:06,751 Not persistent, unloading model
+2025-05-15 14:20:06,752 MEMORY [BERTScore._unload_model START]: RAM 837.14 MB, GPU 0.00 MB
+2025-05-15 14:20:06,885 MEMORY [BERTScore._unload_model END]: RAM 836.16 MB, GPU 0.00 MB
+2025-05-15 14:20:06,886 MEMORY [BERTScore._calculate_impl END]: RAM 836.16 MB, GPU 0.00 MB
+2025-05-15 14:20:06,896 [short|after_calc2] RSS=827.9 MB
+2025-05-15 14:20:07,093 --- diff for short|after_calc2 ---
+2025-05-15 14:20:07,094 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/safetensors/torch.py:315: size=62.5 KiB (+25.3 KiB), count=1880 (+850), average=34 B
+2025-05-15 14:20:07,094 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:558: size=168 B (-2096 B), count=3 (-39), average=56 B
+2025-05-15 14:20:07,095 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/container.py:443: size=3015 B (+1532 B), count=71 (+36), average=42 B
+2025-05-15 14:20:07,096 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/transformers/tokenization_utils_base.py:1090: size=1400 B (+500 B), count=28 (+10), average=50 B
+2025-05-15 14:20:07,096 <frozen importlib._bootstrap_external>:1185: size=12.6 KiB (-495 B), count=151 (-11), average=86 B
+2025-05-15 14:20:07,239 MEMORY [BERTScore._unload_model START]: RAM 828.05 MB, GPU 0.00 MB
+2025-05-15 14:20:07,400 MEMORY [BERTScore._unload_model END]: RAM 828.05 MB, GPU 0.00 MB
+2025-05-15 14:20:07,401 [short|after_unload] RSS=828.0 MB
+2025-05-15 14:20:07,602 --- diff for short|after_unload ---
+2025-05-15 14:20:07,602 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:560: size=832 B (+248 B), count=6 (+2), average=139 B
+2025-05-15 14:20:07,603 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:423: size=832 B (+248 B), count=6 (+2), average=139 B
+2025-05-15 14:20:07,604 /users/mryan0/.conda/envs/autometrics/lib/python3.12/logging/__init__.py:1622: size=240 B (+240 B), count=1 (+1), average=240 B
+2025-05-15 14:20:07,604 <string>:1: size=3480 B (+200 B), count=36 (+3), average=97 B
+2025-05-15 14:20:07,605 /projects/m000076/mryan0/autometrics/scripts/bertscore_memory_profiler.py:47: size=704 B (+128 B), count=10 (+1), average=70 B
+2025-05-15 14:20:07,750 [short|final] RSS=827.0 MB
+2025-05-15 14:21:53,453 [short|init] RSS=704.2 MB
+2025-05-15 14:21:53,453 [short|before_create] RSS=704.2 MB
+2025-05-15 14:21:53,455 MEMORY [BERTScore.__init__ START model=roberta-large, persistent=False]: RAM 704.25 MB, GPU 0.00 MB
+2025-05-15 14:21:53,997 MEMORY [BERTScore.__init__ END model=roberta-large, persistent=False]: RAM 705.21 MB, GPU 0.00 MB
+2025-05-15 14:21:53,998 [short|after_create] RSS=705.2 MB
+2025-05-15 14:21:53,999 --- diff for short|after_create ---
+2025-05-15 14:21:53,999 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:636: size=1300 B (+1300 B), count=24 (+24), average=54 B
+2025-05-15 14:21:54,003 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:2431: size=1176 B (+1176 B), count=17 (+17), average=69 B
+2025-05-15 14:21:54,004 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:2438: size=980 B (+980 B), count=15 (+15), average=65 B
+2025-05-15 14:21:54,005 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:623: size=728 B (+728 B), count=8 (+8), average=91 B
+2025-05-15 14:21:54,008 /projects/m000076/mryan0/autometrics/autometrics/metrics/Metric.py:42: size=728 B (+728 B), count=2 (+2), average=364 B
+2025-05-15 14:21:54,010 [short|after_gen] RSS=705.2 MB
+2025-05-15 14:21:54,012 --- diff for short|after_gen ---
+2025-05-15 14:21:54,012 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:115: size=4560 B (+4560 B), count=57 (+57), average=80 B
+2025-05-15 14:21:54,015 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:193: size=2688 B (+2688 B), count=56 (+56), average=48 B
+2025-05-15 14:21:54,016 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:558: size=1584 B (+1528 B), count=29 (+28), average=55 B
+2025-05-15 14:21:54,017 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:2431: size=1128 B (+1128 B), count=16 (+16), average=70 B
+2025-05-15 14:21:54,018 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py:2438: size=932 B (+932 B), count=14 (+14), average=67 B
+2025-05-15 14:21:54,033 [short|before_calc1] RSS=705.5 MB
+2025-05-15 14:21:54,039 MEMORY [BERTScore._calculate_impl START]: RAM 705.50 MB, GPU 0.00 MB
+2025-05-15 14:21:54,039 Model not loaded, calling _load_model
+2025-05-15 14:21:54,041 MEMORY [BERTScore._load_model START]: RAM 705.50 MB, GPU 0.00 MB
+2025-05-15 14:21:54,041 MEMORY [BERTScore._load_model END]: RAM 705.50 MB, GPU 0.00 MB
+2025-05-15 14:21:54,045 MEMORY [compute_bertscore START - 1 samples]: RAM 705.50 MB, GPU 0.00 MB
+2025-05-15 14:21:54,046 Input size: 74 chars, Output size: 51 chars, References size: 173 chars
+2025-05-15 14:21:54,048 MEMORY [compute_bertscore before bert_score.score call]: RAM 705.50 MB, GPU 0.00 MB
+2025-05-15 14:21:54,050 Calling bert_score.score with method=compare_to_reference, model=roberta-large
+2025-05-15 14:21:56,235 MEMORY [compute_bertscore after bert_score.score call]: RAM 815.43 MB, GPU 0.00 MB
+2025-05-15 14:21:56,235 compute_bertscore completed in 2.19 seconds
+2025-05-15 14:21:56,238 MEMORY [compute_bertscore END - 1 samples]: RAM 815.43 MB, GPU 0.00 MB
+2025-05-15 14:21:56,238 compute_bertscore completed in 2.19 seconds
+2025-05-15 14:21:56,240 Not persistent, unloading model
+2025-05-15 14:21:56,241 MEMORY [BERTScore._unload_model START]: RAM 815.43 MB, GPU 0.00 MB
+2025-05-15 14:21:56,428 MEMORY [BERTScore._unload_model END]: RAM 815.43 MB, GPU 0.00 MB
+2025-05-15 14:21:56,429 MEMORY [BERTScore._calculate_impl END]: RAM 815.43 MB, GPU 0.00 MB
+2025-05-15 14:21:56,452 [short|after_calc1] RSS=810.7 MB
+2025-05-15 14:21:56,569 --- diff for short|after_calc1 ---
+2025-05-15 14:21:56,569 <frozen importlib._bootstrap_external>:752: size=3952 KiB (+3952 KiB), count=19543 (+19543), average=207 B
+2025-05-15 14:21:56,571 <frozen abc>:106: size=206 KiB (+206 KiB), count=680 (+680), average=310 B
+2025-05-15 14:21:56,572 <frozen importlib._bootstrap_external>:1652: size=171 KiB (+171 KiB), count=469 (+469), average=372 B
+2025-05-15 14:21:56,576 <frozen importlib._bootstrap_external>:128: size=115 KiB (+115 KiB), count=687 (+687), average=172 B
+2025-05-15 14:21:56,578 <frozen importlib._bootstrap_external>:1644: size=100 KiB (+100 KiB), count=1720 (+1720), average=60 B
+2025-05-15 14:21:56,725 [short|before_calc2] RSS=810.8 MB
+2025-05-15 14:21:56,733 MEMORY [BERTScore._calculate_impl START]: RAM 810.81 MB, GPU 0.00 MB
+2025-05-15 14:21:56,733 Model not loaded, calling _load_model
+2025-05-15 14:21:56,734 MEMORY [BERTScore._load_model START]: RAM 810.81 MB, GPU 0.00 MB
+2025-05-15 14:21:56,738 MEMORY [BERTScore._load_model END]: RAM 810.81 MB, GPU 0.00 MB
+2025-05-15 14:21:56,738 MEMORY [compute_bertscore START - 1 samples]: RAM 810.81 MB, GPU 0.00 MB
+2025-05-15 14:21:56,739 Input size: 53 chars, Output size: 41 chars, References size: 36 chars
+2025-05-15 14:21:56,743 MEMORY [compute_bertscore before bert_score.score call]: RAM 810.81 MB, GPU 0.00 MB
+2025-05-15 14:21:56,744 Calling bert_score.score with method=compare_to_reference, model=roberta-large
+2025-05-15 14:21:58,762 MEMORY [compute_bertscore after bert_score.score call]: RAM 848.23 MB, GPU 0.00 MB
+2025-05-15 14:21:58,762 compute_bertscore completed in 2.02 seconds
+2025-05-15 14:21:58,764 MEMORY [compute_bertscore END - 1 samples]: RAM 848.23 MB, GPU 0.00 MB
+2025-05-15 14:21:58,766 compute_bertscore completed in 2.03 seconds
+2025-05-15 14:21:58,768 Not persistent, unloading model
+2025-05-15 14:21:58,770 MEMORY [BERTScore._unload_model START]: RAM 848.23 MB, GPU 0.00 MB
+2025-05-15 14:21:58,908 MEMORY [BERTScore._unload_model END]: RAM 847.24 MB, GPU 0.00 MB
+2025-05-15 14:21:58,908 MEMORY [BERTScore._calculate_impl END]: RAM 847.24 MB, GPU 0.00 MB
+2025-05-15 14:21:58,921 [short|after_calc2] RSS=842.9 MB
+2025-05-15 14:21:59,120 --- diff for short|after_calc2 ---
+2025-05-15 14:21:59,121 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/safetensors/torch.py:315: size=63.5 KiB (+25.2 KiB), count=1897 (+848), average=34 B
+2025-05-15 14:21:59,124 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:558: size=168 B (-2048 B), count=3 (-38), average=56 B
+2025-05-15 14:21:59,125 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/container.py:443: size=2680 B (+1150 B), count=63 (+27), average=43 B
+2025-05-15 14:21:59,126 <frozen importlib._bootstrap_external>:1185: size=11.9 KiB (-765 B), count=135 (-17), average=91 B
+2025-05-15 14:21:59,126 /users/mryan0/.conda/envs/autometrics/lib/python3.12/site-packages/psutil/_common.py:766: size=784 B (+304 B), count=7 (+3), average=112 B
+2025-05-15 14:21:59,276 MEMORY [BERTScore._unload_model START]: RAM 842.92 MB, GPU 0.00 MB
+2025-05-15 14:21:59,404 MEMORY [BERTScore._unload_model END]: RAM 842.92 MB, GPU 0.00 MB
+2025-05-15 14:21:59,405 [short|after_unload] RSS=842.9 MB
+2025-05-15 14:21:59,606 --- diff for short|after_unload ---
+2025-05-15 14:21:59,606 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:560: size=832 B (+248 B), count=6 (+2), average=139 B
+2025-05-15 14:21:59,607 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:423: size=832 B (+248 B), count=6 (+2), average=139 B
+2025-05-15 14:21:59,609 /users/mryan0/.conda/envs/autometrics/lib/python3.12/logging/__init__.py:1622: size=240 B (+240 B), count=1 (+1), average=240 B
+2025-05-15 14:21:59,610 <string>:1: size=3480 B (+200 B), count=36 (+3), average=97 B
+2025-05-15 14:21:59,613 /projects/m000076/mryan0/autometrics/scripts/bertscore_memory_profiler.py:49: size=920 B (+152 B), count=19 (+2), average=48 B
+2025-05-15 14:21:59,617 [short|final] RSS=844.9 MB
+2025-05-15 14:21:59,738 --- diff for short|final ---
+2025-05-15 14:21:59,738 <frozen importlib._bootstrap_external>:752: size=3952 KiB (+3952 KiB), count=19543 (+19543), average=207 B
+2025-05-15 14:21:59,741 <frozen abc>:106: size=206 KiB (+206 KiB), count=680 (+680), average=310 B
+2025-05-15 14:21:59,742 <frozen importlib._bootstrap_external>:1652: size=171 KiB (+171 KiB), count=469 (+469), average=372 B
+2025-05-15 14:21:59,744 /users/mryan0/.conda/envs/autometrics/lib/python3.12/tracemalloc.py:115: size=156 KiB (+156 KiB), count=1999 (+1999), average=80 B
+2025-05-15 14:21:59,747 <frozen importlib._bootstrap_external>:128: size=115 KiB (+115 KiB), count=687 (+687), average=172 B

@@ -171,3 +171,5 @@ cython_debug/
 .litellm_cache
 
 .autometrics_cache/
+autometrics_cache/
+test_autometrics_cache/

@@ -111,6 +111,36 @@ def parse_args():
         help="Enable verbose output"
     )
     
+    parser.add_argument(
+        "--measure-import-costs",
+        action="store_true",
+        help="Measure import and construction costs in a clean process (default: False)"
+    )
+    
+    parser.add_argument(
+        "--skip-import-costs",
+        action="store_true",
+        help="Skip measuring import and construction costs"
+    )
+    
+    parser.add_argument(
+        "--use-isolated-trials",
+        action="store_true",
+        help="Run each length category in a separate process for clean memory measurements (default: True)"
+    )
+    
+    parser.add_argument(
+        "--no-isolated-trials",
+        action="store_true",
+        help="Disable isolated trials (not recommended as it may lead to memory accumulation between trials)"
+    )
+    
+    parser.add_argument(
+        "--deterministic-examples",
+        action="store_true",
+        help="Use deterministic text examples for more consistent memory measurements"
+    )
+    
     return parser.parse_args()
 
 
@@ -160,6 +190,18 @@ def main():
     # Create experiment directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
+    # Handle import cost measurement setting
+    # Default is to measure import costs unless explicitly skipped
+    measure_import_costs = not args.skip_import_costs
+    if args.measure_import_costs:
+        measure_import_costs = True
+    
+    # Use isolated trials if specified
+    use_isolated_trials = not args.no_isolated_trials  # Default to True unless explicitly disabled
+    
+    # Use deterministic examples if specified
+    use_deterministic_examples = args.deterministic_examples
+    
     # Create and run the experiment
     experiment = UtilizationExperiment(
         name="Metric Utilization Benchmark",
@@ -171,7 +213,10 @@ def main():
         num_burn_in=num_burn_in,
         lengths=lengths,
         use_synthetic=use_synthetic,
-        seed=seed
+        seed=seed,
+        measure_import_costs=measure_import_costs,
+        use_isolated_trials=use_isolated_trials,
+        use_deterministic_examples=use_deterministic_examples
     )
     
     print(f"Starting utilization experiment with {len(metrics)} metrics")

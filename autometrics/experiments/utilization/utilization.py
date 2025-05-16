@@ -58,6 +58,10 @@ class ResourceTracker:
         self.disk_after = None
         self.device_count = 0
         
+        # Use the resource utilities for consistent measurements
+        from autometrics.experiments.utilization.resource import snap
+        self.snap_func = snap
+        
         if HAS_TORCH and torch.cuda.is_available():
             self.device_count = torch.cuda.device_count()
             torch.cuda.reset_peak_memory_stats()
@@ -70,77 +74,52 @@ class ResourceTracker:
     
     def start(self):
         """Start tracking resources."""
-        # Capture baseline memory usage
-        self.start_memory_usage = self.process.memory_info().rss / (1024 * 1024)  # Convert to MB
-        self.peak_memory_usage = self.start_memory_usage
+        # Force garbage collection for more consistent measurements
+        import gc
+        gc.collect()
         
-        # Capture baseline GPU memory
-        self.start_gpu_memory = 0
-        if HAS_TORCH and torch.cuda.is_available():
-            torch.cuda.reset_peak_memory_stats()
-            try:
-                self.start_gpu_memory = sum([
-                    torch.cuda.memory_allocated(i) / (1024 * 1024) for i in range(self.device_count)
-                ]) if self.device_count > 0 else 0
-            except Exception:
-                pass
-        elif HAS_PYNVML:
-            try:
-                total_memory = 0
-                for i in range(self.device_count):
-                    handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-                    info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-                    total_memory += info.used / (1024 * 1024)
-                self.start_gpu_memory = total_memory
-            except Exception:
-                pass
-                
-        self.disk_before = psutil.disk_usage('/').used
+        # Capture full state using our snapshot utility
+        self.start_snapshot = self.snap_func("start_tracking")
+        
+        # Extract values for backwards compatibility
+        self.start_memory_usage = self.start_snapshot["cpu_ram_mb"]
+        self.peak_memory_usage = self.start_memory_usage
+        self.start_gpu_memory = self.start_snapshot["gpu_ram_mb"]
+        self.peak_gpu_memory = self.start_gpu_memory
+        self.disk_before = self.start_snapshot["disk_used_mb"] * 1024 * 1024  # Convert back to bytes for compatibility
         self.start_time = time.time()
+        
         return self
     
     def stop(self):
         """Stop tracking resources and record final metrics."""
         self.end_time = time.time()
-        current_memory = self.process.memory_info().rss / (1024 * 1024)
-        self.peak_memory_usage = current_memory
+        # Sleep a tiny bit to ensure allocations are registered
+        time.sleep(0.01)
         
-        # Get GPU memory if available - SUM across all GPUs
-        current_gpu_memory = 0
-        if HAS_TORCH and torch.cuda.is_available():
-            try:
-                current_gpu_memory = sum(
-                    [torch.cuda.max_memory_allocated(i) / (1024 * 1024) for i in range(self.device_count)]
-                ) if self.device_count > 0 else 0
-                self.peak_gpu_memory = current_gpu_memory
-            except Exception:
-                pass
-        elif HAS_PYNVML:
-            try:
-                total_memory = 0
-                for i in range(self.device_count):
-                    handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-                    info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-                    total_memory += info.used / (1024 * 1024)
-                self.peak_gpu_memory = total_memory
-            except Exception:
-                pass
-                
-        self.disk_after = psutil.disk_usage('/').used
+        # Take end snapshot
+        self.end_snapshot = self.snap_func("end_tracking")
+        
+        # Extract values for backwards compatibility
+        self.peak_memory_usage = self.end_snapshot["cpu_ram_mb"]
+        self.peak_gpu_memory = self.end_snapshot["gpu_ram_mb"]
+        self.disk_after = self.end_snapshot["disk_used_mb"] * 1024 * 1024  # Convert back to bytes
+        
         return self
     
     def get_results(self):
         """Return the recorded metrics as a dictionary."""
+        # Calculate deltas directly to match original implementation behavior
         duration = self.end_time - self.start_time if self.end_time and self.start_time else 0
-        # Convert duration to milliseconds
         duration_ms = duration * 1000
         
-        # Calculate incremental RAM usage (what was added during the metric execution)
+        # Calculate incremental RAM usage
         incremental_ram = max(0, self.peak_memory_usage - self.start_memory_usage)
         
         # Calculate incremental GPU memory usage
         incremental_gpu = max(0, self.peak_gpu_memory - self.start_gpu_memory)
         
+        # Calculate disk usage change
         disk_delta = (self.disk_after - self.disk_before) / (1024 * 1024) if self.disk_after and self.disk_before else 0
         
         return {
@@ -163,6 +142,55 @@ def track_resources():
         yield tracker
     finally:
         tracker.stop()
+
+
+def generate_deterministic_text(length_category: str, seed: int = 42) -> Tuple[str, str, List[str]]:
+    """Generate deterministic synthetic text samples for testing.
+    
+    Args:
+        length_category: "short", "medium", or "long"
+        seed: Random seed for reproducibility
+        
+    Returns:
+        Tuple containing (input_text, output_text, reference_texts)
+    """
+    import random
+    
+    # Simple word list to avoid external dependencies
+    word_list = (
+        "time person year way day thing man world life hand part child eye woman "
+        "place work week case point government company number group problem fact"
+    ).split()
+    
+    # Set random seed for deterministic generation
+    rng = random.Random(seed)
+    
+    # Determine text lengths based on category
+    if length_category == "short":
+        input_len = 12
+        output_len = 15
+        ref_count = 2
+        ref_lens = [10, 14]
+    elif length_category == "medium":
+        input_len = 90
+        output_len = 100
+        ref_count = 2
+        ref_lens = [95, 105]
+    else:  # long
+        input_len = 260
+        output_len = 280
+        ref_count = 2
+        ref_lens = [275, 285]
+    
+    # Generate texts using consistent random seed
+    def rand_text(length):
+        return " ".join(rng.choice(word_list) for _ in range(length)) + "."
+    
+    input_text = rand_text(input_len)
+    output_text = rand_text(output_len)
+    reference_texts = [rand_text(ref_len) for ref_len in ref_lens]
+    
+    return input_text, output_text, reference_texts
 
 
 def generate_synthetic_text(length_category: str) -> Tuple[str, str, List[str]]:
@@ -261,6 +289,9 @@ class UtilizationExperiment(Experiment):
         lengths: List[str] = None,
         use_synthetic: bool = True,
         seed: int = 42,
+        measure_import_costs: bool = True,  # Whether to measure import costs in separate process
+        use_isolated_trials: bool = True,  # Whether to run each length category in a separate process
+        use_deterministic_examples: bool = False,  # Whether to use deterministic text examples
         **kwargs
     ):
         # Measure initial memory footprint before loading anything
@@ -284,6 +315,9 @@ class UtilizationExperiment(Experiment):
         self.num_examples = num_examples
         self.num_burn_in = num_burn_in
         self.lengths = lengths or ["short", "medium", "long"]
+        self.measure_import_costs = measure_import_costs
+        self.use_isolated_trials = use_isolated_trials
+        self.use_deterministic_examples = use_deterministic_examples
         self.results = {}
         
     def run(self, print_results: bool = False):
@@ -304,11 +338,22 @@ class UtilizationExperiment(Experiment):
         all_results = {
             "metrics": [],
             "results_by_metric": {},
-            "initial_memory": self.initial_memory
+            "initial_memory": self.initial_memory,
+            "import_costs": {}  # New section for import/construction costs
         }
         
         # For real dataset, we don't use length categories
         categories_to_test = self.lengths if self.use_synthetic else ["dataset"]
+        
+        # Import the metric profiler if needed
+        if self.measure_import_costs:
+            try:
+                from autometrics.experiments.utilization.metric_profiler import measure_metric_phases
+                from autometrics.experiments.utilization.resource import calc_delta
+            except ImportError:
+                if print_results:
+                    print("⚠️ Warning: metric_profiler not found. Import costs will not be measured.")
+                self.measure_import_costs = False
         
         # Run experiment for each metric
         for metric in self.metrics:
@@ -316,7 +361,82 @@ class UtilizationExperiment(Experiment):
             if print_results:
                 print(f"Testing metric: {metric_name}")
             
+            # Measure import costs if enabled (using separate process)
+            if self.measure_import_costs:
+                if print_results:
+                    print(f"  Measuring import and construction costs in clean process...")
+                
+                # Generate the full class path for the metric (best effort)
+                try:
+                    metric_module = metric.__class__.__module__
+                    metric_class = metric.__class__.__name__
+                    metric_class_path = f"{metric_module}.{metric_class}"
+                    
+                    # Create sample test data (the first example from the first category)
+                    category = categories_to_test[0]
+                    sample_data = self._get_test_examples(category)[0]
+                    
+                    # Get constructor arguments from the metric instance if possible
+                    constructor_kwargs = {}
+                    if hasattr(metric, '_init_params'):
+                        # Filter out excluded parameters that don't affect the metric
+                        constructor_kwargs = {k: v for k, v in metric._init_params.items() 
+                                            if not hasattr(metric, '_excluded_params') or 
+                                            k not in metric._excluded_params}
+                    
+                    # Add use_cache=False to avoid any caching during import cost measurement
+                    if hasattr(metric.__class__, '__init__'):
+                        import inspect
+                        # Only include parameters that the constructor actually accepts
+                        sig = inspect.signature(metric.__class__.__init__)
+                        allowed_params = set(sig.parameters.keys()) - {'self'}
+                        constructor_kwargs = {k: v for k, v in constructor_kwargs.items() 
+                                             if k in allowed_params}
+                        
+                        # Only add use_cache if the constructor accepts it
+                        if 'use_cache' in allowed_params:
+                            constructor_kwargs['use_cache'] = False
+                    
+                    # Measure phases
+                    checkpoints = measure_metric_phases(
+                        metric_class_path=metric_class_path,
+                        constructor_kwargs=constructor_kwargs,
+                        sample_data=sample_data
+                    )
+                    
+                    # Calculate deltas between checkpoints
+                    import_costs = []
+                    for i in range(len(checkpoints) - 1):
+                        before = checkpoints[i]
+                        after = checkpoints[i+1]
+                        delta = calc_delta(before, after)
+                        import_costs.append(delta)
+                    
+                    # Store the results
+                    all_results["import_costs"][metric_name] = {
+                        "checkpoints": checkpoints,
+                        "deltas": import_costs
+                    }
+                    
+                    # Save as tabular result
+                    if import_costs:
+                        import_df = pd.DataFrame(import_costs)
+                        self.results[f"{metric_name}/import_costs"] = TabularResult(import_df)
+                    
+                    if print_results:
+                        for delta in import_costs:
+                            print(f"    {delta['phase']}:")
+                            print(f"      CPU RAM: {delta['cpu_ram_mb']:.2f} MB")
+                            print(f"      GPU RAM: {delta['gpu_ram_mb']:.2f} MB")
+                            print(f"      Duration: {delta['duration_milliseconds']:.2f} ms")
+                
+                except Exception as e:
+                    if print_results:
+                        print(f"  ⚠️ Error measuring import costs: {str(e)}")
+                        traceback.print_exc()
+            
             # Disable cache for this metric if possible
+            original_cache_state = None
             try:
                 original_cache_state = metric.use_cache
                 metric.use_cache = False
@@ -333,61 +453,115 @@ class UtilizationExperiment(Experiment):
                     else:
                         print(f"  Testing with real dataset examples")
                 
-                # Get test examples
-                test_examples = self._get_test_examples(category)
-                length_results = []
-                
                 # Track metadata for results
                 result_prefix = f"{metric_name}/{category}" if self.use_synthetic else f"{metric_name}"
                 
-                # Check if this metric has model loading/unloading methods
+                # Check for model loading methods
                 has_model_methods = hasattr(metric, '_load_model') and hasattr(metric, '_unload_model')
                 model_was_loaded = False
-                
-                # If the metric has load/unload methods, check if model is already loaded
                 if has_model_methods:
-                    # Store whether model was loaded before we unload it
                     model_was_loaded = hasattr(metric, 'model') and metric.model is not None
-                    # Unload model to ensure we measure full memory usage
-                    try:
-                        metric._unload_model()
-                    except Exception as e:
-                        if print_results:
-                            print(f"  ⚠️ Warning: Failed to unload model: {str(e)}")
-
-                    try:
-                        metric._load_model()
-                    except Exception as e:
-                        if print_results:
-                            print(f"  ⚠️ Warning: Failed to load model: {str(e)}")
                 
-                # Perform burn-in samples first
-                for i in range(min(self.num_burn_in, len(test_examples))):
-                    input_text, output_text, reference_texts = test_examples[i]
-                    try:
-                        metric.calculate(input_text, output_text, reference_texts)
-                    except Exception as e:
-                        if print_results:
-                            print(f"  ⚠️ Error during burn-in: {str(e)}")
-                
-                # Now run the actual experiments
-                for i in range(min(self.num_examples, len(test_examples))):
-                    input_text, output_text, reference_texts = test_examples[i]
+                # Run trials in isolated subprocess if requested and supported
+                if self.use_isolated_trials and self.use_synthetic:
+                    if print_results:
+                        print(f"  Running in isolated subprocess for clean memory measurements...")
                     
-                    try:
-                        with track_resources() as tracker:
-                            result = metric.calculate(input_text, output_text, reference_texts)
-                        
-                        resources = tracker.get_results()
-                        length_results.append(resources)
-                    except Exception as e:
+                    # Generate the full class path for the metric
+                    metric_module = metric.__class__.__module__
+                    metric_class = metric.__class__.__name__
+                    metric_class_path = f"{metric_module}.{metric_class}"
+                    
+                    # Get constructor arguments from the metric instance if possible
+                    constructor_kwargs = {}
+                    if hasattr(metric, '_init_params'):
+                        # Filter out excluded parameters
+                        constructor_kwargs = {k: v for k, v in metric._init_params.items() 
+                                            if not hasattr(metric, '_excluded_params') or 
+                                            k not in metric._excluded_params}
+                    
+                    # Import the isolated runner
+                    from autometrics.experiments.utilization.isolated_runner import run_isolated_category
+                    
+                    # Run the isolated category
+                    length_results = run_isolated_category(
+                        metric_class_path=metric_class_path,
+                        constructor_kwargs=constructor_kwargs,
+                        category=category,
+                        num_examples=self.num_examples,
+                        num_burn_in=self.num_burn_in,
+                        use_synthetic=self.use_synthetic,
+                        seed=self.seed,
+                        use_deterministic_examples=self.use_deterministic_examples
+                    )
+                    
+                    if not length_results:
                         if print_results:
-                            print(f"  ⚠️ Error on example {i}: {str(e)}")
-                            traceback.print_exc()
-                
+                            print(f"  ⚠️ Error: Failed to run isolated trials for {category}")
+                        continue
+                else:
+                    # Get test examples
+                    test_examples = self._get_test_examples(category)
+                    length_results = []
+                    
+                    # If the metric has load/unload methods, unload and reload the model
+                    if has_model_methods:
+                        # Unload model to ensure we measure full memory usage
+                        try:
+                            metric._unload_model()
+                        except Exception as e:
+                            if print_results:
+                                print(f"  ⚠️ Warning: Failed to unload model: {str(e)}")
+
+                        try:
+                            metric._load_model()
+                        except Exception as e:
+                            if print_results:
+                                print(f"  ⚠️ Warning: Failed to load model: {str(e)}")
+                    
+                    # Force garbage collection before starting
+                    import gc
+                    gc.collect()
+                    
+                    # Perform burn-in samples first
+                    for i in range(min(self.num_burn_in, len(test_examples))):
+                        input_text, output_text, reference_texts = test_examples[i]
+                        try:
+                            metric.calculate(input_text, output_text, reference_texts)
+                        except Exception as e:
+                            if print_results:
+                                print(f"  ⚠️ Error during burn-in: {str(e)}")
+                    
+                    # Now run the actual experiments
+                    for i in range(min(self.num_examples, len(test_examples))):
+                        input_text, output_text, reference_texts = test_examples[i]
+                        
+                        # Force garbage collection between trials for more consistent measurements
+                        if i > 0 and i % 5 == 0:  # Every 5 trials
+                            gc.collect()
+                        
+                        try:
+                            with track_resources() as tracker:
+                                result = metric.calculate(input_text, output_text, reference_texts)
+                            
+                            resources = tracker.get_results()
+                            length_results.append(resources)
+                        except Exception as e:
+                            if print_results:
+                                print(f"  ⚠️ Error on example {i}: {str(e)}")
+                                traceback.print_exc()
+                        
+                        # Unload the model if it was not loaded initially and has unload methods
+                        if not model_was_loaded and has_model_methods:
+                            try:
+                                metric._unload_model()
+                            except Exception as e:
+                                if print_results:
+                                    print(f"  ⚠️ Warning: Failed to unload model: {str(e)}")
+                                
                 # Calculate statistics
                 if length_results:
-                    stats = self._calculate_statistics(length_results)
+                    stats = self._calculate_statistics(length_results, all_results["import_costs"].get(metric_name, {}).get("deltas", []))
                     metric_results["results"][category] = {
                         "raw_data": length_results,
                         "summary": stats
@@ -406,19 +580,20 @@ class UtilizationExperiment(Experiment):
                     self._generate_resource_plots(raw_df, result_prefix)
             
             # Restore cache setting
-            try:
-                metric.use_cache = original_cache_state
-            except AttributeError:
-                pass
-
-            # Unload the model if it was not loaded initially and has unload methods
+            if original_cache_state is not None:
+                try:
+                    metric.use_cache = original_cache_state
+                except AttributeError:
+                    pass
+            
+            # Final unload of the model if it was not loaded initially
             if not model_was_loaded and has_model_methods:
                 try:
                     metric._unload_model()
                 except Exception as e:
                     if print_results:
                         print(f"  ⚠️ Warning: Failed to unload model: {str(e)}")
-            
+
             all_results["metrics"].append(metric_name)
             all_results["results_by_metric"][metric_name] = metric_results
         
@@ -431,6 +606,34 @@ class UtilizationExperiment(Experiment):
         
         if print_results:
             print("\nUtilization Experiment Results Summary:")
+            
+            # First print import costs for each metric if available
+            if all_results.get("import_costs") and len(all_results["import_costs"]) > 0:
+                print("\n=== IMPORT AND CONSTRUCTION COSTS ===")
+                for metric_name in all_results["metrics"]:
+                    if metric_name in all_results["import_costs"]:
+                        import_costs = all_results["import_costs"][metric_name]["deltas"]
+                        print(f"\n{metric_name} import and construction:")
+                        total_cpu = 0
+                        total_gpu = 0
+                        for delta in import_costs:
+                            phase = delta["phase"]
+                            cpu = delta["cpu_ram_mb"]
+                            gpu = delta["gpu_ram_mb"]
+                            duration = delta["duration_milliseconds"]
+                            print(f"  {phase}:")
+                            print(f"    CPU RAM: {cpu:.2f} MB")
+                            if gpu > 0:
+                                print(f"    GPU RAM: {gpu:.2f} MB")
+                            print(f"    Duration: {duration:.2f} ms")
+                            total_cpu += cpu
+                            total_gpu += gpu
+                        print(f"  TOTAL IMPORT COSTS:")
+                        print(f"    CPU RAM: {total_cpu:.2f} MB")
+                        if total_gpu > 0:
+                            print(f"    GPU RAM: {total_gpu:.2f} MB")
+            
+            print("\n=== RUNTIME COSTS ===")
             for metric_name in all_results["metrics"]:
                 for category, data in all_results["results_by_metric"][metric_name]["results"].items():
                     summary = data["summary"]
@@ -448,9 +651,17 @@ class UtilizationExperiment(Experiment):
                           f"±{summary['ci_upper_cpu_ram'] - summary['mean_cpu_ram_mb']:.2f}")
                     print(f"  CPU RAM - Total: {total_ram:.2f} MB")
                     
-                    if summary['mean_gpu_ram_mb'] > 0:
-                        print(f"  GPU RAM (MB): {summary['mean_gpu_ram_mb']:.2f} " +
+                    # Print combined import + runtime if available
+                    if "total_with_import_cpu_ram_mb" in summary:
+                        print(f"  CPU RAM - With Import: {summary['total_with_import_cpu_ram_mb']:.2f} MB (import: {summary['import_cpu_ram_mb']:.2f} MB + runtime: {incremental_ram:.2f} MB)")
+                    
+                    if summary['mean_gpu_ram_mb'] > 0 or summary.get('import_gpu_ram_mb', 0) > 0:
+                        runtime_gpu = summary['mean_gpu_ram_mb']
+                        print(f"  GPU RAM - Runtime: {runtime_gpu:.2f} MB " +
                               f"±{summary['ci_upper_gpu_ram'] - summary['mean_gpu_ram_mb']:.2f}")
+                        
+                        if "total_with_import_gpu_ram_mb" in summary and summary["total_with_import_gpu_ram_mb"] > 0:
+                            print(f"  GPU RAM - With Import: {summary['total_with_import_gpu_ram_mb']:.2f} MB (import: {summary['import_gpu_ram_mb']:.2f} MB + runtime: {runtime_gpu:.2f} MB)")
     
     def _get_test_examples(self, category):
         """Get test examples for the experiment.
@@ -465,8 +676,14 @@ class UtilizationExperiment(Experiment):
         
         if self.use_synthetic:
             # Generate synthetic examples based on length category
-            for _ in range(self.num_examples + self.num_burn_in):
-                examples.append(generate_synthetic_text(category))
+            for i in range(self.num_examples + self.num_burn_in):
+                if self.use_deterministic_examples:
+                    # Use different seed for each example, but derived from the main seed
+                    example_seed = self.seed + i
+                    examples.append(generate_deterministic_text(category, example_seed))
+                else:
+                    # Use the original non-deterministic generation
+                    examples.append(generate_synthetic_text(category))
         else:
             # Use examples from dataset without filtering by length
             df = self.test_dataset.get_dataframe()
@@ -486,8 +703,13 @@ class UtilizationExperiment(Experiment):
         
         return examples
     
-    def _calculate_statistics(self, results):
-        """Calculate statistics from a list of resource measurements."""
+    def _calculate_statistics(self, results, import_costs=None):
+        """Calculate statistics from a list of resource measurements.
+        
+        Args:
+            results: List of resource measurement dictionaries
+            import_costs: Optional import cost data to include in the calculations
+        """
         durations = [r["duration_milliseconds"] for r in results]
         cpu_ram = [r["cpu_ram_mb"] for r in results]
         gpu_ram = [r["gpu_ram_mb"] for r in results]
@@ -496,6 +718,18 @@ class UtilizationExperiment(Experiment):
         baseline_gpu_ram = [r["baseline_gpu_ram_mb"] for r in results]
         total_cpu_ram = [r["total_cpu_ram_mb"] for r in results]
         total_gpu_ram = [r["total_gpu_ram_mb"] for r in results]
+        
+        # Add import costs if provided
+        import_cpu_ram = 0
+        import_gpu_ram = 0
+        import_duration = 0
+        if import_costs:
+            # Sum all import and construction costs
+            for cost in import_costs:
+                if cost.get("phase", "").startswith("start→") or cost.get("phase", "").startswith("after_import→"):
+                    import_cpu_ram += cost.get("cpu_ram_mb", 0)
+                    import_gpu_ram += cost.get("gpu_ram_mb", 0)
+                    import_duration += cost.get("duration_milliseconds", 0)
         
         mean_duration = statistics.mean(durations)
         mean_cpu_ram = statistics.mean(cpu_ram)
@@ -532,7 +766,7 @@ class UtilizationExperiment(Experiment):
             margin_duration = margin_cpu_ram = margin_gpu_ram = margin_disk = 0
             margin_baseline_cpu_ram = margin_baseline_gpu_ram = margin_total_cpu_ram = margin_total_gpu_ram = 0
         
-        return {
+        stats = {
             "mean_duration_milliseconds": mean_duration,
             "ci_lower_duration": max(0, mean_duration - margin_duration),
             "ci_upper_duration": mean_duration + margin_duration,
@@ -565,6 +799,19 @@ class UtilizationExperiment(Experiment):
             "ci_lower_total_gpu_ram": max(0, mean_total_gpu_ram - margin_total_gpu_ram),
             "ci_upper_total_gpu_ram": mean_total_gpu_ram + margin_total_gpu_ram,
         }
+        
+        # Include import costs if provided
+        if import_costs:
+            stats["import_cpu_ram_mb"] = import_cpu_ram
+            stats["import_gpu_ram_mb"] = import_gpu_ram
+            stats["import_duration_ms"] = import_duration
+            
+            # Calculate total cost (import + runtime)
+            stats["total_with_import_cpu_ram_mb"] = import_cpu_ram + mean_cpu_ram
+            stats["total_with_import_gpu_ram_mb"] = import_gpu_ram + mean_gpu_ram
+            stats["total_with_import_duration_ms"] = import_duration + mean_duration
+        
+        return stats
     
     def _generate_resource_plots(self, df, prefix):
         """Generate plots for a single metric/category."""
@@ -577,7 +824,7 @@ class UtilizationExperiment(Experiment):
         ax.set_title('Runtime Performance')
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
-        self.results[f"{prefix}/duration_timeseries"] = FigureResult(fig)
+        self._save_figure(fig, f"{prefix}/duration_timeseries")
         
         # Memory usage plot - incremental vs baseline
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -607,7 +854,7 @@ class UtilizationExperiment(Experiment):
         ax.set_title('Memory Utilization')
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
-        self.results[f"{prefix}/memory_timeseries"] = FigureResult(fig)
+        self._save_figure(fig, f"{prefix}/memory_timeseries")
         
         # Histogram of duration - but only if we have enough different values
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -627,7 +874,7 @@ class UtilizationExperiment(Experiment):
         ax.set_title('Duration Distribution')
         ax.legend()
         fig.tight_layout()
-        self.results[f"{prefix}/duration_histogram"] = FigureResult(fig)
+        self._save_figure(fig, f"{prefix}/duration_histogram")
         
         # Histogram of memory usage - but only if we have enough different values
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -649,7 +896,7 @@ class UtilizationExperiment(Experiment):
         ax.set_title('Memory Usage Distribution')
         ax.legend()
         fig.tight_layout()
-        self.results[f"{prefix}/memory_histogram"] = FigureResult(fig)
+        self._save_figure(fig, f"{prefix}/memory_histogram")
     
     def _generate_comparison_plots(self, all_results):
         """Generate comparison plots across all metrics."""
@@ -658,19 +905,63 @@ class UtilizationExperiment(Experiment):
             summary_data = []
             for metric_name in all_results["metrics"]:
                 data = all_results["results_by_metric"][metric_name]["results"]["dataset"]["summary"]
-                summary_data.append({
+                
+                # Basic data from runtime measurements
+                metric_data = {
                     "metric": metric_name,
                     "duration_ms": data["mean_duration_milliseconds"],
                     "duration_ci": data["ci_upper_duration"] - data["mean_duration_milliseconds"],
-                    "cpu_ram_mb": data["mean_cpu_ram_mb"],  # This is now incremental RAM
+                    "cpu_ram_mb": data["mean_cpu_ram_mb"],  # This is incremental RAM during calculation
                     "cpu_ram_ci": data["ci_upper_cpu_ram"] - data["mean_cpu_ram_mb"],
                     "gpu_ram_mb": data["mean_gpu_ram_mb"],
                     "gpu_ram_ci": data["ci_upper_gpu_ram"] - data["mean_gpu_ram_mb"],
-                    "baseline_cpu_ram_mb": data.get("mean_baseline_cpu_ram_mb", 0),  # Include baseline
-                })
+                    "baseline_cpu_ram_mb": data.get("mean_baseline_cpu_ram_mb", 0),  # Baseline during calculation
+                }
+                
+                # Add import cost data if available
+                if "import_costs" in all_results and metric_name in all_results["import_costs"]:
+                    import_costs = all_results["import_costs"][metric_name]["deltas"]
+                    
+                    # Extract costs by phase
+                    for delta in import_costs:
+                        phase = delta["phase"]
+                        phase_key = phase.replace("→", "_to_").replace(" ", "_").lower()
+                        
+                        metric_data[f"import_{phase_key}_cpu_mb"] = delta["cpu_ram_mb"]
+                        metric_data[f"import_{phase_key}_gpu_mb"] = delta["gpu_ram_mb"]
+                        metric_data[f"import_{phase_key}_duration_ms"] = delta["duration_milliseconds"]
+                        
+                        # For phases related to model loading, track specially
+                        if "first_call" in phase:
+                            metric_data["model_load_cpu_mb"] = delta["cpu_ram_mb"]
+                            metric_data["model_load_gpu_mb"] = delta["gpu_ram_mb"]
+                
+                summary_data.append(metric_data)
             
             df = pd.DataFrame(summary_data)
             self.results["metric_comparison/summary"] = TabularResult(df)
+            
+            # Generate a more detailed import costs breakdown if available
+            if "import_costs" in all_results and all_results["import_costs"]:
+                import_cost_data = []
+                for metric_name, cost_data in all_results["import_costs"].items():
+                    for delta in cost_data["deltas"]:
+                        import_cost_data.append({
+                            "metric": metric_name,
+                            "phase": delta["phase"],
+                            "cpu_ram_mb": delta["cpu_ram_mb"],
+                            "gpu_ram_mb": delta["gpu_ram_mb"],
+                            "duration_ms": delta["duration_milliseconds"],
+                            "baseline_cpu_ram_mb": delta["baseline_cpu_ram_mb"],
+                            "total_cpu_ram_mb": delta["total_cpu_ram_mb"]
+                        })
+                
+                if import_cost_data:
+                    import_df = pd.DataFrame(import_cost_data)
+                    self.results["metric_comparison/import_costs"] = TabularResult(import_df)
+                    
+                    # Create a stacked bar chart for import/construction/model loading costs
+                    self._generate_import_cost_plots(import_df)
             
             # Bar chart comparison
             fig, ax = plt.subplots(figsize=(12, 8))
@@ -684,7 +975,7 @@ class UtilizationExperiment(Experiment):
             ax.set_xticks(x_pos)
             ax.set_xticklabels(metrics, rotation=45, ha='right')
             fig.tight_layout()
-            self.results["metric_comparison/duration"] = FigureResult(fig)
+            self._save_figure(fig, "metric_comparison/duration")
             
             # Box and whisker plot for timing
             if len(all_results["metrics"]) > 1:
@@ -711,7 +1002,7 @@ class UtilizationExperiment(Experiment):
                 ax.set_xticklabels(metric_labels, rotation=45, ha='right')
                 plt.grid(True, axis='y', alpha=0.3)
                 fig.tight_layout()
-                self.results["metric_comparison/duration_boxplot"] = FigureResult(fig)
+                self._save_figure(fig, "metric_comparison/duration_boxplot")
             
             # Memory comparison - stacked bar to show baseline and incremental
             fig, ax = plt.subplots(figsize=(12, 8))
@@ -744,7 +1035,7 @@ class UtilizationExperiment(Experiment):
             ax.set_xticks(x_pos)
             ax.set_xticklabels(metrics, rotation=45, ha='right')
             fig.tight_layout()
-            self.results["metric_comparison/memory"] = FigureResult(fig)
+            self._save_figure(fig, "metric_comparison/memory")
         else:
             # For synthetic data, compare within each length category
             for length in self.lengths:
@@ -781,7 +1072,7 @@ class UtilizationExperiment(Experiment):
                 ax.set_xticks(x_pos)
                 ax.set_xticklabels(metrics, rotation=45, ha='right')
                 fig.tight_layout()
-                self.results[f"metric_comparison/{length}/duration"] = FigureResult(fig)
+                self._save_figure(fig, f"metric_comparison/{length}/duration")
                 
                 # Box and whisker plot for timing
                 if len(all_results["metrics"]) > 1:
@@ -809,7 +1100,7 @@ class UtilizationExperiment(Experiment):
                     ax.set_xticklabels(metric_labels, rotation=45, ha='right')
                     plt.grid(True, axis='y', alpha=0.3)
                     fig.tight_layout()
-                    self.results[f"metric_comparison/{length}/duration_boxplot"] = FigureResult(fig)
+                    self._save_figure(fig, f"metric_comparison/{length}/duration_boxplot")
                 
                 # Bar chart comparison - memory
                 fig, ax = plt.subplots(figsize=(12, 8))
@@ -826,7 +1117,7 @@ class UtilizationExperiment(Experiment):
                 ax.set_xticklabels(metrics, rotation=45, ha='right')
                 ax.legend()
                 fig.tight_layout()
-                self.results[f"metric_comparison/{length}/memory"] = FigureResult(fig)
+                self._save_figure(fig, f"metric_comparison/{length}/memory")
             
             # Also create a comparison across all lengths for each metric
             for metric_name in all_results["metrics"]:
@@ -865,7 +1156,7 @@ class UtilizationExperiment(Experiment):
                 ax.set_xticks(x_pos)
                 ax.set_xticklabels(lengths)
                 fig.tight_layout()
-                self.results[f"length_comparison/{metric_name}/duration"] = FigureResult(fig)
+                self._save_figure(fig, f"length_comparison/{metric_name}/duration")
                 
                 # Box plot comparison - duration vs length
                 # Collect timing data across all lengths
@@ -891,7 +1182,7 @@ class UtilizationExperiment(Experiment):
                 ax.set_title(f'Runtime Distribution vs Text Length ({metric_name})')
                 plt.grid(True, axis='y', alpha=0.3)
                 fig.tight_layout()
-                self.results[f"length_comparison/{metric_name}/duration_boxplot"] = FigureResult(fig)
+                self._save_figure(fig, f"length_comparison/{metric_name}/duration_boxplot")
                 
                 # Bar chart comparison - memory vs length
                 fig, ax = plt.subplots(figsize=(10, 6))
@@ -908,7 +1199,306 @@ class UtilizationExperiment(Experiment):
                 ax.set_xticklabels(lengths)
                 ax.legend()
                 fig.tight_layout()
-                self.results[f"length_comparison/{metric_name}/memory"] = FigureResult(fig)
+                self._save_figure(fig, f"length_comparison/{metric_name}/memory")
+
+    def _generate_import_cost_plots(self, import_df):
+        """Generate visualization of import, construction, and model loading costs."""
+        # Create a pivot table to restructure the data for the stacked bar chart
+        pivot_df = import_df.pivot_table(
+            index="metric", 
+            columns="phase", 
+            values=["cpu_ram_mb", "gpu_ram_mb", "duration_ms"],
+            aggfunc="mean"
+        ).fillna(0)
+        
+        # CPU Memory Usage Plot
+        if "cpu_ram_mb" in pivot_df:
+            fig, ax = plt.subplots(figsize=(12, 8))
+            
+            # Get all phases for CPU RAM
+            phases = pivot_df["cpu_ram_mb"].columns.tolist()
+            metrics = pivot_df.index.tolist()
+            x_pos = np.arange(len(metrics))
+            bottom = np.zeros(len(metrics))
+            
+            # Plot each phase as a stacked bar
+            for phase in phases:
+                values = pivot_df["cpu_ram_mb"][phase].values
+                ax.bar(x_pos, values, bottom=bottom, label=phase)
+                bottom += values
+            
+            ax.set_xlabel('Metrics')
+            ax.set_ylabel('CPU Memory (MB)')
+            ax.set_title('Memory Usage by Phase')
+            ax.set_xticks(x_pos)
+            ax.set_xticklabels(metrics, rotation=45, ha='right')
+            ax.legend()
+            fig.tight_layout()
+            self._save_figure(fig, "metric_comparison/memory_by_phase")
+        
+        # Duration Plot
+        if "duration_ms" in pivot_df:
+            fig, ax = plt.subplots(figsize=(12, 8))
+            
+            # Get all phases for duration
+            phases = pivot_df["duration_ms"].columns.tolist()
+            metrics = pivot_df.index.tolist()
+            x_pos = np.arange(len(metrics))
+            bottom = np.zeros(len(metrics))
+            
+            # Plot each phase as a stacked bar
+            for phase in phases:
+                values = pivot_df["duration_ms"][phase].values
+                ax.bar(x_pos, values, bottom=bottom, label=phase)
+                bottom += values
+            
+            ax.set_xlabel('Metrics')
+            ax.set_ylabel('Duration (ms)')
+            ax.set_title('Time by Phase')
+            ax.set_xticks(x_pos)
+            ax.set_xticklabels(metrics, rotation=45, ha='right')
+            ax.legend()
+            fig.tight_layout()
+            self._save_figure(fig, "metric_comparison/duration_by_phase")
+        
+        # If GPU memory was used, create a GPU memory usage plot
+        if "gpu_ram_mb" in pivot_df and pivot_df["gpu_ram_mb"].sum().sum() > 0:
+            fig, ax = plt.subplots(figsize=(12, 8))
+            
+            # Get all phases for GPU RAM
+            phases = pivot_df["gpu_ram_mb"].columns.tolist()
+            metrics = pivot_df.index.tolist()
+            x_pos = np.arange(len(metrics))
+            bottom = np.zeros(len(metrics))
+            
+            # Plot each phase as a stacked bar
+            for phase in phases:
+                values = pivot_df["gpu_ram_mb"][phase].values
+                ax.bar(x_pos, values, bottom=bottom, label=phase)
+                bottom += values
+            
+            ax.set_xlabel('Metrics')
+            ax.set_ylabel('GPU Memory (MB)')
+            ax.set_title('GPU Memory Usage by Phase')
+            ax.set_xticks(x_pos)
+            ax.set_xticklabels(metrics, rotation=45, ha='right')
+            ax.legend()
+            fig.tight_layout()
+            self._save_figure(fig, "metric_comparison/gpu_memory_by_phase")
+        
+        # Create a combined bar chart showing import vs. runtime memory usage
+        fig, ax = plt.subplots(figsize=(12, 8))
+        metrics = import_df["metric"].unique()
+        x_pos = np.arange(len(metrics))
+        bar_width = 0.35
+        
+        # Calculate total import costs vs runtime costs
+        import_costs = []
+        runtime_costs = []
+        
+        for metric in metrics:
+            # Sum all phases for this metric to get total import memory
+            metric_import = import_df[import_df["metric"] == metric]["cpu_ram_mb"].sum()
+            import_costs.append(metric_import)
+            
+            # Get runtime memory from comparison data
+            try:
+                runtime_data = self.results[f"{metric}/summary"].dataframe
+                runtime_mem = runtime_data["mean_cpu_ram_mb"].values[0]
+                runtime_costs.append(runtime_mem)
+            except (KeyError, IndexError):
+                runtime_costs.append(0)
+        
+        # Plot the bars
+        ax.bar(x_pos - bar_width/2, import_costs, bar_width, label='Import & Construction')
+        ax.bar(x_pos + bar_width/2, runtime_costs, bar_width, label='Runtime')
+        
+        ax.set_xlabel('Metrics')
+        ax.set_ylabel('CPU Memory (MB)')
+        ax.set_title('Import vs Runtime Memory Usage')
+        ax.set_xticks(x_pos)
+        ax.set_xticklabels(metrics, rotation=45, ha='right')
+        ax.legend()
+        fig.tight_layout()
+        self._save_figure(fig, "metric_comparison/import_vs_runtime")
+
+    def _save_figure(self, fig, result_path):
+        """Save a figure as a result and close it to prevent memory leaks."""
+        self.results[result_path] = FigureResult(fig)
+        plt.close(fig)  # Close the figure to prevent memory leaks
+
+
+def run_isolated_trials(metric_class_path, constructor_kwargs, category, num_examples, num_burn_in, use_synthetic, seed=42, use_deterministic_examples=False):
+    """
+    Run trials for a single category in an isolated subprocess.
+    
+    Args:
+        metric_class_path: Fully qualified path to the metric class
+        constructor_kwargs: Parameters to pass to the metric constructor
+        category: Length category ('short', 'medium', 'long') or 'dataset' for real data
+        num_examples: Number of examples to test
+        num_burn_in: Number of burn-in examples
+        use_synthetic: Whether to use synthetic data
+        seed: Random seed
+        use_deterministic_examples: Whether to use deterministic text examples
+        
+    Returns:
+        List of resource measurement dictionaries
+    """
+    import os
+    import sys
+    import json
+    import importlib
+    import traceback
+    import gc
+    import time
+    from contextlib import contextmanager
+    
+    from autometrics.experiments.utilization.resource import snap
+    
+    # Function to get current memory use
+    def get_memory():
+        return snap("memory_check")
+    
+    @contextmanager
+    def memory_checkpoint(label):
+        """Context manager to track memory usage before and after a block of code."""
+        # Force garbage collection before taking measurements
+        gc.collect()
+        time.sleep(0.1)  # Small delay to allow memory to stabilize
+        
+        # Take memory measurement before
+        mem_before = get_memory()
+        print(f"[{label}] Before: CPU RAM = {mem_before['cpu_ram_mb']:.2f} MB, GPU RAM = {mem_before['gpu_ram_mb']:.2f} MB")
+        
+        # Execute the block
+        yield
+        
+        # Force garbage collection after execution
+        gc.collect()
+        time.sleep(0.1)  # Small delay to allow memory to stabilize
+        
+        # Take memory measurement after
+        mem_after = get_memory()
+        print(f"[{label}] After: CPU RAM = {mem_after['cpu_ram_mb']:.2f} MB, GPU RAM = {mem_after['gpu_ram_mb']:.2f} MB")
+        print(f"[{label}] Delta: CPU RAM = {mem_after['cpu_ram_mb'] - mem_before['cpu_ram_mb']:.2f} MB, "
+              f"GPU RAM = {mem_after['gpu_ram_mb'] - mem_before['gpu_ram_mb']:.2f} MB")
+    
+    # Create checkpoint list
+    results = []
+    
+    try:
+        # Initial memory state (record as the true baseline)
+        baseline_mem = get_memory()
+        print(f"Initial baseline memory: CPU RAM = {baseline_mem['cpu_ram_mb']:.2f} MB, GPU RAM = {baseline_mem['gpu_ram_mb']:.2f} MB")
+        
+        # Import the module
+        with memory_checkpoint("module_import"):
+            module_path, class_name = metric_class_path.rsplit(".", 1)
+            module = importlib.import_module(module_path)
+        
+        # Construct the metric
+        with memory_checkpoint("metric_construction"):
+            MetricClass = getattr(module, class_name)
+            metric = MetricClass(**constructor_kwargs)
+        
+        # Generate test examples
+        with memory_checkpoint("generate_examples"):
+            if use_synthetic:
+                # Import locally to minimize memory usage in subprocess
+                if use_deterministic_examples:
+                    from autometrics.experiments.utilization.utilization import generate_deterministic_text
+                    
+                    test_examples = []
+                    for i in range(num_examples + num_burn_in):
+                        # Use a different seed for each example, but derived from the main seed
+                        example_seed = seed + i
+                        test_examples.append(generate_deterministic_text(category, example_seed))
+                else:
+                    from autometrics.experiments.utilization.utilization import generate_synthetic_text
+                    
+                    test_examples = []
+                    for _ in range(num_examples + num_burn_in):
+                        test_examples.append(generate_synthetic_text(category))
+            else:
+                # For real datasets, we need to access the dataset
+                # This is trickier in a subprocess - we could serialize the dataset data
+                # For now, we'll just return an error
+                return {"error": "Real dataset not supported in isolated mode"}
+        
+        # Create resource tracker
+        from autometrics.experiments.utilization.utilization import ResourceTracker
+        
+        # Force garbage collection before starting burn-in
+        gc.collect()
+        
+        # Perform burn-in samples first
+        with memory_checkpoint("burn_in_phase"):
+            for i in range(min(num_burn_in, len(test_examples))):
+                input_text, output_text, reference_texts = test_examples[i]
+                try:
+                    metric.calculate(input_text, output_text, reference_texts)
+                except Exception as e:
+                    return {"error": f"Error during burn-in: {str(e)}", "traceback": traceback.format_exc()}
+        
+        # Reset baseline memory after burn-in
+        # This ensures we're only measuring incremental memory from the actual trials
+        post_burnin_mem = get_memory()
+        print(f"Post burn-in memory (new baseline): CPU RAM = {post_burnin_mem['cpu_ram_mb']:.2f} MB, GPU RAM = {post_burnin_mem['gpu_ram_mb']:.2f} MB")
+        print(f"Memory increase during burn-in: CPU RAM = {post_burnin_mem['cpu_ram_mb'] - baseline_mem['cpu_ram_mb']:.2f} MB, GPU RAM = {post_burnin_mem['gpu_ram_mb'] - baseline_mem['gpu_ram_mb']:.2f} MB")
+        
+        # Now run the actual trials
+        for i in range(min(num_examples, len(test_examples) - num_burn_in)):
+            input_text, output_text, reference_texts = test_examples[i + num_burn_in]
+            
+            # Force garbage collection between trials for more consistent measurements
+            if i > 0:
+                gc.collect()
+                time.sleep(0.05)  # Small delay to allow memory to stabilize
+            
+            try:
+                tracker = ResourceTracker().start()
+                result = metric.calculate(input_text, output_text, reference_texts)
+                tracker.stop()
+                
+                resources = tracker.get_results()
+                
+                # Use post-burnin memory as the true baseline
+                # This gives more consistent measurements of incremental memory usage
+                resources['baseline_cpu_ram_mb'] = post_burnin_mem['cpu_ram_mb']
+                resources['baseline_gpu_ram_mb'] = post_burnin_mem['gpu_ram_mb']
+                resources['total_cpu_ram_mb'] = resources['baseline_cpu_ram_mb'] + resources['cpu_ram_mb']
+                resources['total_gpu_ram_mb'] = resources['baseline_gpu_ram_mb'] + resources['gpu_ram_mb']
+                
+                results.append(resources)
+                print(f"Trial {i+1} completed: CPU RAM = {resources['cpu_ram_mb']:.2f} MB, Duration = {resources['duration_milliseconds']:.2f} ms")
+            except Exception as e:
+                return {"error": f"Error on example {i}: {str(e)}", "traceback": traceback.format_exc()}
+        
+        # Clean up resources - this is important for accurate memory reporting
+        with memory_checkpoint("cleanup"):
+            # Try unloading model if the metric has that capability
+            if hasattr(metric, '_unload_model') and callable(getattr(metric, '_unload_model')):
+                try:
+                    metric._unload_model()
+                except Exception:
+                    pass
+            
+            # Explicitly delete the metric
+            del metric
+            del module
+            # Force garbage collection
+            gc.collect()
+        
+        # Final memory state
+        final_mem = get_memory()
+        print(f"Final memory: CPU RAM = {final_mem['cpu_ram_mb']:.2f} MB, GPU RAM = {final_mem['gpu_ram_mb']:.2f} MB")
+        print(f"Total memory delta: CPU RAM = {final_mem['cpu_ram_mb'] - baseline_mem['cpu_ram_mb']:.2f} MB, GPU RAM = {final_mem['gpu_ram_mb'] - baseline_mem['gpu_ram_mb']:.2f} MB")
+        
+        return results
+        
+    except Exception as e:
+        return {"error": f"Unexpected error: {str(e)}", "traceback": traceback.format_exc()}
 
 
 def main():

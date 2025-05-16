@@ -10,6 +10,17 @@ This module provides tools to benchmark and analyze the resource utilization of 
   - GPU memory usage (summed across all GPUs, in MB)
   - Disk usage changes (MB)
   
+  - Tracks memory across different phases:
+  - Import costs (libraries and dependencies)
+  - Construction costs (instantiating the metric)
+  - First-time use costs (lazy-loaded models and resources)
+  - Runtime costs (during actual metric calculation)
+  
+- Supports memory-isolated trials:
+  - Can run each length category in a separate process
+  - Ensures clean memory measurements between trials
+  - Prevents memory accumulation between length categories
+  
 - Supports two data sources:
   - Synthetic text generation with configurable lengths
   - Real data from existing datasets (uses all available examples without filtering)
@@ -23,6 +34,7 @@ This module provides tools to benchmark and analyze the resource utilization of 
   - Raw data for every test run
   - Statistical summary with means and confidence intervals
   - Visualization plots for easy comparison
+  - Breakdown of import vs. runtime costs
   - JSON export for programmatic analysis
 
 ## Requirements
@@ -53,7 +65,8 @@ experiment = UtilizationExperiment(
     num_examples=30,  # Number of test examples per length category
     num_burn_in=5,    # Number of warm-up runs to avoid cold start effects
     lengths=["short", "medium", "long"],  # Text length categories to test
-    use_synthetic=True  # Use synthetic data (default)
+    use_synthetic=True,  # Use synthetic data (default)
+    measure_import_costs=True  # Track import and construction costs (default: True)
 )
 
 # Run the experiment
@@ -103,6 +116,12 @@ python run_utilization.py --output-dir=outputs/my_experiment --num-examples=50 -
 
 # Run with real dataset
 python run_utilization.py --output-dir=outputs/my_experiment --num-examples=50 --burn-in=10 --metrics=BLEU,ROUGE,BERTScore --dataset=SimpDA
+
+# Run without measuring import costs (faster but less comprehensive)
+python run_utilization.py --metrics=BLEU,ROUGE --skip-import-costs
+
+# Explicitly enable import cost measurement (enabled by default)
+python run_utilization.py --metrics=BLEU,ROUGE --measure-import-costs
 ```
 
 ## Output Format
@@ -115,6 +134,7 @@ The experiment produces a well-organized directory structure of output files:
 outputs/utilization_synthetic/
 ├── full_results.json                  # Complete results in JSON format
 ├── BLEU/
+│   ├── import_costs.csv               # Import and construction costs
 │   ├── short/                         # Results for short text inputs
 │   │   ├── raw_data.csv               # Raw measurements for each run
 │   │   ├── summary.csv                # Statistical summary
@@ -125,6 +145,10 @@ outputs/utilization_synthetic/
 │   └── long/...                       # Similar files for long text inputs
 ├── ROUGE/...                          # Similar structure for ROUGE metric
 ├── metric_comparison/                 # Cross-metric comparisons
+│   ├── import_costs.csv               # Import cost comparison across metrics
+│   ├── memory_by_phase.pdf            # Memory usage broken down by phase
+│   ├── duration_by_phase.pdf          # Time usage broken down by phase
+│   ├── import_vs_runtime.pdf          # Import vs runtime memory comparison
 │   ├── short/                         # Comparisons for short texts
 │   │   ├── summary.csv                # Summary statistics
 │   │   ├── duration.pdf               # Duration comparison

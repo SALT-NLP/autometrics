@@ -290,7 +290,7 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
 - **Contact:** mryan0@stanford.edu"""
 
     def __init__(
-        self, batch_size: int = 4, model: str = "facebook/bart-large-cnn"
+        self, batch_size: int = 4, model: str = "facebook/bart-large-cnn", **kwargs
     ):
         # Get device
         self.device = torch.device(
@@ -306,7 +306,8 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
             ),
             batch_size=batch_size,
             model=model,
-            device=str(self.device)  # Include device as string
+            device=str(self.device),  # Include device as string
+            **kwargs
         )
         
         # Initialize scorer

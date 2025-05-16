@@ -1,0 +1,5 @@
+,phase,duration_milliseconds,cpu_ram_mb,gpu_ram_mb,disk_usage_change_mb,baseline_cpu_ram_mb,baseline_gpu_ram_mb,total_cpu_ram_mb,total_gpu_ram_mb
+0,start→after_import,2732.754945755005,118.8046875,0,0.0078125,602.44921875,0.0,721.25390625,0.0
+1,after_import→after_construct,27.579307556152344,0.01171875,0,0.0,721.25390625,0.0,721.265625,0.0
+2,after_construct→after_first_call,1449.730634689331,67.3828125,0,0.0,721.265625,0.0,788.6484375,0.0
+3,after_first_call→after_unload,184.88383293151855,0.0,0,0.0,788.6484375,0.0,788.6484375,0.0

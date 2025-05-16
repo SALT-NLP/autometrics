@@ -160,13 +160,14 @@ where $c$ is a scaling factor (default: 5), and AUC is the area under the curve 
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, persistent: bool = True):
+    def __init__(self, persistent: bool = True, **kwargs):
         super().__init__(
             name="MAUVE",
             description="MAUVE reference-based metric (GAN diversity assessment)",
             metric_id="mauve",
             score_key="mauve",
             load_kwargs={},
+            **kwargs
         )
         self.persistent = persistent
         self.exclude_from_cache_key("persistent")

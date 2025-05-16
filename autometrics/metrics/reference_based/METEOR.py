@@ -151,8 +151,11 @@ $$
 - **Contact:** mryan0@stanford.edu"""
     def __init__(self,
                  name: str = "METEOR",
-                 description: str = "METEOR score for machine translation evaluation (NLTK)"):
-        super().__init__(name, description)
+                 description: str = "METEOR score for machine translation evaluation (NLTK)",
+                 **kwargs):
+        super().__init__(name, description, **kwargs)
+
+        self.exclude_from_cache_key('device', 'batch_size')
 
     def _calculate_impl(self,
                   input: str,

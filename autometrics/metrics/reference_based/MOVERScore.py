@@ -163,22 +163,41 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu  """
 
-    def __init__(self, model_name='distilbert-base-uncased', device='cuda'):
+    def __init__(self, model_name='distilbert-base-uncased', device='cuda', persistent=True, **kwargs):
         """
         Construct the MoverScore model.
         """
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, do_lower_case=True)
-        self.model = AutoModel.from_pretrained(model_name, output_hidden_states=True, output_attentions=True)
-        self.model.eval()
-        self.model.to(device)
-        self.device = device
         self.model_name = model_name
+        self.device = device
+        self.persistent = persistent
+        self.model = None
+        self.tokenizer = None
 
         name = "MOVERScore_" + model_name
         description = "MOVERScore is a metric that computes the similarity between two sentences using a pre-trained BERT model. It is based on the cosine similarity between the embeddings of the two sentences, and it uses the Earth Mover's Distance (EMD) to compute the distance between the two sets of embeddings."
         
-        super().__init__(name, description, model_name=model_name, device=device)
-        self.exclude_from_cache_key("device")
+        super().__init__(name, description, model_name=model_name, device=device, **kwargs)
+        self.exclude_from_cache_key("device", "persistent")
+
+        if self.persistent:
+            self._load_model()
+
+    def _load_model(self):
+        """Load the model and tokenizer."""
+        if self.model is None:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, do_lower_case=True)
+            self.model = AutoModel.from_pretrained(self.model_name, output_hidden_states=True, output_attentions=True)
+            self.model.eval()
+            self.model.to(self.device)
+
+    def _unload_model(self):
+        """Unload model to free resources."""
+        if self.model is not None:
+            del self.model
+            del self.tokenizer
+            torch.cuda.empty_cache()
+            self.model = None
+            self.tokenizer = None
 
     def truncate(self, tokens):
         if len(tokens) > self.tokenizer.model_max_length - 2:
@@ -374,14 +393,39 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         """
         Calculate the metric
         """
+        if self.model is None:
+            self._load_model()
+
         if references is None:
             references = []
 
         output = [output]
         references = [[r] for r in references]
 
-        return self.corpus_score(output, references)
+        result = self.corpus_score(output, references)
+
+        if not self.persistent:
+            self._unload_model()
+
+        return result
     
+    def _calculate_batched_impl(self, inputs, outputs, references, **kwargs):
+        """
+        Calculate the metric for a batch of inputs
+        """
+        if self.model is None:
+            self._load_model()
+
+        results = []
+        for input, output, refs in zip(inputs, outputs, references):
+            result = self._calculate_impl(input, output, refs)
+            results.append(result)
+
+        if not self.persistent:
+            self._unload_model()
+
+        return results
+
 if __name__ == "__main__":
     # Example usage
     moverscore = MOVERScore()

@@ -150,9 +150,10 @@ These divergences are computed over distributions derived from MLM logits, optio
         max_length: int = None,
         batch_size: int = 64,
         num_threads: int = 0,
-        verbose: bool = False
+        verbose: bool = False,
+        **kwargs
     ):
-        super().__init__(name, description)
+        super().__init__(name, description, **kwargs)
         self.model_name_or_path = model_name_or_path
         self.temperature = temperature
         self.information_measure = information_measure
@@ -162,6 +163,8 @@ These divergences are computed over distributions derived from MLM logits, optio
         self.batch_size = batch_size
         self.num_threads = num_threads
         self.verbose = verbose
+
+        self.exclude_from_cache_key('device', 'batch_size')
 
     def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
         """

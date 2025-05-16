@@ -1,3 +1,0 @@
-{"scenario": "low_cpu_mem_false", "stage": "start", "rss_mb": 20.4609375, "timestamp": 1747348954.9254422}
-{"scenario": "low_cpu_mem_false", "stage": "import_done", "rss_mb": 629.97265625, "timestamp": 1747348960.693494}
-{"scenario": "low_cpu_mem_false", "stage": "model_loaded", "rss_mb": 652.40625, "timestamp": 1747348961.3725088}

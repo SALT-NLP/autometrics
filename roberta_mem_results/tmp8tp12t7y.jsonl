@@ -1,3 +1,0 @@
-{"scenario": "import_only", "stage": "start", "rss_mb": 20.4609375, "timestamp": 1747348937.845958}
-{"scenario": "import_only", "stage": "import_done", "rss_mb": 630.01953125, "timestamp": 1747348946.3382993}
-{"scenario": "import_only", "stage": "model_loaded", "rss_mb": 652.421875, "timestamp": 1747348947.0824704}

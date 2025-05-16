@@ -1,3 +1,0 @@
-,example_id,duration_milliseconds,cpu_ram_mb,gpu_ram_mb,disk_usage_change_mb,baseline_cpu_ram_mb,baseline_gpu_ram_mb,total_cpu_ram_mb,total_gpu_ram_mb
-0,0,1750.8940696716309,32.72265625,0,0.484375,1067.734375,0.0,1100.45703125,0.0
-1,1,1999.964714050293,2.9609375,0,0.0,1067.734375,0.0,1070.6953125,0.0

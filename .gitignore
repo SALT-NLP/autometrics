@@ -173,3 +173,5 @@ cython_debug/
 .autometrics_cache/
 autometrics_cache/
 test_autometrics_cache/
+
+/outputs/

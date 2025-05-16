@@ -1,0 +1,218 @@
+Generating train split:   0%|          | 0/700 [00:00<?, ? examples/s]Generating train split:  14%|█▍        | 100/700 [00:00<00:03, 173.19 examples/s]Generating train split:  29%|██▊       | 200/700 [00:00<00:02, 240.23 examples/s]Generating train split:  43%|████▎     | 300/700 [00:01<00:01, 342.34 examples/s]Generating train split:  57%|█████▋    | 400/700 [00:01<00:00, 332.08 examples/s]Generating train split:  71%|███████▏  | 500/700 [00:01<00:00, 421.85 examples/s]Generating train split:  86%|████████▌ | 600/700 [00:01<00:00, 439.85 examples/s]Generating train split: 100%|██████████| 700/700 [00:04<00:00, 147.97 examples/s]
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:07<00:14,  7.21s/it] 67%|██████▋   | 2/3 [00:08<00:03,  3.68s/it]100%|██████████| 3/3 [00:08<00:00,  2.15s/it]100%|██████████| 3/3 [00:08<00:00,  2.92s/it]
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:00<00:01,  1.70it/s]100%|██████████| 3/3 [00:00<00:00,  4.68it/s]
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:03<00:00,  3.62s/it]100%|██████████| 1/1 [00:03<00:00,  3.62s/it]
+  0%|          | 0/3 [00:00<?, ?it/s]100%|██████████| 3/3 [00:00<00:00, 33.02it/s]
+Token indices sequence length is longer than the specified maximum sequence length for this model (65913 > 512). Running this sequence through the model will result in indexing errors
+DistilBertSdpaAttention is used but `torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True` or `head_mask`. Falling back to the manual attention implementation, but specifying the manual implementation will be required from Transformers version v5.0.0 onwards. This warning can be removed using the argument `attn_implementation="eager"` when loading the model.
+Passing a tuple of `past_key_values` is deprecated and will be removed in Transformers v4.48.0. You should pass an instance of `EncoderDecoderCache` instead, e.g. `past_key_values=EncoderDecoderCache.from_legacy_cache(past_key_values)`.
+Token indices sequence length is longer than the specified maximum sequence length for this model (1526 > 1024). Running this sequence through the model will result in indexing errors
+Groups:   0%|          | 0/9 [00:00<?, ?it/s]Groups:  11%|█         | 1/9 [00:14<01:55, 14.45s/it]Groups:  22%|██▏       | 2/9 [00:18<00:56,  8.08s/it]Groups:  22%|██▏       | 2/9 [00:23<01:21, 11.65s/it]
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/design2code.py", line 35, in <module>
+    train.add_metrics(all_metrics)
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/dataset/Dataset.py", line 95, in add_metrics
+    self.add_metric(metric, update_dataset=update_dataset)
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/dataset/PairwiseDataset.py", line 132, in add_metric
+    self.model1_dataset.add_metric(metric, update_dataset=update_dataset)
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/dataset/Dataset.py", line 91, in add_metric
+    metric.predict(self, update_dataset=update_dataset)
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/ReferenceFreeMetric.py", line 48, in predict
+    results = self.calculate_batched(inputs, outputs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/Perplexity.py", line 340, in calculate_batched
+    return calculate_perplexities(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/Perplexity.py", line 157, in calculate_perplexities
+    doc_perplexities = compute_per_document_perplexities(grouped, model, tokenizer, device, batch_size, progress_bar)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/Perplexity.py", line 115, in compute_per_document_perplexities
+    outputs = model(padded_inputs, labels=None)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/transformers/models/gpt2/modeling_gpt2.py", line 1084, in forward
+    lm_logits = self.lm_head(hidden_states)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 39.39 GiB of which 59.94 MiB is free. Including non-PyTorch memory, this process has 39.32 GiB memory in use. Of the allocated memory 36.94 GiB is allocated by PyTorch, and 1.89 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:07<00:14,  7.00s/it] 67%|██████▋   | 2/3 [00:08<00:03,  3.59s/it]100%|██████████| 3/3 [00:08<00:00,  2.13s/it]100%|██████████| 3/3 [00:08<00:00,  2.87s/it]
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:00<00:01,  1.38it/s]100%|██████████| 3/3 [00:00<00:00,  3.89it/s]
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:03<00:00,  3.68s/it]100%|██████████| 1/1 [00:03<00:00,  3.68s/it]
+  0%|          | 0/3 [00:00<?, ?it/s]100%|██████████| 3/3 [00:00<00:00, 37.93it/s]
+Token indices sequence length is longer than the specified maximum sequence length for this model (65913 > 512). Running this sequence through the model will result in indexing errors
+DistilBertSdpaAttention is used but `torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True` or `head_mask`. Falling back to the manual attention implementation, but specifying the manual implementation will be required from Transformers version v5.0.0 onwards. This warning can be removed using the argument `attn_implementation="eager"` when loading the model.
+Passing a tuple of `past_key_values` is deprecated and will be removed in Transformers v4.48.0. You should pass an instance of `EncoderDecoderCache` instead, e.g. `past_key_values=EncoderDecoderCache.from_legacy_cache(past_key_values)`.
+Token indices sequence length is longer than the specified maximum sequence length for this model (1526 > 1024). Running this sequence through the model will result in indexing errors
+Groups:   0%|          | 0/9 [00:00<?, ?it/s]Groups:  11%|█         | 1/9 [00:14<01:53, 14.18s/it]Groups:  22%|██▏       | 2/9 [00:17<00:55,  7.93s/it]Groups:  33%|███▎      | 3/9 [00:22<00:39,  6.65s/it]Groups:  44%|████▍     | 4/9 [00:23<00:22,  4.42s/it]Groups:  56%|█████▌    | 5/9 [00:26<00:14,  3.74s/it]Groups:  67%|██████▋   | 6/9 [00:28<00:09,  3.15s/it]Groups:  78%|███████▊  | 7/9 [00:28<00:04,  2.30s/it]Groups:  89%|████████▉ | 8/9 [00:29<00:01,  1.84s/it]Groups: 100%|██████████| 9/9 [00:30<00:00,  1.63s/it]Groups: 100%|██████████| 9/9 [00:30<00:00,  3.44s/it]
+Groups:   0%|          | 0/4 [00:00<?, ?it/s]Groups:  25%|██▌       | 1/4 [00:06<00:20,  6.75s/it]Groups:  50%|█████     | 2/4 [00:16<00:16,  8.49s/it]Groups:  75%|███████▌  | 3/4 [00:20<00:06,  6.53s/it]Groups: 100%|██████████| 4/4 [00:24<00:00,  5.54s/it]Groups: 100%|██████████| 4/4 [00:24<00:00,  6.17s/it]
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:07,  3.57s/it] 67%|██████▋   | 2/3 [00:04<00:02,  2.21s/it]100%|██████████| 3/3 [00:05<00:00,  1.34s/it]100%|██████████| 3/3 [00:05<00:00,  1.71s/it]
+  0%|          | 0/3 [00:00<?, ?it/s]100%|██████████| 3/3 [00:00<00:00, 37.17it/s]
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:03<00:00,  3.02s/it]100%|██████████| 1/1 [00:03<00:00,  3.02s/it]
+  0%|          | 0/3 [00:00<?, ?it/s]100%|██████████| 3/3 [00:00<00:00, 38.60it/s]
+Groups:   0%|          | 0/7 [00:00<?, ?it/s]Groups:  14%|█▍        | 1/7 [00:07<00:45,  7.65s/it]Groups:  29%|██▊       | 2/7 [00:10<00:23,  4.70s/it]Groups:  43%|████▎     | 3/7 [00:24<00:36,  9.01s/it]Groups:  57%|█████▋    | 4/7 [00:25<00:18,  6.02s/it]Groups:  71%|███████▏  | 5/7 [00:30<00:10,  5.36s/it]Groups:  86%|████████▌ | 6/7 [00:31<00:03,  3.90s/it]Groups: 100%|██████████| 7/7 [00:32<00:00,  2.98s/it]Groups: 100%|██████████| 7/7 [00:32<00:00,  4.60s/it]
+Groups:   0%|          | 0/4 [00:00<?, ?it/s]Groups:  25%|██▌       | 1/4 [00:05<00:17,  5.83s/it]Groups:  50%|█████     | 2/4 [00:09<00:09,  4.82s/it]Groups:  75%|███████▌  | 3/4 [00:23<00:08,  8.80s/it]Groups: 100%|██████████| 4/4 [00:26<00:00,  6.38s/it]Groups: 100%|██████████| 4/4 [00:26<00:00,  6.54s/it]
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/7 [00:00<?, ?it/s] 14%|█▍        | 1/7 [00:08<00:52,  8.74s/it] 29%|██▊       | 2/7 [00:10<00:22,  4.43s/it] 43%|████▎     | 3/7 [00:11<00:11,  3.00s/it] 57%|█████▋    | 4/7 [00:12<00:06,  2.31s/it] 71%|███████▏  | 5/7 [00:13<00:03,  1.91s/it] 86%|████████▌ | 6/7 [00:15<00:01,  1.66s/it]100%|██████████| 7/7 [00:16<00:00,  1.45s/it]100%|██████████| 7/7 [00:16<00:00,  2.30s/it]
+  0%|          | 0/7 [00:00<?, ?it/s] 29%|██▊       | 2/7 [00:00<00:00, 17.79it/s] 71%|███████▏  | 5/7 [00:00<00:00, 20.19it/s]100%|██████████| 7/7 [00:00<00:00, 21.68it/s]
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:08<00:08,  8.71s/it]100%|██████████| 2/2 [00:09<00:00,  4.23s/it]100%|██████████| 2/2 [00:09<00:00,  4.91s/it]
+  0%|          | 0/7 [00:00<?, ?it/s] 43%|████▎     | 3/7 [00:00<00:00, 25.96it/s] 86%|████████▌ | 6/7 [00:00<00:00, 25.73it/s]100%|██████████| 7/7 [00:00<00:00, 27.36it/s]
+Groups:   0%|          | 0/13 [00:00<?, ?it/s]Groups:   8%|▊         | 1/13 [00:14<02:55, 14.60s/it]Groups:  15%|█▌        | 2/13 [00:36<03:27, 18.90s/it]Groups:  23%|██▎       | 3/13 [01:06<04:00, 24.06s/it]Groups:  31%|███       | 4/13 [01:14<02:37, 17.55s/it]Groups:  38%|███▊      | 5/13 [01:15<01:34, 11.76s/it]Groups:  46%|████▌     | 6/13 [01:17<00:57,  8.20s/it]Groups:  54%|█████▍    | 7/13 [01:18<00:35,  5.93s/it]Groups:  62%|██████▏   | 8/13 [01:19<00:21,  4.35s/it]Groups:  69%|██████▉   | 9/13 [01:20<00:13,  3.33s/it]Groups:  77%|███████▋  | 10/13 [01:24<00:10,  3.59s/it]Groups:  85%|████████▍ | 11/13 [01:27<00:06,  3.38s/it]Groups:  92%|█████████▏| 12/13 [01:29<00:02,  2.93s/it]Groups: 100%|██████████| 13/13 [01:31<00:00,  2.57s/it]Groups: 100%|██████████| 13/13 [01:31<00:00,  7.01s/it]
+Groups:   0%|          | 0/6 [00:00<?, ?it/s]Groups:  17%|█▋        | 1/6 [00:34<02:51, 34.34s/it]Groups:  33%|███▎      | 2/6 [00:49<01:32, 23.21s/it]Groups:  50%|█████     | 3/6 [01:06<01:01, 20.39s/it]Groups:  67%|██████▋   | 4/6 [01:15<00:31, 15.81s/it]Groups:  83%|████████▎ | 5/6 [01:18<00:11, 11.16s/it]Groups: 100%|██████████| 6/6 [01:21<00:00,  8.52s/it]Groups: 100%|██████████| 6/6 [01:21<00:00, 13.65s/it]
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/evaluate/correlation.py:65: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+  spearman_correlations_all[target_column][metric_column] = correlation(df[target_column], df[metric_column])[0]
+Traceback (most recent call last):
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 727, in completion
+    raise e
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 654, in completion
+    self.make_sync_openai_chat_completion_request(
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 145, in sync_wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 473, in make_sync_openai_chat_completion_request
+    raise e
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 455, in make_sync_openai_chat_completion_request
+    raw_response = openai_client.chat.completions.with_raw_response.create(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/openai/_legacy_response.py", line 364, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/openai/_utils/_utils.py", line 279, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/openai/resources/chat/completions.py", line 863, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/openai/_base_client.py", line 1283, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/openai/_base_client.py", line 960, in request
+    return self._request(
+           ^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/openai/_base_client.py", line 1064, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.BadRequestError: Error code: 400 - {'object': 'error', 'message': "The input (403643 tokens) is longer than the model's context length (131072 tokens).", 'type': 'BadRequestError', 'param': None, 'code': 400}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/main.py", line 1732, in completion
+    raise e
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/main.py", line 1705, in completion
+    response = openai_chat_completions.completion(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 738, in completion
+    raise OpenAIError(
+litellm.llms.openai.common_utils.OpenAIError: Error code: 400 - {'object': 'error', 'message': "The input (403643 tokens) is longer than the model's context length (131072 tokens).", 'type': 'BadRequestError', 'param': None, 'code': 400}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/design2code.py", line 47, in <module>
+    new_metrics.extend(generator.generate(train, target_column))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/generator/LLMJudgeProposer.py", line 115, in generate
+    axis_of_variation = self._get_axes_of_variation(good_examples_formatted, bad_examples_formatted)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/generator/LLMJudgeProposer.py", line 103, in _get_axes_of_variation
+    response = GenerateAxisOfVariation()(task_description=self.task_description, good_examples=good_examples, bad_examples=bad_examples)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/utils/callback.py", line 266, in wrapper
+    return fn(instance, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/primitives/program.py", line 32, in __call__
+    return self.forward(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/generator/LLMJudgeProposer.py", line 36, in forward
+    axes_of_variation = self.generate_axes(task_description=task_description, target_name=target_name, good_examples=good_examples, bad_examples=bad_examples).axes_of_variation
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/utils/callback.py", line 266, in wrapper
+    return fn(instance, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/primitives/program.py", line 32, in __call__
+    return self.forward(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/predict/chain_of_thought.py", line 38, in forward
+    return self.predict(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/utils/callback.py", line 266, in wrapper
+    return fn(instance, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/predict/predict.py", line 76, in __call__
+    return self.forward(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/predict/predict.py", line 131, in forward
+    completions = adapter(lm, lm_kwargs=config, signature=signature, demos=demos, inputs=kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/adapters/chat_adapter.py", line 50, in __call__
+    return JSONAdapter()(lm, lm_kwargs, signature, demos, inputs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/adapters/json_adapter.py", line 57, in __call__
+    return super().__call__(lm, lm_kwargs, signature, demos, inputs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/adapters/chat_adapter.py", line 49, in __call__
+    raise e
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/adapters/chat_adapter.py", line 41, in __call__
+    return super().__call__(lm, lm_kwargs, signature, demos, inputs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/adapters/base.py", line 51, in __call__
+    outputs = lm(messages=inputs, **lm_kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/utils/callback.py", line 266, in wrapper
+    return fn(instance, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/clients/base_lm.py", line 88, in __call__
+    response = self.forward(prompt=prompt, messages=messages, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/clients/lm.py", line 107, in forward
+    results = completion(
+              ^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/clients/cache.py", line 207, in wrapper
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/clients/lm.py", line 217, in cached_litellm_completion
+    return litellm_completion(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/dspy/clients/lm.py", line 239, in litellm_completion
+    return litellm.completion(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/utils.py", line 1213, in wrapper
+    raise e
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/utils.py", line 1091, in wrapper
+    result = original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/main.py", line 3093, in completion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2214, in exception_type
+    raise e
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 384, in exception_type
+    raise BadRequestError(
+litellm.exceptions.BadRequestError: litellm.BadRequestError: Litellm_proxyException - The input (403643 tokens) is longer than the model's context length (131072 tokens).

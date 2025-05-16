@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Metric Report Card</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    body.dark-mode { background-color: #121212; color: #e0e0e0; }
+    body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 { color: #e0e0e0; }
+    body.dark-mode .text-secondary, body.dark-mode .text-secondary.small { color: #aaaaaa !important; }
+    body.dark-mode .card { background-color: #1e1e1e; border-color: #333; color: #e0e0e0; }
+    body.dark-mode .table, body.dark-mode .table th, body.dark-mode .table td { background-color: #1e1e1e; color: #e0e0e0; border-color: #333; }
+    body.dark-mode .table-striped tbody tr:nth-of-type(odd) { background-color: #2a2a2a; }
+    body.dark-mode .accordion-button { background-color: #1e1e1e; color: #e0e0e0; }
+    body.dark-mode .accordion-button:not(.collapsed) { background-color: #333; color: #fff; }
+    body.dark-mode .accordion-body { background-color: #1e1e1e; color: #e0e0e0; }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Metric Report Card</h1>
+      <div class="d-flex align-items-center">
+        <div class="form-check form-switch me-3">
+          <input class="form-check-input" type="checkbox" id="darkModeToggle">
+          <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+        </div>
+        <button class="btn btn-primary" onclick="window.print()">Export to PDF</button>
+      </div>
+    </div>
+    <div class="row g-4">
+      <!-- Regression Coefficients -->
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Regression Coefficients</h2>
+          <p class="text-secondary small">Shows the weight of each submetric in the aggregate metric.</p>
+          <table class="table table-striped">
+            <thead><tr><th>Metric</th><th>Coeff.</th></tr></thead>
+            <tbody>
+              <tr><td>BLEU</td><td>0.18</td></tr>
+              <tr><td>ROUGE-1</td><td>0.20</td></tr>
+              <tr><td>Medical Correctness</td><td>0.24</td></tr>
+              <tr><td>BERTScore</td><td>0.20</td></tr>
+              <tr><td>QAGS</td><td>0.18</td></tr>
+              <tr><td><strong>Aggregate</strong></td><td><strong>1.00</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Correlation -->
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Correlation</h2>
+          <p class="text-secondary small">Scatter of each metric vs. human ratings (0–6).</p>
+          <div id="correlation-chart" style="height:250px;"></div>
+          <p class="mt-2 small"><strong>Note:</strong> higher r indicates better alignment.</p>
+          <ul>
+            <li>BLEU r = 0.60</li>
+            <li>ROUGE-1 r = 0.65</li>
+            <li>Medical Correctness r = 0.82</li>
+            <li>BERTScore r = 0.72</li>
+            <li>QAGS r = 0.75</li>
+            <li><strong>Aggregate r = 0.78</strong></li>
+          </ul>
+        </div>
+      </div>
+      <!-- Robustness -->
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Robustness</h2>
+          <p class="text-secondary small">Rate at which scores drop on perturbed outputs (higher is better).</p>
+          <div id="robustness-chart" style="height:250px;"></div>
+        </div>
+      </div>
+      <!-- Run Time Distribution -->
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Run Time Distribution</h2>
+          <p class="text-secondary small">Box & whisker of sample computation times per metric, plus aggregate time with confidence intervals.</p>
+          <div id="runtime-chart" style="height:250px;"></div>
+          <p id="runtime-info" class="mt-2"></p>
+        </div>
+      </div>
+      <!-- Metric Details -->
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Metric Details</h2>
+          <p class="text-secondary small">Descriptions, usage, and limitations.</p>
+          <div class="accordion" id="metricDetails">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="descHeader">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#descPanel" aria-expanded="false" aria-controls="descPanel">Descriptions</button>
+              </h2>
+              <div id="descPanel" class="accordion-collapse collapse" aria-labelledby="descHeader" data-bs-parent="#metricDetails">
+                <div class="accordion-body">
+                  <ul>
+                    <li><strong>BLEU:</strong> N-gram precision measuring surface similarity.</li>
+                    <li><strong>ROUGE-1:</strong> Recall of unigrams against references.</li>
+                    <li><strong>Medical Correctness:</strong> LLM-based factual accuracy judgment.</li>
+                    <li><strong>BERTScore:</strong> Contextual embedding similarity.</li>
+                    <li><strong>QAGS:</strong> QA-based consistency score.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="usageHeader">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#usagePanel" aria-expanded="false" aria-controls="usagePanel">Usage Descriptions</button>
+              </h2>
+              <div id="usagePanel" class="accordion-collapse collapse" aria-labelledby="usageHeader" data-bs-parent="#metricDetails">
+                <div class="accordion-body">
+                  <ul>
+                    <li><strong>BLEU:</strong> Exact n-gram overlap in clinical summaries.</li>
+                    <li><strong>ROUGE-1:</strong> Term recall vs. reference summaries.</li>
+                    <li><strong>Medical Correctness:</strong> LLM judge on factual accuracy.</li>
+                    <li><strong>BERTScore:</strong> Semantic similarity via embeddings.</li>
+                    <li><strong>QAGS:</strong> QA consistency with reference facts.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="limitsHeader">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#limitsPanel" aria-expanded="false" aria-controls="limitsPanel">Limitations</button>
+              </h2>
+              <div id="limitsPanel" class="accordion-collapse collapse" aria-labelledby="limitsHeader" data-bs-parent="#metricDetails">
+                <div class="accordion-body">
+                  <ul>
+                    <li><strong>BLEU:</strong> Misses valid paraphrases.</li>
+                    <li><strong>ROUGE-1:</strong> Overemphasizes recall over semantics.</li>
+                    <li><strong>Medical Correctness:</strong> Dependent on rubric quality.</li>
+                    <li><strong>BERTScore:</strong> Embedding biases affect scores.</li>
+                    <li><strong>QAGS:</strong> QA model hallucinations possible.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Compute Requirements -->
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Compute Requirements</h2>
+          <p class="text-secondary small">Estimated memory for CPU & GPU per metric.</p>
+          <table class="table table-striped">
+            <thead><tr><th>Metric</th><th>GPU RAM</th><th>CPU RAM</th></thead>
+            <tbody>
+              <tr><td>BLEU</td><td>4 GB</td><td>2 GB</td></tr>
+              <tr><td>ROUGE-1</td><td>5 GB</td><td>2.5 GB</td></tr>
+              <tr><td>Medical Correctness</td><td>8 GB</td><td>4 GB</td></tr>
+              <tr><td>BERTScore</td><td>7 GB</td><td>3.5 GB</td></tr>
+              <tr><td>QAGS</td><td>6 GB</td><td>3 GB</td></tr>
+              <tr><td><strong>Aggregate</strong></td><td><strong>30 GB</strong></td><td><strong>15 GB</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- Metric Summary -->
+    <div class="mt-5 card p-3">
+      <h3>Metric Summary</h3>
+      <p>This aggregate metric balances lexical overlap, recall, semantic similarity, and clinical correctness to closely predict human evaluations in medical summarization.</p>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function getThemeLayout() {
+      const color = getComputedStyle(document.body).color;
+      return { paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: { color } };
+    }
+    function drawCharts() {
+      const N=50; const human=Array.from({length:N},()=>Math.random()*4+1);
+      const scores=[
+        human.map(h=>h*0.72+(Math.random()-0.5)*1.2),
+        human.map(h=>h*0.65+(Math.random()-0.5)*1.0),
+        human.map(h=>h*0.82+(Math.random()-0.5)*0.5),
+        human.map(h=>h*0.72+(Math.random()-0.5)*0.7),
+        human.map(h=>h*0.75+(Math.random()-0.5)*0.8)
+      ];
+      const scoresAgg=human.map((h,i)=>0.18*scores[0][i]+0.20*scores[1][i]+0.24*scores[2][i]+0.20*scores[3][i]+0.18*scores[4][i]);
+      const labels=['BLEU','ROUGE-1','Medical Correctness','BERTScore','QAGS'];
+      const layout=Object.assign({xaxis:{title:'Metric Score (0-6)'},yaxis:{title:'Human Rating (0-6)'}},getThemeLayout());
+      const traces=labels.map((nm,i)=>({x:scores[i],y:human,mode:'markers',name:nm}));
+      traces.push({x:scoresAgg,y:human,mode:'markers',name:'Aggregate',marker:{size:8,color:'black'}});
+      Plotly.newPlot('correlation-chart',traces,layout);
+      Plotly.newPlot('robustness-chart',[{x:labels.concat('Aggregate'),y:[0.25,0.30,0.15,0.20,0.18,0.22],type:'bar'}],Object.assign({yaxis:{title:'Score Drop Rate'}},getThemeLayout()));
+      const times=labels.map(()=>Array.from({length:N},()=>Math.random()*0.6+0.1));
+      const boxes=labels.map((nm,i)=>({y:times[i],type:'box',name:nm}));
+      Plotly.newPlot('runtime-chart',boxes,Object.assign({yaxis:{title:'Time per Sample (s)'}},getThemeLayout()));
+      // compute avg & CI for sum & max
+      const sumArr=Array.from({length:N},(_,i)=>times.reduce((a,t)=>a+t[i],0));
+      const maxArr=Array.from({length:N},(_,i)=>Math.max(...times.map(t=>t[i])));
+      const meanSum=sumArr.reduce((a,b)=>a+b,0)/N;
+      const meanMax=maxArr.reduce((a,b)=>a+b,0)/N;
+      const stdSum=Math.sqrt(sumArr.map(v=>Math.pow(v-meanSum,2)).reduce((a,b)=>a+b,0)/N);
+      const stdMax=Math.sqrt(maxArr.map(v=>Math.pow(v-meanMax,2)).reduce((a,b)=>a+b,0)/N);
+      const ciSum=1.96*stdSum/Math.sqrt(N);
+      const ciMax=1.96*stdMax/Math.sqrt(N);
+      document.getElementById('runtime-info').innerText=
+        `Avg time/sample (sequence): ${meanSum.toFixed(2)}s ± ${ciSum.toFixed(2)}s; `+
+        `Avg time/sample (parallel): ${meanMax.toFixed(2)}s ± ${ciMax.toFixed(2)}s`;
+    }
+    document.getElementById('darkModeToggle').addEventListener('change',e=>{document.body.classList.toggle('dark-mode',e.target.checked);drawCharts();});
+    drawCharts();
+  </script>
+</body>
+</html>

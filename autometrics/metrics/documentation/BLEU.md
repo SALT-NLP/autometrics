@@ -18,7 +18,7 @@ BLEU evaluates the quality of text generation by comparing n-grams in the genera
 ### Formal Definition
 
 $$
-\text{BLEU} = \text{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
+\text{BLEU} = \text{BP} \times \exp \left( \sum_{n=1}^N w_n \log p_n \right)
 $$
 
 where:
@@ -64,7 +64,7 @@ where:
 ### Computational Complexity
 
 - **Efficiency:**  
-  BLEU is computationally efficient, requiring $O(n \cdot m)$ operations for $n$-gram matching where $n$ is the number of words in the candidate text and $m$ is the number of reference words. SacreBLEU optimizes tokenization and scoring, making it highly suitable for large-scale evaluations.
+  BLEU is computationally efficient, requiring $O(n \times m)$ operations for $n$-gram matching where $n$ is the number of words in the candidate text and $m$ is the number of reference words. SacreBLEU optimizes tokenization and scoring, making it highly suitable for large-scale evaluations.
 
 - **Scalability:**  
   BLEU scales well across datasets of varying sizes due to its simple design. SacreBLEU further supports evaluation with multiple references, diverse tokenization schemes, and language-specific preprocessing, making it adaptable to diverse evaluation setups.
@@ -97,6 +97,29 @@ where:
 - **Blogs/Tutorials:**  
   - [Understanding BLEU](https://machinelearningmastery.com/calculate-bleu-score-for-text-python/)  
   - [SacreBLEU Documentation](https://github.com/mjpost/sacrebleu)
+
+## Citation
+
+```
+@inproceedings{papineni-etal-2002-bleu,
+    title = "{B}leu: a Method for Automatic Evaluation of Machine Translation",
+    author = "Papineni, Kishore  and
+      Roukos, Salim  and
+      Ward, Todd  and
+      Zhu, Wei-Jing",
+    editor = "Isabelle, Pierre  and
+      Charniak, Eugene  and
+      Lin, Dekang",
+    booktitle = "Proceedings of the 40th Annual Meeting of the Association for Computational Linguistics",
+    month = jul,
+    year = "2002",
+    address = "Philadelphia, Pennsylvania, USA",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/P02-1040/",
+    doi = "10.3115/1073083.1073135",
+    pages = "311--318"
+}
+```
 
 ## Metric Card Authors
 

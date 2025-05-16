@@ -21,7 +21,8 @@ The parts of the repo are organized as follows:
     - Located at `autometrics/aggregator`.  Specifically `autometrics/aggregator/regression` for the regression based methods.
 - `Evaluate`: For some tasks we compute accuracy of scores (i.e. pairwise) and some we compute correlation (i.e. scalar human labels).  Eventually some more evaluations of our metrics will go here, notably this is not for metrics that measure text quality themselves.
     - Located at `autometrics/evaluate`.
-
+- `Test`: Unit tests and functionality tests
+    - Located at `autometrics/test`. Contains tests for caching and other features.
 
 # Getting started
 
@@ -30,3 +31,30 @@ Make sure to install the necessary packages listed in `requirements.txt`.  Notab
 A nice simple starting point to working with this library would be to checkout the notebook `simpda.ipynb`.  This notebook shows computing metric correlations without introducing any LLM as a Judge complexity.  Just computing all metrics and aggregating (so skipping step 2)
 
 For a more in depth introduction it would be useful to check out `simpda_dspy.ipynb` which will serve as an introduction to the LLM as a Judge components of the repo.
+
+# Disk Caching
+
+The library implements disk caching for all metrics to improve performance when running scripts multiple times. Key features:
+
+- All metrics cache results by default in the `./autometrics_cache` directory
+- Cache keys are generated based on:
+  - Input/output/references passed to the metric
+  - All initialization parameters (automatically included by default)
+  - Any additional keyword arguments passed to the calculate method
+- All initialization parameters automatically affect caching
+  - No need to explicitly register parameters
+  - Different parameter values create separate caches
+  - For example, BERTScore with different models or LLMJudge with different prompts will use different caches
+- The following parameters are automatically excluded from the cache key:
+  - `name` and `description` (don't affect output, just labeling)
+  - `use_cache` and `cache_dir` (cache configuration, not behavior)
+- You can exclude additional parameters that don't affect results using `self.exclude_from_cache_key()`
+  - For example, debug flags or verbosity settings
+- Caching can be disabled per-metric-instance by passing `use_cache=False` during initialization
+- Some simple metrics like BLEU and SARI have caching disabled by default (`DEFAULT_USE_CACHE=False`) since their computation is faster than cache lookup
+
+To implement caching in your own metrics, you only need to:
+1. Call the parent constructor with `super().__init__(...)`
+2. Exclude any additional parameters that don't affect results with `self.exclude_from_cache_key('param1', 'param2', ...)`
+
+See examples in `autometrics/test/custom_metric_caching_example.py`.

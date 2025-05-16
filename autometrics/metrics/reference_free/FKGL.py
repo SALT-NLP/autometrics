@@ -99,6 +99,17 @@ FKGL scales well for texts of varying lengths and can handle large datasets with
 - **Blogs/Tutorials:**  
 - [TextStat Documentation](https://github.com/shivam5992/textstat)
 
+## Citation
+
+```
+@article{kincaid1975derivation,
+  title={Derivation of new readability formulas (automated readability index, fog count and flesch reading ease formula) for navy enlisted personnel},
+  author={Kincaid, J Peter and Fishburne Jr, Robert P and Rogers, Richard L and Chissom, Brad S},
+  year={1975},
+  publisher={Institute for Simulation and Training, University of Central Florida}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
@@ -110,7 +121,7 @@ Portions of this metric card were drafted with assistance from OpenAI's ChatGPT,
     def __init__(self, name="FKGL", description="Flesch-Kincaid Grade Level (FKGL) is a metric that estimates the readability of a text based on the average number of syllables per word and the average number of words per sentence. Lower scores indicate easier-to-read text."):
         super().__init__(name, description)
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate the metric
         """

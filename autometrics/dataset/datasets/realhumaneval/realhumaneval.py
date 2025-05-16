@@ -32,5 +32,7 @@ class RealHumanEval(Dataset):
 
         metrics = [DummyMetric(col) for col in metric_columns]
 
-        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
+        task_description = """You are an expert Python programmer, be helpful to the user and return code only in Python."""
+
+        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics, task_description=task_description)
     

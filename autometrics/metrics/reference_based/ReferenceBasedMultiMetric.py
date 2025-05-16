@@ -4,8 +4,8 @@ class ReferenceBasedMultiMetric(MultiMetric):
     """
     Abstract class for reference-based metrics
     """
-    def __init__(self, name, description, submetric_names=[]) -> None:
-        super().__init__(name, description, submetric_names)
+    def __init__(self, name, description, submetric_names=[], **kwargs) -> None:
+        super().__init__(name, description, submetric_names, **kwargs)
 
     def calculate_row(self, row, dataset, update_dataset=True, **kwargs):
         """

@@ -218,9 +218,9 @@ def SARIsent(ssent, csent, rsents):
 
 class SARI(ReferenceBasedMultiMetric):
 	"""---
-# Metric Card for SARI
+# Metric Card for SARI (System output Against References and against the Input sentence)
 
-SARI (Sentence Adaptation for Readability Index) is a metric designed to evaluate the quality of text simplification by comparing the system-generated output against both the original input text and reference simplified texts. It measures how well words are added, deleted, and kept appropriately, rewarding edits that enhance readability while preserving meaning.
+SARI is a metric designed specifically for evaluating text simplification systems. It measures the quality of a simplification by comparing it to both the original complex text and reference simplifications. The metric considers three operations: keeping important words, deleting unnecessary words, and adding new words.
 
 ## Metric Details
 
@@ -228,11 +228,11 @@ SARI (Sentence Adaptation for Readability Index) is a metric designed to evaluat
 
 SARI evaluates text simplification by considering three types of operations: additions, deletions, and retention of n-grams. It computes precision and recall for these operations by comparing the system output to both the input and the reference simplified texts. SARI is particularly suited for simplification tasks as it explicitly rewards edits that improve readability while maintaining semantic correctness.
 
-- **Metric Type:** Surface-Level Similarity  
-- **Range:** 0 to 1  
-- **Higher is Better?:** Yes  
-- **Reference-Based?:** Yes  
-- **Input-Required?:** Yes  
+- **Metric Type:** Surface-Level Similarity
+- **Range:** 0 to 1
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** Yes
 
 ### Formal Definition
 
@@ -312,6 +312,20 @@ SARI scales well across datasets with multiple references, leveraging n-gram mat
 - **Papers:**  
 - [Optimizing Statistical Machine Translation for Text Simplification (Xu et al., 2016)](https://github.com/cocoxu/simplification/)  
 
+## Citation
+
+```
+@article{Xu-EtAl:2016:TACL,
+  author = {Wei Xu and Courtney Napoles and Ellie Pavlick and Quanze Chen and Chris Callison-Burch},
+  title = {Optimizing Statistical Machine Translation for Text Simplification},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume = {4},
+  year = {2016},
+  url = {https://cocoxu.github.io/publications/tacl2016-smt-simplification.pdf},
+  pages = {401--415}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
@@ -320,12 +334,15 @@ Portions of this metric card were drafted with assistance from OpenAI's ChatGPT,
 - **Contact:** mryan0@stanford.edu
 	"""
 	
-	def __init__(self, name="SARI", description="SARI evaluates the quality of text simplification by comparing the system output against both the original and simplified reference texts. It measures how well words are added, deleted, and kept appropriately, rewarding edits that improve readability while preserving meaning."):
-		super().__init__(name, description, submetric_names=["SARI_P", "SARI_F"])
+	# SARI is fast enough without caching
+	DEFAULT_USE_CACHE = False
+	
+	def __init__(self, name="SARI", description="SARI evaluates the quality of text simplification by comparing the system output against both the original and simplified reference texts. It measures how well words are added, deleted, and kept appropriately, rewarding edits that improve readability while preserving meaning.", **kwargs):
+		super().__init__(name, description, submetric_names=["SARI_P", "SARI_F"], **kwargs)
 		
-	def calculate(self, input, output, references=None, **kwargs):
+	def _calculate_impl(self, input, output, references=None, **kwargs):
 		"""
-		Calculate the metric
+		Actual implementation of the SARI metric
 		"""
 		if references is None:
 			references = []

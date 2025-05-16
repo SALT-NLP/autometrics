@@ -4,8 +4,8 @@ class ReferenceBasedMetric(Metric):
     """
     Abstract class for reference-based metrics
     """
-    def __init__(self, name, description):
-        super().__init__(name, description)
+    def __init__(self, name, description, **kwargs):
+        super().__init__(name, description, **kwargs)
 
     def calculate_row(self, row, dataset, update_dataset=True, **kwargs):
         """

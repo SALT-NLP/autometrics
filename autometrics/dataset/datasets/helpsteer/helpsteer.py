@@ -35,8 +35,9 @@ class HelpSteer(Dataset):
         self.train_dataset = Dataset(train_df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
         self.val_dataset = Dataset(val_df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
         self.test_dataset = None
+        task_description = """Answer the user query as a helpful chatbot assistant."""
 
-        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
+        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics, task_description=task_description)
 
     def get_splits(self, split_column=None, train_ratio=0.5, val_ratio=0.2, seed=None, preserve_splits=True, max_size=None):
         if preserve_splits:

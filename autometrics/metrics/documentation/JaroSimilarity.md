@@ -91,6 +91,24 @@ $$
 - **Blogs/Tutorials:**  
   - [Jaro and Jaro-Winkler Similarity - GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
 
+## Citation
+
+```
+@article{3ebd50ca-85b6-3914-bf38-759fcad3ed72,
+ ISSN = {01621459, 1537274X},
+ URL = {http://www.jstor.org/stable/2289924},
+ author = {Matthew A. Jaro},
+ journal = {Journal of the American Statistical Association},
+ number = {406},
+ pages = {414--420},
+ publisher = {[American Statistical Association, Taylor & Francis, Ltd.]},
+ title = {Advances in Record-Linkage Methodology as Applied to Matching the 1985 Census of Tampa, Florida},
+ urldate = {2025-05-07},
+ volume = {84},
+ year = {1989}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan

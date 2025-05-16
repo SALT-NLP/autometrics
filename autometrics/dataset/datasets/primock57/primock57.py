@@ -32,4 +32,6 @@ class Primock57(Dataset):
 
         metrics = [DummyMetric(col) for col in metric_columns]
 
-        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
+        task_description = """Write a high quality clinical note based on the transcript of a consultation with a patient."""
+
+        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics, task_description=task_description)

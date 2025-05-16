@@ -174,12 +174,28 @@ ROUGE-LSum extends ROUGE-L to the summary level by treating newlines as sentence
 
 ## Metric Card Authors
 
+## Citation
+
+  ```
+  @inproceedings{lin-2004-rouge,
+      title = "{ROUGE}: A Package for Automatic Evaluation of Summaries",
+      author = "Lin, Chin-Yew",
+      booktitle = "Text Summarization Branches Out",
+      month = jul,
+      year = "2004",
+      address = "Barcelona, Spain",
+      publisher = "Association for Computational Linguistics",
+      url = "https://aclanthology.org/W04-1013/",
+      pages = "74--81"
+  }
+  ```
+
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu  """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         name = "ROUGE"
         description = "ROUGE is a set of metrics for evaluating automatic summarization and machine translation. It compares the overlap of n-grams between the generated text and reference text, providing precision, recall, and F1 scores. ROUGE is widely used in NLP tasks to assess the quality of generated content."
 
@@ -190,9 +206,9 @@ ROUGE-LSum extends ROUGE-L to the summary level by treating newlines as sentence
             f"ROUGE-{submetric}-{measure}" for measure in measures for submetric in submetrics
         ] # ROUGE- + [1-p, 1-r, 1-f1, 2-p, 2-r, 2-f1, L-p, L-r, L-f1, Lsum-p, Lsum-r, Lsum-f1]
         
-        super().__init__(name, description, self.combinations)
+        super().__init__(name, description, self.combinations, **kwargs)
     
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate ROUGE scores for the given input and output.
         """

@@ -20,7 +20,7 @@ UniEvalDialogue evaluates dialogue responses by **converting evaluation into a B
 - **Metric Type:** Semantic Similarity, Reference-Free, Multi-Dimensional Evaluation  
 - **Range:** [0,1] for all dimensions  
 - **Higher is Better?:** Yes  
-- **Reference-Based?:** No (except for engagingness, which may require factual context)  
+- **Reference-Based?:** Yes (groundedness and engagingness require factual context)
 - **Input-Required?:** Yes  
 
 ### Formal Definition
@@ -141,17 +141,45 @@ These prompts are tokenized and passed into the **UniEvalDialogue** model, which
 ## Further Reading
 
 - **Papers:**  
-  - [Towards a Unified Multi-Dimensional Evaluator for Text Generation (Zhong et al., 2022)](https://arxiv.org/abs/2210.07197)  
+  - [Towards a Unified Multi-Dimensional Evaluator for Text Generation (Zhong et al., 2022)](https://aclanthology.org/2022.emnlp-main.131.pdf)  
 
 - **Blogs/Tutorials:**  
-  - [UniEval GitHub Documentation](https://github.com/maszhongming/UniEval)  
+  - [UniEval GitHub Documentation](https://github.com/maszhongming/UniEval)
+
+## Citation
+
+```
+@inproceedings{zhong-etal-2022-towards,
+    title = "Towards a Unified Multi-Dimensional Evaluator for Text Generation",
+    author = "Zhong, Ming  and
+      Liu, Yang  and
+      Yin, Da  and
+      Mao, Yuning  and
+      Jiao, Yizhu  and
+      Liu, Pengfei  and
+      Zhu, Chenguang  and
+      Ji, Heng  and
+      Han, Jiawei",
+    editor = "Goldberg, Yoav  and
+      Kozareva, Zornitsa  and
+      Zhang, Yue",
+    booktitle = "Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.emnlp-main.131/",
+    doi = "10.18653/v1/2022.emnlp-main.131",
+    pages = "2023--2038"
+}
+```
 
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
-- **Contact:** mryan0@stanford.edu  """
+- **Contact:** mryan0@stanford.edu"""
 
     def __init__(self):
         name = "UniEvalDialogue"
@@ -168,7 +196,7 @@ These prompts are tokenized and passed into the **UniEvalDialogue** model, which
       results = [result[submetric] for submetric in self.submetrics]
       return results
     
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate UniEvalSum scores for the given input and output.
         """
@@ -186,7 +214,7 @@ These prompts are tokenized and passed into the **UniEvalDialogue** model, which
         
         return self._parse_unieval(eval_scores[0])
     
-    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
         Calculate UniEvalSum scores for the given inputs and outputs in batches.
         """

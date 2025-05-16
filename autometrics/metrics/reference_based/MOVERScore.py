@@ -25,7 +25,7 @@ class MOVERScore(ReferenceBasedMetric):
     """---
 # Metric Card for MoverScore
 
-MoverScore is a semantic similarity metric for evaluating generated text, leveraging contextualized embeddings (such as BERT) and Earth Mover’s Distance (EMD) to measure the alignment between system outputs and reference texts. It is designed to capture semantic similarity beyond lexical overlap and has been shown to achieve a high correlation with human judgments across tasks like machine translation, summarization, image captioning, and data-to-text generation.
+MoverScore is a semantic similarity metric for evaluating generated text, leveraging contextualized embeddings (such as BERT) and Earth Mover's Distance (EMD) to measure the alignment between system outputs and reference texts. It is designed to capture semantic similarity beyond lexical overlap and has been shown to achieve a high correlation with human judgments across tasks like machine translation, summarization, image captioning, and data-to-text generation.
 
 ## Metric Details
 
@@ -41,7 +41,7 @@ MoverScore measures text similarity by computing the minimum cost required to mo
   
 ### Formal Definition
 
-MoverScore extends **Word Mover’s Distance (WMD)** by incorporating contextualized embeddings. Given a generated sentence $x$ and a reference sentence $y$, let $x_n$ and $y_n$ represent their n-grams. The distance between these sentences is computed as:
+MoverScore extends **Word Mover's Distance (WMD)** by incorporating contextualized embeddings. Given a generated sentence $x$ and a reference sentence $y$, let $x_n$ and $y_n$ represent their n-grams. The distance between these sentences is computed as:
 
 $$
 \text{WMD}(x _{n}, y _{n}) = \min _{F} \sum _{i,j} C _{ij} F _{ij}
@@ -115,7 +115,7 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
   
 ## Related Metrics
 
-- **BERTScore:** Similar to MoverScore but relies on cosine similarity rather than Earth Mover’s Distance.
+- **BERTScore:** Similar to MoverScore but relies on cosine similarity rather than Earth Mover's Distance.
 - **BLEU, ROUGE:** Traditional surface-level n-gram overlap metrics, which MoverScore seeks to improve upon.
 - **CIDEr, METEOR:** Alternative semantic similarity-based evaluation metrics.
 
@@ -129,6 +129,33 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
   - [MoverScore GitHub README](https://github.com/AIPHES/emnlp19-moverscore)  
   - [Evaluating Text Generation with MoverScore](https://arxiv.org/pdf/1909.02622.pdf)
 
+## Citation
+
+```
+@inproceedings{zhao-etal-2019-moverscore,
+    title = "{M}over{S}core: Text Generation Evaluating with Contextualized Embeddings and Earth Mover Distance",
+    author = "Zhao, Wei  and
+      Peyrard, Maxime  and
+      Liu, Fei  and
+      Gao, Yang  and
+      Meyer, Christian M.  and
+      Eger, Steffen",
+    editor = "Inui, Kentaro  and
+      Jiang, Jing  and
+      Ng, Vincent  and
+      Wan, Xiaojun",
+    booktitle = "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)",
+    month = nov,
+    year = "2019",
+    address = "Hong Kong, China",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/D19-1053/",
+    doi = "10.18653/v1/D19-1053",
+    pages = "563--578",
+    abstract = "A robust evaluation metric has a profound impact on the development of text generation systems. A desirable metric compares system output against references based on their semantics rather than surface forms. In this paper we investigate strategies to encode system and reference texts to devise a metric that shows a high correlation with human judgment of text quality. We validate our new metric, namely MoverScore, on a number of text generation tasks including summarization, machine translation, image captioning, and data-to-text generation, where the outputs are produced by a variety of neural and non-neural systems. Our findings suggest that metrics combining contextualized representations with a distance measure perform the best. Such metrics also demonstrate strong generalization capability across tasks. For ease-of-use we make our metrics available as web service."
+}
+```
+  
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
@@ -136,22 +163,41 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu  """
 
-    def __init__(self, model_name='distilbert-base-uncased', device='cuda'):
+    def __init__(self, model_name='distilbert-base-uncased', device='cuda', persistent=True, **kwargs):
         """
         Construct the MoverScore model.
         """
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, do_lower_case=True)
-        self.model = AutoModel.from_pretrained(model_name, output_hidden_states=True, output_attentions=True)
-        self.model.eval()
-        self.model.to(device)
-        self.device = device
         self.model_name = model_name
+        self.device = device
+        self.persistent = persistent
+        self.model = None
+        self.tokenizer = None
 
         name = "MOVERScore_" + model_name
         description = "MOVERScore is a metric that computes the similarity between two sentences using a pre-trained BERT model. It is based on the cosine similarity between the embeddings of the two sentences, and it uses the Earth Mover's Distance (EMD) to compute the distance between the two sets of embeddings."
         
-        super().__init__(name, description)
+        super().__init__(name, description, model_name=model_name, device=device, **kwargs)
+        self.exclude_from_cache_key("device", "persistent")
 
+        if self.persistent:
+            self._load_model()
+
+    def _load_model(self):
+        """Load the model and tokenizer."""
+        if self.model is None:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, do_lower_case=True)
+            self.model = AutoModel.from_pretrained(self.model_name, output_hidden_states=True, output_attentions=True)
+            self.model.eval()
+            self.model.to(self.device)
+
+    def _unload_model(self):
+        """Unload model to free resources."""
+        if self.model is not None:
+            del self.model
+            del self.tokenizer
+            torch.cuda.empty_cache()
+            self.model = None
+            self.tokenizer = None
 
     def truncate(self, tokens):
         if len(tokens) > self.tokenizer.model_max_length - 2:
@@ -343,18 +389,43 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
 
         return corpus_score
     
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate the metric
         """
+        if self.model is None:
+            self._load_model()
+
         if references is None:
             references = []
 
         output = [output]
         references = [[r] for r in references]
 
-        return self.corpus_score(output, references)
+        result = self.corpus_score(output, references)
+
+        if not self.persistent:
+            self._unload_model()
+
+        return result
     
+    def _calculate_batched_impl(self, inputs, outputs, references, **kwargs):
+        """
+        Calculate the metric for a batch of inputs
+        """
+        if self.model is None:
+            self._load_model()
+
+        results = []
+        for input, output, refs in zip(inputs, outputs, references):
+            result = self._calculate_impl(input, output, refs)
+            results.append(result)
+
+        if not self.persistent:
+            self._unload_model()
+
+        return results
+
 if __name__ == "__main__":
     # Example usage
     moverscore = MOVERScore()

@@ -35,7 +35,9 @@ class SimpDA(Dataset):
 
         metrics = [DummyMetric(col) for col in metric_columns]
 
-        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
+        task_description = """Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it."""
+
+        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics, task_description=task_description)
 
 class SimpEval(Dataset):
     def __init__(self, path='./autometrics/dataset/datasets/simplification/simpeval.csv'):
@@ -67,4 +69,6 @@ class SimpEval(Dataset):
 
         metrics = [DummyMetric(col) for col in metric_columns]
 
-        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
+        task_description = """Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it."""
+
+        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics, task_description=task_description)

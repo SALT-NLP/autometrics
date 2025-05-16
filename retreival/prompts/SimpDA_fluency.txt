@@ -1,0 +1,2456 @@
+ I am looking for a metric to evaluate the following task: "Given a complicated original sentence, simplify it in a way such that a broader audience could easily understand it.".
+In particular I care about "fluency".
+
+Here are some metrics that might be relevant:
+======
+BARTScore.md
+======
+---
+# Metric Card for BARTScore
+
+BARTScore is a reference-based evaluation metric for text generation that formulates evaluation as a text generation task. It leverages the pre-trained BART model to compute the conditional likelihood of one text given another, enabling flexible evaluation of different aspects such as informativeness, fluency, factuality, and coherence. BARTScore outperforms existing metrics across multiple tasks and evaluation settings.
+
+## Metric Details
+
+### Metric Description
+
+BARTScore conceptualizes evaluation as a text generation problem, assessing how likely a hypothesis (generated text) is given a reference text, source text, or both. This probability is computed using the log-likelihood of the hypothesis under a pre-trained BART model. Different evaluation perspectives can be achieved by modifying the generation direction:
+
+- **Faithfulness ($s \to h$)**: Measures how well the generated text aligns with the source text.
+- **Precision ($r \to h$)**: Evaluates the likelihood of generating the hypothesis given the reference text.
+- **Recall ($h \to r$)**: Assesses how easily the reference could be generated from the hypothesis.
+- **F-score ($r \leftrightarrow h$)**: Computes an average of Precision and Recall.
+
+Fine-tuning on downstream tasks (e.g., summarization, paraphrasing) and prompt engineering further enhance BARTScore’s adaptability to different domains.
+
+- **Metric Type:** Semantic Similarity  
+- **Range:** $(-\infty, 0]$ (log-probabilities, higher is better)  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** Yes  
+- **Input-Required?:** Yes  
+
+### Formal Definition
+
+BARTScore is computed as:
+
+$$
+BARTScore = \sum _{t=1}^{m} \omega _{t} \log p ( y _{t} \mid y _{\text{<}t}, x, \theta )
+$$
+
+where:
+
+- $p(y _{t} \mid y _{<t}, x, \theta)$ is the probability of the $t$-th token in the hypothesis $y$ given the preceding tokens and the source/reference text $x$ under the BART model parameters $\theta$.
+- $\omega _{t}$ is an optional weighting factor (default: uniform).
+
+The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., source-to-hypothesis for faithfulness, reference-to-hypothesis for precision).
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Source text (optional, for faithfulness evaluation)
+  - Generated text (hypothesis)
+  - Reference text(s) (for precision, recall, and F-score)
+
+- **Outputs:**  
+  - Scalar log-likelihood score (higher indicates better alignment)
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation  
+- **Tasks:**  
+  - Machine Translation  
+  - Summarization  
+  - Paraphrasing  
+  - Data-to-Text Generation  
+  - Dialogue Generation  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Tasks where reference-based evaluation is appropriate (e.g., machine translation, summarization).
+  - Evaluating generated text from multiple perspectives (e.g., factuality, coherence, fluency).
+  - Cases where fine-tuning and prompt-based customization are beneficial.
+
+- **Not Recommended For:**  
+  - Fully reference-free evaluation tasks.
+  - Open-ended generation tasks where diversity matters more than similarity to references.
+  - Evaluating highly extractive summaries, where performance may degrade.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - [BARTScore GitHub Repository](https://github.com/neulab/BARTScore)  
+  - Available in Hugging Face `evaluate` module  
+
+### Computational Complexity
+
+- **Efficiency:**  
+  - Requires forward passes through BART, making it more computationally expensive than n-gram-based metrics.  
+  - Can be optimized using batch processing.  
+
+- **Scalability:**  
+  - Suitable for large-scale evaluations but requires GPU acceleration for efficiency.  
+  - Performance depends on the pre-trained model size and dataset length.
+
+## Known Limitations
+
+- **Biases:**  
+  - BARTScore tends to favor abstractive over extractive summaries.  
+  - May be sensitive to the domain of the pre-trained BART model used.  
+
+- **Task Misalignment Risks:**  
+  - May not fully capture factual correctness despite faithfulness scoring.  
+  - Sensitive to tokenization and domain shift effects.  
+
+- **Failure Cases:**  
+  - Performance degrades when evaluating extractive summarization models.  
+  - Prompt engineering impacts results significantly, requiring careful selection.  
+
+## Related Metrics
+
+- **ROUGE:** Measures lexical overlap, whereas BARTScore captures semantic similarity.  
+- **BERTScore:** Also embeds text using pre-trained models but computes cosine similarity instead of generation probabilities.  
+- **BLEU:** Focuses on n-gram precision, lacking semantic alignment capabilities.  
+
+## Further Reading
+
+- **Papers:**  
+  - [BARTScore: Evaluating Generated Text as Text Generation (Yuan et al., 2021)](https://arxiv.org/abs/2106.11520)  
+
+- **Blogs/Tutorials:**  
+  - [BARTScore GitHub Documentation](https://github.com/neulab/BARTScore)  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu  
+======
+
+======
+BERTScore.md
+======
+---
+# Metric Card for BERTScore
+
+BERTScore is a semantic similarity metric for evaluating generated text against reference text. It leverages pre-trained contextual embeddings (e.g., BERT, RoBERTa) to compute token-level cosine similarity, measuring precision, recall, and F1 scores. BERTScore is particularly effective in capturing semantic equivalence and correlates well with human judgments, making it a versatile metric for various text generation tasks.
+
+## Metric Details
+
+### Metric Description
+
+BERTScore evaluates the semantic similarity between a generated text and a reference text using contextual embeddings. Unlike traditional n-gram-based metrics (e.g., BLEU), which rely on surface-level token overlap, BERTScore uses pre-trained embeddings to capture the contextual meaning of tokens. 
+
+The metric computes cosine similarity for each token pair between the reference and generated text, with optional inverse document frequency (IDF) weighting to emphasize rare tokens. The precision, recall, and F1 scores are calculated by aggregating the maximum similarity scores for each token, and an optional baseline rescaling makes the scores more interpretable.
+
+- **Metric Type:** Semantic Similarity
+- **Range:** Typically [0, 1] after rescaling
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** No
+
+### Formal Definition
+
+For a reference sentence $x = \langle x_1, \dots, x_k \rangle$ and a candidate sentence $\hat{x} = \langle \hat{x}_1, \dots, \hat{x}_l \rangle$, the BERTScore components are defined as:
+
+$$
+R_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{\hat{x}_j \in \hat{x}} x_i^\top \hat{x}_j
+$$
+
+$$
+P_{\text{BERT}} = \frac{1}{|x|} \sum_{x_j \in \hat{x}_{j} } \max _{x_i \in x} x_i^\top \hat{x}_j
+$$
+
+$$
+F_{\text{BERT}} = \frac{2 \cdot P_{\text{BERT}} \cdot R_{\text{BERT}}}{P_{\text{BERT}} + R_{\text{BERT}}}
+$$
+
+Here, $x_i$ and $\hat{x}_j$ represent the contextual embeddings of the tokens, and the similarity is computed using cosine similarity.
+
+With IDF weighting, recall is modified as:
+
+Recall Modified:
+
+$$
+R_{\text{BERT}} = \frac{\sum _{x_i \in x} \text{idf}(x_i) \cdot \max _{\hat{x}_j \in \hat{x}} x_i^\top \hat{x}_j}{\sum _{x_i \in x} \text{idf}(x_i)}
+$$
+
+Baseline rescaling adjusts scores to lie within [0, 1].
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Generated text (candidate)  
+  - Reference text(s)  
+  - Optional: IDF weights for importance weighting  
+
+- **Outputs:**  
+  - Scalar precision, recall, and F1 scores  
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation, Dialogue Systems, Image Captioning
+- **Tasks:** Machine Translation, Summarization, Paraphrasing, Image-to-Text Generation
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Tasks requiring semantic similarity evaluation between generated and reference texts.  
+  - Use cases where semantic correctness is prioritized over lexical overlap.  
+
+- **Not Recommended For:**  
+  - Open-ended or highly creative generation tasks with diverse acceptable outputs (e.g., storytelling).  
+  - Domains with very low-resource or out-of-domain embeddings.  
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [BERTScore GitHub Repository](https://github.com/Tiiiger/bert_score)  
+  - [Hugging Face `evaluate`](https://huggingface.co/docs/evaluate)  
+
+### Computational Complexity
+
+- **Efficiency:**  
+  BERTScore is computationally intensive due to the use of contextual embeddings. A GPU is recommended for large-scale evaluations.
+
+- **Scalability:**  
+  Supports multiple languages and embeddings. Processing speed varies based on embedding size and sentence length.
+
+## Known Limitations
+
+- **Biases:**  
+  - Performance may degrade for low-resource languages.  
+  - Contextual embeddings may reflect biases present in the pre-trained models.  
+
+- **Task Misalignment Risks:**  
+  - Poor performance on tasks emphasizing diversity or creativity.  
+
+- **Failure Cases:**  
+  - Struggles with very long sentences due to truncation in transformer models.  
+  - Sensitivity to embedding model choice and layer selection.  
+
+## Related Metrics
+
+- **BLEU:** Focuses on surface-level similarity using n-grams.  
+- **ROUGE:** Often used for summarization but lacks semantic understanding.  
+- **METEOR:** Incorporates synonyms but is limited in language coverage.  
+- **CHRF:** Uses character-level n-grams for lexical similarity.  
+
+## Further Reading
+
+- **Papers:**  
+  - [BERTScore: Evaluating Text Generation with BERT (Zhang et al., 2020)](https://arxiv.org/abs/1904.09675)  
+
+- **Blogs/Tutorials:**  
+  - [BERTScore GitHub Documentation](https://github.com/Tiiiger/bert_score)  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+BLEU.md
+======
+---
+# Metric Card for BLEU
+
+BLEU (Bilingual Evaluation Understudy) is a widely used metric for evaluating the quality of text generated in tasks like machine translation and summarization. It measures the overlap of n-grams between a generated text and one or more reference texts, with a brevity penalty to penalize overly short translations. SacreBLEU, a modern implementation, ensures reproducibility and standardization of BLEU scores across research.
+
+## Metric Details
+
+### Metric Description
+
+BLEU evaluates the quality of text generation by comparing n-grams in the generated output with those in one or more reference texts. It computes modified precision for n-grams and combines scores using a geometric mean, with a brevity penalty to ensure the length of the generated text matches that of the references. Higher BLEU scores indicate closer similarity to the references.
+
+- **Metric Type:** Surface-Level Similarity
+- **Range:** 0 to 1
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** No
+
+### Formal Definition
+
+$$
+\text{BLEU} = \text{BP} \cdot \exp \left( \sum_{n=1}^N w_n \log p_n \right)
+$$
+
+where:
+- $\text{BP} = \min(1, e^{1 - r/c})$ is the brevity penalty,
+- $r$ is the effective reference length (based on the closest matching reference length for each sentence),
+- $c$ is the candidate translation length,
+- $p_n$ is the modified precision for n-grams of length $n$,
+- $w_n$ are weights for each n-gram (commonly uniform, $w_n = \frac{1}{N}$).
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Generated text (candidate translation)  
+  - Reference text(s) (gold-standard translations)  
+
+- **Outputs:**  
+  - Scalar BLEU score (range: 0 to 1)
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation
+- **Tasks:** Machine Translation, Summarization, Data-to-Text Generation
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  Structured tasks with a clear correspondence between generated and reference texts, such as translation or summarization.
+  
+- **Not Recommended For:**  
+  Open-ended or creative generation tasks where diversity or semantic similarity matters more than lexical overlap (e.g., storytelling, dialogue).
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [SacreBLEU](https://github.com/mjpost/sacrebleu) (robust, standard implementation)
+  - [NLTK](https://www.nltk.org/api/nltk.translate.html) (basic Python implementation)
+  - [Hugging Face `evaluate`](https://huggingface.co/docs/evaluate) (integrated metric framework)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  BLEU is computationally efficient, requiring $O(n \cdot m)$ operations for $n$-gram matching where $n$ is the number of words in the candidate text and $m$ is the number of reference words. SacreBLEU optimizes tokenization and scoring, making it highly suitable for large-scale evaluations.
+
+- **Scalability:**  
+  BLEU scales well across datasets of varying sizes due to its simple design. SacreBLEU further supports evaluation with multiple references, diverse tokenization schemes, and language-specific preprocessing, making it adaptable to diverse evaluation setups.
+
+## Known Limitations
+
+- **Biases:**  
+  - BLEU penalizes valid paraphrases or semantically equivalent outputs that do not match reference n-grams exactly.  
+  - The brevity penalty can overly penalize valid shorter outputs, particularly for tasks where shorter text may be acceptable or even preferred (e.g., summarization).  
+
+- **Task Misalignment Risks:**  
+  - BLEU is not designed for evaluating tasks with high diversity in acceptable outputs (e.g., open-ended dialogue).  
+  - Scores depend on the quality and number of references; fewer or inconsistent references can lead to misleading evaluations.
+
+- **Failure Cases:**  
+  - BLEU struggles to capture semantic adequacy beyond lexical similarity. For instance, it cannot identify whether a translation preserves the meaning of the original sentence if word choices diverge significantly.
+
+## Related Metrics
+
+- **ROUGE:** Often used for summarization tasks, emphasizing recall over precision.  
+- **METEOR:** Incorporates synonym matching for better semantic alignment.  
+- **BERTScore:** Uses contextual embeddings for semantic similarity.  
+
+## Further Reading
+
+- **Papers:**  
+  - [Original BLEU Paper (Papineni et al., 2002)](https://www.aclweb.org/anthology/P02-1040)  
+  - [SacreBLEU: A Call for Clarity in Reporting BLEU Scores (Post, 2018)](https://www.aclweb.org/anthology/W18-6319)
+  
+- **Blogs/Tutorials:**  
+  - [Understanding BLEU](https://machinelearningmastery.com/calculate-bleu-score-for-text-python/)  
+  - [SacreBLEU Documentation](https://github.com/mjpost/sacrebleu)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+CHRF.md
+======
+---
+# Metric Card for CHRF++
+
+CHRF++ (Character n-gram F-score with word n-grams) is a metric for evaluating the quality of machine translation or other text generation tasks. It calculates the precision and recall of character-level n-grams and augments this by incorporating word n-grams, making it a versatile metric that balances lexical similarity and fluency. CHRF++ can handle languages with diverse morphological structures and is tokenization-independent.
+
+## Metric Details
+
+### Metric Description
+
+CHRF++ evaluates text quality by calculating F-scores over character n-grams while also incorporating word-level n-grams. The metric averages precision and recall of n-grams to compute an overall F-score, parameterized by $\beta$ to adjust the importance of recall relative to precision. By capturing character-level n-gram overlaps, CHRF++ is well-suited for languages with rich morphology or those that lack clear tokenization conventions.
+
+- **Metric Type:** Surface-Level Similarity  
+- **Range:** 0 to 1  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** Yes  
+- **Input-Required?:** No  
+
+### Formal Definition
+
+The CHRF++ score is calculated as:
+
+$$
+CHRF_{\beta} = (1 + \beta^2) \cdot \frac{CHRP \cdot CHRR}{\beta^2 \cdot CHRP + CHRR}
+$$
+
+Where:
+
+- $CHRP$ is the average precision of character and word n-grams:
+
+$$
+CHRP = \frac{1}{N} \sum_{n=1}^N \frac{\text{n-grams in hypothesis and reference}}{\text{total n-grams in hypothesis}}
+$$
+
+- $CHRR$ is the average recall of character and word n-grams:
+
+$$
+CHRR = \frac{1}{N} \sum_{n=1}^N \frac{\text{n-grams in hypothesis and reference}}{\text{total n-grams in reference}}
+$$
+
+- $N$ is the maximum n-gram length (typically $N=6$ for characters and $N=2$ for words).
+- $\beta$ adjusts the weight of recall relative to precision (e.g., $\beta=3$ for CHRF3).
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Generated text (hypothesis)  
+  - Reference text(s)  
+
+- **Outputs:**  
+  - Scalar CHRF++ score (range: 0 to 1)
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation  
+- **Tasks:** Machine Translation, Summarization, Paraphrasing, Data-to-Text Generation  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Tasks where tokenization independence and morphological sensitivity are crucial, such as low-resource or morphologically rich languages.  
+
+- **Not Recommended For:**  
+  - Open-ended or creative generation tasks where diversity or higher-level semantics outweigh character or word n-gram similarity.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [SacreBLEU](https://github.com/mjpost/sacrebleu)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  CHRF++ is computationally efficient, with complexity proportional to the number of n-grams in the input texts.  
+
+- **Scalability:**  
+  Scales well for datasets of varying sizes due to its simple character and word n-gram matching.
+
+## Known Limitations
+
+- **Biases:**  
+  - Can overemphasize lexical similarity, penalizing valid outputs with synonymous expressions or structural variations.
+  
+- **Task Misalignment Risks:**  
+  - May not adequately capture semantic adequacy or fluency in tasks requiring understanding beyond n-gram overlaps.  
+
+- **Failure Cases:**  
+  - Struggles with evaluating translations into languages where character n-grams lack correspondence with meaningful units (e.g., ideographic languages without preprocessing).
+
+## Related Metrics
+
+- **BLEU:** A word-based n-gram precision metric, widely used but less sensitive to morphological differences.  
+- **METEOR:** Incorporates synonym matching for better semantic similarity.  
+- **ROUGE:** Focuses on recall, commonly used for summarization tasks.  
+
+## Further Reading
+
+- **Papers:**  
+  - [Original CHRF Paper (Popović, 2015)](https://aclanthology.org/W15-3049)  
+
+- **Blogs/Tutorials:**  
+  - SacreBLEU Documentation: [CHRF++ details](https://github.com/mjpost/sacrebleu)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+CIDEr.md
+======
+---
+# Metric Card for CIDEr
+
+CIDEr (Consensus-based Image Description Evaluation) measures the similarity between a candidate image caption and a set of human-generated reference captions. It leverages TF-IDF weighted n-gram matching to capture consensus in both content and linguistic style, making it especially useful for benchmarking image captioning systems.
+
+## Metric Details
+
+### Metric Description
+
+CIDEr evaluates how well a candidate caption matches the consensus of human descriptions by comparing n-gram counts weighted by TF-IDF. In this process, each sentence is decomposed into n-grams (typically from unigrams up to four-grams), and each n-gram is weighted according to its term frequency in the sentence and its inverse document frequency across a dataset of images. The final score is the weighted average of cosine similarities computed for each n-gram length. An extended version, CIDEr-D, incorporates additional mechanisms (e.g., clipping and a Gaussian length penalty) to mitigate potential gaming of the metric.
+
+- **Metric Type:** Surface-Level Similarity
+- **Range:** Typically 0 to approximately 10 (higher values indicate better consensus)
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** No
+
+### Formal Definition
+
+For each n-gram $\omega_k$ in a reference sentence $s_{ij}$, the TF-IDF weighting is computed as:
+
+$$
+g_k(s_{ij}) = \frac{h_k(s_{ij})}{\sum_{\omega_l \in \Omega} h_l(s_{ij})} \log \left( \frac{|I|}{\sum_{p \in I} \min \left(1, \sum_q h_k(s_{pq}) \right)} \right)
+$$
+
+where:
+- $h_k(s_{ij})$ is the count of n-gram $\omega_k$ in $s_{ij}$,
+- $\Omega$ is the vocabulary of all n-grams,
+- $|I|$ is the total number of images in the dataset, and
+- the denominator in the log computes the document frequency of $\omega_k$.
+
+The n-gram level CIDEr score is defined as:
+
+$$
+CIDEr_n(c_i, S_i) = \frac{1}{m} \sum_j \frac{g_n(c_i) \cdot g_n(s_{ij})}{\| g_n(c_i) \| \, \| g_n(s_{ij}) \|}
+$$
+
+where:
+- $c_i$ is the candidate caption,
+- $S_i = \{ s_{i1}, s_{i2}, \dots, s_{im} \}$ is the set of reference captions,
+- $g_n(c_i)$ is the TF-IDF vector for n-grams of length $n$ from $c_i$, and
+- $\| \cdot \|$ denotes the Euclidean norm.
+
+The overall CIDEr score aggregates the n-gram scores:
+
+$$
+CIDEr(c_i, S_i) = \sum_{n=1}^N w_n \, CIDEr_n(c_i, S_i)
+$$
+
+with uniform weights $w_n = \frac{1}{N}$ (typically $N=4$).
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Candidate caption (a string)  
+  - A set of reference captions (a list of strings)
+
+- **Outputs:**  
+  - A scalar CIDEr score representing the degree of consensus between the candidate caption and the references
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Image Captioning, Multimodal Generation
+- **Tasks:** Image Description Evaluation
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  Evaluating image captioning systems where a rich set of human reference captions (e.g., 50 per image) is available. CIDEr is particularly effective for assessing how well a candidate caption captures the consensus of human descriptions.
+
+- **Not Recommended For:**  
+  Open-ended generation tasks (e.g., creative storytelling or dialogue) where high lexical diversity is expected, or scenarios lacking sufficient reference data.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - [coco-caption repository](https://github.com/tylin/coco-caption) (reference implementation)  
+
+### Computational Complexity
+
+- **Efficiency:**  
+  CIDEr is efficient at the sentence level; it primarily involves n-gram extraction, TF-IDF weighting, and cosine similarity calculations.
+
+- **Scalability:**  
+  While the computation scales linearly with the number of reference captions, performance benefits from additional references up to a saturation point.
+
+## Known Limitations
+
+- **Biases:**  
+  - May favor candidate captions that closely mimic the majority of reference texts, potentially penalizing valid paraphrases or creative expressions.
+  
+- **Task Misalignment Risks:**  
+  - Less effective for tasks with high variability in acceptable outputs, such as creative writing or dialogue generation.
+  
+- **Failure Cases:**  
+  - When candidate captions use synonyms or alternative phrasings not reflected in the reference set, CIDEr may under-score these valid variations.
+
+## Related Metrics
+
+- **BLEU:** Focuses on n-gram precision without TF-IDF weighting.  
+- **ROUGE:** Emphasizes n-gram recall.  
+- **METEOR:** Incorporates stemming and synonym matching for enhanced semantic alignment.  
+- **CIDEr-D:** A variant of CIDEr with added clipping and length penalty to reduce susceptibility to metric gaming.
+
+## Further Reading
+
+- **Papers:**  
+  - Vedantam, R., Zitnick, C. L., & Parikh, D. (2015). *CIDEr: Consensus-based Image Description Evaluation*. [Original paper, arXiv:1411.5726](https://arxiv.org/abs/1411.5726)
+  
+- **Blogs/Tutorials:**  
+  - Documentation and tutorials available on the coco-caption GitHub repository
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:** Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high), based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+FKGL.md
+======
+---
+# Metric Card for FKGL (Flesch-Kincaid Grade Level)
+
+The Flesch-Kincaid Grade Level (FKGL) is a readability metric designed to evaluate the complexity of English-language texts. FKGL scores correspond to U.S. school grade levels, making it easy for educators, writers, and practitioners to understand the level of education required to comprehend a given text.
+
+## Metric Details
+
+### Metric Description
+
+The FKGL metric calculates readability using the average sentence length (words per sentence) and the average syllables per word. It is widely used to assess the difficulty of documents in fields such as education, technical communication, and public policy. Lower FKGL scores indicate easier-to-read material, while higher scores signify increased complexity.
+
+- **Metric Type:** Fluency
+- **Range:** No theoretical upper bound; typical range is approximately -3.4 to above 20.
+- **Higher is Better?:** No
+- **Reference-Based?:** No
+- **Input-Required?:** Yes
+
+### Formal Definition
+
+The FKGL formula is:
+
+$$
+\text{FKGL} = 0.39 \left( \frac{\text{total words}}{\text{total sentences}} \right) + 11.8 \left( \frac{\text{total syllables}}{\text{total words}} \right) - 15.59
+$$
+
+where:
+- $\text{total words}$ is the number of words in the text,
+- $\text{total sentences}$ is the number of sentences in the text,
+- $\text{total syllables}$ is the number of syllables in the text.
+
+The result corresponds to a U.S. grade level.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Text (string) to analyze.  
+
+- **Outputs:**  
+  - A scalar score representing the U.S. school grade level required to understand the input text.
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation, Education, Technical Communication  
+- **Tasks:** Readability assessment, document simplification, educational content evaluation  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Analyzing educational materials, technical manuals, and legal documents to ensure they meet readability standards.  
+  - Simplifying public-facing content such as insurance policies or government forms.  
+
+- **Not Recommended For:**  
+  - Tasks involving creative or highly contextual text, where readability depends on subjective factors.  
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - [TextStat](https://github.com/shivam5992/textstat): A Python library implementing FKGL and other readability formulas.  
+  - [Microsoft Word Readability Statistics](https://support.microsoft.com/en-us/office/get-your-document-s-readability-and-level-statistics-85b4969e-e80a-4777-8dd3-f7fc3c8b3fd2): FKGL is included in Word's readability analysis tool.  
+
+### Computational Complexity
+
+- **Efficiency:**  
+  FKGL is computationally efficient, with a complexity approximately linear in the number of words and sentences.  
+- **Scalability:**  
+  FKGL scales well for texts of varying lengths and can handle large datasets with appropriate preprocessing.
+
+## Known Limitations
+
+- **Biases:**  
+  - FKGL does not account for the semantic content, context, or layout of the text, which may impact readability.  
+  - Polysyllabic words disproportionately influence scores, potentially overestimating difficulty in texts with technical or specialized vocabulary.  
+
+- **Task Misalignment Risks:**  
+  - May fail to accurately represent the reading comprehension difficulty for non-native speakers or readers with diverse literacy levels.  
+
+- **Failure Cases:**  
+  - Poorly segmented texts (e.g., incorrect sentence splitting) can lead to inaccurate FKGL scores.  
+
+## Related Metrics
+
+- **Flesch Reading Ease (FRE):** A complementary metric providing a score from 0 to 100 for readability, inversely correlated with FKGL.  
+- **Gunning Fog Index:** Another grade-level readability formula focusing on sentence length and complex words.  
+- **Automated Readability Index (ARI):** Similar in purpose but uses character counts instead of syllables.
+
+## Further Reading
+
+- **Papers:**  
+  - [Kincaid et al. (1975)](https://apps.dtic.mil/sti/pdfs/ADA006655.pdf): "Derivation of New Readability Formulas (Automated Readability Index, Fog Count, and Flesch Reading Ease Formula) for Navy Enlisted Personnel."
+
+- **Blogs/Tutorials:**  
+  - [TextStat Documentation](https://github.com/shivam5992/textstat)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+GLEU.md
+======
+---
+# Metric Card for GLEU
+
+GLEU (Google-BLEU) is a metric introduced to address limitations of BLEU for sentence-level evaluation. It is designed to compute recall and precision over n-grams for hypotheses and references, taking the minimum of these two values as the final score. The metric is symmetrical and ranges from 0 (no match) to 1 (perfect match). It was initially proposed in Google's Neural Machine Translation (GNMT) system for reinforcement learning experiments.
+
+## Metric Details
+
+### Metric Description
+
+GLEU computes sentence-level evaluation scores by comparing n-grams (of lengths 1 to 4) in the hypothesis and reference sentences. It calculates the precision (matching n-grams over total n-grams in the hypothesis) and recall (matching n-grams over total n-grams in the reference) and uses the minimum of the two values to determine the GLEU score. This approach avoids issues with BLEU's sentence-level evaluation while maintaining a high correlation with corpus-level BLEU scores.
+
+- **Metric Type:** Surface-Level Similarity  
+- **Range:** 0 to 1  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** Yes  
+- **Input-Required?:** No  
+
+### Formal Definition
+
+The GLEU score for a hypothesis $h$ and a set of reference sentences $\{r_1, r_2, \ldots, r_n\}$ is defined as:
+
+$$
+GLEU(h, R) = \min \left( \text{precision}, \text{recall} \right)
+$$
+
+Where:
+- **Precision:** $\frac{\text{Number of matching n-grams}}{\text{Total n-grams in hypothesis}}$  
+- **Recall:** $\frac{\text{Number of matching n-grams}}{\text{Total n-grams in reference}}$  
+
+The final score is symmetrical with respect to hypothesis and reference, making it robust for single-sentence evaluation.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Hypothesis sentence (generated text)  
+  - Reference sentence(s) (gold-standard text)  
+
+- **Outputs:**  
+  - A scalar score in the range [0, 1], where 1 indicates a perfect match.
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation  
+- **Tasks:** Machine Translation, Summarization  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  Sentence-level evaluation in structured tasks where precision and recall over n-grams are meaningful indicators of quality, such as translation.  
+
+- **Not Recommended For:**  
+  Creative or open-ended text generation tasks where semantic similarity or diversity is more relevant than surface-level n-gram overlap.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - [NLTK GLEU Implementation](https://github.com/nltk/nltk/blob/develop/nltk/translate/gleu_score.py)  
+
+### Computational Complexity
+
+- **Efficiency:**  
+  Efficient for sentence-level evaluation, as it requires simple n-gram matching and aggregation.
+
+- **Scalability:**  
+  Scales well for batch evaluations but may be computationally expensive for larger corpora due to repeated n-gram matching.
+
+## Known Limitations
+
+- **Biases:**  
+  Penalizes valid paraphrases or semantically equivalent outputs that differ in n-gram overlap.  
+
+- **Task Misalignment Risks:**  
+  Designed for tasks with a single correct output structure; performs poorly for evaluating diverse or creative responses.  
+
+- **Failure Cases:**  
+  - GLEU may not adequately evaluate cases where semantic preservation is more important than lexical overlap.
+
+## Related Metrics
+
+- **BLEU:** GLEU is inspired by BLEU but designed for sentence-level evaluation.  
+- **METEOR:** Aims to improve on BLEU by incorporating synonym matching.  
+- **BERTScore:** Evaluates semantic similarity using contextual embeddings.  
+
+## Further Reading
+
+- **Papers:**  
+  - [Google’s Neural Machine Translation System (Wu et al., 2016)](https://arxiv.org/pdf/1609.08144v2.pdf)  
+
+- **Blogs/Tutorials:**  
+  - Needs more information  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+HammingDistance.md
+======
+---
+# Metric Card for Hamming Distance
+
+Hamming Distance measures the number of positions at which two equal-length sequences differ. It is a fundamental metric in coding theory and information theory, commonly used for error detection and correction in digital communications.
+
+## Metric Details
+
+### Metric Description
+
+Hamming Distance calculates the number of substitutions required to change one sequence into the other, or equivalently, the number of positions where the corresponding symbols differ. This metric is strictly defined for sequences of equal length.
+
+- **Metric Type:** Surface-Level Similarity
+- **Range:** 0 to $n$ (where $n$ is the length of the sequences)
+- **Higher is Better?:** No (lower values indicate greater similarity)
+- **Reference-Based?:** Yes
+- **Input-Required?:** Yes
+
+### Formal Definition
+
+For two sequences $s$ and $t$ of equal length $n$, the Hamming Distance is defined as:
+
+$$
+H(s, t) = \sum_{i=1}^{n} \mathbf{1}\{ s_i \neq t_i \}
+$$
+
+where $\mathbf{1}\{ s_i \neq t_i \}$ is an indicator function that equals 1 if $s_i \neq t_i$ and 0 otherwise.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Two equal-length sequences (e.g., binary strings, character arrays)
+  
+- **Outputs:**  
+  - An integer representing the number of differing positions between the two sequences.
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:**  
+  - Coding Theory  
+  - Information Theory
+  
+- **Tasks:**  
+  - Error Detection  
+  - Error Correction  
+  - Code Evaluation
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Fixed-length sequences in digital communication systems and error correcting codes.
+  
+- **Not Recommended For:**  
+  - Sequences of differing lengths or applications requiring semantic similarity evaluation (e.g., natural language text similarity).
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - Custom implementations in Python (using simple loops or vectorized operations in NumPy)
+  - Functions available in libraries such as SciPy.
+  - For a conceptual overview, see the [Hamming Distance - Wikipedia](https://en.wikipedia.org/wiki/Hamming_distance).
+
+### Computational Complexity
+
+- **Efficiency:**  
+  - Operates in $O(n)$ time, where $n$ is the length of the sequences.
+  
+- **Scalability:**  
+  - Highly efficient for moderate-length sequences; performance scales linearly with sequence length.
+
+## Known Limitations
+
+- **Biases:**  
+  - Considers only literal character differences without accounting for semantic or contextual similarities.
+  
+- **Task Misalignment Risks:**  
+  - Not applicable to sequences of unequal length.
+  
+- **Failure Cases:**  
+  - Use with unequal-length inputs will result in errors or undefined behavior.
+
+## Related Metrics
+
+- **Levenshtein Distance:** Measures the minimum edit operations (insertions, deletions, substitutions) required to transform one sequence into another.
+- **Damerau-Levenshtein Distance:** Extends Levenshtein Distance by considering transpositions as well.
+- **Jaccard Index:** Evaluates similarity based on set overlap, rather than positional differences.
+
+## Further Reading
+
+- **Papers:**  
+  - Richard W. Hamming, "Error detecting and error correcting codes", *The Bell System Technical Journal*, 1950. [Available here](https://hdl.handle.net/10945/64206)
+  
+- **Blogs/Tutorials:**  
+  - [Hamming Distance - Wikipedia](https://en.wikipedia.org/wiki/Hamming_distance)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan
+- **Acknowledgment of AI Assistance:**
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+JaroSimilarity.md
+======
+---
+# Metric Card for Jaro Similarity
+
+Jaro Similarity is a string metric used to measure the similarity between two strings based on the number of matching characters and the number of transpositions. It produces a score between 0 and 1, where 1 indicates an exact match and 0 indicates no similarity.
+
+## Metric Details
+
+### Metric Description
+
+Jaro Similarity computes a score by comparing two strings as follows:
+- **Matching Characters:** Two characters from the two strings are considered matching if they are the same and not farther than $\lfloor\max(|s_1|, |s_2|)/2\rfloor - 1$ positions apart.
+- **Transpositions:** Transpositions are counted as half the number of matching characters that appear in a different order.
+
+- **Metric Type:** Surface-Level Similarity
+- **Range:** 0 to 1
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** Yes
+
+### Formal Definition
+
+Let $s_1$ and $s_2$ be two strings with lengths $|s_1|$ and $|s_2|$, respectively. Let $m$ denote the number of matching characters, and $t$ denote half the number of transpositions. The Jaro Similarity $J$ is defined as:
+
+$$
+J = \frac{1}{3} \left( \frac{m}{|s_1|} + \frac{m}{|s_2|} + \frac{m - t}{m} \right)
+$$
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Two strings (or sequences) to compare.
+  
+- **Outputs:**  
+  - A float representing the similarity score in the range [0, 1].
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:**  
+  - Record Linkage
+  
+- **Tasks:**  
+  - Record Linkage, Data Deduplication, Approximate String Matching
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Comparing strings in applications such as record linkage or data deduplication where a normalized similarity score is useful.
+  
+- **Not Recommended For:**  
+  - Applications requiring semantic or context-aware similarity, as this metric considers only character-level differences.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - Implementations are available in multiple programming languages (Python, C++, Java, etc.). For example, a detailed explanation and implementation can be found on [GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  - The algorithm operates in $O(|s_1| \times |s_2|)$ time.
+  
+- **Scalability:**  
+  - Suitable for comparing moderate-length strings; performance may degrade with very long strings.
+
+## Known Limitations
+
+- **Biases:**  
+  - The metric is sensitive to the chosen matching window, which may affect the similarity score for strings of varying lengths.
+  
+- **Task Misalignment Risks:**  
+  - May not perform well in scenarios where higher-level semantic similarity is required.
+  
+- **Failure Cases:**  
+  - Less effective when strings contain numerous transpositions or when small differences are critical.
+
+## Related Metrics
+
+- **Jaro-Winkler Similarity:** A variant that incorporates a prefix scale to give extra weight to common prefixes.
+- **Levenshtein Distance:** Measures the number of edit operations (insertions, deletions, substitutions) needed to transform one string into another.
+- **Damerau-Levenshtein Distance:** Extends Levenshtein by also considering transpositions as a valid edit operation.
+
+## Further Reading
+
+- **Papers:**  
+  - Matthew A. Jaro, "Advances in Record-Linkage Methodology as Applied to Matching the 1985 Census of Tampa, Florida", *Journal of the American Statistical Association*, 1989. [Available here](https://www.jstor.org/stable/2289924) Jaro-AdvancesRecordLinkageMethodology-1989.pdf](https://www.jstor.org/stable/2289924)
+  
+- **Blogs/Tutorials:**  
+  - [Jaro and Jaro-Winkler Similarity - GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan
+- **Acknowledgment of AI Assistance:**
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+JaroWinklerSimilarity.md
+======
+---
+# Metric Card for Jaro-Winkler Similarity
+
+Jaro-Winkler Similarity is a string metric that builds upon the Jaro Similarity by incorporating a prefix scale to give extra weight to common prefixes. It is widely used in record linkage, data deduplication, and other applications where matching similar strings (such as names) is critical.
+
+## Metric Details
+
+### Metric Description
+
+Jaro-Winkler Similarity adjusts the base Jaro Similarity score by factoring in the length of the common prefix (up to 4 characters) between two strings. This enhancement increases the similarity score for strings that match from the beginning. The similarity score is normalized between 0 and 1, where 1 indicates an exact match.
+
+- **Metric Type:** Surface-Level Similarity
+- **Range:** 0 to 1
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** Yes
+
+### Formal Definition
+
+Let $J$ be the Jaro Similarity between two strings $s_1$ and $s_2$, defined as:
+
+$$
+J = \frac{1}{3} \left( \frac{m}{|s_1|} + \frac{m}{|s_2|} + \frac{m - t}{m} \right)
+$$
+
+where:
+- $m$ is the number of matching characters,
+- $t$ is half the number of transpositions.
+
+The Jaro-Winkler Similarity, $JW$, is then given by:
+
+$$
+JW = J + l \cdot p \cdot (1 - J)
+$$
+
+where:
+- $l$ is the length of the common prefix (maximum 4),
+- $p$ is a constant scaling factor (typically 0.1).
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Two strings to compare.
+  - Optional parameters:
+    - `prefix_weight` ($p$), default is 0.1.
+    - Maximum prefix length, default is 4.
+  
+- **Outputs:**  
+  - A float representing the similarity score in the range [0, 1].
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:**  
+  - Record Linkage  
+  - Data Deduplication  
+  - Information Retrieval
+  
+- **Tasks:**  
+  - Matching names and addresses in databases.
+  - Detecting duplicate records.
+  - Evaluating string similarity in record linkage.
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Applications where the initial part of the string is particularly significant (e.g., surnames in record linkage).
+  - Scenarios where slight typographical errors need to be tolerated.
+  
+- **Not Recommended For:**  
+  - Cases where the common prefix is not indicative of overall similarity.
+  - Applications that require a metric adhering to the triangle inequality (Jaro-Winkler does not satisfy this).
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - Implementations are available in multiple programming languages (Python, C++, Java, etc.).
+  - Detailed implementations and explanations can be found on [GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
+  - The [Levenshtein module](https://rapidfuzz.github.io/Levenshtein/levenshtein.html#jaro-winkler) documentation provides context on related edit-distance metrics.
+  - The original paper by Winkler (1990), "String Comparator Metrics and Enhanced Decision Rules in the Fellegi-Sunter Model of Record Linkage", outlines the theoretical foundation. [here](https:files.eric.ed.gov:fulltext:ED325505.pdf)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  - The algorithm typically operates in $O(|s_1| \times |s_2|)$ time.
+  
+- **Scalability:**  
+  - Suitable for moderate-length strings, with performance diminishing for very long strings.
+
+## Known Limitations
+
+- **Biases:**  
+  - The metric heavily weights the common prefix, which might not be appropriate for all types of data.
+  
+- **Task Misalignment Risks:**  
+  - It may overestimate similarity for strings with similar beginnings but divergent endings.
+  
+- **Failure Cases:**  
+  - Less effective when the prefix does not carry significant meaning or when errors occur predominantly beyond the prefix.
+
+## Related Metrics
+
+- **Jaro Similarity:** The base metric without the prefix adjustment.
+- **Levenshtein Distance:** Measures the number of edit operations required to transform one string into another.
+- **Damerau-Levenshtein Distance:** Extends Levenshtein by also considering transpositions.
+- **Hamming Distance:** Counts differences in fixed-length strings.
+
+## Further Reading
+
+- **Papers:**  
+  - Winkler, W. E. (1990). "String Comparator Metrics and Enhanced Decision Rules in the Fellegi-Sunter Model of Record Linkage." [Available here](https://files.eric.ed.gov/fulltext/ED325505.pdf)
+  - Jaro, M. A. (1989). "Advances in Record-Linkage Methodology as Applied to Matching the 1985 Census of Tampa, Florida." [Available here](https://www.jstor.org/stable/2289924)
+  
+- **Blogs/Tutorials:**  
+  - [Jaro and Jaro-Winkler Similarity - GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan
+- **Acknowledgment of AI Assistance:**
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+LevenshteinDistance.md
+======
+---
+# Metric Card for Levenshtein Distance
+
+Levenshtein Distance measures the minimum number of single-character edits—insertions, deletions, or substitutions—required to transform one sequence into another. It is a fundamental metric in text processing, error correction, and approximate string matching.
+
+## Metric Details
+
+### Metric Description
+
+Levenshtein Distance calculates the minimal cost of edit operations needed to convert one string into another. The computation is typically performed using a dynamic programming approach that considers insertions, deletions, and substitutions. Users can optionally assign custom weights to each operation (defaulting to 1 for all), allowing the metric to adapt to different application needs.
+
+- **Metric Type:** Surface-Level Similarity
+- **Range:** 0 to $\infty$ (practically 0 to $\max(|s_1|, |s_2|)$ with unit costs)
+- **Higher is Better?:** No (lower values indicate greater similarity)
+- **Reference-Based?:** Yes
+- **Input-Required?:** Yes
+
+### Formal Definition
+
+Given two sequences $s_1$ and $s_2$, and weights $w_{ins}$, $w_{del}$, $w_{sub}$, the Levenshtein Distance $D(i, j)$ is defined as:
+
+$$
+D(i, 0) = i \cdot w_{del}, \quad D(0, j) = j \cdot w_{ins}
+$$
+
+$$
+D(i, j) = \min \begin{cases}
+D(i-1, j) + w_{del}, \\
+D(i, j-1) + w_{ins}, \\
+D(i-1, j-1) + \begin{cases}
+0, & \text{if } s_1[i] = s_2[j] \\
+w_{sub}, & \text{otherwise}
+\end{cases}
+\end{cases}
+$$
+
+where $1 \leq i \leq |s_1|$, $1 \leq j \leq |s_2|$, and typically $w_{ins} = w_{del} = w_{sub} = 1$.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Two sequences (e.g., strings or lists of hashable items) to compare.
+  - Optional parameters:
+    - `weights`: A tuple $(w_{ins}, w_{del}, w_{sub})$ specifying custom costs.
+    - `processor`: A callable to preprocess the inputs.
+    - `score_cutoff`: A threshold to limit computation for large distances.
+  
+- **Outputs:**  
+  - An integer representing the computed Levenshtein Distance between the two inputs.
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation
+- **Tasks:** Machine Translation, Summarization, Paraphrasing, Spell Checking, Error Correction
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Evaluating character-level similarity between two sequences.
+  - Applications in spell checking, optical character recognition, and error correction where precise, literal differences matter.
+  
+- **Not Recommended For:**  
+  - Tasks requiring semantic or context-aware similarity measures (e.g., creative text generation, open-ended dialogue).
+  - Scenarios where reordering or paraphrasing plays a significant role in perceived similarity.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - [Levenshtein Python module](https://rapidfuzz.github.io/Levenshtein/index.html) – A highly optimized C-based implementation for computing Levenshtein Distance.
+
+### Computational Complexity
+
+- **Efficiency:**  
+  - The standard dynamic programming solution operates in $O(m \times n)$ time, where $m$ and $n$ are the lengths of the two input sequences.
+  
+- **Scalability:**  
+  - Memory usage can be optimized to $O(\min(m, n))$ using a two-row technique, making it feasible for moderately sized inputs. However, performance may become an issue for extremely long sequences.
+
+## Known Limitations
+
+- **Biases:**  
+  - Focuses solely on literal character differences and does not account for semantic or contextual similarity.
+  
+- **Task Misalignment Risks:**  
+  - May not correlate with human judgments in cases where meaning is preserved despite significant character-level differences.
+  
+- **Failure Cases:**  
+  - In tasks with high variability in acceptable outputs (e.g., creative generation), the metric may yield misleadingly high distances despite semantically similar content.
+
+## Related Metrics
+
+- **Damerau-Levenshtein Distance:** Considers transpositions in addition to insertions, deletions, and substitutions.
+- **Hamming Distance:** Measures the number of differing characters for sequences of equal length.
+- **ROUGE and BLEU:** Surface-level similarity metrics commonly used in text generation evaluation.
+- **BERTScore:** Evaluates semantic similarity using contextual embeddings.
+
+## Further Reading
+
+- **Papers:**  
+  - V. I. Levenshtein, "Binary Codes with Correction of Deletions, Insertions, and Substitutions of Symbols", Doklady of the USSR Academy of Sciences, 1965. [Available here](https://www.mathnet.ru/php/archive.phtml?wshow=paper&jrnid=dan&paperid=31411)
+  
+- **Blogs/Tutorials:**  
+  - [Levenshtein Distance Documentation](https://rapidfuzz.github.io/Levenshtein/index.html)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan
+- **Acknowledgment of AI Assistance:**
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+LevenshteinRatio.md
+======
+---
+# Metric Card for Levenshtein Ratio
+
+Levenshtein Ratio is a normalized similarity metric that computes the relative similarity between two sequences by evaluating the minimum number of insertions and deletions required to transform one sequence into the other. The result is expressed as a value between 0 and 1, where 1 indicates identical sequences.
+
+## Metric Details
+
+### Metric Description
+
+Levenshtein Ratio calculates a normalized indel similarity score. It uses the indel distance (i.e., the minimum number of insertions and deletions required to change one sequence into the other) and normalizes this value by the total length of both sequences. This provides a score in the range [0, 1], where higher scores indicate greater similarity.
+
+- **Metric Type:** Surface-Level Similarity
+- **Range:** 0 to 1
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** Yes
+
+### Formal Definition
+
+Let $d(s_1, s_2)$ be the indel distance between sequences $s_1$ and $s_2$. The Levenshtein Ratio is defined as:
+
+$$
+\text{Levenshtein Ratio} = 1 - \frac{d(s_1, s_2)}{|s_1| + |s_2|}
+$$
+
+where $|s_1|$ and $|s_2|$ denote the lengths of the sequences $s_1$ and $s_2$, respectively.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Two sequences (e.g., strings or lists of hashable elements) to compare.
+  - Optional parameters:
+    - `processor`: A callable to preprocess the inputs (default is None).
+    - `score_cutoff`: A threshold for early termination, specified as a float between 0 and 1 (default is 0, which deactivates this behavior).
+  
+- **Outputs:**  
+  - A float representing the normalized similarity between the two sequences, ranging from 0 (completely different) to 1 (identical).
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation
+- **Tasks:** Spell Checking, Error Correction, Approximate String Matching, Quality Evaluation of Generated Text
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Situations requiring a normalized measure of string similarity.
+  - Applications where the relative similarity (rather than the absolute number of edit operations) is more informative.
+  
+- **Not Recommended For:**  
+  - Scenarios where semantic similarity is crucial, as the metric only considers literal character differences.
+  - Tasks with high variability in acceptable outputs, such as creative text generation.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - [Levenshtein Python module](https://rapidfuzz.github.io/Levenshtein/index.html)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  - The computation typically requires $O(m \times n)$ time, where $m$ and $n$ are the lengths of the input sequences.
+  
+- **Scalability:**  
+  - Memory optimizations (e.g., using a two-row dynamic programming approach) allow the metric to scale for moderately sized sequences.
+
+## Known Limitations
+
+- **Biases:**  
+  - The metric is sensitive only to literal character differences and does not account for semantic or contextual similarity.
+  
+- **Task Misalignment Risks:**  
+  - May yield low similarity scores for strings that are semantically similar but differ significantly in character order or structure.
+  
+- **Failure Cases:**  
+  - Not effective for comparing sequences where insertions and deletions are less indicative of overall similarity (e.g., when substitutions are more prevalent).
+
+## Related Metrics
+
+- **Levenshtein Distance:** The non-normalized version measuring the absolute number of edit operations.
+- **Damerau-Levenshtein Ratio:** A variant that also considers transpositions.
+- **BERTScore:** Evaluates semantic similarity using contextual embeddings.
+
+## Further Reading
+
+- **Papers:**  
+  - V. I. Levenshtein, "Binary Codes with Correction of Deletions, Insertions, and Substitutions of Symbols", Doklady of the USSR Academy of Sciences, 1965. [Available here](https://www.mathnet.ru/php/archive.phtml?wshow=paper&jrnid=dan&paperid=31411&option_lang=rus)
+  
+- **Blogs/Tutorials:**  
+  - [Levenshtein Python Module Documentation](https://rapidfuzz.github.io/Levenshtein/index.html)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan
+- **Acknowledgment of AI Assistance:**
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+MOVERScore.md
+======
+---
+# Metric Card for MoverScore
+
+MoverScore is a semantic similarity metric for evaluating generated text, leveraging contextualized embeddings (such as BERT) and Earth Mover’s Distance (EMD) to measure the alignment between system outputs and reference texts. It is designed to capture semantic similarity beyond lexical overlap and has been shown to achieve a high correlation with human judgments across tasks like machine translation, summarization, image captioning, and data-to-text generation.
+
+## Metric Details
+
+### Metric Description
+
+MoverScore measures text similarity by computing the minimum cost required to move the distributed representations of words from the generated text to the reference text. It uses contextualized word embeddings (from models like BERT) and optimizes a transport cost matrix to determine the most efficient mapping between words. Unlike surface-level metrics such as BLEU and ROUGE, MoverScore accounts for semantic equivalence even when lexical forms differ.
+
+- **Metric Type:** Semantic Similarity
+- **Range:** 0 to 1
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** No (evaluates only system output and reference)
+  
+### Formal Definition
+
+MoverScore extends **Word Mover’s Distance (WMD)** by incorporating contextualized embeddings. Given a generated sentence $x$ and a reference sentence $y$, let $x_n$ and $y_n$ represent their n-grams. The distance between these sentences is computed as:
+
+$$
+\text{WMD}(x _{n}, y _{n}) = \min _{F} \sum _{i,j} C _{ij} F _{ij}
+$$
+
+subject to:
+
+$$
+F 1 = f _{x _{n}}, \quad F^T 1 = f _{y _{n}}
+$$
+
+where:
+- $F$ is the transportation flow matrix,
+- $C _{ij}$ is the Euclidean distance between the embeddings of n-grams $x _{i}^{n}$ and $y _{j}^{n}$,
+- $f _{x _{n}}$ and $f _{y _{n}}$ represent n-gram weight distributions, computed using inverse document frequency (IDF).
+
+MoverScore supports multiple variations, including **Word Mover Distance (WMD) on unigrams/bigrams** and **Sentence Mover Distance (SMD)**.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Generated text (system output)  
+  - Reference text(s) (gold-standard text)
+
+- **Outputs:**  
+  - A scalar similarity score in the range [0,1], where higher values indicate better semantic alignment.
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation
+- **Tasks:** Machine Translation, Summarization, Image Captioning, Data-to-Text Generation
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Tasks where capturing semantic similarity is critical, such as summarization, paraphrasing, and machine translation.  
+  - Cases where lexical overlap is insufficient to judge text quality (e.g., abstractive summarization).  
+
+- **Not Recommended For:**  
+  - Evaluating grammatical correctness or fluency in isolation.  
+  - Tasks where exact lexical matching is the primary evaluation criterion (e.g., extractive summarization).  
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [MoverScore GitHub Repository](https://github.com/AIPHES/emnlp19-moverscore)  
+  - Available in `moverscore.py` (original) and `moverscore_v2.py` (faster but less accurate version).
+
+### Computational Complexity
+
+- **Efficiency:**  
+  - MoverScore is computationally more expensive than n-gram-based metrics due to the need for contextualized embeddings and solving an optimal transport problem.
+  
+- **Scalability:**  
+  - Can be slow for large datasets but optimized versions exist (`moverscore_v2.py` uses DistilBERT for speed).
+
+## Known Limitations
+
+- **Biases:**  
+  - Performance depends on the pre-trained language model used. Models trained on large-scale English corpora may not generalize well to low-resource languages.
+  
+- **Task Misalignment Risks:**  
+  - May not accurately reflect human preferences when lexical precision is crucial.
+  
+- **Failure Cases:**  
+  - Contextual embeddings may not effectively capture domain-specific terminology or named entity variations.
+  
+## Related Metrics
+
+- **BERTScore:** Similar to MoverScore but relies on cosine similarity rather than Earth Mover’s Distance.
+- **BLEU, ROUGE:** Traditional surface-level n-gram overlap metrics, which MoverScore seeks to improve upon.
+- **CIDEr, METEOR:** Alternative semantic similarity-based evaluation metrics.
+
+## Further Reading
+
+- **Papers:**  
+  - Zhao et al., 2019. *MoverScore: Text Generation Evaluating with Contextualized Embeddings and Earth Mover Distance.* [EMNLP 2019](https://arxiv.org/abs/1909.02622)  
+  - Peyrard et al., 2019. *Supervised and Unsupervised Metrics for Machine Translation and Summarization.*
+
+- **Blogs/Tutorials:**  
+  - [MoverScore GitHub README](https://github.com/AIPHES/emnlp19-moverscore)  
+  - [Evaluating Text Generation with MoverScore](https://arxiv.org/pdf/1909.02622.pdf)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu  
+======
+
+======
+Perplexity.md
+======
+---
+# Metric Card for Perplexity
+
+Perplexity (PPL) is a widely used metric for evaluating the fluency of language models. It measures how well a probabilistic model predicts a sequence of tokens, with lower values indicating better predictions. Specifically, it computes the exponentiated average negative log-likelihood of a sequence. Perplexity is only applicable to autoregressive language models (e.g., GPT-2) and **cannot** be used with masked language models like BERT.
+
+## Metric Details
+
+### Metric Description
+
+Perplexity assesses the predictive capability of a language model by computing the exponentiated average negative log-likelihood of a given sequence. It quantifies how uncertain the model is when predicting the next token. A lower perplexity score indicates better model performance, as it suggests the model assigns higher probabilities to the correct tokens.
+
+- **Metric Type:** Fluency
+- **Range:** $(1, \infty)$
+- **Higher is Better?:** No
+- **Reference-Based?:** No
+- **Input-Required?:** No (Perplexity can be computed on output tokens alone)
+
+### Formal Definition
+
+Given a sequence of tokens $X = (x_1, x_2, ..., x_T)$, the perplexity of $X$ under a language model with parameters $\theta$ is defined as:
+
+$$
+PPL(X) = \exp \left( -\frac{1}{T} \sum_{i=1}^{T} \log p_{\theta}(x_i \mid x_{\text{<}i}) \right)
+$$
+
+where:
+- $p_{\theta}(x_i \mid x_{\text{<}i})$ is the probability assigned by the model to token $x_i$ given the preceding tokens.
+- $T$ is the length of the sequence.
+
+A lower perplexity value indicates that the model assigns higher probabilities to observed sequences, meaning it better predicts the given data.
+
+### Sliding-Window Perplexity
+
+For models with a fixed context size (e.g., GPT-2, LLaMA), perplexity cannot be computed over arbitrarily long sequences directly. Instead, a **sliding-window** approach is used, as described in the [Hugging Face blog on perplexity](https://huggingface.co/docs/transformers/en/perplexity):
+
+- The input sequence is broken into overlapping **windows** of a fixed length.
+- Each window is passed through the model, and **only the log-likelihood of the newly introduced tokens** (not the entire window) is used in the perplexity calculation.
+- This approach better approximates full-sequence perplexity compared to naïve chunking (which can overestimate perplexity due to loss of context).
+
+Using this method, perplexity is calculated as:
+
+$$
+PPL(X) = \exp \left( -\frac{1}{T} \sum_{i=1}^{T} \log p_{\theta}(x_i \mid x_{\max(1, i-k):i-1}) \right)
+$$
+
+where:
+- $k$ is the model’s fixed context size,
+- The probability of each token $x_i$ is conditioned on a **sliding context of at most $k$ tokens**.
+
+This method provides a **more realistic** evaluation of model fluency while efficiently handling long sequences.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - A sequence of text tokens (typically output from a model)
+  - A trained language model (e.g., GPT-2)
+  - Tokenizer for processing input text
+
+- **Outputs:**  
+  - A scalar value representing the perplexity score of the input text
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation
+- **Tasks:** Language Modeling, Dialogue Generation, Storytelling, Code Completion
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Evaluating the fluency of language models, especially autoregressive models
+  - Comparing the relative performance of different language models on the same dataset
+  
+- **Not Recommended For:**  
+  - Evaluating masked language models (e.g., BERT) since perplexity is undefined for non-autoregressive architectures
+  - Assessing high-level semantic coherence, factual consistency, or diversity in generated text
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [Hugging Face Transformers](https://huggingface.co/docs/transformers/en/perplexity)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  - Perplexity calculation involves computing log-likelihoods for each token, making it computationally intensive for large datasets.
+  
+- **Scalability:**  
+  - Efficient when used with GPU acceleration but may become expensive for long sequences due to the need for multiple forward passes.
+
+## Known Limitations
+
+- **Biases:**  
+  - Sensitive to tokenization choices; different tokenization schemes can yield different perplexity values.
+  - Models trained on specific domains may yield artificially low perplexity scores on similar datasets while failing on out-of-domain data.
+  
+- **Task Misalignment Risks:**  
+  - Perplexity measures token-level fluency but does not assess semantic correctness or factuality.
+  
+- **Failure Cases:**  
+  - Does not distinguish between grammatically correct but nonsensical text and genuinely coherent text.
+  - Perplexity values are not always comparable across different models due to differences in vocabulary and tokenization.
+
+## Related Metrics
+
+- **Cross-Entropy Loss:** Closely related to perplexity, as perplexity is the exponentiated cross-entropy loss.
+- **BERTScore:** Evaluates semantic similarity rather than fluency.
+- **ROUGE/BLEU:** Measure lexical overlap rather than model uncertainty.
+
+## Further Reading
+
+- **Papers:**  
+  - Jelinek et al. (1977) - [Perplexity: A Measure of the Difficulty of Speech Recognition Tasks](https://doi.org/10.1121/1.2016299)
+  - Hugging Face Documentation - [Perplexity of Fixed-Length Models](https://huggingface.co/docs/transformers/en/perplexity)
+
+- **Blogs/Tutorials:**  
+  - [Understanding Evaluation Metrics for Language Models](https://thegradient.pub/understanding-evaluation-metrics-for-language-models/)
+  - [Hugging Face's Guide to Perplexity](https://huggingface.co/docs/transformers/en/perplexity)
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+ROUGE.md
+======
+---
+# Metric Card for ROUGE (ROUGE-1, ROUGE-2, ROUGE-L, ROUGE-LSum)
+
+ROUGE (Recall-Oriented Understudy for Gisting Evaluation) is a widely used evaluation metric for text summarization, machine translation, and text generation tasks. It measures the overlap between an automatically generated text and reference texts using various methods such as **n-gram overlap (ROUGE-1, ROUGE-2), longest common subsequence (ROUGE-L), and summary-level longest common subsequence (ROUGE-LSum)**.
+
+The **rouge-score** Python package provides a native implementation that replicates results from the original Perl-based ROUGE package. It supports **text normalization, Porter stemming, and confidence interval calculation** while omitting stopword removal due to licensing restrictions.
+
+## Metric Details
+
+### Metric Description
+
+ROUGE evaluates generated text by comparing it with human-written references. The key variants included in this implementation are:
+
+- **ROUGE-1**: Measures unigram (single-word) overlap between candidate and reference texts.
+- **ROUGE-2**: Measures bigram (two-word sequence) overlap.
+- **ROUGE-L**: Measures the longest common subsequence (LCS) between candidate and reference texts, capturing sentence-level structure similarity.
+- **ROUGE-LSum**: A summary-level variant of ROUGE-L, treating newlines as sentence boundaries and computing LCS across sentence pairs.
+
+- **Metric Type:** Surface-Level Similarity
+- **Range:** 0 to 1
+- **Higher is Better?:** Yes
+- **Reference-Based?:** Yes
+- **Input-Required?:** No
+
+### Formal Definition
+
+#### ROUGE-N (N-gram Overlap)
+
+For an n-gram of length $n$:
+
+$$
+\text{ROUGE-N} = \frac{\sum _{S \in \text{Reference Summaries}} \sum _{\text{gram} _{n} \in S} \text{Count} _{\text{match}}(\text{gram} _{n})}
+{\sum _{S \in \text{Reference Summaries}} \sum _{\text{gram} _{n} \in S} \text{Count}(\text{gram} _{n})}
+$$
+
+where $\text{Count} _{\text{match}}(\text{gram} _{n})$ is the number of n-grams appearing in both the candidate and reference summaries.
+
+## **ROUGE-L (Longest Common Subsequence)**
+
+ROUGE-L evaluates the longest common subsequence (LCS) between the candidate and reference texts. The LCS captures sentence structure similarity by considering word order while allowing gaps.
+
+Given a candidate summary $X$ of length $m$ and a reference summary $Y$ of length $n$, let $LCS(X, Y)$ denote the length of their longest common subsequence.
+
+### **Recall ($R_{LCS}$):**
+
+$$
+R_{LCS} = \frac{LCS(X, Y)}{n}
+$$
+
+Measures the proportion of the reference summary captured by the candidate summary.
+
+### **Precision ($P_{LCS}$):**
+
+$$
+P_{LCS} = \frac{LCS(X, Y)}{m}
+$$
+
+Measures the proportion of the candidate summary that is part of the LCS.
+
+### **F-measure ($F_{LCS}$):**
+
+$$
+F_{LCS} = \frac{(1 + \beta^2) \cdot R_{LCS} \cdot P_{LCS}}{R_{LCS} + \beta^2 \cdot P_{LCS}}
+$$
+
+Where $\beta$ determines the relative weight of recall versus precision. A common choice is $\beta = 1$, giving equal weight to both.
+
+#### ROUGE-LSum (Summary-Level LCS)
+
+ROUGE-LSum extends ROUGE-L to the summary level by treating newlines as sentence boundaries. Instead of computing a single LCS over the entire text, it:
+
+1. Splits the candidate and reference summaries into sentences.
+2. Computes LCS for each candidate-reference sentence pair.
+3. Aggregates results to produce an overall ROUGE-LSum score.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Generated text (candidate summary)  
+  - Reference text(s) (human-written summary)
+
+- **Outputs:**  
+  - Scalar ROUGE score (range: 0 to 1), providing recall, precision, and F1-score.
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation
+- **Tasks:** Summarization, Machine Translation, Paraphrasing, Data-to-Text Generation
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Evaluating text generation tasks where lexical similarity is a reliable proxy for quality.
+  - Comparing multiple summarization systems against a reference standard.
+
+- **Not Recommended For:**  
+  - Evaluating abstractiveness, coherence, fluency, or factual consistency.
+  - Tasks where paraphrasing or rewording is expected, as ROUGE penalizes non-exact matches.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [Google Research ROUGE](https://github.com/google-research/google-research/tree/master/rouge)
+  - [Hugging Face `evaluate`](https://huggingface.co/docs/evaluate)
+  - [Python `rouge_score` package](https://pypi.org/project/rouge-score/)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  - ROUGE-N complexity is $O(n \cdot m)$ for n-gram counting, where $n$ is the candidate text length and $m$ is the reference text length.
+  - ROUGE-L requires LCS computation, which is $O(n \cdot m)$ using dynamic programming.
+
+- **Scalability:**  
+  - ROUGE scales well to large datasets but can be computationally intensive when multiple reference texts are used.
+
+## Known Limitations
+
+- **Biases:**  
+  - Prefers texts with high lexical overlap, penalizing valid paraphrases.
+  - Highly sensitive to the number and quality of reference summaries.
+
+- **Task Misalignment Risks:**  
+  - Cannot capture meaning beyond exact n-gram matches.
+  - Does not account for factual correctness or grammaticality.
+
+- **Failure Cases:**  
+  - Overestimates quality for summaries with high recall but poor readability.
+  - Struggles with abstractive summarization, which may use different wording.
+
+## Related Metrics
+
+- **BLEU:** A precision-based alternative used in machine translation.  
+- **METEOR:** Incorporates synonym matching and paraphrase detection.  
+- **BERTScore:** Uses contextual embeddings for semantic similarity.  
+
+## Further Reading
+
+- **Papers:**  
+  - [Lin, 2004: ROUGE: A Package for Automatic Evaluation of Summaries](https://aclanthology.org/W04-1013)  
+  - [Ganesan, 2018: ROUGE 2.0 - Improved Evaluation Measures](https://arxiv.org/abs/1803.01937)  
+
+- **Blogs/Tutorials:**  
+  - [ROUGE How-To](http://kavita-ganesan.com/rouge-howto)  
+  - [ROUGE in Hugging Face](https://huggingface.co/docs/evaluate)  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu  
+======
+
+======
+SARI.md
+======
+---
+# Metric Card for SARI
+
+SARI (Sentence Adaptation for Readability Index) is a metric designed to evaluate the quality of text simplification by comparing the system-generated output against both the original input text and reference simplified texts. It measures how well words are added, deleted, and kept appropriately, rewarding edits that enhance readability while preserving meaning.
+
+## Metric Details
+
+### Metric Description
+
+SARI evaluates text simplification by considering three types of operations: additions, deletions, and retention of n-grams. It computes precision and recall for these operations by comparing the system output to both the input and the reference simplified texts. SARI is particularly suited for simplification tasks as it explicitly rewards edits that improve readability while maintaining semantic correctness.
+
+- **Metric Type:** Surface-Level Similarity  
+- **Range:** 0 to 1  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** Yes  
+- **Input-Required?:** Yes  
+
+### Formal Definition
+
+SARI is computed as the arithmetic mean of F-scores for the addition and retention operations, along with the precision of the deletion operation:
+
+$$
+SARI = \frac{1}{3}(F_{add} + F_{keep} + P_{del})
+$$
+
+Where:
+- $F_{add}$: F-score for addition operations
+- $F_{keep}$: F-score for keeping relevant text
+- $P_{del}$: Precision for deletion operations  
+
+Each F-score or precision is computed based on the comparison of n-grams in the input, system output, and references.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Source text (original, complex input text)  
+  - Candidate text (simplified text from the system)  
+  - Reference texts (simplified human-created texts)  
+
+- **Outputs:**  
+  - Scalar SARI score (range: 0 to 1)
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation  
+- **Tasks:**  
+  - Text Simplification  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Text simplification tasks where changes to the text, such as paraphrasing, deletions, or additions, are expected to enhance readability.  
+
+- **Not Recommended For:**  
+  - Open-ended or creative text generation tasks where diversity and semantic similarity matter more than lexical transformation.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - [SARI Implementation in LENS Repository](https://github.com/Yao-Dou/LENS/blob/master/experiments/meta_evaluation/metrics/sari.py)  
+
+### Computational Complexity
+
+- **Efficiency:**  
+  SARI is computationally efficient, with complexity similar to BLEU, as it involves n-gram extraction and comparison.  
+
+- **Scalability:**  
+  SARI scales well across datasets with multiple references, leveraging n-gram matching for simplicity evaluation.
+
+## Known Limitations
+
+- **Biases:**  
+  - SARI may over-penalize outputs that do not align well with reference texts, particularly in cases where valid simplifications are not covered by references.  
+
+- **Task Misalignment Risks:**  
+  - SARI is unsuitable for tasks that emphasize semantic similarity over structural changes, such as summarization or machine translation.  
+
+- **Failure Cases:**  
+  - It can struggle with highly creative or diverse simplifications where multiple equally valid outputs are possible.
+
+## Related Metrics
+
+- **BLEU:** Measures surface similarity but does not compare outputs with the input text.  
+- **FKBLEU:** Combines BLEU with the Flesch-Kincaid readability metric for simplification tasks.  
+- **ROUGE:** Suitable for summarization but less relevant for simplification.  
+
+## Further Reading
+
+- **Papers:**  
+  - [Optimizing Statistical Machine Translation for Text Simplification (Xu et al., 2016)](https://github.com/cocoxu/simplification/)  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+TER.md
+======
+---
+# Metric Card for TER (Translation Edit Rate)
+
+TER (Translation Edit Rate) is an automatic evaluation metric designed to measure the effort required to edit a machine translation output to match a reference translation. It computes the minimum number of edits (insertions, deletions, substitutions, and shifts of words or phrases) needed to make a hypothesis identical to a reference. TER provides a straightforward, intuitive measure of translation quality and correlates well with human judgments.
+
+## Metric Details
+
+### Metric Description
+
+TER calculates the minimum number of edits needed to convert a translation hypothesis into one of the provided reference translations. Edits include:
+- **Insertions**
+- **Deletions**
+- **Substitutions**
+- **Shifts** (reordering of contiguous sequences of words)
+
+The final score is normalized by the average length of the reference translations. All edits, including shifts, have a uniform cost of 1. 
+
+TER can be computed in two modes:
+1. **Untargeted TER (TER):** Compares the hypothesis to predefined reference translations.
+2. **Human-targeted TER (HTER):** Compares the hypothesis to a targeted reference created by human annotators to maximize semantic equivalence.
+
+- **Metric Type:** Surface-Level Similarity
+- **Range:** $[0, \infty)$
+- **Higher is Better?:** No
+- **Reference-Based?:** Yes
+- **Input-Required?:** No
+
+### Formal Definition
+
+The TER score is calculated as:
+
+$$
+\text{TER} = \frac{\text{Number of edits}}{\text{Average reference length}}
+$$
+
+Where:
+- **Number of edits:** The sum of insertions, deletions, substitutions, and shifts needed to make the hypothesis match the closest reference.
+- **Average reference length:** The mean number of words in the reference translations.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Hypothesis translation (generated text)
+  - One or more reference translations (gold-standard texts)
+
+- **Outputs:**  
+  - Scalar TER score (lower values indicate better translations)
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation
+- **Tasks:** Machine Translation
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  Evaluating structured tasks like machine translation where there is a well-defined correspondence between the hypothesis and reference translations.
+  
+- **Not Recommended For:**  
+  Tasks requiring semantic equivalence or diversity, such as open-ended text generation or dialogue systems.
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - [SacreBLEU](https://github.com/mjpost/sacrebleu): Includes an implementation of TER.  
+
+### Computational Complexity
+
+- **Efficiency:**  
+  The computation of TER involves finding the minimum edit distance, which is optimized using dynamic programming and a greedy beam search for shifts. The algorithm has a complexity of $O(n^2)$ for the edit distance computation and $O(n)$ for the beam search.
+
+- **Scalability:**  
+  TER is computationally efficient for sentence-level evaluation but may require optimizations for very large datasets.
+
+## Known Limitations
+
+- **Biases:**  
+  - Assigns equal cost to all edits, which may not accurately reflect human perceptions of translation effort.
+  - Penalizes valid translations that differ in structure but are semantically equivalent to the reference.
+  
+- **Task Misalignment Risks:**  
+  - Not suited for tasks requiring high semantic understanding or creative language use, as it focuses on surface-level similarity.
+
+- **Failure Cases:**  
+  - TER scores may misrepresent translation quality when references are poorly constructed or insufficient in number.
+
+## Related Metrics
+
+- **BLEU:** Focuses on n-gram overlap and does not account for reordering.  
+- **METEOR:** Incorporates stemming and synonymy to capture semantic similarity.  
+- **HTER:** A variant of TER that uses human-targeted references for improved semantic alignment.
+
+## Further Reading
+
+- **Papers:**  
+  - [A Study of Translation Edit Rate with Targeted Human Annotation (Snover et al., 2006)](https://www.mt-archive.info/AMTA-2006-Snover.pdf)  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu
+======
+
+======
+UniEvalDialogue.md
+======
+---
+# Metric Card for UniEvalDialogue
+
+UniEvalDialogue is a multi-dimensional evaluation metric designed specifically for **dialogue response generation**. It assesses responses across five key dimensions: **naturalness, coherence, engagingness, groundedness, and understandability**. The metric formulates evaluation as a **Boolean Question Answering (QA) task**, where a pre-trained language model predicts scores based on Yes/No answers to predefined evaluation questions.
+
+## Metric Details
+
+### Metric Description
+
+UniEvalDialogue evaluates dialogue responses by **converting evaluation into a Boolean QA problem**. The model is prompted with questions tailored to specific evaluation dimensions, allowing it to assess **fluency, informativeness, factual grounding, and coherence** in open-ended dialogue tasks. Unlike traditional metrics that rely on reference responses, UniEvalDialogue is primarily **reference-free**, except when additional factual grounding is required (e.g., engagingness evaluation).
+
+- **Metric Type:** Semantic Similarity, Reference-Free, Multi-Dimensional Evaluation  
+- **Range:** [0,1] for all dimensions  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** No (except for engagingness, which may require factual context)  
+- **Input-Required?:** Yes  
+
+### Formal Definition
+
+Given a **generated response** $r$, a **dialogue history** $h$, and optionally a **factual grounding document** $f$, UniEvalDialogue evaluates five dimensions using a **pre-trained T5 model** in a Boolean QA format:
+
+$$
+\text{Score}_{dim} = \frac{P(\text{"Yes"} \mid r, h, f, q)}{P(\text{"Yes"} \mid r, h, f, q) + P(\text{"No"} \mid r, h, f, q)}
+$$
+
+where $q$ represents the evaluation question for a given dimension (e.g., "Is this response coherent given the dialogue history?"). The final **overall score** is computed as the **average** of the five dimension scores.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Generated response  
+  - Dialogue history  
+  - Optional factual context (for groundedness and engagingness evaluation)  
+
+- **Outputs:**  
+  - Scores for **naturalness, coherence, engagingness, groundedness, and understandability** (range: [0,1])  
+  - Overall score (default: **average of all dimension scores**)  
+
+### Prompt Formulation for Evaluation Dimensions
+
+UniEvalDialogue structures evaluation using **Boolean QA-style prompts** for each dimension:
+
+1. **Naturalness** (Measures how human-like the response sounds)
+   - **Prompt Template:**  
+     ```
+     question: Is this a natural response in the dialogue? </s> response: {system_output}
+     ```
+   - **Inputs Required:** Generated response  
+
+2. **Coherence** (Checks logical consistency with prior turns in the dialogue)
+   - **Prompt Template:**  
+     ```
+     question: Is this a coherent response given the dialogue history? </s> response: {system_output} </s> dialogue history: {source}
+     ```
+   - **Inputs Required:** Dialogue history, generated response  
+
+3. **Engagingness** (Evaluates informativeness and conversational depth, requires factual grounding)
+   - **Prompt Template:**  
+     ```
+     question: Is this an engaging and informative response according to the dialogue history and fact? </s> response: {system_output} </s> dialogue history: {source} </s> fact: {context}
+     ```
+   - **Inputs Required:** Dialogue history, generated response, factual grounding  
+
+4. **Groundedness** (Assesses factual accuracy against a known knowledge base)
+   - **Prompt Template:**  
+     ```
+     question: Is this response consistent with knowledge in the fact? </s> response: {system_output} </s> fact: {context}
+     ```
+   - **Inputs Required:** Generated response, factual grounding  
+
+5. **Understandability** (Determines if the response is clear and interpretable)
+   - **Prompt Template:**  
+     ```
+     question: Is this an understandable response in the dialogue? </s> response: {system_output}
+     ```
+   - **Inputs Required:** Generated response  
+
+These prompts are tokenized and passed into the **UniEvalDialogue** model, which then predicts **Yes/No probabilities**, converting them into scores between **0 and 1**.
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Dialogue Systems, Text Generation  
+- **Tasks:** Dialogue Response Generation  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Evaluating **open-domain** and **task-oriented** dialogue systems  
+  - Systems where **coherence, fluency, and engagingness** are critical metrics  
+  - Settings where **reference-free evaluation** is preferred  
+
+- **Not Recommended For:**  
+  - Evaluating **long-form creative writing** (e.g., storytelling, novel generation)  
+  - Contexts where **fact verification requires external retrieval** (e.g., legal or medical dialogue)  
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [Hugging Face Model: MingZhong/unieval-dialog](https://huggingface.co/MingZhong/unieval-dialog)
+  - [GitHub Repository: UniEval](https://github.com/maszhongming/UniEval)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  The model requires encoding the input and computing probability distributions over the **Yes/No outputs**. While more computationally expensive than simple token-overlap metrics, it remains efficient for evaluating dialogue at **scale**.
+
+- **Scalability:**  
+  UniEvalDialogue scales well with dataset size, but evaluation cost **grows linearly** with the number of responses due to separate model calls for each **evaluation dimension**.
+
+## Known Limitations
+
+- **Biases:**  
+  - May inherit **biases** from the pre-trained T5 model.  
+  - May **underestimate response diversity**, favoring safe, generic dialogue responses.  
+
+- **Task Misalignment Risks:**  
+  - While designed for dialogue, results may not **generalize well to highly structured** domains like legal or scientific chatbots.  
+
+- **Failure Cases:**  
+  - **Groundedness evaluation may fail** if factual sources are noisy or ambiguous.  
+  - Model-generated scores may **not correlate well with human judgments** in highly subjective dialogue tasks.  
+
+## Related Metrics
+
+- **USR (Unsupervised and Reference-Free Dialogue Evaluation):** A multi-dimensional metric for dialogue quality.  
+- **FED (Fine-grained Evaluation of Dialogue):** Uses a similar reference-free approach with multiple scoring dimensions.  
+- **BLEU & METEOR:** Traditional n-gram overlap metrics (less relevant for dialogue).  
+
+## Further Reading
+
+- **Papers:**  
+  - [Towards a Unified Multi-Dimensional Evaluator for Text Generation (Zhong et al., 2022)](https://arxiv.org/abs/2210.07197)  
+
+- **Blogs/Tutorials:**  
+  - [UniEval GitHub Documentation](https://github.com/maszhongming/UniEval)  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu  
+======
+
+======
+UniEvalFact.md
+======
+---
+# Metric Card for UniEvalFact
+
+UniEvalFact is a multi-dimensional evaluation metric designed specifically for **factual consistency detection** in generated text. It assesses whether claims made in a generated text align with facts provided in a **source document**. The metric formulates evaluation as a **Boolean Question Answering (QA) task**, where a pre-trained language model predicts scores based on Yes/No answers to predefined evaluation questions.
+
+## Metric Details
+
+### Metric Description
+
+UniEvalFact evaluates the **factual accuracy** of generated claims by **converting evaluation into a Boolean QA problem**. The model is prompted with a **fact-checking question**, enabling it to determine whether a claim is **consistent** with a supporting document. Unlike traditional **n-gram-based metrics** (e.g., ROUGE), UniEvalFact directly **compares factual consistency** instead of lexical similarity.
+
+- **Metric Type:** Factual Consistency, Reference-Free Evaluation  
+- **Range:** [0,1]  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** No  
+- **Input-Required?:** Yes (source document)  
+
+### Formal Definition
+
+Given a **generated claim** $c$ and a **source document** $d$, UniEvalFact evaluates factual consistency using a **pre-trained T5 model** in a Boolean QA format:
+
+$$
+\text{Score}_{\text{fact}} = \frac{P(\text{"Yes"} \mid c, d, q)}{P(\text{"Yes"} \mid c, d, q) + P(\text{"No"} \mid c, d, q)}
+$$
+
+where $q$ represents the evaluation question (e.g., "Is this claim consistent with the document?"). The final **factual consistency score** is computed as the **average of sentence-level consistency scores**.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Generated claim  
+  - Source document  
+
+- **Outputs:**  
+  - **Factual consistency score** (range: [0,1])  
+
+### Prompt Formulation for Factual Consistency
+
+UniEvalFact structures evaluation using a **Boolean QA-style prompt**:
+
+1. **Factual Consistency** (Measures whether the generated claim is factually consistent with the reference document)
+   - **Prompt Template:**  
+     ```
+     question: Is this claim consistent with the document? </s> claim: {system_output} </s> document: {source}
+     ```
+   - **Inputs Required:** Source document, generated claim  
+
+This prompt is tokenized and passed into the **UniEvalFact** model, which then predicts **Yes/No probabilities**, converting them into scores between **0 and 1**.
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation, Fact Verification  
+- **Tasks:** Fact Checking, Factual Consistency Evaluation  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Evaluating **factual consistency** in summarization and knowledge-grounded text generation  
+  - **Reference-free** fact verification tasks  
+
+- **Not Recommended For:**  
+  - Evaluating **coherence, fluency, or linguistic quality**  
+  - Tasks where **multiple plausible answers exist**, as the metric strictly checks consistency  
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [Hugging Face Model: MingZhong/unieval-fact](https://huggingface.co/MingZhong/unieval-fact)
+  - [GitHub Repository: UniEval](https://github.com/maszhongming/UniEval)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  The model requires encoding the input and computing probability distributions over the **Yes/No outputs**. While more computationally expensive than simple token-overlap metrics, it remains efficient for evaluating factual consistency at **scale**.
+
+- **Scalability:**  
+  UniEvalFact scales well with dataset size, but evaluation cost **grows linearly** with the number of claims due to separate model calls for each **sentence-level evaluation**.
+
+## Known Limitations
+
+- **Biases:**  
+  - May inherit **biases** from the pre-trained T5 model.  
+  - Performance may degrade if the **claim style** deviates significantly from the model's training data.  
+
+- **Task Misalignment Risks:**  
+  - While designed for **fact checking**, results may not generalize well to **highly domain-specific fact verification** (e.g., legal, medical claims).  
+
+- **Failure Cases:**  
+  - **Context ambiguity**: If the source document is **incomplete or vague**, the metric may provide misleading consistency scores.  
+  - **Paraphrased claims**: The model may **overpenalize** valid claims that do not **exactly match** reference wording.  
+
+## Related Metrics
+
+- **FactCC:** A factual consistency metric designed for text summarization.  
+- **FEQA:** An **extractive QA-based** metric that evaluates factual correctness.  
+- **QAGS:** Uses **question generation** to check factual consistency.  
+
+## Further Reading
+
+- **Papers:**  
+  - [Towards a Unified Multi-Dimensional Evaluator for Text Generation (Zhong et al., 2022)](https://arxiv.org/abs/2210.07197)  
+
+- **Blogs/Tutorials:**  
+  - [UniEval GitHub Documentation](https://github.com/maszhongming/UniEval)  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu  
+======
+
+======
+UniEvalSum.md
+======
+---
+# Metric Card for UniEvalSum
+
+UniEvalSum is a multi-dimensional evaluation metric designed specifically for text summarization. It assesses summaries across four key dimensions: coherence, consistency, fluency, and relevance. The metric formulates evaluation as a Boolean Question Answering (QA) task, where a pre-trained language model predicts scores based on Yes/No answers to predefined evaluation questions.
+
+## Metric Details
+
+### Metric Description
+
+UniEvalSum evaluates text summaries by converting evaluation into a Boolean QA problem. The model is guided by questions tailored to specific evaluation dimensions, enabling it to assess coherence, consistency, fluency, and relevance. It leverages a pre-trained T5 model and intermediate learning techniques to improve evaluation robustness. Unlike traditional similarity-based metrics (e.g., ROUGE, BLEU), UniEvalSum does not rely solely on reference texts and can function in a reference-free manner except for the relevance dimension.
+
+- **Metric Type:** Semantic Similarity, Reference-Free, Multi-Dimensional Evaluation
+- **Range:** [0,1] for all dimensions  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** Mixed (Reference required for relevance, but not for other dimensions)  
+- **Input-Required?:** Yes  
+
+### Formal Definition
+
+Given a generated summary $s$, a reference summary $r$, and a source document $d$, UniEvalSum evaluates four dimensions using a pre-trained T5 model in a Boolean QA format:
+
+$$
+\text{Score}_{dim} = \frac{P(\text{"Yes"} \mid s, d, r, q)}{P(\text{"Yes"} \mid s, d, r, q) + P(\text{"No"} \mid s, d, r, q)}
+$$
+
+where $q$ represents the evaluation question for a given dimension (e.g., "Is this a coherent summary to the document?"). The final overall score is computed as the average of the four dimension scores.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Generated summary
+  - Reference summary (only for relevance dimension)
+  - Source document
+
+- **Outputs:**  
+  - Scores for coherence, consistency, fluency, and relevance (range: [0,1])  
+  - Overall score (default: average of all dimension scores)  
+
+### Prompt Formulation for Evaluation Dimensions
+
+UniEvalSum structures evaluation by generating **Boolean QA-style prompts** for each dimension:
+
+1. **Coherence** (Evaluates whether the summary is well-structured and logically consistent)
+   - **Prompt Template:**  
+     ```
+     question: Is this a coherent summary to the document? </s> summary: {system_output} </s> document: {source}
+     ```
+   - **Inputs Required:** Source document, generated summary  
+
+2. **Consistency** (Measures factual consistency with the source document)
+   - **Prompt Template:**  
+     ```
+     question: Is this claim consistent with the document? </s> claim: {system_output} </s> document: {source}
+     ```
+   - **Inputs Required:** Source document, generated summary  
+
+3. **Fluency** (Evaluates linguistic fluency and grammatical correctness)
+   - **Prompt Template:**  
+     ```
+     question: Is this a fluent paragraph? </s> paragraph: {system_output}
+     ```
+   - **Inputs Required:** Generated summary  
+
+4. **Relevance** (Measures how well the summary captures the key information from the reference summary)
+   - **Prompt Template:**  
+     ```
+     question: Is this summary relevant to the reference? </s> summary: {system_output} </s> reference: {reference}
+     ```
+   - **Inputs Required:** Generated summary, reference summary  
+
+These prompts are tokenized and passed into the **UniEvalSum** model, which then predicts Yes/No probabilities, converting them into scores between 0 and 1.
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation  
+- **Tasks:** Summarization  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Evaluating abstractive and extractive summaries in a structured manner  
+  - Tasks requiring explainable and interpretable evaluation dimensions  
+
+- **Not Recommended For:**  
+  - Open-ended creative writing evaluation  
+  - Tasks where diversity and novelty are primary concerns  
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - [Hugging Face Model: MingZhong/unieval-sum](https://huggingface.co/MingZhong/unieval-sum)
+  - [GitHub Repository: UniEval](https://github.com/maszhongming/UniEval)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  The model requires encoding the input and computing probability distributions over the Yes/No outputs. While more computationally expensive than simple n-gram-based metrics, it remains feasible for large-scale summarization evaluations.
+
+- **Scalability:**  
+  UniEvalSum scales well with dataset size, but evaluation cost grows linearly with the number of summaries due to separate model calls for each dimension.
+
+## Known Limitations
+
+- **Biases:**  
+  - May inherit biases from the pre-trained T5 model.  
+  - Performance may degrade if the summary style deviates significantly from the model's training data.  
+
+- **Task Misalignment Risks:**  
+  - While designed for summarization, results may not generalize to highly domain-specific summarization tasks (e.g., scientific summarization).  
+
+- **Failure Cases:**  
+  - In cases where reference summaries are poor, the relevance dimension may not be a reliable measure.  
+  - Evaluation scores may not correlate well with human judgment for summaries that use complex paraphrasing.  
+
+## Related Metrics
+
+- **ROUGE:** Lexical similarity-based evaluation metric commonly used for summarization.  
+- **BERTScore:** Embedding-based similarity metric for text evaluation.  
+- **CTC (Compression, Transduction, Creation):** A framework for evaluating NLG tasks across multiple dimensions.  
+
+## Further Reading
+
+- **Papers:**  
+  - [Towards a Unified Multi-Dimensional Evaluator for Text Generation (Zhong et al., 2022)](https://arxiv.org/abs/2210.07197)  
+
+- **Blogs/Tutorials:**  
+  - [UniEval GitHub Documentation](https://github.com/maszhongming/UniEval)  
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu  
+======
+
+
+Please rank the metrics from most relevant to least relevant for the task and target above.
+You can reason first about what makes a metric relevant for the task and target, and then provide your ranking.
+
+The final ranking should just be a python list of metric file names, in order from most relevant to least relevant.
+
+```
+# Example output:
+# ['LevenshteinDistance.md', 'UniEvalDialogue.md', 'CIDEr.md', ...] # length 20
+```
+
+You can include as much reasoning as you need, but please make your final answer a single list of metric file names, in order from most relevant to least relevant and in a code block.
+
+Additionally, please ensure that the list is all on one line, and that there are no newlines or extra spaces in the list itself (match the example output format).  Thanks!

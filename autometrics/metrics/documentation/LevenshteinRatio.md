@@ -93,6 +93,22 @@ where $|s_1|$ and $|s_2|$ denote the lengths of the sequences $s_1$ and $s_2$, r
 - **Blogs/Tutorials:**  
   - [Levenshtein Python Module Documentation](https://rapidfuzz.github.io/Levenshtein/index.html)
 
+## Citation
+
+```
+@article{levenshtein1965binary,
+  author       = {В.~И.~Левенштейн},
+  title        = {Двоичные коды с исправлением выпадений, вставок и замещений символов},
+  journal      = {Доклады Академии Наук СССР},
+  year         = {1965},
+  volume       = {163},
+  number       = {4},
+  pages        = {845--848},
+  url          = {http://mi.mathnet.ru/dan31411},
+  note         = {English translation: \emph{Binary Codes Capable of Correcting Deletions, Insertions, and Reversals}, \emph{Soviet Physics Doklady}, vol. 10, pp. 707, 1966.}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan

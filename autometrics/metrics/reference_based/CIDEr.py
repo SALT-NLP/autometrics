@@ -12,6 +12,9 @@ import numpy as np
 import copy
 from collections import defaultdict
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
+from nltk import word_tokenize
+from nltk.stem.porter import PorterStemmer
+from collections import Counter
 
 # ----------------------------
 # Internal Functions and Classes
@@ -335,17 +338,33 @@ with uniform weights $w_n = \frac{1}{N}$ (typically $N=4$).
 - **Blogs/Tutorials:**  
   - Documentation and tutorials available on the coco-caption GitHub repository
 
+## Citation
+
+```
+@INPROCEEDINGS{7299087,
+  author={Vedantam, Ramakrishna and Zitnick, C. Lawrence and Parikh, Devi},
+  booktitle={2015 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 
+  title={CIDEr: Consensus-based image description evaluation}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={4566-4575},
+  keywords={Measurement;Protocols;Accuracy;Training;Testing;Silicon;Correlation},
+  doi={10.1109/CVPR.2015.7299087}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:** Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high), based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, n=4, sigma=6.0, name="CIDEr", description="CIDEr measures consensus between a candidate sentence and its references."):
-        super().__init__(name + "_n" + str(n) + "_sig" + str(sigma), description)
+    def __init__(self, n=4, sigma=6.0, name="CIDEr", description="CIDEr measures consensus between a candidate sentence and its references.", **kwargs):
+        super().__init__(name + "_n" + str(n) + "_sig" + str(sigma), description, n=n, sigma=sigma, **kwargs)
         self._n = n
         self._sigma = sigma
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate the CIDEr score for a single candidate sentence.
         

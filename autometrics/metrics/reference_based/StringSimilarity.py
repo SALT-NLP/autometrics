@@ -1,4 +1,5 @@
 from Levenshtein import distance, ratio, hamming, jaro, jaro_winkler
+from nltk.metrics.distance import jaccard_distance
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
 def _aggregate(values, method):
@@ -132,22 +133,51 @@ where $1 \leq i \leq |s_1|$, $1 \leq j \leq |s_2|$, and typically $w_{ins} = w_{
 - **Blogs/Tutorials:**  
   - [Levenshtein Distance Documentation](https://rapidfuzz.github.io/Levenshtein/index.html)
 
+## Citation
+
+```
+@article{levenshtein1965binary,
+  author       = {В.~И.~Левенштейн},
+  title        = {Двоичные коды с исправлением выпадений, вставок и замещений символов},
+  journal      = {Доклады Академии Наук СССР},
+  year         = {1965},
+  volume       = {163},
+  number       = {4},
+  pages        = {845--848},
+  url          = {http://mi.mathnet.ru/dan31411},
+  note         = {English translation: \emph{Binary Codes Capable of Correcting Deletions, Insertions, and Reversals}, \emph{Soviet Physics Doklady}, vol. 10, pp. 707, 1966.}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, weights=(1, 1, 1), processor=None, score_cutoff=None, aggregation="min"):
+
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, weights=(1, 1, 1), processor=None, score_cutoff=None, aggregation="min", **kwargs):
         metric_name = f"LevenshteinDistance_{aggregation}"
         description = "Computes the Levenshtein distance between the candidate and reference strings."
-        super().__init__(metric_name, description)
+
+        super().__init__(
+            name=metric_name,
+            description=description,
+            weights=weights,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.weights = weights
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
             return 0  # No references; assume zero distance.
         w = kwargs.get("weights", self.weights)
@@ -256,25 +286,52 @@ where $|s_1|$ and $|s_2|$ denote the lengths of the sequences $s_1$ and $s_2$, r
 - **Blogs/Tutorials:**  
   - [Levenshtein Python Module Documentation](https://rapidfuzz.github.io/Levenshtein/index.html)
 
+## Citation
+
+```
+@article{levenshtein1965binary,
+  author       = {В.~И.~Левенштейн},
+  title        = {Двоичные коды с исправлением выпадений, вставок и замещений символов},
+  journal      = {Доклады Академии Наук СССР},
+  year         = {1965},
+  volume       = {163},
+  number       = {4},
+  pages        = {845--848},
+  url          = {http://mi.mathnet.ru/dan31411},
+  note         = {English translation: \emph{Binary Codes Capable of Correcting Deletions, Insertions, and Reversals}, \emph{Soviet Physics Doklady}, vol. 10, pp. 707, 1966.}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, processor=None, score_cutoff=None, aggregation="max"):
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, processor=None, score_cutoff=None, aggregation="max", **kwargs):
         metric_name = f"LevenshteinRatio_{aggregation}"
         description = "Computes the normalized Levenshtein ratio between the candidate and reference strings."
-        super().__init__(metric_name, description)
+        super().__init__(
+            name=metric_name,
+            description=description,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
-            return 1.0  # Identical string yields ratio 1.
+            return 0  # No references; assume zero similarity.
         proc = kwargs.get("processor", self.processor)
         cutoff = kwargs.get("score_cutoff", self.score_cutoff)
+        # Compute ratio for each reference.
         ratios = [
             ratio(output, ref, processor=proc, score_cutoff=cutoff)
             for ref in references
@@ -380,27 +437,54 @@ where $\mathbf{1}\{ s_i \neq t_i \}$ is an indicator function that equals 1 if $
 - **Blogs/Tutorials:**  
   - [Hamming Distance - Wikipedia](https://en.wikipedia.org/wiki/Hamming_distance)
 
+## Citation
+
+```
+@article{hamming1950error,
+  title={Error detecting and error correcting codes},
+  author={Hamming, Richard W},
+  journal={The Bell system technical journal},
+  volume={29},
+  number={2},
+  pages={147--160},
+  year={1950},
+  publisher={Nokia Bell Labs}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, pad=True, processor=None, score_cutoff=None, aggregation="min"):
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, pad=True, processor=None, score_cutoff=None, aggregation="min", **kwargs):
         metric_name = f"HammingDistance_{aggregation}"
         description = "Computes the Hamming distance between the candidate and reference strings."
-        super().__init__(metric_name, description)
+        super().__init__(
+            name=metric_name,
+            description=description,
+            pad=pad,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.pad = pad
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
-            return 0
+            return 0  # No references; assume zero distance.
         pad = kwargs.get("pad", self.pad)
         proc = kwargs.get("processor", self.processor)
         cutoff = kwargs.get("score_cutoff", self.score_cutoff)
+        # Compute distance for each reference.
         distances = [
             hamming(output, ref, pad=pad, processor=proc, score_cutoff=cutoff)
             for ref in references
@@ -501,25 +585,54 @@ $$
 - **Blogs/Tutorials:**  
   - [Jaro and Jaro-Winkler Similarity - GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
 
+## Citation
+
+```
+@article{3ebd50ca-85b6-3914-bf38-759fcad3ed72,
+ ISSN = {01621459, 1537274X},
+ URL = {http://www.jstor.org/stable/2289924},
+ author = {Matthew A. Jaro},
+ journal = {Journal of the American Statistical Association},
+ number = {406},
+ pages = {414--420},
+ publisher = {[American Statistical Association, Taylor & Francis, Ltd.]},
+ title = {Advances in Record-Linkage Methodology as Applied to Matching the 1985 Census of Tampa, Florida},
+ urldate = {2025-05-07},
+ volume = {84},
+ year = {1989}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, processor=None, score_cutoff=None, aggregation="max"):
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, processor=None, score_cutoff=None, aggregation="max", **kwargs):
         metric_name = f"JaroSimilarity_{aggregation}"
         description = "Computes the Jaro similarity between the candidate and reference strings."
-        super().__init__(metric_name, description)
+        super().__init__(
+            name=metric_name,
+            description=description,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
-            return 0.0
+            return 0  # No references; assume zero similarity.
         proc = kwargs.get("processor", self.processor)
         cutoff = kwargs.get("score_cutoff", self.score_cutoff)
+        # Compute similarity for each reference.
         similarities = [
             jaro(output, ref, processor=proc, score_cutoff=cutoff)
             for ref in references
@@ -646,29 +759,204 @@ where:
 - **Blogs/Tutorials:**  
   - [Jaro and Jaro-Winkler Similarity - GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
 
+## Citation
+
+```
+@article{winkler1990string,
+  title={String comparator metrics and enhanced decision rules in the fellegi-sunter model of record linkage.},
+  author={Winkler, William E},
+  year={1990},
+  publisher={ERIC}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
-    def __init__(self, prefix_weight=0.1, processor=None, score_cutoff=None, aggregation="max"):
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, prefix_weight=0.1, processor=None, score_cutoff=None, aggregation="max", **kwargs):
         metric_name = f"JaroWinklerSimilarity_{aggregation}"
         description = "Computes the Jaro-Winkler similarity between the candidate and reference strings."
-        super().__init__(metric_name, description)
+        super().__init__(
+            name=metric_name,
+            description=description,
+            prefix_weight=prefix_weight,
+            processor=processor,
+            score_cutoff=score_cutoff,
+            aggregation=aggregation,
+            **kwargs
+        )
         self.prefix_weight = prefix_weight
         self.processor = processor
         self.score_cutoff = score_cutoff
         self.aggregation = aggregation
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if references is None or len(references) == 0:
-            return 0.0
-        prefix_weight = kwargs.get("prefix_weight", self.prefix_weight)
+            return 0  # No references; assume zero similarity.
+        weight = kwargs.get("prefix_weight", self.prefix_weight)
         proc = kwargs.get("processor", self.processor)
         cutoff = kwargs.get("score_cutoff", self.score_cutoff)
+        # Compute similarity for each reference.
         similarities = [
-            jaro_winkler(output, ref, prefix_weight=prefix_weight, processor=proc, score_cutoff=cutoff)
+            jaro_winkler(output, ref, prefix_weight=weight, processor=proc, score_cutoff=cutoff)
             for ref in references
         ]
         return _aggregate(similarities, self.aggregation)
+
+class JaccardDistance(ReferenceBasedMetric):
+    """---
+# Metric Card for Jaccard Distance
+
+Jaccard Distance is a classic set-based dissimilarity metric that quantifies the difference between two sets. Derived from the Jaccard Index (or Jaccard Similarity), it is defined as one minus the ratio of the size of the intersection to the size of the union of the sets. It is widely used in information retrieval, text analysis, clustering, and various classification tasks where the inputs can be represented as sets, such as sets of tokens, labels, or features.
+
+## Metric Details
+
+### Metric Description
+
+Jaccard Distance measures dissimilarity between two sets and is calculated as:
+
+$$
+\text{Jaccard Distance}(A, B) = 1 - \frac{|A \cap B|}{|A \cup B|}
+$$
+
+It ranges from 0 to 1, where 0 means the two sets are identical, and 1 means they are completely disjoint. This metric is especially useful for sparse binary data and categorical feature comparison.
+
+- **Metric Type:** Surface-Level Similarity  
+- **Range:** 0 to 1  
+- **Higher is Better?:** No  
+- **Reference-Based?:** Yes  
+- **Input-Required?:** Yes  
+
+### Formal Definition
+
+Let $A$ and $B$ be two sets.
+
+$$
+J_D(A, B) = 1 - \frac{|A \cap B|}{|A \cup B|}
+$$
+
+Where:
+- $|A \cap B|$ is the size of the intersection (elements common to both sets),
+- $|A \cup B|$ is the size of the union (all elements in either set).
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Two sets or collections of elements (e.g., tokens, binary labels, feature indices)
+
+- **Outputs:**  
+  - A scalar score between 0 and 1 indicating dissimilarity between the sets
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation, Code Generation, Multimodal Generation  
+- **Tasks:** Summarization, Paraphrasing, Dialogue Generation, Image-to-Text Generation, Clustering Evaluation, Recommendation Systems  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  - Binary or categorical comparisons where data can be represented as sets  
+  - Tasks where exact set overlap is a meaningful signal (e.g., label prediction, tag-based retrieval)
+
+- **Not Recommended For:**  
+  - Continuous-valued vectors or embeddings  
+  - Semantic similarity tasks where partial or fuzzy matches are relevant
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**
+  - Python (standard set operations):  
+    ```python
+    def jaccard_distance(set1, set2):
+        return (len(set1.union(set2)) - len(set1.intersection(set2))) / len(set1.union(set2))
+    ```
+  - [`scikit-learn`](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.jaccard_score.html) (for binary vectors)
+  - [`NLTK`](https://www.nltk.org/) (for text-based applications)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  $O(n)$ where $n$ is the number of unique elements in the union of the two sets. Efficient for sparse data.
+
+- **Scalability:**  
+  Scales well with large datasets when used with set operations or sparse matrix representations.
+
+## Known Limitations
+
+- **Biases:**  
+  Assumes equal importance of all elements; does not account for semantic similarity between differing elements.
+
+- **Task Misalignment Risks:**  
+  May under-represent similarity in cases where minor variations in content result in very different sets (e.g., synonyms in NLP).
+
+- **Failure Cases:**  
+  - Near-duplicate texts with paraphrased wording but minimal token overlap will yield high Jaccard Distance despite semantic similarity.  
+  - Sensitive to tokenization and preprocessing choices.
+
+## Related Metrics
+
+- **Jaccard Index (Similarity):** $1 - \text{Jaccard Distance}$  
+- **Cosine Similarity:** Useful for high-dimensional sparse data but considers vector orientation  
+- **Dice Coefficient:** Similar to Jaccard but with a different normalization factor: $2|A \cap B| / (|A| + |B|)$
+
+## Further Reading
+
+- **Papers:**  
+  - Paul Jaccard. *Étude comparative de la distribution florale dans une portion des Alpes et des Jura*, *Bull. Soc. Vaudoise Sci. Nat.*, 1901.  
+  - [ResearchGate Summary and DOI](https://www.researchgate.net/publication/225035806)
+
+- **Blogs/Tutorials:**  
+  - [Jaccard Similarity Made Simple (Medium)](https://mayurdhvajsinhjadeja.medium.com/)
+
+## Citation
+
+```
+@article{jaccard1901etude,
+  title={{\'E}tude comparative de la distribution florale dans une portion des Alpes et des Jura},
+  author={Jaccard, Paul},
+  journal={Bull Soc Vaudoise Sci Nat},
+  volume={37},
+  pages={547--579},
+  year={1901}
+}
+```
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu"""
+    # String similarity metrics are fast enough without caching
+    DEFAULT_USE_CACHE = False
+    
+    def __init__(self, aggregation: str = "min", **kwargs):
+        metric_name = f"JaccardDistance_{aggregation}"
+        description = "Computes the Jaccard distance between the candidate and reference strings."
+        super().__init__(
+            name=metric_name,
+            description=description,
+            aggregation=aggregation,
+            **kwargs
+        )
+        self.aggregation = aggregation
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):
+        if references is None or len(references) == 0:
+            return 0  # No references; assume zero distance.
+        # Compute distance for each reference.
+        distances = [
+            jaccard_distance(set(output.split()), set(ref.split()))
+            for ref in references
+        ]
+        return _aggregate(distances, self.aggregation)

@@ -5,509 +5,344 @@ from typing import List, Optional
 from pydantic import Field
 from autometrics.dataset.Dataset import Dataset
 from autometrics.metrics.MultiMetric import MultiMetric
+from autometrics.metrics.PairwiseMetric import PairwiseMetric
+from autometrics.metrics.PairwiseMultiMetric import PairwiseMultiMetric
 from autometrics.metrics.Metric import Metric
 
 class PairwiseDataset(Dataset):
     """
-    Dataset class for handling and manipulating pairwise datasets.
+    Dataset class for handling paired model outputs for comparison.
     """
-    # target_columns_1: List[str] = Field(default_factory=list)
-    # target_columns_2: List[str] = Field(default_factory=list)
-    # metric_columns_1: List[str] = Field(default_factory=list)
-    # metric_columns_2: List[str] = Field(default_factory=list)
-    # model_id_column_1: Optional[str] = None
-    # model_id_column_2: Optional[str] = None
-    # output_column_1: Optional[str] = None
-    # output_column_2: Optional[str] = None
-    # model1_dataset: Optional[Dataset] = None
-    # model2_dataset: Optional[Dataset] = None
 
-    def __init__(self, dataframe: pd.DataFrame, target_columns_1: List[str], target_columns_2: List[str], ignore_columns: List[str], metric_columns_1: List[str], metric_columns_2: List[str], name: str, data_id_column: Optional[str] = None, model_id_column_1: Optional[str] = None, model_id_column_2: Optional[str] = None, input_column: Optional[str] = None, output_column_1: Optional[str] = None, output_column_2: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None):
-        assert len(target_columns_1) == len(target_columns_2), "Target columns for both models must be the same length"
-        assert len(metric_columns_1) == len(metric_columns_2), "Metric columns for both models must be the same length"
-
-        # PairwiseDataset specific attributes
-        self.target_columns_1 = target_columns_1
-        self.target_columns_2 = target_columns_2
-        self.metric_columns_1 = metric_columns_1
-        self.metric_columns_2 = metric_columns_2
-        self.model_id_column_1 = model_id_column_1
-        self.model_id_column_2 = model_id_column_2
-        self.output_column_1 = output_column_1
-        self.output_column_2 = output_column_2
-
-        # Step 1: Create model1_dataset and model2_dataset by splitting the dataframe
-
-        model_1_columns = target_columns_1 + metric_columns_1 + [data_id_column, model_id_column_1, input_column, output_column_1] + reference_columns
-        model_2_columns = target_columns_2 + metric_columns_2 + [data_id_column, model_id_column_2, input_column, output_column_2] + reference_columns
-
-        model_1_columns = list(set(model_1_columns))
-        model_2_columns = list(set(model_2_columns))
-
-        model_1_df = dataframe[model_1_columns].copy()
-        model_2_df = dataframe[model_2_columns].copy()
-
-        self.model1_dataset = Dataset(
-            dataframe=model_1_df,
-            target_columns=target_columns_1,
+    def __init__(self, 
+                 dataframe: pd.DataFrame, 
+                 target_columns: List[str], 
+                 ignore_columns: List[str], 
+                 metric_columns: List[str], 
+                 name: str, 
+                 data_id_column: Optional[str] = None, 
+                 model_id_column_1: Optional[str] = None,
+                 model_id_column_2: Optional[str] = None,
+                 input_column: Optional[str] = None, 
+                 output_column_1: Optional[str] = None, 
+                 output_column_2: Optional[str] = None, 
+                 reference_columns: Optional[List[str]] = None, 
+                 metrics: List[Metric] = None, 
+                 task_description: Optional[str] = None):
+        """
+        Initialize a PairwiseDataset with paired outputs.
+        
+        Args:
+            dataframe: DataFrame containing the data
+            target_columns: Names of target columns
+            ignore_columns: Names of columns to ignore
+            metric_columns: Names of metric columns
+            name: Name of the dataset
+            data_id_column: Name of column with data IDs
+            model_id_column_1: Name of column with model IDs for first model outputs
+            model_id_column_2: Name of column with model IDs for second model outputs
+            input_column: Name of column with inputs
+            output_column_1: Name of column with outputs from first model
+            output_column_2: Name of column with outputs from second model
+            reference_columns: Names of columns with reference outputs
+            metrics: List of metrics to use
+            task_description: Description of the task
+        """
+        # Call the parent constructor
+        super().__init__(
+            dataframe=dataframe,
+            target_columns=target_columns,
             ignore_columns=ignore_columns,
-            metric_columns=metric_columns_1,
+            metric_columns=metric_columns,
             name=name,
             data_id_column=data_id_column,
-            model_id_column=model_id_column_1,
+            model_id_column=model_id_column_1,  # Use model_id_column_1 as default model_id_column
             input_column=input_column,
-            output_column=output_column_1,
+            output_column=output_column_1,  # Use output_column_1 as default output_column
             reference_columns=reference_columns,
-            metrics=metrics
-        )
-
-        self.model2_dataset = Dataset(
-            dataframe=model_2_df,
-            target_columns=target_columns_2,
-            ignore_columns=ignore_columns,
-            metric_columns=metric_columns_2,
-            name=name,
-            data_id_column=data_id_column,
-            model_id_column=model_id_column_2,
-            input_column=input_column,
-            output_column=output_column_2,
-            reference_columns=reference_columns,
-            metrics=metrics
-        )
-
-        # Step 2: Set the dataframe and other attributes for the PairwiseDataset to be a combination of the two datasets
-        self.target_columns = [f"{col1}-{col2}" for col1, col2 in zip(target_columns_1, target_columns_2)]
-        self.ignore_columns = ignore_columns
-        self.metric_columns = [f"{col1}-{col2}" for col1, col2 in zip(metric_columns_1, metric_columns_2)]
-        self.name = name
-        self.data_id_column = data_id_column
-        self.model_id_column = "model_id"  # Set a common model_id column for the pairwise dataset
-        self.input_column = input_column
-        self.output_column = "output"  # Set a common output column for the pairwise dataset
-        self.reference_columns = reference_columns
-        self.metrics = metrics if metrics is not None else []
-
-        # Combine the dataframes for the pairwise dataset
-        cols = [data_id_column, input_column] + reference_columns
-
-        cols = list(set(cols)) # Ensure unique columns
-
-        df = dataframe[cols].copy()
-        df.columns = cols
-        # add model_id, output, and target, and metric columns
-        df["model_id"] = model_1_df[model_id_column_1].astype(str) + "-" + model_2_df[model_id_column_2].astype(str)
-        df["output"] = "[\"" + model_1_df[output_column_1].astype(str) + "\",\"" + model_2_df[output_column_2].astype(str) + "\"]"
-        for col1, col2 in zip(target_columns_1, target_columns_2):
-            df[f"{col1}-{col2}"] = model_1_df[col1].astype(float) - model_2_df[col2].astype(float)
-        for col1, col2 in zip(metric_columns_1, metric_columns_2):
-            df[f"{col1}-{col2}"] = model_1_df[col1].astype(float) - model_2_df[col2].astype(float)
-
-        self.dataframe = df
-        self.original_dataframe = dataframe.copy()
-
-    def set_all_fields(self, dataframe: pd.DataFrame, target_columns_1: List[str], target_columns_2: List[str], ignore_columns: List[str], metric_columns_1: List[str], metric_columns_2: List[str], name: str, data_id_column: Optional[str] = None, model_id_column_1: Optional[str] = None, model_id_column_2: Optional[str] = None, input_column: Optional[str] = None, output_column_1: Optional[str] = None, output_column_2: Optional[str] = None, reference_columns: Optional[List[str]] = None, metrics: List[Metric] = None):
-        self.dataframe = dataframe
-        self.original_dataframe = dataframe.copy()
-        self.target_columns_1 = target_columns_1
-        self.target_columns_2 = target_columns_2
-        self.ignore_columns = ignore_columns
-        self.metric_columns_1 = metric_columns_1
-        self.metric_columns_2 = metric_columns_2
-        self.name = name
-        self.data_id_column = data_id_column
-        self.model_id_column_1 = model_id_column_1
-        self.model_id_column_2 = model_id_column_2
-        self.input_column = input_column
-        self.output_column_1 = output_column_1
-        self.output_column_2 = output_column_2
-        self.reference_columns = reference_columns if reference_columns is not None else []
-        self.metrics = metrics if metrics is not None else []
-
-
-    def set_dataframe(self, dataframe: pd.DataFrame):
-        print("[WARNING] Setting dataframe directly. This is not recommended for pairwise datasets which have custom logic for handling data.")
-        self.dataframe = dataframe
-
-    def add_metric(self, metric: Metric, update_dataset: bool = True):
-        self.model1_dataset.add_metric(metric, update_dataset=update_dataset)
-        self.model2_dataset.add_metric(metric, update_dataset=update_dataset)
-        model1_df = self.model1_dataset.get_dataframe()
-        model2_df = self.model2_dataset.get_dataframe()
-
-        if isinstance(metric, MultiMetric):
-            self.metrics.append(metric)
-            for submetric_name in metric.get_submetric_names():
-                if submetric_name not in self.metric_columns:
-                    self.metric_columns.append(submetric_name)
-
-                if self.dataframe is not None and update_dataset and submetric_name not in self.dataframe.columns:
-                    self.dataframe[submetric_name] = model1_df[submetric_name].astype(float) - model2_df[submetric_name].astype(float)
-
-        else:
-            self.metrics.append(metric)
-            metric_name = metric.get_name()
-            if metric_name not in self.metric_columns:
-                self.metric_columns.append(metric_name)
-            if self.dataframe is not None and update_dataset and metric_name not in self.dataframe.columns:
-                self.dataframe[metric_name] = model1_df[metric_name].astype(float) - model2_df[metric_name].astype(float)
-            
-    
-    def get_splits(self, split_column: Optional[str] = None, train_ratio: float = 0.5, val_ratio: float = 0.2, seed: Optional[int] = None, max_size: Optional[int] = None):
-        df = self.original_dataframe
-
-        if len(self.metrics) > 0:
-            warnings.warn("Metrics have already been added to this dataset.  For PairwiseDataset, metrics must be added AFTER splitting the dataset."
-                            "DISCARDING Metrics added to this dataset.")
-
-        if not split_column:
-            split_column = self.data_id_column
-        if not split_column:
-            warnings.warn("No split column specified. Splitting based on index which is not recommended. "
-                          "This means that we could be testing on data that is partially represented in the training set.")
-            items = np.arange(len(df))
-        else:
-            items = df[split_column].unique()
-
-        train_size = int(train_ratio * len(items))
-        val_size = int(val_ratio * len(items))
-        test_size = len(items) - train_size - val_size
-
-        if train_size + val_size + test_size < len(items):
-            train_size += len(items) - (train_size + val_size + test_size)
-
-        if seed:
-            np.random.seed(seed)
-
-        np.random.shuffle(items)
-
-        train_items = items[:train_size]
-        val_items = items[train_size:train_size + val_size]
-        test_items = items[train_size + val_size:]
-
-        if split_column:
-            train_df = df[df[split_column].isin(train_items)]
-            val_df = df[df[split_column].isin(val_items)]
-            test_df = df[df[split_column].isin(test_items)]
-        else:
-            train_df = df.iloc[train_items]
-            val_df = df.iloc[val_items]
-            test_df = df.iloc[test_items]
-
-        train_dataset = PairwiseDataset(
-            dataframe=train_df,
-            target_columns_1=self.target_columns_1,
-            target_columns_2=self.target_columns_2,
-            ignore_columns=self.ignore_columns,
-            metric_columns_1=self.metric_columns_1,
-            metric_columns_2=self.metric_columns_2,
-            name=self.name,
-            data_id_column=self.data_id_column,
-            model_id_column_1=self.model_id_column_1,
-            model_id_column_2=self.model_id_column_2,
-            input_column=self.input_column,
-            output_column_1=self.output_column_1,
-            output_column_2=self.output_column_2,
-            reference_columns=self.reference_columns,
-            metrics=[]
-        )
-        val_dataset = PairwiseDataset(
-            dataframe=val_df,
-            target_columns_1=self.target_columns_1,
-            target_columns_2=self.target_columns_2,
-            ignore_columns=self.ignore_columns,
-            metric_columns_1=self.metric_columns_1,
-            metric_columns_2=self.metric_columns_2,
-            name=self.name,
-            data_id_column=self.data_id_column,
-            model_id_column_1=self.model_id_column_1,
-            model_id_column_2=self.model_id_column_2,
-            input_column=self.input_column,
-            output_column_1=self.output_column_1,
-            output_column_2=self.output_column_2,
-            reference_columns=self.reference_columns,
-            metrics=[]
-        )
-        test_dataset = PairwiseDataset(
-            dataframe=test_df,
-            target_columns_1=self.target_columns_1,
-            target_columns_2=self.target_columns_2,
-            ignore_columns=self.ignore_columns,
-            metric_columns_1=self.metric_columns_1,
-            metric_columns_2=self.metric_columns_2,
-            name=self.name,
-            data_id_column=self.data_id_column,
-            model_id_column_1=self.model_id_column_1,
-            model_id_column_2=self.model_id_column_2,
-            input_column=self.input_column,
-            output_column_1=self.output_column_1,
-            output_column_2=self.output_column_2,
-            reference_columns=self.reference_columns,
-            metrics=[]
+            metrics=metrics if metrics is not None else [],
+            task_description=task_description
         )
         
-        if max_size:
-            train_dataset = train_dataset.get_subset(max_size)
-            val_dataset = val_dataset.get_subset(max_size)
-            test_dataset = test_dataset.get_subset(max_size)
+        # Store additional attributes specific to pairwise datasets
+        self.output_column_1 = output_column_1
+        self.output_column_2 = output_column_2
+        self.model_id_column_1 = model_id_column_1
+        self.model_id_column_2 = model_id_column_2
+        
+        # Validate required columns
+        if not output_column_1 or not output_column_2:
+            raise ValueError("Both output_column_1 and output_column_2 must be provided for PairwiseDataset")
+            
+        if output_column_1 not in dataframe.columns or output_column_2 not in dataframe.columns:
+            raise ValueError(f"Output columns must exist in dataframe: {output_column_1}, {output_column_2}")
+        
+        # Check model ID columns if provided
+        if model_id_column_1 and model_id_column_1 not in dataframe.columns:
+            raise ValueError(f"Model ID column 1 '{model_id_column_1}' not found in dataframe")
+        if model_id_column_2 and model_id_column_2 not in dataframe.columns:
+            raise ValueError(f"Model ID column 2 '{model_id_column_2}' not found in dataframe")
 
-        return train_dataset, val_dataset, test_dataset
-
-    def get_kfold_splits(self, k: int = 5, split_column: Optional[str] = None, seed: Optional[int] = None, test_ratio: float = 0.3):
-        df = self.original_dataframe
-
-        if len(self.metrics) > 0:
-            warnings.warn("Metrics have already been added to this dataset.  For PairwiseDataset, metrics must be added AFTER splitting the dataset."
-                            "DISCARDING Metrics added to this dataset.")
-
-        if test_ratio and test_ratio > 0:
-            if seed:
-                np.random.seed(seed)
-
-            if not split_column:
-                split_column = self.data_id_column
-
-            if not split_column:
-                items = np.arange(len(df))
-                test_size = int(test_ratio * len(items))
-                test_items = np.random.choice(np.arange(len(df)), test_size, replace=False)
-                test_df = df[df.index.isin(test_items)]
-                df = df[~df.index.isin(test_items)]
-                train_df = df.copy()
-            else:
-                items = df[split_column].unique()
-                test_size = int(test_ratio * len(items))
-                test_items = np.random.choice(df[split_column].unique(), test_size, replace=False)
-                test_df = df[df[split_column].isin(test_items)]
-                df = df[~df[split_column].isin(test_items)]
-                train_df = df.copy()
-        else:
-            test_df = None
-
-        if not split_column:
-            split_column = self.data_id_column
-        if not split_column:
-            warnings.warn("No split column specified. Splitting based on index which is not recommended. "
-                          "This means that we could be testing on data that is partially represented in the training set.")
-            items = np.arange(len(df))
-        else:
-            items = df[split_column].unique()
-
-        if seed:
-            np.random.seed(seed)
-
-        np.random.shuffle(items)
-
-        splits = np.array_split(items, k)
-
-        split_datasets = []
-        for i in range(k):
-            split_items = splits[i]
-            non_split_items = np.concatenate([splits[j] for j in range(k) if j != i])
-            if split_column:
-                split_df = df[df[split_column].isin(split_items)]
-                non_split_df = df[df[split_column].isin(non_split_items)]
-            else:
-                split_df = df.iloc[split_items].copy()
-                non_split_df = df.iloc[non_split_items].copy()
-            split_val_dataset = PairwiseDataset(
-                dataframe=split_df,
-                target_columns_1=self.target_columns_1,
-                target_columns_2=self.target_columns_2,
-                ignore_columns=self.ignore_columns,
-                metric_columns_1=self.metric_columns_1,
-                metric_columns_2=self.metric_columns_2,
-                name=self.name,
-                data_id_column=self.data_id_column,
-                model_id_column_1=self.model_id_column_1,
-                model_id_column_2=self.model_id_column_2,
-                input_column=self.input_column,
-                output_column_1=self.output_column_1,
-                output_column_2=self.output_column_2,
-                reference_columns=self.reference_columns,
-                metrics=[]
-            )
-            split_train_dataset = PairwiseDataset(
-                dataframe=non_split_df,
-                target_columns_1=self.target_columns_1,
-                target_columns_2=self.target_columns_2,
-                ignore_columns=self.ignore_columns,
-                metric_columns_1=self.metric_columns_1,
-                metric_columns_2=self.metric_columns_2,
-                name=self.name,
-                data_id_column=self.data_id_column,
-                model_id_column_1=self.model_id_column_1,
-                model_id_column_2=self.model_id_column_2,
-                input_column=self.input_column,
-                output_column_1=self.output_column_1,
-                output_column_2=self.output_column_2,
-                reference_columns=self.reference_columns,
-                metrics=[]
-            )
-            split_datasets.append((split_train_dataset, split_val_dataset))
-
-        train_dataset = PairwiseDataset(
-            dataframe=train_df,
-            target_columns_1=self.target_columns_1,
-            target_columns_2=self.target_columns_2,
-            ignore_columns=self.ignore_columns,
-            metric_columns_1=self.metric_columns_1,
-            metric_columns_2=self.metric_columns_2,
-            name=self.name,
-            data_id_column=self.data_id_column,
-            model_id_column_1=self.model_id_column_1,
-            model_id_column_2=self.model_id_column_2,
-            input_column=self.input_column,
-            output_column_1=self.output_column_1,
-            output_column_2=self.output_column_2,
-            reference_columns=self.reference_columns,
-            metrics=[]
-        )
-        test_dataset = PairwiseDataset( 
-            dataframe=test_df,
-            target_columns_1=self.target_columns_1,
-            target_columns_2=self.target_columns_2,
-            ignore_columns=self.ignore_columns,
-            metric_columns_1=self.metric_columns_1,
-            metric_columns_2=self.metric_columns_2,
-            name=self.name,
-            data_id_column=self.data_id_column,
-            model_id_column_1=self.model_id_column_1,
-            model_id_column_2=self.model_id_column_2,
-            input_column=self.input_column,
-            output_column_1=self.output_column_1,
-            output_column_2=self.output_column_2,
-            reference_columns=self.reference_columns,
-            metrics=[]
-        )
-
-        return split_datasets, train_dataset, test_dataset
+    def get_output_column_1(self) -> str:
+        """
+        Get the name of the column containing outputs from the first model.
+        
+        Returns:
+            The name of the first output column
+        """
+        return self.output_column_1
+        
+    def get_output_column_2(self) -> str:
+        """
+        Get the name of the column containing outputs from the second model.
+        
+        Returns:
+            The name of the second output column
+        """
+        return self.output_column_2
     
+    def get_model_id_column_1(self) -> Optional[str]:
+        """
+        Get the name of the column containing model IDs for the first model.
+        
+        Returns:
+            The name of the first model ID column, or None if not defined
+        """
+        return self.model_id_column_1
+        
+    def get_model_id_column_2(self) -> Optional[str]:
+        """
+        Get the name of the column containing model IDs for the second model.
+        
+        Returns:
+            The name of the second model ID column, or None if not defined
+        """
+        return self.model_id_column_2
+
+    def add_metric(self, metric: Metric, update_dataset: bool = True):
+        """
+        Add a metric to the dataset. If it's not a PairwiseMetric, wrap it.
+        
+        Args:
+            metric: The metric to add
+            update_dataset: Whether to update the dataset with metric values
+            
+        Returns:
+            None
+        """
+        # If the metric is not already a pairwise metric, wrap it
+        if not isinstance(metric, (PairwiseMetric, PairwiseMultiMetric)):
+            pairwise_metric = None
+            if isinstance(metric, MultiMetric):
+                pairwise_metric = PairwiseMultiMetric(multi_metric=metric)
+            else:
+                pairwise_metric = PairwiseMetric(scalar_metric=metric)
+            self.metrics.append(pairwise_metric)
+            
+            # Add metric names to metric_columns
+            if isinstance(pairwise_metric, PairwiseMultiMetric):
+                # For MultiMetrics, add all submetric names
+                for submetric_name in pairwise_metric.get_submetric_names():
+                    if submetric_name not in self.metric_columns:
+                        self.metric_columns.append(submetric_name)
+            else:
+                # For regular metrics, add the single metric name
+                if pairwise_metric.get_name() not in self.metric_columns:
+                    self.metric_columns.append(pairwise_metric.get_name())
+                
+            # Calculate and update the dataset if requested
+            if update_dataset and self.dataframe is not None:
+                pairwise_metric.predict(self, update_dataset=True)
+        else:
+            # The metric is already a pairwise metric
+            self.metrics.append(metric)
+            
+            # Add metric names to metric_columns
+            if isinstance(metric, PairwiseMultiMetric):
+                # For MultiMetrics, add all submetric names
+                for submetric_name in metric.get_submetric_names():
+                    if submetric_name not in self.metric_columns:
+                        self.metric_columns.append(submetric_name)
+            else:
+                # For regular metrics, add the single metric name
+                if metric.get_name() not in self.metric_columns:
+                    self.metric_columns.append(metric.get_name())
+                
+            # Calculate and update the dataset if requested
+            if update_dataset and self.dataframe is not None:
+                metric.predict(self, update_dataset=True)
+
     def calculate_metrics(self, update_dataset: bool = True, **kwargs):
+        """
+        Calculate all metrics for the dataset.
+        
+        Args:
+            update_dataset: Whether to update the dataset with metric values
+            **kwargs: Additional arguments for metric calculation
+            
+        Returns:
+            None
+        """
         for metric in self.metrics:
-            if metric.get_name() not in self.get_metric_columns():
-                self.add_metric(metric, update_dataset=update_dataset)
-
-            df = self.get_dataframe()
-
-            for i, row in df.iterrows():
-                if metric.get_name() not in row:
-                    res1 = metric.calculate_row(row, self.model1_dataset, update_dataset=update_dataset)
-                    res2 = metric.calculate_row(row, self.model2_dataset, update_dataset=update_dataset)
-
-                    if update_dataset:
-                        df.at[i, metric.get_name()] = res1 - res2
-
-        if update_dataset:
-            self.set_dataframe(df)
-
-    def get_subset(self, size: int, seed: Optional[int] = None) -> 'PairwiseDataset':
-        df = self.get_dataframe() if len(self.metrics) > 0 else self.original_dataframe
-        if seed:
-            np.random.seed(seed)
-        subset_df = df.sample(n=min(size, len(df)), random_state=seed)
-
-        if len(self.metrics) == 0:
-            return PairwiseDataset(
-                dataframe=subset_df,
-                target_columns_1=self.target_columns_1,
-                target_columns_2=self.target_columns_2,
-                ignore_columns=self.ignore_columns,
-                metric_columns_1=self.metric_columns_1,
-                metric_columns_2=self.metric_columns_2,
-                name=self.name,
-                data_id_column=self.data_id_column,
-                model_id_column_1=self.model_id_column_1,
-                model_id_column_2=self.model_id_column_2,
-                input_column=self.input_column,
-                output_column_1=self.output_column_1,
-                output_column_2=self.output_column_2,
-                reference_columns=self.reference_columns,
-                metrics=[]
-            )
-
-        indices = subset_df.index
-        model1_df = self.model1_dataset.get_dataframe().loc[indices].copy()
-        model2_df = self.model2_dataset.get_dataframe().loc[indices].copy()
-
-        model1_dataset = self.model1_dataset.copy()
-        model1_dataset.set_dataframe(model1_df)
-
-        model2_dataset = self.model2_dataset.copy()
-        model2_dataset.set_dataframe(model2_df)
-
-        output_dataset = PairwiseDataset(
-            dataframe=subset_df,
-            target_columns_1=self.target_columns_1,
-            target_columns_2=self.target_columns_2,
-            ignore_columns=self.ignore_columns,
-            metric_columns_1=self.metric_columns_1,
-            metric_columns_2=self.metric_columns_2,
-            name=self.name,
-            data_id_column=self.data_id_column,
-            model_id_column_1=self.model_id_column_1,
-            model_id_column_2=self.model_id_column_2,
-            input_column=self.input_column,
-            output_column_1=self.output_column_1,
-            output_column_2=self.output_column_2,
-            reference_columns=self.reference_columns,
-            metrics=[],
-        )
-
-        output_dataset.set_all_fields(
-            dataframe=subset_df,
-            target_columns_1=self.target_columns_1,
-            target_columns_2=self.target_columns_2,
-            ignore_columns=self.ignore_columns,
-            metric_columns_1=self.metric_columns_1,
-            metric_columns_2=self.metric_columns_2,
-            name=self.name,
-            data_id_column=self.data_id_column,
-            model_id_column_1=self.model_id_column_1,
-            model_id_column_2=self.model_id_column_2,
-            input_column=self.input_column,
-            output_column_1=self.output_column_1,
-            output_column_2=self.output_column_2,
-            reference_columns=self.reference_columns,
-            metrics=[],
-            model1_dataset=model1_dataset,
-            model2_dataset=model2_dataset
-        )
+            if isinstance(metric, (PairwiseMetric, PairwiseMultiMetric)):
+                metric.predict(self, update_dataset=update_dataset, **kwargs)
+            else:
+                # Not a PairwiseMetric - create a wrapper and use it
+                pairwise_metric = None
+                if isinstance(metric, MultiMetric):
+                    pairwise_metric = PairwiseMultiMetric(multi_metric=metric)
+                else:
+                    pairwise_metric = PairwiseMetric(scalar_metric=metric)
+                pairwise_metric.predict(self, update_dataset=update_dataset, **kwargs)
     
-    def copy(self):
-        new_dataset = PairwiseDataset(
-            dataframe=self.dataframe.copy(),
-            target_columns_1=self.target_columns_1,
-            target_columns_2=self.target_columns_2,
-            ignore_columns=self.ignore_columns,
-            metric_columns_1=self.metric_columns_1,
-            metric_columns_2=self.metric_columns_2,
-            name=self.name,
-            data_id_column=self.data_id_column,
+    def get_metric_values(self, metric: Metric, update_dataset: bool = True, **kwargs):
+        """
+        Get the values for a specific metric.
+        
+        Args:
+            metric: The metric to use
+            update_dataset: Whether to update the dataset with metric values
+            **kwargs: Additional arguments for metric calculation
+            
+        Returns:
+            The metric values for all rows
+        """
+        # Make sure we're using a pairwise metric
+        if not isinstance(metric, (PairwiseMetric, PairwiseMultiMetric)):
+            if isinstance(metric, MultiMetric):
+                pairwise_metric = PairwiseMultiMetric(multi_metric=metric)
+            else:
+                pairwise_metric = PairwiseMetric(scalar_metric=metric)
+        else:
+            pairwise_metric = metric
+            
+        # Calculate metric values if they don't exist in the dataset
+        if update_dataset:
+            # For MultiMetrics, check if all submetric columns exist
+            if isinstance(pairwise_metric, PairwiseMultiMetric):
+                submetric_names = pairwise_metric.get_submetric_names()
+                if any(name not in self.get_dataframe().columns for name in submetric_names):
+                    pairwise_metric.predict(self, update_dataset=True, **kwargs)
+            # For regular metrics, check if the metric column exists
+            elif pairwise_metric.get_name() not in self.get_metric_columns():
+                pairwise_metric.predict(self, update_dataset=True, **kwargs)
+            
+        df = self.get_dataframe()
+        
+        # Return appropriate columns based on metric type
+        if isinstance(pairwise_metric, PairwiseMultiMetric):
+            return df[pairwise_metric.get_submetric_names()]
+        else:
+            return df[pairwise_metric.get_name()]
+    
+    def get_splits(self, split_column: Optional[str] = None, train_ratio: float = 0.5, val_ratio: float = 0.2, seed: Optional[int] = None, max_size: Optional[int] = None):
+        """
+        Split the dataset into training, validation, and test sets.
+        
+        Args:
+            split_column: Column to use for splitting
+            train_ratio: Ratio of data to use for training
+            val_ratio: Ratio of data to use for validation
+            seed: Random seed for reproducibility
+            max_size: Maximum size of each split
+            
+        Returns:
+            train_dataset, val_dataset, test_dataset
+        """
+        train_dataset, val_dataset, test_dataset = super().get_splits(
+            split_column=split_column,
+            train_ratio=train_ratio,
+            val_ratio=val_ratio,
+            seed=seed,
+            max_size=max_size
+        )
+        
+        # Convert each split to a PairwiseDataset
+        train_pairwise = self._convert_to_pairwise(train_dataset)
+        val_pairwise = self._convert_to_pairwise(val_dataset)
+        test_pairwise = self._convert_to_pairwise(test_dataset)
+        
+        return train_pairwise, val_pairwise, test_pairwise
+    
+    def get_kfold_splits(self, k: int = 5, split_column: Optional[str] = None, seed: Optional[int] = None, test_ratio: float = 0.3):
+        """
+        Split the dataset into k folds.
+        
+        Args:
+            k: Number of folds
+            split_column: Column to use for splitting
+            seed: Random seed for reproducibility
+            test_ratio: Ratio of data to use for testing
+            
+        Returns:
+            List of (train, val) splits, train_dataset, test_dataset
+        """
+        split_datasets, train_dataset, test_dataset = super().get_kfold_splits(
+            k=k,
+            split_column=split_column,
+            seed=seed,
+            test_ratio=test_ratio
+        )
+        
+        # Convert each split to a PairwiseDataset
+        pairwise_splits = []
+        for train_split, val_split in split_datasets:
+            train_pairwise = self._convert_to_pairwise(train_split)
+            val_pairwise = self._convert_to_pairwise(val_split)
+            pairwise_splits.append((train_pairwise, val_pairwise))
+            
+        train_pairwise = self._convert_to_pairwise(train_dataset)
+        test_pairwise = None if test_dataset is None else self._convert_to_pairwise(test_dataset)
+        
+        return pairwise_splits, train_pairwise, test_pairwise
+    
+    def get_subset(self, size: int, seed: Optional[int] = None) -> 'PairwiseDataset':
+        """
+        Get a random subset of the dataset.
+        
+        Args:
+            size: Size of the subset
+            seed: Random seed for reproducibility
+            
+        Returns:
+            A new PairwiseDataset with a subset of the data
+        """
+        subset = super().get_subset(size, seed)
+        return self._convert_to_pairwise(subset)
+    
+    def copy(self) -> 'PairwiseDataset':
+        """
+        Create a deep copy of the dataset.
+        
+        Returns:
+            A new PairwiseDataset with copied data
+        """
+        copied_dataset = super().copy()
+        return self._convert_to_pairwise(copied_dataset)
+        
+    def _convert_to_pairwise(self, dataset: Dataset) -> 'PairwiseDataset':
+        """
+        Convert a Dataset to a PairwiseDataset.
+        
+        Args:
+            dataset: The Dataset to convert
+            
+        Returns:
+            A new PairwiseDataset with the same data
+        """
+        return PairwiseDataset(
+            dataframe=dataset.get_dataframe().copy(),
+            target_columns=dataset.get_target_columns(),
+            ignore_columns=dataset.get_ignore_columns(),
+            metric_columns=dataset.get_metric_columns(),
+            name=dataset.get_name(),
+            data_id_column=dataset.get_data_id_column(),
             model_id_column_1=self.model_id_column_1,
             model_id_column_2=self.model_id_column_2,
-            input_column=self.input_column,
+            input_column=dataset.get_input_column(),
             output_column_1=self.output_column_1,
             output_column_2=self.output_column_2,
-            reference_columns=self.reference_columns,
-            metrics=[]
+            reference_columns=dataset.get_reference_columns(),
+            metrics=[metric for metric in self.metrics],
+            task_description=dataset.get_task_description()
         )
-        new_dataset.set_all_fields(
-            dataframe=self.dataframe.copy(),
-            target_columns_1=self.target_columns_1,
-            target_columns_2=self.target_columns_2,
-            ignore_columns=self.ignore_columns,
-            metric_columns_1=self.metric_columns_1,
-            metric_columns_2=self.metric_columns_2,
-            name=self.name,
-            data_id_column=self.data_id_column,
-            model_id_column_1=self.model_id_column_1,
-            model_id_column_2=self.model_id_column_2,
-            input_column=self.input_column,
-            output_column_1=self.output_column_1,
-            output_column_2=self.output_column_2,
-            reference_columns=self.reference_columns,
-            metrics=self.metrics,
-            model1_dataset=self.model1_dataset.copy(),
-            model2_dataset=self.model2_dataset.copy()
-        )
-        return new_dataset

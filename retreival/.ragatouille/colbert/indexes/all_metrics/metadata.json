@@ -1,0 +1,73 @@
+{
+  "config":{
+    "query_token_id":"[unused0]",
+    "doc_token_id":"[unused1]",
+    "query_token":"[Q]",
+    "doc_token":"[D]",
+    "ncells":null,
+    "centroid_score_threshold":null,
+    "ndocs":null,
+    "load_index_with_mmap":false,
+    "index_path":null,
+    "index_bsize":32,
+    "nbits":4,
+    "kmeans_niters":20,
+    "resume":false,
+    "pool_factor":1,
+    "clustering_mode":"hierarchical",
+    "protected_tokens":0,
+    "similarity":"cosine",
+    "bsize":64,
+    "accumsteps":1,
+    "lr":0.00001,
+    "maxsteps":400000,
+    "save_every":null,
+    "warmup":20000,
+    "warmup_bert":null,
+    "relu":false,
+    "nway":64,
+    "use_ib_negatives":true,
+    "reranker":false,
+    "distillation_alpha":1.0,
+    "ignore_scores":false,
+    "model_name":null,
+    "query_maxlen":32,
+    "attend_to_mask_tokens":false,
+    "interaction":"colbert",
+    "dim":128,
+    "doc_maxlen":256,
+    "mask_punctuation":true,
+    "checkpoint":"colbert-ir/colbertv2.0",
+    "triples":"/future/u/okhattab/root/unit/experiments/2021.10/downstream.distillation.round2.2_score/round2.nway6.cosine.ib/examples.64.json",
+    "collection":[
+      "list with 129 elements starting with...",
+      [
+        "---\n# Metric Card for BARTScore\n\nBARTScore is a reference-based evaluation metric for text generation that formulates evaluation as a text generation task. It leverages the pre-trained BART model to compute the conditional likelihood of one text given another, enabling flexible evaluation of different aspects such as informativeness, fluency, factuality, and coherence. BARTScore outperforms existing metrics across multiple tasks and evaluation settings.\n\n## Metric Details\n\n### Metric Description\n\nBARTScore conceptualizes evaluation as a text generation problem, assessing how likely a hypothesis (generated text) is given a reference text, source text, or both. This probability is computed using the log-likelihood of the hypothesis under a pre-trained BART model. Different evaluation perspectives can be achieved by modifying the generation direction:\n\n- **Faithfulness ($s \\to h$)**: Measures how well the generated text aligns with the source text.\n- **Precision ($r \\to h$)**: Evaluates the likelihood of generating the hypothesis given the reference text.\n- **Recall ($h \\to r$)**: Assesses how easily the reference could be generated from the hypothesis.",
+        "- **Precision ($r \\to h$)**: Evaluates the likelihood of generating the hypothesis given the reference text.\n- **Recall ($h \\to r$)**: Assesses how easily the reference could be generated from the hypothesis.\n- **F-score ($r \\leftrightarrow h$)**: Computes an average of Precision and Recall.\n\nFine-tuning on downstream tasks (e.g., summarization, paraphrasing) and prompt engineering further enhance BARTScore\u2019s adaptability to different domains.\n\n- **Metric Type:** Semantic Similarity  \n- **Range:** $(-\\infty, 0]$ (log-probabilities, higher is better)  \n- **Higher is Better?:** Yes  \n- **Reference-Based?:** Yes  \n- **Input-Required?",
+        "- **Metric Type:** Semantic Similarity  \n- **Range:** $(-\\infty, 0]$ (log-probabilities, higher is better)  \n- **Higher is Better?:** Yes  \n- **Reference-Based?:** Yes  \n- **Input-Required?:** Yes  \n\n### Formal Definition\n\nBARTScore is computed as:\n\n$$\nBARTScore = \\sum _{t=1}^{m} \\omega _{t} \\log p ( y _{t} \\mid y _{\\text{<}t}, x, \\theta )\n$$\n\nwhere:\n\n- $p(y _{t} \\mid y _{<t}, x, \\theta)$ is the probability of the $t$-th token in the hypothesis $y$ given the preceding tokens and the source/reference text $x$ under the BART model parameters $\\theta$.\n- $\\omega _{t}$ is an optional weighting factor (default: uniform).\n\nThe choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., source-to-hypothesis for faithfulness, reference-to-hypothesis for precision)."
+      ]
+    ],
+    "queries":"/future/u/okhattab/data/MSMARCO/queries.train.tsv",
+    "index_name":"all_metrics",
+    "overwrite":false,
+    "root":".ragatouille/",
+    "experiment":"colbert",
+    "index_root":null,
+    "name":"2025-03/21/08.44.16",
+    "rank":0,
+    "nranks":1,
+    "amp":true,
+    "gpus":0,
+    "avoid_fork_if_possible":false
+  },
+  "num_chunks":1,
+  "num_partitions":2048,
+  "num_embeddings":18479,
+  "avg_doclen":143.2480620155,
+  "RAGatouille":{
+    "index_config":{
+      "index_type":"PLAID",
+      "index_name":"all_metrics"
+    }
+  }
+}

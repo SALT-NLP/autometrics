@@ -1,0 +1,258 @@
+import torch
+from typing import List, Union
+from bleurt_pytorch import BleurtConfig, BleurtForSequenceClassification, BleurtTokenizer
+from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
+
+class BLEURT(ReferenceBasedMetric):
+    """---
+# Metric Card for BLEURT
+
+BLEURT (Bilingual Evaluation Understudy with Representations from Transformers) is a learned evaluation metric for natural language generation. It combines BERT-based contextual embeddings with a regression model fine-tuned on human-annotated data. BLEURT produces scalar scores that aim to reflect fluency, grammaticality, and semantic adequacy by measuring the similarity between generated and reference texts. It has demonstrated strong correlation with human judgment in machine translation and summarization tasks.
+
+## Metric Details
+
+### Metric Description
+
+BLEURT is a regression-based evaluation metric trained to approximate human judgment of text quality. It leverages transfer learning in multiple stages: beginning with a pretrained BERT model, then performing further pretraining on synthetically noised data to improve robustness, and finally fine-tuning on human-labeled ratings from the WMT Metrics Shared Tasks.
+
+The metric compares a generated sentence (candidate) to a human-written sentence (reference) and produces a scalar score indicating how well the candidate matches the reference in terms of fluency and adequacy. Different BLEURT checkpoints (e.g., BLEURT-20, BLEURT-20-D12) vary in size, accuracy, and multilingual support.
+
+- **Metric Type:** Semantic Similarity  
+- **Range:** Approximately 0 to 1 (but may exceed 1 or fall below 0 depending on checkpoint and inputs)  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** Yes  
+- **Input-Required?:** No  
+
+### Formal Definition
+
+Let $x$ be the reference sentence and $\hat{x}$ the candidate sentence. BLEURT computes a learned score:
+
+$$
+\text{BLEURT}(x, \hat{x}) = f_\theta(x, \hat{x})
+$$
+
+where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine-tuned to predict human ratings of text similarity. The model is trained to minimize mean squared error on labeled sentence pairs.
+
+### Inputs and Outputs
+
+- **Inputs:**  
+  - Generated text (candidate sentence)  
+  - Reference text (reference sentence)  
+  - BLEURT checkpoint (e.g., `BLEURT-20`, `bleurt-base-128`, etc.)
+
+- **Outputs:**  
+  - A scalar score for each sentence pair, representing similarity and adequacy  
+
+## Intended Use
+
+### Domains and Tasks
+
+- **Domain:** Text Generation  
+- **Tasks:** Machine Translation, Summarization, Paraphrasing, Data-to-Text Generation  
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  Sentence-level evaluation where reference-based semantic adequacy is important. Particularly effective for machine translation, summarization, and tasks with high-quality references.
+
+- **Not Recommended For:**  
+  - Reference-free evaluation settings  
+  - Tasks with highly diverse valid outputs (e.g., open-ended dialogue or storytelling) where many correct outputs may not resemble the reference lexically or structurally
+
+## Metric Implementation
+
+### Reference Implementations
+
+- **Libraries/Packages:**  
+  - [google-research/bleurt](https://github.com/google-research/bleurt)  
+  - [Hugging Face Evaluate: BLEURT](https://huggingface.co/spaces/evaluate-metric/bleurt)  
+  - [lucadiliello/bleurt-pytorch](https://github.com/lucadiliello/bleurt-pytorch)
+
+### Computational Complexity
+
+- **Efficiency:**  
+  BLEURT is significantly more computationally expensive than n-gram based metrics like BLEU. It requires loading a large transformer model and computing contextual embeddings and a regression head per sentence pair.
+
+- **Scalability:**  
+  BLEURT supports batched inference and length-based batching to speed up evaluation on large corpora. Distilled checkpoints (e.g., BLEURT-20-D6) provide faster and smaller alternatives.
+
+## Known Limitations
+
+- BLEURT scores may vary significantly across different checkpoints; scores are not directly comparable across models.
+- Output scores may fall outside the nominal 0–1 range.
+- BLEURT may reflect biases present in the pretrained models and training data.
+- BLEURT primarily supports English; while BLEURT-20 supports several other languages (e.g., French, Chinese, German), its performance in low-resource or code-mixed settings is less validated.
+
+- **Biases:**  
+  BLEURT inherits biases from BERT/RemBERT and from the WMT training annotations. Its judgments may reflect linguistic and cultural norms present in the training data.
+
+- **Task Misalignment Risks:**  
+  BLEURT assumes a single reference and may unfairly penalize valid alternative phrasings or creative outputs not matching the reference closely.
+
+- **Failure Cases:**  
+  BLEURT may overvalue surface similarity or penalize outputs that are fluent but structurally divergent from the reference. It may also be unreliable on very short or very long sequences.
+
+## Related Metrics
+
+- **BERTScore:** Also uses contextual embeddings but focuses on token-level similarity using cosine similarity.
+- **COMET:** Another learned metric based on multilingual encoder-decoder architecture trained on direct assessment data.
+- **METEOR:** Incorporates synonym matching and paraphrase tables but is not learned.
+- **BLEU/ROUGE:** Surface-level overlap metrics commonly used for baseline evaluation.
+
+## Further Reading
+
+- **Papers:**  
+  - [BLEURT: Learning Robust Metrics for Text Generation (Sellam et al., 2020)](https://aclanthology.org/2020.acl-main.704/)  
+  - [Learning Compact Metrics for MT (Pu et al., 2021)](https://arxiv.org/abs/2110.06341)
+
+- **Blogs/Tutorials:**  
+  - [Google AI Blog: Evaluating Natural Language Generation with BLEURT](https://ai.googleblog.com/2020/05/evaluating-natural-language-generation.html)
+
+## Citation
+
+```
+@inproceedings{sellam-etal-2020-bleurt,  
+ title = "{BLEURT}: Learning Robust Metrics for Text Generation",  
+ author = "Sellam, Thibault  and  
+  Das, Dipanjan  and  
+  Parikh, Ankur",  
+ editor = "Jurafsky, Dan  and  
+  Chai, Joyce  and  
+  Schluter, Natalie  and  
+  Tetreault, Joel",  
+ booktitle = "Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics",  
+ month = jul,  
+ year = "2020",  
+ address = "Online",  
+ publisher = "Association for Computational Linguistics",  
+ url = "https://aclanthology.org/2020.acl-main.704/",  
+ doi = "10.18653/v1/2020.acl-main.704",  
+ pages = "7881--7892"  
+}
+```
+
+## Metric Card Authors
+
+- **Authors:** Michael J. Ryan  
+- **Acknowledgment of AI Assistance:**  
+  Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu"""
+
+    def __init__(
+        self,
+        name: str = "BLEURT",
+        description: str = "BLEURT-20 metric from lucadiliello/BLEURT-20",
+        model_name: str = "lucadiliello/BLEURT-20",
+        torch_dtype = torch.float32,
+        batch_size: int = 2,
+        persistent: bool = True,
+        **kwargs
+    ):
+        # Pass ALL parameters to parent constructor
+        super().__init__(
+            name=name,
+            description=description,
+            model_name=model_name,
+            torch_dtype=torch_dtype,
+            batch_size=batch_size,
+            persistent=persistent,
+            **kwargs
+        )
+        
+        # Store parameters as instance variables
+        self.model_name = model_name
+        self.torch_dtype = torch_dtype
+        self.batch_size = batch_size
+        self.persistent = persistent
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.config = None
+        self.tokenizer = None
+        self.model = None
+        
+        # Exclude parameters that don't affect results from cache key
+        self.exclude_from_cache_key('persistent', 'batch_size', 'device')
+        
+        if self.persistent:
+            self._load_model()
+
+    def _load_model(self):
+        """Load BLEURT tokenizer and model."""
+        if self.model is None:
+            self.config = BleurtConfig.from_pretrained(self.model_name)
+            self.tokenizer = BleurtTokenizer.from_pretrained(self.model_name)
+            self.model = BleurtForSequenceClassification.from_pretrained(
+                self.model_name,
+                config=self.config
+            ).to(self.device)
+            self.model.eval()
+
+    def _unload_model(self):
+        """Unload the model and tokenizer to free resources."""
+        if self.model is not None:
+            del self.model, self.tokenizer, self.config
+            torch.cuda.empty_cache()
+            self.model = None
+            self.tokenizer = None
+            self.config = None
+
+    def _calculate_impl(self,
+                  input: str,
+                  output: str,
+                  references=None,
+                  **kwargs) -> float:
+        """
+        Compute BLEURT score for one candidate-reference pair.
+        """
+        if references is None:
+            references = []
+        if self.model is None:
+            self._load_model()
+        # select first reference if list
+        ref = references[0] if isinstance(references, (list, tuple)) and references else (
+            references if isinstance(references, str) else ""
+        )
+        # tokenize single pair
+        inputs = self.tokenizer([ref], [output], padding='longest', return_tensors='pt').to(self.device)
+        with torch.no_grad():
+            logits = self.model(**inputs).logits.flatten()
+        score = logits[0].cpu().item()
+        if not self.persistent:
+            self._unload_model()
+        return score
+
+    def _calculate_batched_impl(self,
+                          inputs_list: List[str],
+                          outputs_list: List[str],
+                          references=None,
+                          **kwargs) -> List[float]:
+        """
+        Compute BLEURT scores for batches of candidate-reference pairs.
+        """
+        if references is None:
+            references = [None] * len(outputs_list)
+        if self.model is None:
+            self._load_model()
+        # prepare reference strings
+        refs_flat: List[str] = []
+        for ref in references:
+            if isinstance(ref, (list, tuple)) and ref:
+                refs_flat.append(ref[0])
+            elif isinstance(ref, str):
+                refs_flat.append(ref)
+            else:
+                refs_flat.append("")
+        all_scores: List[float] = []
+        for i in range(0, len(outputs_list), self.batch_size):
+            chunk_refs = refs_flat[i:i+self.batch_size]
+            chunk_outs = outputs_list[i:i+self.batch_size]
+            inputs = self.tokenizer(chunk_refs, chunk_outs, padding='longest', return_tensors='pt').to(self.device)
+            with torch.no_grad():
+                logits = self.model(**inputs).logits.flatten().cpu().tolist()
+            # flatten to list
+            if isinstance(logits, float):
+                all_scores.append(logits)
+            else:
+                all_scores.extend(logits)
+        if not self.persistent:
+            self._unload_model()
+        return all_scores 

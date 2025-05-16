@@ -60,10 +60,12 @@ class SummEval(Dataset):
         # Instantiate dummy metrics (update later with real metrics as needed).
         metrics = [DummyMetric(col) for col in metric_columns]
 
+        task_description = """Summarize the dialogue from the user conversation into a concise and coherent summary."""
+
         super().__init__(
             df, target_columns, ignore_columns, metric_columns, name,
             data_id_column, model_id_column, input_column, output_column,
-            reference_columns, metrics
+            reference_columns, metrics, task_description=task_description
         )
 
 if __name__ == "__main__":

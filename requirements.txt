@@ -10,3 +10,21 @@ scikit-learn
 numpy
 levenshtein
 prometheus_eval
+parascore==1.0.5
+flash-attn
+fasttext
+platformdirs
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+evaluate
+faiss-cpu
+mauve-text
+beautifulsoup4
+bleurt-pytorch
+lens-metric
+torchmetrics
+plotly
+sqlite==3.43.0
+statsmodels
+diskcache
+pytest
+nvidia-ml-py

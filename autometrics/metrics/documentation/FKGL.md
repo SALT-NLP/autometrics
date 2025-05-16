@@ -95,6 +95,17 @@ The result corresponds to a U.S. grade level.
 - **Blogs/Tutorials:**  
   - [TextStat Documentation](https://github.com/shivam5992/textstat)
 
+## Citation
+
+```
+@article{kincaid1975derivation,
+  title={Derivation of new readability formulas (automated readability index, fog count and flesch reading ease formula) for navy enlisted personnel},
+  author={Kincaid, J Peter and Fishburne Jr, Robert P and Rogers, Richard L and Chissom, Brad S},
+  year={1975},
+  publisher={Institute for Simulation and Training, University of Central Florida}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

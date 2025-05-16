@@ -27,7 +27,7 @@ def sentence_gleu(references, hypothesis, min_len=1, max_len=4):
 		Stephan Gouws, Yoshikiyo Kato, Taku Kudo, Hideto Kazawa, Keith Stevens,
 		George Kurian, Nishant Patil, Wei Wang, Cliff Young, Jason Smith,
 		Jason Riesa, Alex Rudnick, Oriol Vinyals, Greg Corrado, Macduff Hughes,
-		Jeffrey Dean. (2016) Google’s Neural Machine Translation System:
+		Jeffrey Dean. (2016) Google's Neural Machine Translation System:
 		Bridging the Gap between Human and Machine Translation.
 		eprint arXiv:1609.08144. https://arxiv.org/pdf/1609.08144v2.pdf
 		Retrieved on 27 Oct 2016.
@@ -233,11 +233,11 @@ The final score is symmetrical with respect to hypothesis and reference, making 
 ### Inputs and Outputs
 
 - **Inputs:**  
-- Hypothesis sentence (generated text)  
-- Reference sentence(s) (gold-standard text)  
+  - Hypothesis sentence (generated text)  
+  - Reference sentence(s) (gold-standard text)  
 
 - **Outputs:**  
-- A scalar score in the range [0, 1], where 1 indicates a perfect match.
+  - A scalar score in the range [0, 1], where 1 indicates a perfect match.
 
 ## Intended Use
 
@@ -249,36 +249,36 @@ The final score is symmetrical with respect to hypothesis and reference, making 
 ### Applicability and Limitations
 
 - **Best Suited For:**  
-Sentence-level evaluation in structured tasks where precision and recall over n-grams are meaningful indicators of quality, such as translation.  
+  Sentence-level evaluation in structured tasks where precision and recall over n-grams are meaningful indicators of quality, such as translation.  
 
 - **Not Recommended For:**  
-Creative or open-ended text generation tasks where semantic similarity or diversity is more relevant than surface-level n-gram overlap.
+  Creative or open-ended text generation tasks where semantic similarity or diversity is more relevant than surface-level n-gram overlap.
 
 ## Metric Implementation
 
 ### Reference Implementations
 
 - **Libraries/Packages:**  
-- [NLTK GLEU Implementation](https://github.com/nltk/nltk/blob/develop/nltk/translate/gleu_score.py)  
+  - [NLTK GLEU Implementation](https://github.com/nltk/nltk/blob/develop/nltk/translate/gleu_score.py)  
 
 ### Computational Complexity
 
 - **Efficiency:**  
-Efficient for sentence-level evaluation, as it requires simple n-gram matching and aggregation.
+  Efficient for sentence-level evaluation, as it requires simple n-gram matching and aggregation.
 
 - **Scalability:**  
-Scales well for batch evaluations but may be computationally expensive for larger corpora due to repeated n-gram matching.
+  Scales well for batch evaluations but may be computationally expensive for larger corpora due to repeated n-gram matching.
 
 ## Known Limitations
 
 - **Biases:**  
-Penalizes valid paraphrases or semantically equivalent outputs that differ in n-gram overlap.  
+  Penalizes valid paraphrases or semantically equivalent outputs that differ in n-gram overlap.  
 
 - **Task Misalignment Risks:**  
-Designed for tasks with a single correct output structure; performs poorly for evaluating diverse or creative responses.  
+  Designed for tasks with a single correct output structure; performs poorly for evaluating diverse or creative responses.  
 
 - **Failure Cases:**  
-- GLEU may not adequately evaluate cases where semantic preservation is more important than lexical overlap.
+  - GLEU may not adequately evaluate cases where semantic preservation is more important than lexical overlap.
 
 ## Related Metrics
 
@@ -289,25 +289,41 @@ Designed for tasks with a single correct output structure; performs poorly for e
 ## Further Reading
 
 - **Papers:**  
-- [Google’s Neural Machine Translation System (Wu et al., 2016)](https://arxiv.org/pdf/1609.08144v2.pdf)  
+  - [Google's Neural Machine Translation System (Wu et al., 2016)](https://arxiv.org/pdf/1609.08144v2.pdf)  
 
 - **Blogs/Tutorials:**  
-- Needs more information  
+  - Needs more information  
+
+## Citation
+
+```
+@misc{wu2016googlesneuralmachinetranslation,
+      title={Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation}, 
+      author={Yonghui Wu and Mike Schuster and Zhifeng Chen and Quoc V. Le and Mohammad Norouzi and Wolfgang Macherey and Maxim Krikun and Yuan Cao and Qin Gao and Klaus Macherey and Jeff Klingner and Apurva Shah and Melvin Johnson and Xiaobing Liu and Łukasz Kaiser and Stephan Gouws and Yoshikiyo Kato and Taku Kudo and Hideto Kazawa and Keith Stevens and George Kurian and Nishant Patil and Wei Wang and Cliff Young and Jason Smith and Jason Riesa and Alex Rudnick and Oriol Vinyals and Greg Corrado and Macduff Hughes and Jeffrey Dean},
+      year={2016},
+      eprint={1609.08144},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/1609.08144}, 
+}
+```
 
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
-Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
-- **Contact:** mryan0@stanford.edu
-	"""
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu"""
 
-	def __init__(self, name="GLEU", description="GLEU is a sentence-level metric that computes the minimum of precision and recall of n-grams.  It is meant to resolve some of the issues with BLEU when used at the sentence level."):
-		super().__init__(name, description)
+	# GLEU is fast enough without caching
+	DEFAULT_USE_CACHE = False
+
+	def __init__(self, name="GLEU", description="GLEU is a sentence-level metric that computes the minimum of precision and recall of n-grams.  It is meant to resolve some of the issues with BLEU when used at the sentence level.", **kwargs):
+		super().__init__(name, description, **kwargs)
 		
-	def calculate(self, input, output, references=None, **kwargs):
+	def _calculate_impl(self, input, output, references=None, **kwargs):
 		"""
-        Calculate the metric
+		Actual implementation of the GLEU metric
 		"""
 		if references is None:
 			references = [] 

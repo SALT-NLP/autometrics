@@ -117,6 +117,17 @@ where:
 - **Blogs/Tutorials:**  
   - [Jaro and Jaro-Winkler Similarity - GeeksforGeeks](https://www.geeksforgeeks.org/jaro-and-jaro-winkler-similarity/)
 
+## Citation
+
+```
+@article{winkler1990string,
+  title={String comparator metrics and enhanced decision rules in the fellegi-sunter model of record linkage.},
+  author={Winkler, William E},
+  year={1990},
+  publisher={ERIC}
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan

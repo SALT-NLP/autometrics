@@ -37,13 +37,30 @@ class JudgeByRubric(dspy.Module):
 
 class LLMJudgeRubricDSPy(Metric):
     def __init__(self, name, description, dataset, rubric, judge=None, task_description=None, judge_api_base="http://future-hgx-1:7410/v1"):
-        super().__init__(name, description)
+        # Initialize default judge if not provided
+        if judge is None:
+            judge = dspy.LM("openai/meta-llama/Meta-Llama-3.3-70b-Instruct", api_base=judge_api_base, api_key="None")
+        
+        # Pass all important parameters to parent constructor for caching
+        super().__init__(
+            name=name, 
+            description=description,
+            rubric=rubric,
+            judge=judge,
+            task_description=task_description,
+            judge_api_base=judge_api_base,
+            dataset=dataset  # We'll exclude this later
+        )
+        
         self.dataset = dataset
         self.rubric = rubric
-        self.judge = judge if judge else dspy.LM("openai/meta-llama/Meta-Llama-3.1-70b-Instruct", api_base=judge_api_base, api_key="None")
+        self.judge = judge
         self.task_description = task_description
         
-    def calculate(self, input, output, references=None, **kwargs):
+        # Exclude non-affecting parameters from cache key
+        self.exclude_from_cache_key('dataset', 'judge_api_base')
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         if self.task_description:
             input = self.task_description + "\n\n" + input
 
@@ -64,7 +81,7 @@ class LLMJudgeRubricDSPy(Metric):
         
         return int(score.group())
 
-    def calculate_batched(self, inputs, outputs, references=None, num_workers=64, **kwargs):
+    def _calculate_batched_impl(self, inputs, outputs, references=None, num_workers=64, **kwargs):
         """
         Calculate scores using multi-threading, ensuring results are in the correct order.
         Each input/output pair is processed individually in parallel, and results are ordered correctly.

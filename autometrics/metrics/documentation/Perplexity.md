@@ -120,6 +120,25 @@ This method provides a **more realistic** evaluation of model fluency while effi
   - [Understanding Evaluation Metrics for Language Models](https://thegradient.pub/understanding-evaluation-metrics-for-language-models/)
   - [Hugging Face's Guide to Perplexity](https://huggingface.co/docs/transformers/en/perplexity)
 
+## Citation
+
+```
+@article{10.1121/1.2016299,
+    author = {Jelinek, F. and Mercer, R. L. and Bahl, L. R. and Baker, J. K.},
+    title = {Perplexity—a measure of the difficulty of speech recognition tasks},
+    journal = {The Journal of the Acoustical Society of America},
+    volume = {62},
+    number = {S1},
+    pages = {S63-S63},
+    year = {2005},
+    month = {08},
+    issn = {0001-4966},
+    doi = {10.1121/1.2016299},
+    url = {https://doi.org/10.1121/1.2016299},
+    eprint = {https://pubs.aip.org/asa/jasa/article-pdf/62/S1/S63/11558910/s63\_5\_online.pdf},
+}
+```
+
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  

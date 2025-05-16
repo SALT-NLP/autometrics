@@ -1,30 +1,5 @@
+Using LENS with topk=3
 Train size: 140 Validation size: 140 Test size: 420
 litellm_proxy/meta-llama/Meta-Llama-3.3-70b-Instruct
 calculating scores...
 computing bert embedding.
-computing greedy matching.
-done in 4.00 seconds, 35.00 sentences/sec
-calculating scores...
-computing bert embedding.
-computing greedy matching.
-done in 2.03 seconds, 68.93 sentences/sec
-calculating scores...
-computing bert embedding.
-computing greedy matching.
-done in 2.74 seconds, 51.04 sentences/sec
-calculating scores...
-computing bert embedding.
-computing greedy matching.
-done in 1.68 seconds, 83.10 sentences/sec
-calculating scores...
-computing bert embedding.
-computing greedy matching.
-done in 8.54 seconds, 49.17 sentences/sec
-calculating scores...
-computing bert embedding.
-computing greedy matching.
-done in 5.43 seconds, 77.37 sentences/sec
-                      Top 1 Metric & Value  ...               Top 5 Metric & Value
-win1-win2  ROUGE-2-r (0.21591192662955405)  ...  ROUGE-Lsum-p (0.1966185275773293)
-
-[1 rows x 5 columns]

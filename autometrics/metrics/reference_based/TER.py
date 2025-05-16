@@ -44,11 +44,11 @@ Where:
 ### Inputs and Outputs
 
 - **Inputs:**  
-- Hypothesis translation (generated text)
-- One or more reference translations (gold-standard texts)
+  - Hypothesis translation (generated text)
+  - One or more reference translations (gold-standard texts)
 
 - **Outputs:**  
-- Scalar TER score (lower values indicate better translations)
+  - Scalar TER score (lower values indicate better translations)
 
 ## Intended Use
 
@@ -60,37 +60,37 @@ Where:
 ### Applicability and Limitations
 
 - **Best Suited For:**  
-Evaluating structured tasks like machine translation where there is a well-defined correspondence between the hypothesis and reference translations.
-
+  Evaluating structured tasks like machine translation where there is a well-defined correspondence between the hypothesis and reference translations.
+  
 - **Not Recommended For:**  
-Tasks requiring semantic equivalence or diversity, such as open-ended text generation or dialogue systems.
+  Tasks requiring semantic equivalence or diversity, such as open-ended text generation or dialogue systems.
 
 ## Metric Implementation
 
 ### Reference Implementations
 
 - **Libraries/Packages:**  
-- [SacreBLEU](https://github.com/mjpost/sacrebleu): Includes an implementation of TER.  
+  - [SacreBLEU](https://github.com/mjpost/sacrebleu): Includes an implementation of TER.  
 
 ### Computational Complexity
 
 - **Efficiency:**  
-The computation of TER involves finding the minimum edit distance, which is optimized using dynamic programming and a greedy beam search for shifts. The algorithm has a complexity of $O(n^2)$ for the edit distance computation and $O(n)$ for the beam search.
+  The computation of TER involves finding the minimum edit distance, which is optimized using dynamic programming and a greedy beam search for shifts. The algorithm has a complexity of $O(n^2)$ for the edit distance computation and $O(n)$ for the beam search.
 
 - **Scalability:**  
-TER is computationally efficient for sentence-level evaluation but may require optimizations for very large datasets.
+  TER is computationally efficient for sentence-level evaluation but may require optimizations for very large datasets.
 
 ## Known Limitations
 
 - **Biases:**  
-- Assigns equal cost to all edits, which may not accurately reflect human perceptions of translation effort.
-- Penalizes valid translations that differ in structure but are semantically equivalent to the reference.
-
+  - Assigns equal cost to all edits, which may not accurately reflect human perceptions of translation effort.
+  - Penalizes valid translations that differ in structure but are semantically equivalent to the reference.
+  
 - **Task Misalignment Risks:**  
-- Not suited for tasks requiring high semantic understanding or creative language use, as it focuses on surface-level similarity.
+  - Not suited for tasks requiring high semantic understanding or creative language use, as it focuses on surface-level similarity.
 
 - **Failure Cases:**  
-- TER scores may misrepresent translation quality when references are poorly constructed or insufficient in number.
+  - TER scores may misrepresent translation quality when references are poorly constructed or insufficient in number.
 
 ## Related Metrics
 
@@ -101,21 +101,40 @@ TER is computationally efficient for sentence-level evaluation but may require o
 ## Further Reading
 
 - **Papers:**  
-- [A Study of Translation Edit Rate with Targeted Human Annotation (Snover et al., 2006)](https://www.mt-archive.info/AMTA-2006-Snover.pdf)  
+  - [A Study of Translation Edit Rate with Targeted Human Annotation (Snover et al., 2006)](https://aclanthology.org/2006.amta-papers.25.pdf)
+
+## Citation
+
+```
+@inproceedings{snover-etal-2006-study,
+    title = "A Study of Translation Edit Rate with Targeted Human Annotation",
+    author = "Snover, Matthew  and
+      Dorr, Bonnie  and
+      Schwartz, Rich  and
+      Micciulla, Linnea  and
+      Makhoul, John",
+    booktitle = "Proceedings of the 7th Conference of the Association for Machine Translation in the Americas: Technical Papers",
+    month = aug # " 8-12",
+    year = "2006",
+    address = "Cambridge, Massachusetts, USA",
+    publisher = "Association for Machine Translation in the Americas",
+    url = "https://aclanthology.org/2006.amta-papers.25/",
+    pages = "223--231"
+}
+```
 
 ## Metric Card Authors
 
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
-Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
-- **Contact:** mryan0@stanford.edu
-    """
+  Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
+- **Contact:** mryan0@stanford.edu"""
 
     def __init__(self, name="TER", description="TER (Translation Edit Rate) is a metric that measures the number of edits needed to transform a system output into a reference translation. It quantifies translation quality by counting insertions, deletions, substitutions, and shifts, with lower scores indicating better translations."):
         super().__init__(name, description)
         self.metric = ter()
 
-    def calculate(self, input, output, references=None, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate the metric
         """

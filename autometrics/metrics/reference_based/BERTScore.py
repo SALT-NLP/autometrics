@@ -11,10 +11,10 @@ def compute_bertscore(original, output, references, model="roberta-large", type=
             all_origs.append(orig.lower())
 
     if compare_to_original:
-        (P, R, F), _ = bert_score.score(all_cands, all_origs, lang="en", return_hash=True, verbose=True, idf=False,
+        (P, R, F), _ = bert_score.score(all_cands, all_origs, lang="en", return_hash=True, verbose=False, idf=False,
                                         model_type=model)
     else:
-        (P, R, F), _ = bert_score.score(all_cands, all_refs, lang="en", return_hash=True, verbose=True, idf=False,
+        (P, R, F), _ = bert_score.score(all_cands, all_refs, lang="en", return_hash=True, verbose=False, idf=False,
                                     model_type=model)
 
     ind = 0

@@ -215,13 +215,17 @@ ROUGE-LSum extends ROUGE-L to the summary level by treating newlines as sentence
         if references is None:
             references = []
 
+        assert len(references) > 0, "ROUGE requires at least one reference"
+        assert type(references) == list, "ROUGE requires a list of references"
+        assert type(references[0]) == str, "ROUGE requires a list of strings"
+
         scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL', 'rougeLsum'],
             use_stemmer=True)
         
         all_scores = [[] for _ in range(len(self.combinations))]
 
         for reference in references:
-            scores = scorer.score(output, reference)
+            scores = scorer.score(reference, output)
             parsed_scores = parse_rouge_dict(scores)
 
             for i, score in enumerate(parsed_scores):

@@ -112,10 +112,10 @@ The module provides a command-line interface through `run_utilization.py`:
 
 ```bash
 # Run with synthetic data
-python run_utilization.py --output-dir=outputs/my_experiment --num-examples=50 --burn-in=10 --metrics=BLEU,ROUGE,BERTScore --lengths=short,medium,long --synthetic
+python autometrics/experiments/utilization/run_utilization.py --output-dir=outputs/utilization --num-examples=50 --burn-in=10 --metrics=BLEU,ROUGE,BERTScore --lengths=short,medium,long --synthetic
 
 # Run with real dataset
-python run_utilization.py --output-dir=outputs/my_experiment --num-examples=50 --burn-in=10 --metrics=BLEU,ROUGE,BERTScore --dataset=SimpDA
+python autometrics/experiments/utilization/run_utilization.py --output-dir=outputs/utilization --num-examples=50 --burn-in=10 --metrics=BLEU,ROUGE,BERTScore --dataset=SimpDA
 
 # Run without measuring import costs (faster but less comprehensive)
 python run_utilization.py --metrics=BLEU,ROUGE --skip-import-costs

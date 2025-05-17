@@ -82,6 +82,7 @@ def _plot_bar_mpl(df_norm, col, dimension, tukey, results):
     ax.set_title(f"{col} vs Perturbation Type ({dimension.capitalize()})")
     plt.tight_layout()
     results[f"{dimension}/{col}/bar"] = FigureResult(fig)
+    plt.close(fig)
 
 def _plot_bar_plotly(df_norm, col, dimension, tukey, results):
     groups = ['original','same_subtle','same_obvious','worse_subtle','worse_obvious']
@@ -121,22 +122,42 @@ def _plot_bar_plotly(df_norm, col, dimension, tukey, results):
     results[f"{dimension}/{col}/bar_interactive"] = PlotlyResult(fig)
 
 def _build_summary(df_norm, cols):
-    recs = []
-    orig = df_norm[df_norm['group']=='original']
+    rows  = []
+    orig  = df_norm[df_norm['group'] == 'original']
+
     for col in cols:
-        for g in ['worse_subtle','worse_obvious']:
-            part   = df_norm[df_norm['group']==g]
-            merged = pd.merge(part[['sample_id',col]], orig[['sample_id',col]],
-                              on='sample_id', suffixes=('_p','_o'))
-            sens   = (merged[f"{col}_o"] - merged[f"{col}_p"]).mean()
-            recs.append({'metric':col, f'sensitivity_{g}': sens})
-        for g in ['same_subtle','same_obvious']:
-            part   = df_norm[df_norm['group']==g]
-            merged = pd.merge(part[['sample_id',col]], orig[['sample_id',col]],
-                              on='sample_id', suffixes=('_p','_o'))
-            stab   = 1 - np.abs(merged[f"{col}_o"] - merged[f"{col}_p"]).mean()
-            recs.append({'metric':col, f'stability_{g}': stab})
-    return pd.DataFrame(recs).groupby('metric').first().reset_index()
+        row = {'metric': col}
+
+        # sensitivity
+        for g in ['worse_subtle', 'worse_obvious']:
+            part   = df_norm[df_norm['group'] == g]
+            merged = pd.merge(
+                part[['sample_id', col]],
+                orig[['sample_id', col]],
+                on='sample_id',
+                suffixes=('_p', '_o')
+            )
+            row[f'sensitivity_{g}'] = (merged[f'{col}_o'] - merged[f'{col}_p']).mean()
+
+        # stability
+        for g in ['same_subtle', 'same_obvious']:
+            part   = df_norm[df_norm['group'] == g]
+            merged = pd.merge(
+                part[['sample_id', col]],
+                orig[['sample_id', col]],
+                on='sample_id',
+                suffixes=('_p', '_o')
+            )
+            row[f'stability_{g}'] = 1 - np.abs(
+                merged[f'{col}_o'] - merged[f'{col}_p']
+            ).mean()
+
+        rows.append(row)
+
+    df = pd.DataFrame(rows)
+    assert df.filter(like='NaN').empty    # should pass
+
+    return df
 
 def _plot_scatter_mpl(summary_df, dimension, results):
     fig, ax = plt.subplots(figsize=(8,6))
@@ -151,6 +172,7 @@ def _plot_scatter_mpl(summary_df, dimension, results):
     ax.set_title(f"Stability vs Sensitivity ({dimension.capitalize()})")
     plt.tight_layout()
     results[f"{dimension}/scatter"] = FigureResult(fig)
+    plt.close(fig)
 
 def _plot_scatter_plotly(summary_df, dimension, results):
     fig = go.Figure()
@@ -172,6 +194,44 @@ def _plot_scatter_plotly(summary_df, dimension, results):
     )
     results[f"{dimension}/scatter_interactive"] = PlotlyResult(fig)
 
+# ────────────────────────────────────────────────────────────────────
+# NEW: per-sample |Δ| histogram for every perturbation group
+#      – robust to duplicated rows & closes the figure afterward
+# ────────────────────────────────────────────────────────────────────
+def _plot_abs_diffs(df_norm, metric, dimension, results):
+    for pert_group in ["same_subtle",
+                       "same_obvious",
+                       "worse_subtle",
+                       "worse_obvious"]:
+
+        # keep only original + one target group
+        tmp = df_norm[df_norm["group"].isin(["original", pert_group])]
+
+        # one value per (sample_id, group): take the mean if duplicates exist
+        pairs = (
+            tmp.pivot_table(index="sample_id",
+                            columns="group",
+                            values=metric,
+                            aggfunc="mean")
+            .dropna()                      # ensure both columns are present
+        )
+
+        if pairs.empty:          # safety guard in case a group is missing
+            continue
+
+        abs_diffs = (pairs["original"] - pairs[pert_group]).abs()
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        ax.hist(abs_diffs, bins=20)
+        nice_name = pert_group.replace("_", " ").title().replace(" ", "_")
+        ax.set_title(f"|Δ| histogram – {metric} ({nice_name})")
+        ax.set_xlabel("|Δ|")
+        ax.set_ylabel("# samples")
+        plt.tight_layout()
+
+        results[f"{dimension}/{metric}/abs_diff_hist_{pert_group}"] = FigureResult(fig)
+        plt.close(fig)  # prevent “too many open figures”
+
 def analyze_and_plot(df: pd.DataFrame, metric_objs: list, dimension: str, results: dict):
     cols    = _get_metric_cols(metric_objs)
     df_norm = _normalize_df(df, cols)
@@ -179,6 +239,7 @@ def analyze_and_plot(df: pd.DataFrame, metric_objs: list, dimension: str, result
         tukey = _do_anova_tukey(df_norm, col, dimension, results)
         _plot_bar_mpl(df_norm, col, dimension, tukey, results)
         _plot_bar_plotly(df_norm, col, dimension, tukey, results)
+        _plot_abs_diffs(df_norm, col, dimension, results)
     summary_df = _build_summary(df_norm, cols)
     results[f"{dimension}/sens_stab"] = TabularResult(summary_df)
     _plot_scatter_mpl(summary_df, dimension, results)

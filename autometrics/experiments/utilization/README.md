@@ -209,7 +209,7 @@ print(f"Total GPU Memory: {stats['gpu_ram_mb']} MB")
 
 ## Sequential Benchmarking of All Metrics
 
-A new script `benchmark_utilization.py` is provided to automatically benchmark all metrics in the `MetricBank` sequentially:
+A script `benchmark_utilization.py` is provided to automatically benchmark all metrics in the `MetricBank` sequentially:
 
 ### Features
 

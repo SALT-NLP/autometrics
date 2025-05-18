@@ -15,7 +15,10 @@ import logging
 import importlib
 import pandas as pd
 import glob
+import platform
+import json
 from typing import List, Dict, Any, Optional
+from datetime import datetime
 
 # Add the project root to the path
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
@@ -159,12 +162,72 @@ def get_metric_class_path(metric) -> str:
     """Get the fully qualified class path for a metric instance."""
     return f"{metric.__class__.__module__}.{metric.__class__.__name__}"
 
-def aggregate_results(output_dir: str) -> pd.DataFrame:
+def detect_hardware_info() -> Dict[str, Any]:
+    """
+    Detect hardware information, especially GPU details.
+    
+    Returns:
+        Dictionary containing hardware information
+    """
+    hw_info = {
+        "system": platform.system(),
+        "machine": platform.machine(),
+        "processor": platform.processor(),
+        "python_version": platform.python_version(),
+        "cpu_count": os.cpu_count(),
+        "timestamp": datetime.now().isoformat(),
+        "gpus": []
+    }
+    
+    # Try to get CUDA/GPU information if available
+    try:
+        import torch
+        if torch.cuda.is_available():
+            hw_info["cuda_version"] = torch.version.cuda
+            hw_info["gpu_count"] = torch.cuda.device_count()
+            hw_info["gpus"] = [
+                {
+                    "index": i,
+                    "name": torch.cuda.get_device_name(i),
+                    "memory_total": torch.cuda.get_device_properties(i).total_memory / (1024**3)  # in GB
+                }
+                for i in range(torch.cuda.device_count())
+            ]
+    except ImportError:
+        hw_info["gpu_info_source"] = "torch_not_available"
+        
+        # Try using pynvml if torch is not available
+        try:
+            import pynvml
+            pynvml.nvmlInit()
+            device_count = pynvml.nvmlDeviceGetCount()
+            hw_info["gpu_count"] = device_count
+            hw_info["gpu_info_source"] = "pynvml"
+            
+            for i in range(device_count):
+                handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+                info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                name = pynvml.nvmlDeviceGetName(handle)
+                
+                hw_info["gpus"].append({
+                    "index": i,
+                    "name": name.decode('utf-8') if isinstance(name, bytes) else name,
+                    "memory_total": info.total / (1024**3)  # in GB
+                })
+            
+            pynvml.nvmlShutdown()
+        except (ImportError, Exception):
+            hw_info["gpu_info_source"] = "none_available"
+    
+    return hw_info
+
+def aggregate_results(output_dir: str, hw_info: Dict[str, Any]) -> pd.DataFrame:
     """
     Aggregate results from all metrics into a single DataFrame.
     
     Args:
         output_dir: Base output directory
+        hw_info: Hardware information dictionary
         
     Returns:
         DataFrame containing aggregated results
@@ -176,6 +239,8 @@ def aggregate_results(output_dir: str) -> pd.DataFrame:
     pattern = os.path.join(synthetic_dir, "*", "*", "summary.csv")
     summary_files = glob.glob(pattern)
     
+    print(f"Found {len(summary_files)} summary files to aggregate")
+    
     for file_path in summary_files:
         # Extract metric name and length category from path
         # Path format: {output_dir}/synthetic/{metric_name}/{length}/summary.csv
@@ -183,27 +248,89 @@ def aggregate_results(output_dir: str) -> pd.DataFrame:
         metric_name = parts[-3]
         length = parts[-2]
         
+        print(f"Processing summary for {metric_name} ({length})")
+        
         try:
             df = pd.read_csv(file_path)
             # Add columns for metric name and length
             df['metric'] = metric_name
             df['length'] = length
+            
+            # Add hardware info columns
+            df['system'] = hw_info.get('system', 'unknown')
+            df['cpu_count'] = hw_info.get('cpu_count', 0)
+            df['gpu_count'] = hw_info.get('gpu_count', 0)
+            
+            # Add GPU model if available (take the first GPU)
+            if hw_info.get('gpus') and len(hw_info['gpus']) > 0:
+                df['gpu_model'] = hw_info['gpus'][0].get('name', 'unknown')
+            else:
+                df['gpu_model'] = 'none'
+                
             all_summaries.append(df)
         except Exception as e:
             logger.warning(f"Error reading {file_path}: {str(e)}")
+            print(f"ERROR: Could not read {file_path}: {str(e)}")
     
     if not all_summaries:
         logger.warning("No summary files found to aggregate")
+        print("WARNING: No summary files found to aggregate")
         return pd.DataFrame()
         
     # Combine all summaries
     combined_df = pd.concat(all_summaries, ignore_index=True)
     
     # Reorder columns to put metric and length first
-    cols = ['metric', 'length'] + [col for col in combined_df.columns if col not in ['metric', 'length']]
+    cols = ['metric', 'length', 'system', 'cpu_count', 'gpu_count', 'gpu_model'] + [
+        col for col in combined_df.columns if col not in [
+            'metric', 'length', 'system', 'cpu_count', 'gpu_count', 'gpu_model'
+        ]
+    ]
     combined_df = combined_df[cols]
     
     return combined_df
+
+def log_error_for_metric(metric_name: str, error: Exception, traceback_str: str, output_dir: str):
+    """
+    Log detailed error information for a failed metric.
+    
+    Args:
+        metric_name: Name of the metric that failed
+        error: Exception that was raised
+        traceback_str: Traceback as a string
+        output_dir: Base output directory
+    """
+    # Create errors directory if it doesn't exist
+    errors_dir = os.path.join(output_dir, "errors")
+    os.makedirs(errors_dir, exist_ok=True)
+    
+    # Create an error log file with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    error_file = os.path.join(errors_dir, f"{metric_name}_error_{timestamp}.log")
+    
+    # Write the error information to the file
+    with open(error_file, 'w') as f:
+        f.write(f"ERROR IN METRIC: {metric_name}\n")
+        f.write(f"TIMESTAMP: {datetime.now().isoformat()}\n")
+        f.write(f"ERROR TYPE: {type(error).__name__}\n")
+        f.write(f"ERROR MESSAGE: {str(error)}\n")
+        f.write("\nTRACEBACK:\n")
+        f.write(traceback_str)
+    
+    # Also maintain a summary file of all errors
+    summary_file = os.path.join(errors_dir, "failed_metrics.csv")
+    
+    # Check if the file exists to determine if we need to write headers
+    file_exists = os.path.isfile(summary_file)
+    
+    # Append to the summary file
+    with open(summary_file, 'a') as f:
+        if not file_exists:
+            f.write("metric,timestamp,error_type,error_message,error_log_file\n")
+        
+        # Escape any commas in the error message
+        error_msg = str(error).replace(',', ';')
+        f.write(f"{metric_name},{timestamp},{type(error).__name__},{error_msg},{error_file}\n")
 
 def run_benchmark_for_metric(metric, args):
     """
@@ -212,12 +339,19 @@ def run_benchmark_for_metric(metric, args):
     Args:
         metric: The metric instance to benchmark
         args: Command-line arguments
+        
+    Returns:
+        True if successful, False if failed
     """
     metric_name = metric.get_name()
+    print(f"\n{'='*80}")
+    print(f"STARTING BENCHMARK FOR: {metric_name}")
+    print(f"{'='*80}")
     logger.info(f"Starting benchmark for {metric_name}")
     
     try:
         # Create the experiment
+        print(f"Configuring experiment for {metric_name}...")
         experiment = UtilizationExperiment(
             name=f"{metric_name} Utilization Benchmark",
             description=f"Resource utilization benchmark for {metric_name}",
@@ -234,29 +368,81 @@ def run_benchmark_for_metric(metric, args):
         )
         
         # Run the experiment
-        experiment.run(print_results=args.verbose)
+        print(f"Running benchmark for {metric_name}...")
+        print(f"Testing with {args.num_examples} examples per length category: {args.lengths}")
+        print(f"Using {args.burn_in} burn-in samples")
+        experiment.run(print_results=True)  # Always print results for each metric
         
         # Save the results
+        print(f"Saving results for {metric_name}...")
         experiment.save_results()
+        
+        print(f"\n{'='*80}")
+        print(f"BENCHMARK COMPLETED SUCCESSFULLY FOR: {metric_name}")
+        print(f"{'='*80}\n")
         logger.info(f"Benchmark completed for {metric_name}")
         return True
+        
     except Exception as e:
-        logger.error(f"Error benchmarking {metric_name}: {str(e)}", exc_info=True)
+        import traceback
+        traceback_str = traceback.format_exc()
+        
+        # Log the error to both console and file
+        error_msg = f"ERROR benchmarking {metric_name}: {str(e)}"
+        logger.error(error_msg)
+        print(f"\n{'!'*80}")
+        print(f"BENCHMARK FAILED FOR: {metric_name}")
+        print(f"Error: {str(e)}")
+        print(f"See error log for details")
+        print(f"{'!'*80}\n")
+        
+        # Log detailed error information to a separate file
+        log_error_for_metric(metric_name, e, traceback_str, args.output_dir)
+        
         return False
 
 def main():
     """Main function to run the benchmarks."""
     args = parse_args()
     
-    # Prepare the output directory
+    # Start with hardware detection
+    print("\nDetecting hardware information...")
+    hw_info = detect_hardware_info()
+    
+    # Print hardware information
+    print("\nHARDWARE INFORMATION:")
+    print(f"System: {hw_info.get('system', 'unknown')}")
+    print(f"Processor: {hw_info.get('processor', 'unknown')}")
+    print(f"CPU Count: {hw_info.get('cpu_count', 'unknown')}")
+    
+    if hw_info.get('gpus'):
+        print(f"GPU Count: {len(hw_info['gpus'])}")
+        for i, gpu in enumerate(hw_info['gpus']):
+            print(f"  GPU {i}: {gpu.get('name', 'unknown')} "
+                  f"({gpu.get('memory_total', 0):.2f} GB)")
+    else:
+        print("No GPUs detected")
+    
+    # Save hardware info to a file
+    hw_info_path = os.path.join(args.output_dir, "hardware_info.json")
     os.makedirs(args.output_dir, exist_ok=True)
+    
+    with open(hw_info_path, 'w') as f:
+        json.dump(hw_info, f, indent=2)
+    
+    print(f"Hardware information saved to {hw_info_path}")
     
     # Log the start of the benchmarking process
     logger.info("Starting metric utilization benchmarking")
-    logger.info(f"Output directory: {args.output_dir}")
-    logger.info(f"Number of examples: {args.num_examples}")
-    logger.info(f"Burn-in samples: {args.burn_in}")
-    logger.info(f"Length categories: {args.lengths}")
+    print("\nSTARTING METRIC UTILIZATION BENCHMARKING")
+    print(f"Output directory: {args.output_dir}")
+    print(f"Number of examples: {args.num_examples}")
+    print(f"Burn-in samples: {args.burn_in}")
+    print(f"Length categories: {args.lengths}")
+    
+    # Create errors directory for potential failures
+    errors_dir = os.path.join(args.output_dir, "errors")
+    os.makedirs(errors_dir, exist_ok=True)
     
     # Collect metrics to benchmark
     metrics_to_benchmark = []
@@ -264,11 +450,18 @@ def main():
     if not args.skip_reference_based:
         metrics_to_benchmark.extend(reference_based_metrics)
         logger.info(f"Including {len(reference_based_metrics)} reference-based metrics")
+        print(f"Including {len(reference_based_metrics)} reference-based metrics:")
+        for m in reference_based_metrics:
+            print(f"  - {m.get_name()}")
     
     if not args.skip_reference_free:
         metrics_to_benchmark.extend(reference_free_metrics)
         logger.info(f"Including {len(reference_free_metrics)} reference-free metrics")
+        print(f"Including {len(reference_free_metrics)} reference-free metrics:")
+        for m in reference_free_metrics:
+            print(f"  - {m.get_name()}")
     
+    print(f"\nTotal metrics to process: {len(metrics_to_benchmark)}")
     logger.info(f"Total metrics to process: {len(metrics_to_benchmark)}")
     
     # Initialize counters
@@ -287,12 +480,14 @@ def main():
     # Process each metric
     for i, metric in enumerate(metrics_to_benchmark, 1):
         metric_name = metric.get_name()
+        print(f"\nProcessing metric {i}/{total_metrics}: {metric_name}")
         logger.info(f"Processing metric {i}/{total_metrics}: {metric_name}")
         
         # Check if this metric already has complete results
         if not args.force_rerun and metric_has_complete_results(
             metric_name, args.output_dir, args.lengths.split(',')
         ):
+            print(f"Skipping {metric_name} - results already exist")
             logger.info(f"Skipping {metric_name} - results already exist")
             skipped_metrics += 1
             results_tracker["skipped"].append(metric_name)
@@ -309,18 +504,31 @@ def main():
             results_tracker["failed"].append(metric_name)
         
         # Log progress
-        logger.info(f"Progress: {i}/{total_metrics} metrics processed")
-        logger.info(f"Status: {completed_metrics} completed, {skipped_metrics} skipped, {failed_metrics} failed")
+        progress_msg = f"Progress: {i}/{total_metrics} metrics processed"
+        status_msg = f"Status: {completed_metrics} completed, {skipped_metrics} skipped, {failed_metrics} failed"
+        
+        print("\n" + "-" * 50)
+        print(progress_msg)
+        print(status_msg)
+        print("-" * 50 + "\n")
+        
+        logger.info(progress_msg)
+        logger.info(status_msg)
     
     # Aggregate results
+    print("\nAggregating results from all metrics...")
     logger.info("Aggregating results from all metrics")
-    combined_results = aggregate_results(args.output_dir)
+    combined_results = aggregate_results(args.output_dir, hw_info)
     
     # Save the aggregated results
     if not combined_results.empty:
         aggregate_path = os.path.join(args.output_dir, "aggregated_results.csv")
         combined_results.to_csv(aggregate_path, index=False)
+        print(f"Aggregated results saved to {aggregate_path}")
         logger.info(f"Aggregated results saved to {aggregate_path}")
+    else:
+        print("WARNING: No results to aggregate")
+        logger.warning("No results to aggregate")
     
     # Save the benchmark summary
     summary = {
@@ -353,21 +561,28 @@ def main():
     detailed_summary.to_csv(detailed_summary_path, index=False)
     
     # Print final summary
-    logger.info("=" * 50)
-    logger.info("BENCHMARK COMPLETE")
-    logger.info("=" * 50)
-    logger.info(f"Total metrics: {total_metrics}")
-    logger.info(f"Completed metrics: {completed_metrics}")
-    logger.info(f"Skipped metrics (already had results): {skipped_metrics}")
-    logger.info(f"Failed metrics: {failed_metrics}")
+    print("\n" + "=" * 80)
+    print("BENCHMARK COMPLETE")
+    print("=" * 80)
+    print(f"Total metrics: {total_metrics}")
+    print(f"Completed metrics: {completed_metrics}")
+    print(f"Skipped metrics (already had results): {skipped_metrics}")
+    print(f"Failed metrics: {failed_metrics}")
     
     if failed_metrics > 0:
-        logger.info("Failed metrics:")
+        print("\nFailed metrics:")
         for metric in results_tracker["failed"]:
-            logger.info(f"  - {metric}")
+            print(f"  - {metric}")
+        print(f"\nSee error logs in {errors_dir} for details")
     
-    logger.info(f"Aggregated results saved to {os.path.join(args.output_dir, 'aggregated_results.csv')}")
-    logger.info(f"Benchmark summary saved to {os.path.join(args.output_dir, 'benchmark_summary.csv')}")
+    print(f"\nAggregated results saved to {os.path.join(args.output_dir, 'aggregated_results.csv')}")
+    print(f"Benchmark summary saved to {os.path.join(args.output_dir, 'benchmark_summary.csv')}")
+    
+    logger.info("\nBENCHMARK COMPLETE")
+    logger.info(f"Total metrics: {total_metrics}")
+    logger.info(f"Completed metrics: {completed_metrics}")
+    logger.info(f"Skipped metrics: {skipped_metrics}")
+    logger.info(f"Failed metrics: {failed_metrics}")
     
     return 0
 
@@ -376,5 +591,9 @@ if __name__ == "__main__":
     exit_code = main()
     end_time = time.time()
     duration_minutes = (end_time - start_time) / 60
-    logger.info(f"Total runtime: {duration_minutes:.2f} minutes")
+    duration_hours = duration_minutes / 60
+    
+    print(f"\nTotal runtime: {duration_minutes:.2f} minutes ({duration_hours:.2f} hours)")
+    logger.info(f"Total runtime: {duration_minutes:.2f} minutes ({duration_hours:.2f} hours)")
+    
     sys.exit(exit_code)

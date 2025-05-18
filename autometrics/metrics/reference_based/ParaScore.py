@@ -155,7 +155,7 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
         if "model_type" not in scorer_kwargs:
             scorer_kwargs["model_type"] = "bert-base-uncased"
 
-        super().__init__(name, description, submetric_names, model_type=scorer_kwargs["model_type"], lang=scorer_kwargs["lang"], **scorer_kwargs)
+        super().__init__(name, description, submetric_names, **scorer_kwargs)
         self.scorer = ParaScorer(**scorer_kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):

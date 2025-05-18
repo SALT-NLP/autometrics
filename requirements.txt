@@ -29,3 +29,4 @@ diskcache
 pytest
 nvidia-ml-py
 pynvml
+protobuf

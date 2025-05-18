@@ -142,9 +142,10 @@ where $f_k$ is the $k$-th expert head's output.
         rescale: bool = True,
         batch_size: int = 16,
         devices: List[int] = None,
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description, model_id=model_id, rescale=rescale, batch_size=batch_size, devices=devices, persistent=persistent)
+        super().__init__(name, description, model_id=model_id, rescale=rescale, batch_size=batch_size, devices=devices, persistent=persistent, **kwargs)
         self.model_id = model_id
         self.rescale = rescale
         self.batch_size = batch_size

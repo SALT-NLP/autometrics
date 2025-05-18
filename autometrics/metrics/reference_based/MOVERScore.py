@@ -161,7 +161,7 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
-- **Contact:** mryan0@stanford.edu  """
+- **Contact:** mryan0@stanford.edu"""
 
     def __init__(self, model_name='distilbert-base-uncased', device='cuda', persistent=True, **kwargs):
         """

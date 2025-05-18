@@ -206,3 +206,58 @@ print(f"CPU RAM: {stats['cpu_ram_mb']} MB")
 print(f"Duration: {stats['duration_milliseconds']} ms")
 print(f"Total GPU Memory: {stats['gpu_ram_mb']} MB")
 ``` 
+
+## Sequential Benchmarking of All Metrics
+
+A new script `benchmark_utilization.py` is provided to automatically benchmark all metrics in the `MetricBank` sequentially:
+
+### Features
+
+- Runs benchmarks for all reference-based and reference-free metrics
+- Checks for existing results before running to avoid duplicate work
+- Saves progress as it goes, can be stopped and resumed at any time
+- Aggregates all results into a single CSV file for easy analysis
+- Provides detailed logging and progress tracking
+
+### Usage
+
+```bash
+# Run with default settings
+python benchmark_utilization.py
+
+# Customize the benchmark parameters
+python benchmark_utilization.py --output-dir=my_benchmark_results --num-examples=100 --burn-in=10
+
+# Run only reference-based metrics
+python benchmark_utilization.py --skip-reference-free
+
+# Run only reference-free metrics
+python benchmark_utilization.py --skip-reference-based
+
+# Force re-run of all metrics, even if results exist
+python benchmark_utilization.py --force-rerun
+
+# Enable verbose output
+python benchmark_utilization.py --verbose
+```
+
+### Output Files
+
+- `aggregated_results.csv`: Combined results from all metrics
+- `benchmark_summary.csv`: Summary statistics of the benchmark run
+- `benchmark_detailed_summary.csv`: Detailed list of all metrics and their status
+- `benchmark_utilizer.log`: Complete log file with detailed progress information
+
+### Resuming an Interrupted Run
+
+If the script is interrupted, simply run it again with the same parameters. It will automatically:
+1. Detect which metrics already have complete results
+2. Skip those metrics and continue with the remaining ones
+3. Update the aggregate results with all completed metrics
+
+### Tips for Long Runs
+
+- Running all metrics can take several hours to days depending on your hardware
+- Use a persistent terminal like `screen` or `tmux` to prevent script termination if your connection drops
+- Check the log file periodically to monitor progress
+- The script saves individual metric results immediately, so no work is lost if interrupted

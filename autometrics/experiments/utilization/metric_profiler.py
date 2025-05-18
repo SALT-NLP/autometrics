@@ -50,6 +50,10 @@ def measure_metric_phases(metric_class_path: str, constructor_kwargs: Optional[D
         json.dumps(payload)
     ]
     
+    # Define JSON markers that match the child process
+    JSON_START_MARKER = "\n===JSON_DATA_START===\n"
+    JSON_END_MARKER = "\n===JSON_DATA_END===\n"
+    
     try:
         # Use subprocess.run with a timeout instead of check_output
         result = subprocess.run(
@@ -67,22 +71,101 @@ def measure_metric_phases(metric_class_path: str, constructor_kwargs: Optional[D
             if result.stderr:
                 print(f"Stderr: {result.stderr}", file=sys.stderr)
             
-            # Try to parse stdout for error information if it's in JSON format
-            try:
-                error_info = json.loads(result.stdout)
-                if isinstance(error_info, list) and error_info and "error" in error_info[0]:
-                    print(f"Error details: {error_info[0]['error']}", file=sys.stderr)
-                    if "traceback" in error_info[0]:
-                        print(f"Traceback:\n{error_info[0]['traceback']}", file=sys.stderr)
-            except json.JSONDecodeError:
-                # If stdout isn't valid JSON, just print it
-                if result.stdout:
-                    print(f"Stdout: {result.stdout}", file=sys.stderr)
+            # Try to find JSON data in stdout
+            stdout = result.stdout
+            json_data = None
+            
+            # Look for markers
+            start_pos = stdout.find(JSON_START_MARKER)
+            if start_pos >= 0:
+                end_pos = stdout.find(JSON_END_MARKER, start_pos)
+                if end_pos >= 0:
+                    json_str = stdout[start_pos + len(JSON_START_MARKER):end_pos]
+                    try:
+                        json_data = json.loads(json_str)
+                    except json.decoder.JSONDecodeError:
+                        print(f"Failed to parse JSON data between markers", file=sys.stderr)
+            
+            # If we found and parsed JSON data with an error message, display it
+            if json_data and isinstance(json_data, list) and json_data and "error" in json_data[0]:
+                print(f"Error details: {json_data[0]['error']}", file=sys.stderr)
+                if "traceback" in json_data[0]:
+                    print(f"Traceback:\n{json_data[0]['traceback']}", file=sys.stderr)
+            else:
+                # If we couldn't extract JSON data, just print stdout
+                if stdout:
+                    print(f"Stdout: {stdout}", file=sys.stderr)
             
             return []
         
+        output = result.stdout
+        
+        # First, check for JSON markers
+        start_pos = output.find(JSON_START_MARKER)
+        if start_pos >= 0:
+            end_pos = output.find(JSON_END_MARKER, start_pos)
+            if end_pos >= 0:
+                json_str = output[start_pos + len(JSON_START_MARKER):end_pos]
+                try:
+                    return json.loads(json_str)
+                except json.decoder.JSONDecodeError as e:
+                    print(f"Failed to parse JSON data between markers: {str(e)}", file=sys.stderr)
+                    # If we can't parse the JSON between markers, print it for debugging
+                    print(f"JSON string between markers: {json_str}", file=sys.stderr)
+        
+        # If no markers found or parsing failed, fall back to more aggressive extraction methods
+        print("No JSON markers found in output, trying alternative extraction methods", file=sys.stderr)
+        
+        # Improved JSON extraction - try to find the actual JSON array in the output
+        # by looking for the first '[' character and matching it with the last ']'
+        try:
+            # Print the raw output for debugging
+            if output:
+                print(f"Raw subprocess output: {output}", file=sys.stderr)
+                
+            # Find the first '[' which should be the start of our JSON array
+            json_start = output.find('[')
+            if json_start >= 0:
+                # Find the matching closing bracket by parsing from this position
+                json_str = output[json_start:]
+                # Try to parse just this substring
+                output = json.loads(json_str)
+            else:
+                # If no '[' is found, try parsing the whole thing anyway
+                # (this will likely fail but we'll catch the exception)
+                output = json.loads(output)
+                
+        except json.decoder.JSONDecodeError as e:
+            print(f"JSON parsing error: {str(e)}", file=sys.stderr)
+            print(f"Could not parse JSON from subprocess output", file=sys.stderr)
+            
+            # Try a more aggressive approach - look for sequences that could be JSON objects
+            try:
+                # Try to find anything that looks like a JSON array
+                import re
+                json_matches = re.findall(r'\[\s*{.*}\s*\]', output, re.DOTALL)
+                if json_matches:
+                    # Try parsing the first match that works
+                    for potential_json in json_matches:
+                        try:
+                            output = json.loads(potential_json)
+                            print(f"Successfully extracted JSON using regex", file=sys.stderr)
+                            break
+                        except json.decoder.JSONDecodeError:
+                            continue
+                    else:
+                        # If none of the matches worked
+                        print(f"Found potential JSON blocks but couldn't parse any of them", file=sys.stderr)
+                        return []
+                else:
+                    print(f"No JSON-like patterns found in output", file=sys.stderr)
+                    return []
+            except Exception as regex_error:
+                print(f"Error in regex extraction attempt: {str(regex_error)}", file=sys.stderr)
+                return []
+        
         # Process completed successfully, parse output
-        return json.loads(result.stdout)
+        return output
         
     except subprocess.TimeoutExpired:
         print(f"Timeout while profiling metric {metric_class_path} (exceeded 60 seconds)", file=sys.stderr)
@@ -98,13 +181,27 @@ def _child_main():
     """Entry point for the child process when launched as a script."""
     import importlib
     
+    # Redirect warnings to stderr to keep stdout clean for JSON output
+    import warnings
+    import sys
+    
+    # Save original stdout and stderr for later
+    original_stdout = sys.stdout
+    original_stderr = sys.stderr
+    
+    # Define JSON marker strings to help the parent process locate the JSON
+    JSON_START_MARKER = "\n===JSON_DATA_START===\n"
+    JSON_END_MARKER = "\n===JSON_DATA_END===\n"
+    
     # Import resource tracker - must be done before any other imports
     # to get accurate baseline memory
     try:
         from autometrics.experiments.utilization.resource import snap
     except Exception as e:
         error_msg = {"error": f"Error importing resource tracker: {str(e)}", "traceback": traceback.format_exc()}
-        print(json.dumps([error_msg]))
+        original_stdout.write(JSON_START_MARKER)
+        original_stdout.write(json.dumps([error_msg]))
+        original_stdout.write(JSON_END_MARKER)
         sys.exit(1)
     
     # Get payload from command line
@@ -128,7 +225,9 @@ def _child_main():
         checkpoints.append(snap("after_import"))
     except Exception as e:
         error_msg = {"error": f"Error importing module {module_path}: {str(e)}", "traceback": traceback.format_exc()}
-        print(json.dumps([error_msg]))
+        original_stdout.write(JSON_START_MARKER)
+        original_stdout.write(json.dumps([error_msg]))
+        original_stdout.write(JSON_END_MARKER)
         sys.exit(1)
     
     # Construct the metric
@@ -138,7 +237,9 @@ def _child_main():
         checkpoints.append(snap("after_construct"))
     except Exception as e:
         error_msg = {"error": f"Error constructing metric {class_name}: {str(e)}", "traceback": traceback.format_exc()}
-        print(json.dumps([error_msg]))
+        original_stdout.write(JSON_START_MARKER)
+        original_stdout.write(json.dumps([error_msg]))
+        original_stdout.write(JSON_END_MARKER)
         sys.exit(1)
     
     # First calculation (this will initialize any lazy-loaded components)
@@ -148,7 +249,9 @@ def _child_main():
         checkpoints.append(snap("after_first_call"))
     except Exception as e:
         error_msg = {"error": f"Error during first calculation: {str(e)}", "traceback": traceback.format_exc()}
-        print(json.dumps([error_msg]))
+        original_stdout.write(JSON_START_MARKER)
+        original_stdout.write(json.dumps([error_msg]))
+        original_stdout.write(JSON_END_MARKER)
         sys.exit(1)
     
     # Try unloading if the metric supports it
@@ -160,8 +263,10 @@ def _child_main():
         # Unloading is optional, don't fail if it doesn't work
         pass
     
-    # Return the checkpoints as JSON
-    print(json.dumps(checkpoints))
+    # Return the checkpoints as JSON with markers
+    original_stdout.write(JSON_START_MARKER)
+    original_stdout.write(json.dumps(checkpoints))
+    original_stdout.write(JSON_END_MARKER)
 
 
 # When run as a script, execute the child process logic

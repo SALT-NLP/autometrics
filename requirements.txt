@@ -23,8 +23,9 @@ bleurt-pytorch
 lens-metric
 torchmetrics
 plotly
-sqlite==3.43.0
+# sqlite==3.43.0
 statsmodels
 diskcache
 pytest
 nvidia-ml-py
+pynvml

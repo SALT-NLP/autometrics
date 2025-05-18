@@ -320,7 +320,7 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
         # Likewise, exclude batch_size as it doesn't affect results in theory
         self.exclude_from_cache_key('device', 'batch_size')
 
-    def calculate(self, input: str, output: str, references=None, **kwargs):
+    def _calculate_impl(self, input: str, output: str, references=None, **kwargs):
         refs = references or []
         if len(refs) > 1:
             scores = self.bart_scorer.multi_ref_score(
@@ -332,7 +332,7 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
             )
         return scores[0]
 
-    def calculate_batched(
+    def _calculate_batched_impl(
         self, inputs: List[str], outputs: List[str], references=None, **kwargs
     ):
         refs = references or [[] for _ in inputs]

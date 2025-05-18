@@ -148,8 +148,9 @@ where $\beta$ is a constant (typically chosen so that penalty = 0.5 when $L_\tex
     def __init__(self,
                  name: str = "NIST",
                  description: str = "NIST score for machine translation (NLTK implementation).",
-                 n: int = 5):
-        super().__init__(name, description, n=n)
+                 n: int = 5,
+                 **kwargs):
+        super().__init__(name, description, n=n, **kwargs)
         self.default_n = n
 
     def _calculate_impl(self, input: str, output: str, references=None, n=None, **kwargs) -> float:

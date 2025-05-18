@@ -118,8 +118,8 @@ Portions of this metric card were drafted with assistance from OpenAI's ChatGPT,
 - **Contact:** mryan0@stanford.edu
     """
 
-    def __init__(self, name="FKGL", description="Flesch-Kincaid Grade Level (FKGL) is a metric that estimates the readability of a text based on the average number of syllables per word and the average number of words per sentence. Lower scores indicate easier-to-read text."):
-        super().__init__(name, description)
+    def __init__(self, name="FKGL", description="Flesch-Kincaid Grade Level (FKGL) is a metric that estimates the readability of a text based on the average number of syllables per word and the average number of words per sentence. Lower scores indicate easier-to-read text.", **kwargs):
+        super().__init__(name, description, **kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):
         """

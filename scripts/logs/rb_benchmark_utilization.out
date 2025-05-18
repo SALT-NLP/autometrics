@@ -1,1 +1,1941 @@
-Using LENS with topk=3
+
+Detecting hardware information...
+
+HARDWARE INFORMATION:
+System: Linux
+Processor: x86_64
+CPU Count: 96
+GPU Count: 1
+  GPU 0: NVIDIA RTX 6000 Ada Generation (47.51 GB)
+Hardware information saved to outputs/utilization/hardware_info.json
+
+STARTING METRIC UTILIZATION BENCHMARKING
+Output directory: outputs/utilization
+Number of examples: 50
+Burn-in samples: 5
+Length categories: short,medium,long
+Including 30 reference-based metrics:
+  - BLEU
+  - CHRF
+  - TER
+  - GLEU
+  - SARI
+  - BERTScore_roberta-large
+  - ROUGE
+  - MOVERScore_distilbert-base-uncased
+  - BARTScore_bart-large-cnn
+  - UniEvalDialogue
+  - UniEvalSum
+  - CIDEr_n4_sig6.0
+  - METEOR
+  - BLEURT
+  - LevenshteinDistance_min
+  - LevenshteinRatio_max
+  - HammingDistance_min
+  - JaroSimilarity_max
+  - JaroWinklerSimilarity_max
+  - JaccardDistance_min
+  - ParaScore
+  - YiSi
+  - MAUVE
+  - PseudoPARENT
+  - NIST
+  - iBLEU
+  - UpdateROUGE
+  - LENS
+  - CharCut
+  - InfoLM
+
+Total metrics to process: 30
+
+Processing metric 1/30: BLEU
+
+================================================================================
+STARTING BENCHMARK FOR: BLEU
+================================================================================
+Configuring experiment for BLEU...
+Running benchmark for BLEU...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3004.70 MB
+  GPU RAM: 13811.96 MB
+Testing metric: BLEU
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 4.52 MB
+      GPU RAM: 0.00 MB
+      Duration: 49.50 ms
+    after_import→after_construct:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 1.43 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.37 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+BLEU import and construction:
+  start→after_import:
+    CPU RAM: 4.52 MB
+    GPU RAM: 0.00 MB
+    Duration: 49.50 ms
+  after_import→after_construct:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 1.43 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.37 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 4.52 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+BLEU - short:
+  Duration (ms): 0.55 ±0.00
+  CPU RAM - Baseline: 728.81 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.01
+  CPU RAM - Total: 728.82 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 4.52 MB (import: 4.52 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+BLEU - medium:
+  Duration (ms): 2.54 ±0.01
+  CPU RAM - Baseline: 728.77 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 728.77 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 4.52 MB (import: 4.52 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+BLEU - long:
+  Duration (ms): 6.63 ±0.17
+  CPU RAM - Baseline: 729.32 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 729.32 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 4.52 MB (import: 4.52 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for BLEU...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: BLEU
+================================================================================
+
+
+--------------------------------------------------
+Progress: 1/30 metrics processed
+Status: 1 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 2/30: CHRF
+
+================================================================================
+STARTING BENCHMARK FOR: CHRF
+================================================================================
+Configuring experiment for CHRF...
+Running benchmark for CHRF...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3021.28 MB
+  GPU RAM: 13811.96 MB
+Testing metric: CHRF
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 4.67 MB
+      GPU RAM: 0.00 MB
+      Duration: 29.79 ms
+    after_import→after_construct:
+      CPU RAM: 0.73 MB
+      GPU RAM: 0.00 MB
+      Duration: 98.11 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.06 MB
+      GPU RAM: 0.00 MB
+      Duration: 4.93 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+CHRF import and construction:
+  start→after_import:
+    CPU RAM: 4.67 MB
+    GPU RAM: 0.00 MB
+    Duration: 29.79 ms
+  after_import→after_construct:
+    CPU RAM: 0.73 MB
+    GPU RAM: 0.00 MB
+    Duration: 98.11 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.06 MB
+    GPU RAM: 0.00 MB
+    Duration: 4.93 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 5.46 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+CHRF - short:
+  Duration (ms): 6.17 ±0.13
+  CPU RAM - Baseline: 730.50 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 730.50 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 5.40 MB (import: 5.40 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+CHRF - medium:
+  Duration (ms): 14.08 ±0.48
+  CPU RAM - Baseline: 729.60 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 729.60 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 5.40 MB (import: 5.40 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+CHRF - long:
+  Duration (ms): 35.18 ±0.68
+  CPU RAM - Baseline: 729.72 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 729.72 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 5.41 MB (import: 5.40 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for CHRF...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: CHRF
+================================================================================
+
+
+--------------------------------------------------
+Progress: 2/30 metrics processed
+Status: 2 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 3/30: TER
+
+================================================================================
+STARTING BENCHMARK FOR: TER
+================================================================================
+Configuring experiment for TER...
+Running benchmark for TER...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3029.94 MB
+  GPU RAM: 13811.96 MB
+Testing metric: TER
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 4.36 MB
+      GPU RAM: 0.00 MB
+      Duration: 27.78 ms
+    after_import→after_construct:
+      CPU RAM: 0.77 MB
+      GPU RAM: 0.00 MB
+      Duration: 101.77 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.22 MB
+      GPU RAM: 0.00 MB
+      Duration: 8.10 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  ⚠️ Error: Failed to run isolated trials for short
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  ⚠️ Error: Failed to run isolated trials for medium
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  ⚠️ Error: Failed to run isolated trials for long
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+TER import and construction:
+  start→after_import:
+    CPU RAM: 4.36 MB
+    GPU RAM: 0.00 MB
+    Duration: 27.78 ms
+  after_import→after_construct:
+    CPU RAM: 0.77 MB
+    GPU RAM: 0.00 MB
+    Duration: 101.77 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.22 MB
+    GPU RAM: 0.00 MB
+    Duration: 8.10 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 5.34 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+Saving results for TER...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: TER
+================================================================================
+
+
+--------------------------------------------------
+Progress: 3/30 metrics processed
+Status: 3 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 4/30: GLEU
+
+================================================================================
+STARTING BENCHMARK FOR: GLEU
+================================================================================
+Configuring experiment for GLEU...
+Running benchmark for GLEU...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3029.94 MB
+  GPU RAM: 13811.96 MB
+Testing metric: GLEU
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 0.12 MB
+      GPU RAM: 0.00 MB
+      Duration: 7.60 ms
+    after_import→after_construct:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.15 ms
+    after_construct→after_first_call:
+      CPU RAM: 3.71 MB
+      GPU RAM: 0.00 MB
+      Duration: 10.32 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+GLEU import and construction:
+  start→after_import:
+    CPU RAM: 0.12 MB
+    GPU RAM: 0.00 MB
+    Duration: 7.60 ms
+  after_import→after_construct:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.15 ms
+  after_construct→after_first_call:
+    CPU RAM: 3.71 MB
+    GPU RAM: 0.00 MB
+    Duration: 10.32 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 3.84 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+GLEU - short:
+  Duration (ms): 0.80 ±0.01
+  CPU RAM - Baseline: 727.61 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.61 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 0.13 MB (import: 0.12 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+GLEU - medium:
+  Duration (ms): 3.42 ±0.03
+  CPU RAM - Baseline: 727.57 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.57 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 0.13 MB (import: 0.12 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+GLEU - long:
+  Duration (ms): 8.78 ±0.07
+  CPU RAM - Baseline: 727.95 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.96 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 0.13 MB (import: 0.12 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for GLEU...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: GLEU
+================================================================================
+
+
+--------------------------------------------------
+Progress: 4/30 metrics processed
+Status: 4 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 5/30: SARI
+
+================================================================================
+STARTING BENCHMARK FOR: SARI
+================================================================================
+Configuring experiment for SARI...
+Running benchmark for SARI...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3038.59 MB
+  GPU RAM: 13811.96 MB
+Testing metric: SARI
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 0.13 MB
+      GPU RAM: 0.00 MB
+      Duration: 8.33 ms
+    after_import→after_construct:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.24 ms
+    after_construct→after_first_call:
+      CPU RAM: 3.72 MB
+      GPU RAM: 0.00 MB
+      Duration: 17.18 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+SARI import and construction:
+  start→after_import:
+    CPU RAM: 0.13 MB
+    GPU RAM: 0.00 MB
+    Duration: 8.33 ms
+  after_import→after_construct:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.24 ms
+  after_construct→after_first_call:
+    CPU RAM: 3.72 MB
+    GPU RAM: 0.00 MB
+    Duration: 17.18 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 3.86 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+SARI - short:
+  Duration (ms): 2.54 ±0.03
+  CPU RAM - Baseline: 727.60 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.60 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 0.13 MB (import: 0.13 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+SARI - medium:
+  Duration (ms): 18.15 ±0.37
+  CPU RAM - Baseline: 727.91 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.91 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 0.13 MB (import: 0.13 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+SARI - long:
+  Duration (ms): 93.53 ±1.32
+  CPU RAM - Baseline: 727.86 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.86 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 0.13 MB (import: 0.13 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for SARI...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: SARI
+================================================================================
+
+
+--------------------------------------------------
+Progress: 5/30 metrics processed
+Status: 5 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 6/30: BERTScore_roberta-large
+
+================================================================================
+STARTING BENCHMARK FOR: BERTScore_roberta-large
+================================================================================
+Configuring experiment for BERTScore_roberta-large...
+Running benchmark for BERTScore_roberta-large...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3042.75 MB
+  GPU RAM: 13811.96 MB
+Testing metric: BERTScore_roberta-large
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'model': 'roberta-large'}
+    start→after_import:
+      CPU RAM: 26.03 MB
+      GPU RAM: 0.00 MB
+      Duration: 743.09 ms
+    after_import→after_construct:
+      CPU RAM: 0.90 MB
+      GPU RAM: 0.00 MB
+      Duration: 96.63 ms
+    after_construct→after_first_call:
+      CPU RAM: 593.50 MB
+      GPU RAM: 8.12 MB
+      Duration: 13073.81 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+BERTScore_roberta-large import and construction:
+  start→after_import:
+    CPU RAM: 26.03 MB
+    GPU RAM: 0.00 MB
+    Duration: 743.09 ms
+  after_import→after_construct:
+    CPU RAM: 0.90 MB
+    GPU RAM: 0.00 MB
+    Duration: 96.63 ms
+  after_construct→after_first_call:
+    CPU RAM: 593.50 MB
+    GPU RAM: 8.12 MB
+    Duration: 13073.81 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 620.43 MB
+    GPU RAM: 8.12 MB
+
+=== RUNTIME COSTS ===
+
+BERTScore_roberta-large - short:
+  Duration (ms): 1202.66 ±22.85
+  CPU RAM - Baseline: 1504.02 MB
+  CPU RAM - Used by metric: 6.37 MB ±1.92
+  CPU RAM - Total: 1510.38 MB
+  GPU RAM - Baseline: 8.12 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 8.12 MB
+  CPU RAM - With Import: 33.29 MB (import: 26.93 MB + runtime: 6.37 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+BERTScore_roberta-large - medium:
+  Duration (ms): 1220.21 ±24.39
+  CPU RAM - Baseline: 1477.28 MB
+  CPU RAM - Used by metric: 3.20 MB ±0.66
+  CPU RAM - Total: 1480.48 MB
+  GPU RAM - Baseline: 8.12 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 8.12 MB
+  CPU RAM - With Import: 30.13 MB (import: 26.93 MB + runtime: 3.20 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+BERTScore_roberta-large - long:
+  Duration (ms): 1257.49 ±45.07
+  CPU RAM - Baseline: 1499.05 MB
+  CPU RAM - Used by metric: 5.26 MB ±1.14
+  CPU RAM - Total: 1504.31 MB
+  GPU RAM - Baseline: 8.12 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 8.12 MB
+  CPU RAM - With Import: 32.19 MB (import: 26.93 MB + runtime: 5.26 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for BERTScore_roberta-large...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: BERTScore_roberta-large
+================================================================================
+
+
+--------------------------------------------------
+Progress: 6/30 metrics processed
+Status: 6 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 7/30: ROUGE
+
+================================================================================
+STARTING BENCHMARK FOR: ROUGE
+================================================================================
+Configuring experiment for ROUGE...
+Running benchmark for ROUGE...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3042.70 MB
+  GPU RAM: 13811.96 MB
+Testing metric: ROUGE
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 1.13 MB
+      GPU RAM: 0.00 MB
+      Duration: 29.47 ms
+    after_import→after_construct:
+      CPU RAM: 0.77 MB
+      GPU RAM: 0.00 MB
+      Duration: 92.48 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.03 MB
+      GPU RAM: 0.00 MB
+      Duration: 4.98 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+ROUGE import and construction:
+  start→after_import:
+    CPU RAM: 1.13 MB
+    GPU RAM: 0.00 MB
+    Duration: 29.47 ms
+  after_import→after_construct:
+    CPU RAM: 0.77 MB
+    GPU RAM: 0.00 MB
+    Duration: 92.48 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.03 MB
+    GPU RAM: 0.00 MB
+    Duration: 4.98 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 1.93 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+ROUGE - short:
+  Duration (ms): 14.01 ±0.67
+  CPU RAM - Baseline: 726.14 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 726.14 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 1.90 MB (import: 1.90 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+ROUGE - medium:
+  Duration (ms): 89.95 ±1.13
+  CPU RAM - Baseline: 726.30 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 726.30 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 1.90 MB (import: 1.90 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+ROUGE - long:
+  Duration (ms): 481.77 ±4.88
+  CPU RAM - Baseline: 726.49 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 726.49 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 1.90 MB (import: 1.90 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for ROUGE...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: ROUGE
+================================================================================
+
+
+--------------------------------------------------
+Progress: 7/30 metrics processed
+Status: 7 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 8/30: MOVERScore_distilbert-base-uncased
+
+================================================================================
+STARTING BENCHMARK FOR: MOVERScore_distilbert-base-uncased
+================================================================================
+Configuring experiment for MOVERScore_distilbert-base-uncased...
+Running benchmark for MOVERScore_distilbert-base-uncased...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3042.70 MB
+  GPU RAM: 13811.96 MB
+Testing metric: MOVERScore_distilbert-base-uncased
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'model_name': 'distilbert-base-uncased'}
+    start→after_import:
+      CPU RAM: 26.94 MB
+      GPU RAM: 0.00 MB
+      Duration: 1723.38 ms
+    after_import→after_construct:
+      CPU RAM: 1.04 MB
+      GPU RAM: 0.00 MB
+      Duration: 98.82 ms
+    after_construct→after_first_call:
+      CPU RAM: 678.59 MB
+      GPU RAM: 262.36 MB
+      Duration: 5108.02 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 10.80 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+MOVERScore_distilbert-base-uncased import and construction:
+  start→after_import:
+    CPU RAM: 26.94 MB
+    GPU RAM: 0.00 MB
+    Duration: 1723.38 ms
+  after_import→after_construct:
+    CPU RAM: 1.04 MB
+    GPU RAM: 0.00 MB
+    Duration: 98.82 ms
+  after_construct→after_first_call:
+    CPU RAM: 678.59 MB
+    GPU RAM: 262.36 MB
+    Duration: 5108.02 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 10.80 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 706.57 MB
+    GPU RAM: 262.36 MB
+
+=== RUNTIME COSTS ===
+
+MOVERScore_distilbert-base-uncased - short:
+  Duration (ms): 33.78 ±1.25
+  CPU RAM - Baseline: 1501.86 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1501.87 MB
+  GPU RAM - Baseline: 262.36 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 262.36 MB
+  CPU RAM - With Import: 27.98 MB (import: 27.98 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+MOVERScore_distilbert-base-uncased - medium:
+  Duration (ms): 380.45 ±3.35
+  CPU RAM - Baseline: 1496.17 MB
+  CPU RAM - Used by metric: 0.04 MB ±0.05
+  CPU RAM - Total: 1496.22 MB
+  GPU RAM - Baseline: 262.36 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 262.36 MB
+  CPU RAM - With Import: 28.02 MB (import: 27.98 MB + runtime: 0.04 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+MOVERScore_distilbert-base-uncased - long:
+  Duration (ms): 2885.33 ±13.35
+  CPU RAM - Baseline: 1534.84 MB
+  CPU RAM - Used by metric: 0.31 MB ±0.18
+  CPU RAM - Total: 1535.16 MB
+  GPU RAM - Baseline: 262.36 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 262.36 MB
+  CPU RAM - With Import: 28.29 MB (import: 27.98 MB + runtime: 0.31 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for MOVERScore_distilbert-base-uncased...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: MOVERScore_distilbert-base-uncased
+================================================================================
+
+
+--------------------------------------------------
+Progress: 8/30 metrics processed
+Status: 8 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 9/30: BARTScore_bart-large-cnn
+
+================================================================================
+STARTING BENCHMARK FOR: BARTScore_bart-large-cnn
+================================================================================
+Configuring experiment for BARTScore_bart-large-cnn...
+Running benchmark for BARTScore_bart-large-cnn...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3047.51 MB
+  GPU RAM: 13811.96 MB
+Testing metric: BARTScore_bart-large-cnn
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'model': 'facebook/bart-large-cnn'}
+    start→after_import:
+      CPU RAM: 149.61 MB
+      GPU RAM: 0.00 MB
+      Duration: 2153.87 ms
+    after_import→after_construct:
+      CPU RAM: 0.88 MB
+      GPU RAM: 0.00 MB
+      Duration: 96.83 ms
+    after_construct→after_first_call:
+      CPU RAM: 426.25 MB
+      GPU RAM: 1558.19 MB
+      Duration: 15702.27 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 43.06 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+BARTScore_bart-large-cnn import and construction:
+  start→after_import:
+    CPU RAM: 149.61 MB
+    GPU RAM: 0.00 MB
+    Duration: 2153.87 ms
+  after_import→after_construct:
+    CPU RAM: 0.88 MB
+    GPU RAM: 0.00 MB
+    Duration: 96.83 ms
+  after_construct→after_first_call:
+    CPU RAM: 426.25 MB
+    GPU RAM: 1558.19 MB
+    Duration: 15702.27 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 43.06 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 576.73 MB
+    GPU RAM: 1558.19 MB
+
+=== RUNTIME COSTS ===
+
+BARTScore_bart-large-cnn - short:
+  Duration (ms): 40.64 ±0.89
+  CPU RAM - Baseline: 1370.59 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1370.59 MB
+  GPU RAM - Baseline: 1558.19 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 1558.19 MB
+  CPU RAM - With Import: 150.48 MB (import: 150.48 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+BARTScore_bart-large-cnn - medium:
+  Duration (ms): 42.79 ±0.49
+  CPU RAM - Baseline: 1365.89 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1365.90 MB
+  GPU RAM - Baseline: 1558.19 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 1558.19 MB
+  CPU RAM - With Import: 150.48 MB (import: 150.48 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+BARTScore_bart-large-cnn - long:
+  Duration (ms): 48.64 ±0.65
+  CPU RAM - Baseline: 1361.64 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1361.64 MB
+  GPU RAM - Baseline: 1558.19 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 1558.19 MB
+  CPU RAM - With Import: 150.48 MB (import: 150.48 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for BARTScore_bart-large-cnn...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: BARTScore_bart-large-cnn
+================================================================================
+
+
+--------------------------------------------------
+Progress: 9/30 metrics processed
+Status: 9 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 10/30: UniEvalDialogue
+
+================================================================================
+STARTING BENCHMARK FOR: UniEvalDialogue
+================================================================================
+Configuring experiment for UniEvalDialogue...
+Running benchmark for UniEvalDialogue...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.63 MB
+  GPU RAM: 13811.96 MB
+Testing metric: UniEvalDialogue
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 0.34 MB
+      GPU RAM: 0.00 MB
+      Duration: 12.37 ms
+    after_import→after_construct:
+      CPU RAM: 0.78 MB
+      GPU RAM: 0.00 MB
+      Duration: 92.09 ms
+    after_construct→after_first_call:
+      CPU RAM: 774.60 MB
+      GPU RAM: 3140.61 MB
+      Duration: 4635.79 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 88.03 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+UniEvalDialogue import and construction:
+  start→after_import:
+    CPU RAM: 0.34 MB
+    GPU RAM: 0.00 MB
+    Duration: 12.37 ms
+  after_import→after_construct:
+    CPU RAM: 0.78 MB
+    GPU RAM: 0.00 MB
+    Duration: 92.09 ms
+  after_construct→after_first_call:
+    CPU RAM: 774.60 MB
+    GPU RAM: 3140.61 MB
+    Duration: 4635.79 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 88.03 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 775.72 MB
+    GPU RAM: 3140.61 MB
+
+=== RUNTIME COSTS ===
+
+UniEvalDialogue - short:
+  Duration (ms): 255.11 ±0.81
+  CPU RAM - Baseline: 1593.81 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1593.81 MB
+  GPU RAM - Baseline: 3140.61 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 3140.61 MB
+  CPU RAM - With Import: 1.12 MB (import: 1.12 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+UniEvalDialogue - medium:
+  Duration (ms): 258.56 ±0.81
+  CPU RAM - Baseline: 2727.89 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 2727.89 MB
+  GPU RAM - Baseline: 3140.61 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 3140.61 MB
+  CPU RAM - With Import: 1.12 MB (import: 1.12 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+UniEvalDialogue - long:
+  Duration (ms): 261.39 ±0.62
+  CPU RAM - Baseline: 3169.94 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 3169.94 MB
+  GPU RAM - Baseline: 3140.61 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 3140.61 MB
+  CPU RAM - With Import: 1.12 MB (import: 1.12 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for UniEvalDialogue...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: UniEvalDialogue
+================================================================================
+
+
+--------------------------------------------------
+Progress: 10/30 metrics processed
+Status: 10 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 11/30: UniEvalSum
+
+================================================================================
+STARTING BENCHMARK FOR: UniEvalSum
+================================================================================
+Configuring experiment for UniEvalSum...
+Running benchmark for UniEvalSum...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.61 MB
+  GPU RAM: 13811.96 MB
+Testing metric: UniEvalSum
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 0.32 MB
+      GPU RAM: 0.00 MB
+      Duration: 11.30 ms
+    after_import→after_construct:
+      CPU RAM: 0.71 MB
+      GPU RAM: 0.00 MB
+      Duration: 90.75 ms
+    after_construct→after_first_call:
+      CPU RAM: 773.70 MB
+      GPU RAM: 3140.61 MB
+      Duration: 5356.05 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 90.03 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+UniEvalSum import and construction:
+  start→after_import:
+    CPU RAM: 0.32 MB
+    GPU RAM: 0.00 MB
+    Duration: 11.30 ms
+  after_import→after_construct:
+    CPU RAM: 0.71 MB
+    GPU RAM: 0.00 MB
+    Duration: 90.75 ms
+  after_construct→after_first_call:
+    CPU RAM: 773.70 MB
+    GPU RAM: 3140.61 MB
+    Duration: 5356.05 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 90.03 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 774.73 MB
+    GPU RAM: 3140.61 MB
+
+=== RUNTIME COSTS ===
+
+UniEvalSum - short:
+  Duration (ms): 204.96 ±0.56
+  CPU RAM - Baseline: 3169.29 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 3169.29 MB
+  GPU RAM - Baseline: 3140.61 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 3140.61 MB
+  CPU RAM - With Import: 1.04 MB (import: 1.04 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+UniEvalSum - medium:
+  Duration (ms): 206.77 ±0.79
+  CPU RAM - Baseline: 1572.85 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1572.85 MB
+  GPU RAM - Baseline: 3140.61 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 3140.61 MB
+  CPU RAM - With Import: 1.04 MB (import: 1.04 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+UniEvalSum - long:
+  Duration (ms): 210.45 ±0.46
+  CPU RAM - Baseline: 1595.17 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1595.17 MB
+  GPU RAM - Baseline: 3140.61 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 3140.61 MB
+  CPU RAM - With Import: 1.04 MB (import: 1.04 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for UniEvalSum...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: UniEvalSum
+================================================================================
+
+
+--------------------------------------------------
+Progress: 11/30 metrics processed
+Status: 11 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 12/30: CIDEr_n4_sig6.0
+
+================================================================================
+STARTING BENCHMARK FOR: CIDEr_n4_sig6.0
+================================================================================
+Configuring experiment for CIDEr_n4_sig6.0...
+Running benchmark for CIDEr_n4_sig6.0...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.63 MB
+  GPU RAM: 13811.96 MB
+Testing metric: CIDEr_n4_sig6.0
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'n': 4, 'sigma': 6.0}
+    start→after_import:
+      CPU RAM: 0.12 MB
+      GPU RAM: 0.00 MB
+      Duration: 7.86 ms
+    after_import→after_construct:
+      CPU RAM: 0.73 MB
+      GPU RAM: 0.00 MB
+      Duration: 147.17 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.04 MB
+      GPU RAM: 0.00 MB
+      Duration: 5.30 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+CIDEr_n4_sig6.0 import and construction:
+  start→after_import:
+    CPU RAM: 0.12 MB
+    GPU RAM: 0.00 MB
+    Duration: 7.86 ms
+  after_import→after_construct:
+    CPU RAM: 0.73 MB
+    GPU RAM: 0.00 MB
+    Duration: 147.17 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.04 MB
+    GPU RAM: 0.00 MB
+    Duration: 5.30 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 0.90 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+CIDEr_n4_sig6.0 - short:
+  Duration (ms): 6.89 ±0.15
+  CPU RAM - Baseline: 726.43 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 726.43 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 0.86 MB (import: 0.86 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+CIDEr_n4_sig6.0 - medium:
+  Duration (ms): 15.33 ±0.58
+  CPU RAM - Baseline: 725.77 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 725.78 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 0.86 MB (import: 0.86 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+CIDEr_n4_sig6.0 - long:
+  Duration (ms): 30.82 ±0.62
+  CPU RAM - Baseline: 726.37 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 726.37 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 0.86 MB (import: 0.86 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for CIDEr_n4_sig6.0...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: CIDEr_n4_sig6.0
+================================================================================
+
+
+--------------------------------------------------
+Progress: 12/30 metrics processed
+Status: 12 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 13/30: METEOR
+
+================================================================================
+STARTING BENCHMARK FOR: METEOR
+================================================================================
+Configuring experiment for METEOR...
+Running benchmark for METEOR...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.61 MB
+  GPU RAM: 13811.96 MB
+Testing metric: METEOR
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 5.49 MB
+      GPU RAM: 0.00 MB
+      Duration: 165.58 ms
+    after_import→after_construct:
+      CPU RAM: 1.07 MB
+      GPU RAM: 0.00 MB
+      Duration: 363.60 ms
+    after_construct→after_first_call:
+      CPU RAM: 156.03 MB
+      GPU RAM: 0.00 MB
+      Duration: 2263.99 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+METEOR import and construction:
+  start→after_import:
+    CPU RAM: 5.49 MB
+    GPU RAM: 0.00 MB
+    Duration: 165.58 ms
+  after_import→after_construct:
+    CPU RAM: 1.07 MB
+    GPU RAM: 0.00 MB
+    Duration: 363.60 ms
+  after_construct→after_first_call:
+    CPU RAM: 156.03 MB
+    GPU RAM: 0.00 MB
+    Duration: 2263.99 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 162.59 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+METEOR - short:
+  Duration (ms): 9.35 ±0.47
+  CPU RAM - Baseline: 1101.41 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1101.41 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 6.56 MB (import: 6.56 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+METEOR - medium:
+  Duration (ms): 17.49 ±0.75
+  CPU RAM - Baseline: 1101.68 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1101.68 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 6.56 MB (import: 6.56 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+METEOR - long:
+  Duration (ms): 26.64 ±0.74
+  CPU RAM - Baseline: 1102.37 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1102.37 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 6.56 MB (import: 6.56 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for METEOR...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: METEOR
+================================================================================
+
+
+--------------------------------------------------
+Progress: 13/30 metrics processed
+Status: 13 completed, 0 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 14/30: BLEURT
+
+================================================================================
+STARTING BENCHMARK FOR: BLEURT
+================================================================================
+Configuring experiment for BLEURT...
+Running benchmark for BLEURT...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.57 MB
+  GPU RAM: 13811.96 MB
+Testing metric: BLEURT
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'model_name': 'lucadiliello/BLEURT-20', 'torch_dtype': torch.float32}
+  ⚠️ Error measuring import costs: Object of type dtype is not JSON serializable
+  Traceback: Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 409, in run
+    checkpoints = measure_metric_phases(
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/metric_profiler.py", line 50, in measure_metric_phases
+    json.dumps(payload)
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/__init__.py", line 231, in dumps
+    return _default_encoder.encode(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type dtype is not JSON serializable
+
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+BENCHMARK FAILED FOR: BLEURT
+Error: Object of type dtype is not JSON serializable
+See error log for details
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+--------------------------------------------------
+Progress: 14/30 metrics processed
+Status: 13 completed, 0 skipped, 1 failed
+--------------------------------------------------
+
+
+Processing metric 15/30: LevenshteinDistance_min
+
+================================================================================
+STARTING BENCHMARK FOR: LevenshteinDistance_min
+================================================================================
+Configuring experiment for LevenshteinDistance_min...
+Running benchmark for LevenshteinDistance_min...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.57 MB
+  GPU RAM: 13811.96 MB
+Testing metric: LevenshteinDistance_min
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'weights': (1, 1, 1), 'processor': None, 'score_cutoff': None, 'aggregation': 'min'}
+    start→after_import:
+      CPU RAM: 2.52 MB
+      GPU RAM: 0.00 MB
+      Duration: 29.50 ms
+    after_import→after_construct:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.15 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 61.01 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+LevenshteinDistance_min import and construction:
+  start→after_import:
+    CPU RAM: 2.52 MB
+    GPU RAM: 0.00 MB
+    Duration: 29.50 ms
+  after_import→after_construct:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.15 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 61.01 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 2.52 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+LevenshteinDistance_min - short:
+  Duration (ms): 0.04 ±0.00
+  CPU RAM - Baseline: 727.03 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.01
+  CPU RAM - Total: 727.04 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.53 MB (import: 2.52 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+LevenshteinDistance_min - medium:
+  Duration (ms): 0.07 ±0.00
+  CPU RAM - Baseline: 727.95 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.95 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.52 MB (import: 2.52 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+LevenshteinDistance_min - long:
+  Duration (ms): 0.22 ±0.00
+  CPU RAM - Baseline: 728.79 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 728.79 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.52 MB (import: 2.52 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for LevenshteinDistance_min...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: LevenshteinDistance_min
+================================================================================
+
+
+--------------------------------------------------
+Progress: 15/30 metrics processed
+Status: 14 completed, 0 skipped, 1 failed
+--------------------------------------------------
+
+
+Processing metric 16/30: LevenshteinRatio_max
+
+================================================================================
+STARTING BENCHMARK FOR: LevenshteinRatio_max
+================================================================================
+Configuring experiment for LevenshteinRatio_max...
+Running benchmark for LevenshteinRatio_max...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.57 MB
+  GPU RAM: 13811.96 MB
+Testing metric: LevenshteinRatio_max
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'processor': None, 'score_cutoff': None, 'aggregation': 'max'}
+    start→after_import:
+      CPU RAM: 2.50 MB
+      GPU RAM: 0.00 MB
+      Duration: 19.12 ms
+    after_import→after_construct:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.15 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.14 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+LevenshteinRatio_max import and construction:
+  start→after_import:
+    CPU RAM: 2.50 MB
+    GPU RAM: 0.00 MB
+    Duration: 19.12 ms
+  after_import→after_construct:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.15 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.14 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 2.50 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+LevenshteinRatio_max - short:
+  Duration (ms): 0.03 ±0.00
+  CPU RAM - Baseline: 726.80 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 726.80 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.50 MB (import: 2.50 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+LevenshteinRatio_max - medium:
+  Duration (ms): 0.05 ±0.00
+  CPU RAM - Baseline: 727.42 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.42 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.50 MB (import: 2.50 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+LevenshteinRatio_max - long:
+  Duration (ms): 0.14 ±0.00
+  CPU RAM - Baseline: 727.15 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.15 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.50 MB (import: 2.50 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for LevenshteinRatio_max...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: LevenshteinRatio_max
+================================================================================
+
+
+--------------------------------------------------
+Progress: 16/30 metrics processed
+Status: 15 completed, 0 skipped, 1 failed
+--------------------------------------------------
+
+
+Processing metric 17/30: HammingDistance_min
+
+================================================================================
+STARTING BENCHMARK FOR: HammingDistance_min
+================================================================================
+Configuring experiment for HammingDistance_min...
+Running benchmark for HammingDistance_min...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.57 MB
+  GPU RAM: 13811.96 MB
+Testing metric: HammingDistance_min
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'pad': True, 'processor': None, 'score_cutoff': None, 'aggregation': 'min'}
+    start→after_import:
+      CPU RAM: 2.39 MB
+      GPU RAM: 0.00 MB
+      Duration: 18.32 ms
+    after_import→after_construct:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.17 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.14 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+HammingDistance_min import and construction:
+  start→after_import:
+    CPU RAM: 2.39 MB
+    GPU RAM: 0.00 MB
+    Duration: 18.32 ms
+  after_import→after_construct:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.17 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.14 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 2.39 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+HammingDistance_min - short:
+  Duration (ms): 0.02 ±0.00
+  CPU RAM - Baseline: 726.99 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 726.99 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.39 MB (import: 2.39 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+HammingDistance_min - medium:
+  Duration (ms): 0.02 ±0.00
+  CPU RAM - Baseline: 728.61 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 728.61 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.39 MB (import: 2.39 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+HammingDistance_min - long:
+  Duration (ms): 0.02 ±0.00
+  CPU RAM - Baseline: 728.48 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 728.48 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.39 MB (import: 2.39 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for HammingDistance_min...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: HammingDistance_min
+================================================================================
+
+
+--------------------------------------------------
+Progress: 17/30 metrics processed
+Status: 16 completed, 0 skipped, 1 failed
+--------------------------------------------------
+
+
+Processing metric 18/30: JaroSimilarity_max
+
+================================================================================
+STARTING BENCHMARK FOR: JaroSimilarity_max
+================================================================================
+Configuring experiment for JaroSimilarity_max...
+Running benchmark for JaroSimilarity_max...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.58 MB
+  GPU RAM: 13811.96 MB
+Testing metric: JaroSimilarity_max
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'processor': None, 'score_cutoff': None, 'aggregation': 'max'}
+    start→after_import:
+      CPU RAM: 2.41 MB
+      GPU RAM: 0.00 MB
+      Duration: 20.77 ms
+    after_import→after_construct:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.16 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 25.60 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+JaroSimilarity_max import and construction:
+  start→after_import:
+    CPU RAM: 2.41 MB
+    GPU RAM: 0.00 MB
+    Duration: 20.77 ms
+  after_import→after_construct:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.16 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 25.60 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 2.41 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+JaroSimilarity_max - short:
+  Duration (ms): 0.04 ±0.00
+  CPU RAM - Baseline: 726.71 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.01
+  CPU RAM - Total: 726.71 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.42 MB (import: 2.41 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+JaroSimilarity_max - medium:
+  Duration (ms): 0.05 ±0.00
+  CPU RAM - Baseline: 727.21 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 727.21 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.41 MB (import: 2.41 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+JaroSimilarity_max - long:
+  Duration (ms): 0.10 ±0.00
+  CPU RAM - Baseline: 726.89 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 726.89 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.41 MB (import: 2.41 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for JaroSimilarity_max...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: JaroSimilarity_max
+================================================================================
+
+
+--------------------------------------------------
+Progress: 18/30 metrics processed
+Status: 17 completed, 0 skipped, 1 failed
+--------------------------------------------------
+
+
+Processing metric 19/30: JaroWinklerSimilarity_max
+
+================================================================================
+STARTING BENCHMARK FOR: JaroWinklerSimilarity_max
+================================================================================
+Configuring experiment for JaroWinklerSimilarity_max...
+Running benchmark for JaroWinklerSimilarity_max...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 3049.58 MB
+  GPU RAM: 13811.96 MB
+Testing metric: JaroWinklerSimilarity_max
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'prefix_weight': 0.1, 'processor': None, 'score_cutoff': None, 'aggregation': 'max'}
+    start→after_import:
+      CPU RAM: 2.46 MB
+      GPU RAM: 0.00 MB
+      Duration: 22.14 ms
+    after_import→after_construct:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.16 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.16 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+JaroWinklerSimilarity_max import and construction:
+  start→after_import:
+    CPU RAM: 2.46 MB
+    GPU RAM: 0.00 MB
+    Duration: 22.14 ms
+  after_import→after_construct:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.16 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.16 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 2.46 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+JaroWinklerSimilarity_max - short:
+  Duration (ms): 0.04 ±0.00
+  CPU RAM - Baseline: 728.60 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 728.60 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 2.46 MB (import: 2.46 MB + runtime: 0.00 MB)

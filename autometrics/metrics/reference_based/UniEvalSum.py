@@ -1,7 +1,8 @@
 from autometrics.metrics.reference_based.ReferenceBasedMultiMetric import ReferenceBasedMultiMetric
 
 from autometrics.metrics.unieval.utils import convert_to_json
-from autometrics.metrics.unieval.evaluator import get_evaluator
+# Removing evaluator import to use lazy loading
+# from autometrics.metrics.unieval.evaluator import get_evaluator
 
 import torch
 
@@ -173,16 +174,33 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu  """
 
-    def __init__(self):
+    def __init__(self, persistent=True, **kwargs):
         name = "UniEvalSum"
         description = "UniEvalSum is a metric for evaluating the quality of generated summaries. It uses a pre-trained model to assess various dimensions of the summary, such as fluency, coherence, and relevance. The metric provides a score based on the model's predictions, allowing for a quantitative evaluation of the summary's quality."
         self.submetrics = ["fluency", "coherence", "consistency", "relevance"]
 
         self.task = 'summarization'
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.evaluator = get_evaluator(self.task, device=self.device)
+        self.persistent = persistent
+        self.evaluator = None
         
-        super().__init__(name, description, ["UniEvalSum-" + submetric for submetric in self.submetrics])
+        super().__init__(name, description, ["UniEvalSum-" + submetric for submetric in self.submetrics], 
+                         persistent=persistent, **kwargs)
+        
+        self.exclude_from_cache_key('persistent')
+
+    def _load_model(self):
+        """Load the UniEval model if not already loaded."""
+        if self.evaluator is None:
+            from autometrics.metrics.unieval.evaluator import get_evaluator
+            self.evaluator = get_evaluator(self.task, device=self.device)
+            
+    def _unload_model(self):
+        """Unload model to free resources."""
+        if self.evaluator is not None:
+            del self.evaluator
+            torch.cuda.empty_cache()
+            self.evaluator = None
 
     def _parse_unieval(self, result):
       results = [result[submetric] for submetric in self.submetrics]
@@ -192,6 +210,9 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
         """
         Calculate UniEvalSum scores for the given input and output.
         """
+        if self.evaluator is None:
+            self._load_model()
+            
         if references is None:
             references = []
 
@@ -204,12 +225,20 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
         # Get multi-dimensional evaluation scores
         eval_scores = self.evaluator.evaluate(data)
         
-        return self._parse_unieval(eval_scores[0])
+        result = self._parse_unieval(eval_scores[0])
+        
+        if not self.persistent:
+            self._unload_model()
+            
+        return result
     
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
         Calculate UniEvalSum scores for the given inputs and outputs in batches.
         """
+        if self.evaluator is None:
+            self._load_model()
+            
         if references is None:
             references = [[] for _ in range(len(inputs))]
 
@@ -226,6 +255,9 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
 
         # Convert to list of lists
         results = [list(result) for result in results]
+        
+        if not self.persistent:
+            self._unload_model()
 
         return results
     

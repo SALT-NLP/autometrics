@@ -226,9 +226,10 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
         batch_size: int = 64,
         max_input_length: int = 512,
         device: str = 'cuda',
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description, model_name=model_name, alpha=alpha, batch_size=batch_size, max_input_length=max_input_length, device=device, persistent=persistent)
+        super().__init__(name, description, model_name=model_name, alpha=alpha, batch_size=batch_size, max_input_length=max_input_length, device=device, persistent=persistent, **kwargs)
         self.model_name = model_name
         self.alpha = alpha
         self.batch_size = batch_size
@@ -237,8 +238,6 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
         self.persistent = persistent
         self.tokenizer = None
         self.model = None
-        if self.persistent:
-            self._initialize_metric()
 
         self.exclude_from_cache_key('model_name', 'batch_size', 'device', 'persistent')
 

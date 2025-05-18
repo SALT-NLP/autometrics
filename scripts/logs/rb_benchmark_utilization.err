@@ -1,7 +1,144 @@
-The tokenizer class you load from this checkpoint is not the same type as the class this function is called from. It may result in unexpected tokenization. 
-The tokenizer class you load from this checkpoint is 'BleurtSPTokenizer'. 
-The class this function is called from is 'BertTokenizer'.
-Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files: 100%|██████████| 4/4 [00:00<00:00, 3029.47it/s]
-/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/pytorch_lightning/core/saving.py:165: UserWarning: Found keys that are not in the model state dict but in the checkpoint: ['encoder.model.embeddings.position_ids']
-  rank_zero_warn(
-Fetching 30 files:   0%|          | 0/30 [00:00<?, ?it/s]
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/MOVERScore.py:25: SyntaxWarning: invalid escape sequence '\m'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/BARTScore.py:149: SyntaxWarning: invalid escape sequence '\l'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/BLEURT.py:7: SyntaxWarning: invalid escape sequence '\h'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/LENS.py:7: SyntaxWarning: invalid escape sequence '\m'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/Perplexity.py:168: SyntaxWarning: invalid escape sequence '\i'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/INFORMRewardModel.py:74: SyntaxWarning: invalid escape sequence '\l'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/PRMRewardModel.py:9: SyntaxWarning: invalid escape sequence '\d'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/SummaQA.py:117: SyntaxWarning: invalid escape sequence '\{'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/FastTextEducationalValue.py:14: SyntaxWarning: invalid escape sequence '\c'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/FactCC.py:7: SyntaxWarning: invalid escape sequence '\h'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/GRMRewardModel.py:7: SyntaxWarning: invalid escape sequence '\m'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/Sentiment.py:8: SyntaxWarning: invalid escape sequence '\h'
+  """---
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_free/LENS_SALSA.py:7: SyntaxWarning: invalid escape sequence '\h'
+  """---
+[nltk_data] Downloading package words to /sailhome/mryan0/nltk_data...
+[nltk_data]   Package words is already up-to-date!
+Error in isolated trials: Unexpected error: TER.__init__() got an unexpected keyword argument 'seed'
+Traceback:
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 1447, in run_isolated_trials
+    metric = MetricClass(**constructor_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: TER.__init__() got an unexpected keyword argument 'seed'
+
+Error in isolated trials: Unexpected error: TER.__init__() got an unexpected keyword argument 'seed'
+Traceback:
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 1447, in run_isolated_trials
+    metric = MetricClass(**constructor_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: TER.__init__() got an unexpected keyword argument 'seed'
+
+Error in isolated trials: Unexpected error: TER.__init__() got an unexpected keyword argument 'seed'
+Traceback:
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 1447, in run_isolated_trials
+    metric = MetricClass(**constructor_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: TER.__init__() got an unexpected keyword argument 'seed'
+
+ERROR:__main__:ERROR benchmarking BLEURT: Object of type dtype is not JSON serializable
+Error profiling metric autometrics.metrics.reference_based.ParaScore.ParaScore (return code 1)
+Stderr: [nltk_data] Downloading package words to /sailhome/mryan0/nltk_data...
+[nltk_data]   Package words is already up-to-date!
+
+Error details: Error during first calculation: list index out of range
+Traceback:
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/metric_profiler.py", line 248, in _child_main
+    metric.calculate(input_text, output_text, references)
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/Metric.py", line 149, in calculate
+    raise e
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/Metric.py", line 144, in calculate
+    result = self._calculate_impl(input, output, references, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ParaScore.py", line 175, in _calculate_impl
+    return P_list[0], P_list[1], P_list[2]
+                      ~~~~~~^^^
+IndexError: list index out of range
+
+Error in isolated trials: Unexpected error: ParaScorer.__init__() got an unexpected keyword argument 'seed'
+Traceback:
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 1447, in run_isolated_trials
+    metric = MetricClass(**constructor_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ParaScore.py", line 159, in __init__
+    self.scorer = ParaScorer(**scorer_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ParaScorer.__init__() got an unexpected keyword argument 'seed'
+
+Error in isolated trials: Unexpected error: ParaScorer.__init__() got an unexpected keyword argument 'seed'
+Traceback:
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 1447, in run_isolated_trials
+    metric = MetricClass(**constructor_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ParaScore.py", line 159, in __init__
+    self.scorer = ParaScorer(**scorer_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ParaScorer.__init__() got an unexpected keyword argument 'seed'
+
+Error in isolated trials: Unexpected error: ParaScorer.__init__() got an unexpected keyword argument 'seed'
+Traceback:
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 1447, in run_isolated_trials
+    metric = MetricClass(**constructor_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ParaScore.py", line 159, in __init__
+    self.scorer = ParaScorer(**scorer_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ParaScorer.__init__() got an unexpected keyword argument 'seed'
+
+Error profiling metric autometrics.metrics.reference_based.YiSi.YiSi (return code 1)
+Stderr: [nltk_data] Downloading package words to /sailhome/mryan0/nltk_data...
+[nltk_data]   Package words is already up-to-date!
+/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/YiSi.py:62: SyntaxWarning: invalid escape sequence '\i'
+  """---
+
+Error details: Error during first calculation: expected scalar type Double but found Float
+Traceback:
+Traceback (most recent call last):
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/metric_profiler.py", line 248, in _child_main
+    metric.calculate(input_text, output_text, references)
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/Metric.py", line 149, in calculate
+    raise e
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/Metric.py", line 144, in calculate
+    result = self._calculate_impl(input, output, references, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/YiSi.py", line 278, in _calculate_impl
+    score = self._calculate_batched_impl([input], [output], [refs], **kwargs)[0]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/YiSi.py", line 312, in _calculate_batched_impl
+    weighted_pred, weighted_ref = self.model(
+                                  ^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/YiSi.py", line 57, in forward
+    weighted_pred = self.compute_weighted_pool(max_sim_pred, pred_input_ids)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/YiSi.py", line 41, in compute_weighted_pool
+    weighted_sum = torch.bmm(similarities.unsqueeze(1), idf_matrix.unsqueeze(2)).squeeze(-1)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: expected scalar type Double but found Float
+
+slurmstepd: error: *** JOB 10360892 ON jagupard39 CANCELLED AT 2025-05-18T02:47:00 ***
+[nltk_data] Downloading package words to /sailhome/mryan0/nltk_data...
+[nltk_data]   Package words is already up-to-date!

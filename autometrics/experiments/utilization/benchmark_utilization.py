@@ -17,6 +17,8 @@ import pandas as pd
 import glob
 import platform
 import json
+import traceback
+import shutil
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
@@ -43,6 +45,56 @@ DEFAULT_NUM_EXAMPLES = 50
 DEFAULT_BURN_IN = 5
 DEFAULT_LENGTHS = ["short", "medium", "long"]
 DEFAULT_USE_SYNTHETIC = True
+
+# Custom JSON encoder to handle numpy dtypes and other special types
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        import numpy as np
+        
+        # Handle numpy types
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.bool_):
+            return bool(obj)
+        # Handle numpy dtype
+        if hasattr(obj, 'dtype'):
+            return str(obj.dtype)
+        # Handle any other types with a __str__ method
+        try:
+            return str(obj)
+        except:
+            pass
+        
+        return super().default(obj)
+
+def safe_json_dump(obj, file_path):
+    """Safely dump object to JSON file with custom encoder."""
+    try:
+        with open(file_path, 'w') as f:
+            json.dump(obj, f, cls=CustomJSONEncoder, indent=2)
+        return True
+    except Exception as e:
+        logger.error(f"Error serializing to JSON: {str(e)}")
+        return False
+
+def safe_json_dumps(obj):
+    """Safely convert object to JSON string with custom encoder."""
+    try:
+        return json.dumps(obj, cls=CustomJSONEncoder)
+    except Exception as e:
+        logger.error(f"Error serializing to JSON: {str(e)}")
+        # Create a simplified version with only strings
+        simplified = {}
+        for k, v in obj.items() if isinstance(obj, dict) else []:
+            try:
+                simplified[str(k)] = str(v)
+            except:
+                simplified[str(k)] = "UNSERIALIZABLE"
+        return json.dumps(simplified)
 
 def parse_args():
     """Parse command-line arguments."""
@@ -108,6 +160,12 @@ def parse_args():
         help="Enable verbose output"
     )
     
+    parser.add_argument(
+        "--clean-partial-results",
+        action="store_true",
+        help="Clean partial results before running metrics (removes incomplete metric folders)"
+    )
+    
     return parser.parse_args()
 
 def metric_has_complete_results(metric_name: str, output_dir: str, lengths: List[str]) -> bool:
@@ -125,6 +183,10 @@ def metric_has_complete_results(metric_name: str, output_dir: str, lengths: List
     # For metrics used with synthetic data, we need to check if results exist for each length
     metric_dir = os.path.join(output_dir, "synthetic", metric_name)
     
+    # If the metric directory doesn't exist at all, clearly incomplete
+    if not os.path.exists(metric_dir):
+        return False
+        
     # Check for the summary.csv file in each length category directory
     for length in lengths:
         summary_path = os.path.join(metric_dir, length, "summary.csv")
@@ -138,6 +200,21 @@ def metric_has_complete_results(metric_name: str, output_dir: str, lengths: List
             return False
             
     return True
+
+def clean_partial_metric_results(metric_name: str, output_dir: str):
+    """
+    Clean partial results for a metric.
+    
+    Args:
+        metric_name: Name of the metric
+        output_dir: Base output directory
+    """
+    metric_dir = os.path.join(output_dir, "synthetic", metric_name)
+    
+    if os.path.exists(metric_dir):
+        print(f"Cleaning partial results for {metric_name}...")
+        shutil.rmtree(metric_dir)
+        print(f"Removed directory: {metric_dir}")
 
 def safely_import_metric(metric_class_path: str) -> Optional[Any]:
     """
@@ -332,6 +409,44 @@ def log_error_for_metric(metric_name: str, error: Exception, traceback_str: str,
         error_msg = str(error).replace(',', ';')
         f.write(f"{metric_name},{timestamp},{type(error).__name__},{error_msg},{error_file}\n")
 
+def patch_utils():
+    """
+    Patch the utilization.py and isolated_runner.py to handle serialization issues.
+    This makes runtime modifications to avoid changing the core code files.
+    """
+    try:
+        # Patch the isolated_runner module if it's available
+        from autometrics.experiments.utilization import isolated_runner
+        
+        # Store the original json.dumps function
+        original_dumps = json.dumps
+        
+        # Replace with our safe version
+        def safe_dumps(obj, *args, **kwargs):
+            try:
+                return original_dumps(obj, *args, **kwargs, cls=CustomJSONEncoder)
+            except Exception as e:
+                print(f"Error serializing to JSON: {str(e)}")
+                # Create a simplified version with only strings
+                simplified = {}
+                if isinstance(obj, dict):
+                    for k, v in obj.items():
+                        try:
+                            simplified[str(k)] = str(v)
+                        except:
+                            simplified[str(k)] = "UNSERIALIZABLE"
+                
+                return original_dumps(simplified, *args, **kwargs)
+        
+        # Replace json.dumps in the isolated_runner module
+        isolated_runner.json.dumps = safe_dumps
+        
+        print("Successfully patched isolated_runner.py for better JSON serialization")
+    except ImportError:
+        print("Could not patch isolated_runner.py - module not found")
+    except Exception as e:
+        print(f"Error patching modules: {str(e)}")
+
 def run_benchmark_for_metric(metric, args):
     """
     Run the utilization benchmark for a single metric.
@@ -348,6 +463,33 @@ def run_benchmark_for_metric(metric, args):
     print(f"STARTING BENCHMARK FOR: {metric_name}")
     print(f"{'='*80}")
     logger.info(f"Starting benchmark for {metric_name}")
+    
+    # Clean partial results if requested
+    if args.clean_partial_results:
+        clean_partial_metric_results(metric_name, args.output_dir)
+    
+    # Get constructor parameters for debugging
+    constructor_params = {}
+    if hasattr(metric, '_init_params'):
+        constructor_params = metric._init_params.copy()
+    
+    try:
+        # Try to pre-validate metric parameters
+        filtered_params = {}
+        if hasattr(metric, '_init_params'):
+            import inspect
+            if hasattr(metric.__class__, '__init__'):
+                sig = inspect.signature(metric.__class__.__init__)
+                allowed_params = set(sig.parameters.keys()) - {'self'}
+                
+                # Filter params to only include those the constructor accepts
+                for k, v in metric._init_params.items():
+                    if k in allowed_params:
+                        filtered_params[k] = v
+                
+                print(f"Filtered constructor params for {metric_name}: {filtered_params}")
+    except Exception as e:
+        print(f"Error during pre-validation of parameters: {str(e)}")
     
     try:
         # Create the experiment
@@ -371,11 +513,42 @@ def run_benchmark_for_metric(metric, args):
         print(f"Running benchmark for {metric_name}...")
         print(f"Testing with {args.num_examples} examples per length category: {args.lengths}")
         print(f"Using {args.burn_in} burn-in samples")
-        experiment.run(print_results=True)  # Always print results for each metric
+        
+        # Monitor for errors in the experiment
+        experiment_error = None
+        experiment_traceback = None
+        
+        try:
+            experiment.run(print_results=True)  # Always print results for each metric
+        except Exception as e:
+            experiment_error = e
+            experiment_traceback = traceback.format_exc()
+            print(f"Error during experiment run: {str(e)}")
+            
+            # Continue with saving whatever results were generated
+            print("Attempting to save partial results...")
         
         # Save the results
         print(f"Saving results for {metric_name}...")
-        experiment.save_results()
+        try:
+            experiment.save_results()
+        except Exception as e:
+            print(f"Error saving results: {str(e)}")
+            if experiment_error is None:  # Only update if we don't already have an error
+                experiment_error = e
+                experiment_traceback = traceback.format_exc()
+        
+        # If there was an error during the experiment, report it now
+        if experiment_error is not None:
+            print(f"\n{'!'*80}")
+            print(f"BENCHMARK ENCOUNTERED ERRORS FOR: {metric_name}")
+            print(f"Error: {str(experiment_error)}")
+            print(f"See error log for details")
+            print(f"{'!'*80}\n")
+            
+            # Log detailed error information to a separate file
+            log_error_for_metric(metric_name, experiment_error, experiment_traceback, args.output_dir)
+            return False
         
         print(f"\n{'='*80}")
         print(f"BENCHMARK COMPLETED SUCCESSFULLY FOR: {metric_name}")
@@ -393,6 +566,7 @@ def run_benchmark_for_metric(metric, args):
         print(f"\n{'!'*80}")
         print(f"BENCHMARK FAILED FOR: {metric_name}")
         print(f"Error: {str(e)}")
+        print(f"Constructor params: {constructor_params}")
         print(f"See error log for details")
         print(f"{'!'*80}\n")
         
@@ -404,6 +578,9 @@ def run_benchmark_for_metric(metric, args):
 def main():
     """Main function to run the benchmarks."""
     args = parse_args()
+    
+    # Apply runtime patches to handle serialization issues
+    patch_utils()
     
     # Start with hardware detection
     print("\nDetecting hardware information...")
@@ -427,8 +604,7 @@ def main():
     hw_info_path = os.path.join(args.output_dir, "hardware_info.json")
     os.makedirs(args.output_dir, exist_ok=True)
     
-    with open(hw_info_path, 'w') as f:
-        json.dump(hw_info, f, indent=2)
+    safe_json_dump(hw_info, hw_info_path)
     
     print(f"Hardware information saved to {hw_info_path}")
     

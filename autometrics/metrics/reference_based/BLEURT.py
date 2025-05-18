@@ -143,7 +143,7 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         name: str = "BLEURT",
         description: str = "BLEURT-20 metric from lucadiliello/BLEURT-20",
         model_name: str = "lucadiliello/BLEURT-20",
-        torch_dtype = torch.float32,
+        torch_dtype = "float32",
         batch_size: int = 2,
         persistent: bool = True,
         **kwargs
@@ -161,7 +161,7 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         
         # Store parameters as instance variables
         self.model_name = model_name
-        self.torch_dtype = torch_dtype
+        self.torch_dtype = torch.float32 if torch_dtype == "float32" else torch.float16 if torch_dtype == "float16" else torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32
         self.batch_size = batch_size
         self.persistent = persistent
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -171,9 +171,6 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         
         # Exclude parameters that don't affect results from cache key
         self.exclude_from_cache_key('persistent', 'batch_size', 'device')
-        
-        if self.persistent:
-            self._load_model()
 
     def _load_model(self):
         """Load BLEURT tokenizer and model."""

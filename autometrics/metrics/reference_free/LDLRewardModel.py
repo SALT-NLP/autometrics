@@ -323,9 +323,10 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
         model_name: str = "ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1",
         device_map: Union[str, dict] = "auto",
         batch_size: int = 2,
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description, model_name=model_name, device_map=device_map, batch_size=batch_size, persistent=persistent)
+        super().__init__(name, description, model_name=model_name, device_map=device_map, batch_size=batch_size, persistent=persistent, **kwargs)
         self.model_name = model_name
         self.device_map = device_map
         self.batch_size = batch_size
@@ -333,8 +334,6 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model: Optional[LDLRewardModel27B] = None
         self.tokenizer: Optional[AutoTokenizer] = None
-        if self.persistent:
-            self._load_model()
 
         self.exclude_from_cache_key('model_name', 'device_map', 'batch_size', 'persistent')
 
@@ -355,7 +354,7 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
             self.model = None
             self.tokenizer = None
 
-    def _calculate_impl(self, input: str, output: str, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
         if self.model is None:
             self._load_model()
         conv = [{"role": "user", "content": input}, {"role": "assistant", "content": output}]

@@ -138,22 +138,21 @@ where $h_l^{+}, h_l^{-}$ are the hidden states at layer $l$ for the preferred an
         name: str = "GRMRewardModel",
         description: str = "Ray2333/GRM-Llama3.2-3B reward model (reference-free).",
         model_name: str = "Ray2333/GRM-Llama3.2-3B-rewardmodel-ft",
-        torch_dtype = torch.float16,
+        torch_dtype = "float16",
         device_map: Union[str, dict] = "auto",
         batch_size: int = 1,
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description, model_name=model_name, torch_dtype=torch_dtype, device_map=device_map, batch_size=batch_size, persistent=persistent)
+        super().__init__(name, description, model_name=model_name, torch_dtype=torch_dtype, device_map=device_map, batch_size=batch_size, persistent=persistent, **kwargs)
         self.model_name = model_name
-        self.torch_dtype = torch_dtype
+        self.torch_dtype = torch.float16 if torch_dtype == "float16" else torch.bfloat16 if torch_dtype == "bfloat16" else torch.float16
         self.device_map = device_map
         self.batch_size = batch_size
         self.persistent = persistent
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = None
         self.model = None
-        if self.persistent:
-            self._load_model()
 
         self.exclude_from_cache_key('model_name', 'device_map', 'batch_size', 'persistent')
 
@@ -178,7 +177,7 @@ where $h_l^{+}, h_l^{-}$ are the hidden states at layer $l$ for the preferred an
             self.model = None
             self.tokenizer = None
 
-    def _calculate_impl(self, input: str, output: str, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
         """
         Score a single input-output pair.
         """

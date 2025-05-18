@@ -152,8 +152,6 @@ where $f_k$ is the $k$-th expert head's output.
         self.devices = devices
         self.persistent = persistent
         self.model = None
-        if self.persistent:
-            self._load_model()
 
         self.exclude_from_cache_key("batch_size", "devices", "persistent")
 

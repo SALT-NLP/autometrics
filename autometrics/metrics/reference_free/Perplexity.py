@@ -211,7 +211,7 @@ PPL(X) = \exp \left( -\frac{1}{T} \sum_{i=1}^{T} \log p_{\theta}(x_i \mid x_{\ma
 $$
 
 where:
-- $k$ is the model’s fixed context size,
+- $k$ is the model's fixed context size,
 - The probability of each token $x_i$ is conditioned on a **sliding context of at most $k$ tokens**.
 
 This method provides a **more realistic** evaluation of model fluency while efficiently handling long sequences.
@@ -314,33 +314,57 @@ This method provides a **more realistic** evaluation of model fluency while effi
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu
     """
-    def __init__(self, model="gpt2-large", batch_size=8, stride=512, progress_bar=True):
+    def __init__(self, model="gpt2-large", batch_size=8, stride=512, progress_bar=True, persistent=True, **kwargs):
         name = "Perplexity_" + model
         description = (
             "Perplexity is a measure of how well a probability distribution predicts a sample. "
             "In the context of language models, it quantifies how well the model predicts a sequence of words. "
             "Lower perplexity indicates better performance."
         )
-        super().__init__(name, description, model_id=model, batch_size=batch_size, stride=stride, progress_bar=progress_bar)
+        super().__init__(name, description, model_id=model, batch_size=batch_size, stride=stride, 
+                         progress_bar=progress_bar, persistent=persistent, **kwargs)
+        
         self.model_name = model
         self.batch_size = batch_size
         self.stride = stride
         self.progress_bar = progress_bar
+        self.persistent = persistent
 
         device, _, _ = get_backend()
         self.device = device
-        self.model = GPT2LMHeadModel.from_pretrained(model).to(self.device)
-        self.tokenizer = GPT2TokenizerFast.from_pretrained(model)
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.tokenizer.eos_token
+        
+        self.model = None
+        self.tokenizer = None
+        
+        if self.persistent:
+            self._load_model()
 
-        self.exclude_from_cache_key('batch_size', 'progress_bar')
+        self.exclude_from_cache_key('batch_size', 'progress_bar', 'persistent')
+
+    def _load_model(self):
+        """Load model and tokenizer if not already loaded."""
+        if self.model is None:
+            self.model = GPT2LMHeadModel.from_pretrained(self.model_name).to(self.device)
+            self.tokenizer = GPT2TokenizerFast.from_pretrained(self.model_name)
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+
+    def _unload_model(self):
+        """Unload model and tokenizer to free resources."""
+        if self.model is not None:
+            del self.model
+            del self.tokenizer
+            torch.cuda.empty_cache()
+            self.model = None
+            self.tokenizer = None
 
     def _calculate_impl(self, input, output, references=None, **kwargs):
         """
         Calculate the perplexity for a single document.
         Assumes `input` is a string.
         """
+        if self.model is None:
+            self._load_model()
             
         perplexities = calculate_perplexities(
             [output],
@@ -351,15 +375,23 @@ This method provides a **more realistic** evaluation of model fluency while effi
             stride=self.stride,
             progress_bar=False
         )
-        return perplexities[0]
+        
+        result = perplexities[0]
+        
+        if not self.persistent:
+            self._unload_model()
+            
+        return result
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
         Calculate perplexities for a batch of documents.
         Assumes `inputs` is a list of strings.
         """
+        if self.model is None:
+            self._load_model()
 
-        return calculate_perplexities(
+        results = calculate_perplexities(
             outputs,
             self.model,
             self.tokenizer,
@@ -368,7 +400,12 @@ This method provides a **more realistic** evaluation of model fluency while effi
             stride=self.stride,
             progress_bar=self.progress_bar
         )
-    
+        
+        if not self.persistent:
+            self._unload_model()
+            
+        return results
+
 # -------------------------------
 # Main Execution for Benchmarking
 # -------------------------------

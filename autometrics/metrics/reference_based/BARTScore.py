@@ -290,7 +290,7 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
 - **Contact:** mryan0@stanford.edu"""
 
     def __init__(
-        self, batch_size: int = 4, model: str = "facebook/bart-large-cnn", **kwargs
+        self, batch_size: int = 4, model: str = "facebook/bart-large-cnn", persistent: bool = True, **kwargs
     ):
         # Get device
         self.device = torch.device(
@@ -307,20 +307,36 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
             batch_size=batch_size,
             model=model,
             device=str(self.device),  # Include device as string
+            persistent=persistent,
             **kwargs
         )
         
-        # Initialize scorer
-        self.bart_scorer = BARTScorer(
-            device=str(self.device), max_length=None, checkpoint=model
-        )
+        self.model = model
         self.batch_size = batch_size
+        self.persistent = persistent
+        self.bart_scorer = None
         
-        # Exclude device from cache key as it doesn't affect results, just computation method
-        # Likewise, exclude batch_size as it doesn't affect results in theory
-        self.exclude_from_cache_key('device', 'batch_size')
+        # Exclude from cache key as these don't affect results, just computation method
+        self.exclude_from_cache_key('device', 'batch_size', 'persistent')
+
+    def _load_model(self):
+        """Load the BART model if not already loaded."""
+        if self.bart_scorer is None:
+            self.bart_scorer = BARTScorer(
+                device=str(self.device), max_length=None, checkpoint=self.model
+            )
+
+    def _unload_model(self):
+        """Unload model to free resources."""
+        if self.bart_scorer is not None:
+            del self.bart_scorer
+            torch.cuda.empty_cache()
+            self.bart_scorer = None
 
     def _calculate_impl(self, input: str, output: str, references=None, **kwargs):
+        if self.bart_scorer is None:
+            self._load_model()
+            
         refs = references or []
         if len(refs) > 1:
             scores = self.bart_scorer.multi_ref_score(
@@ -330,11 +346,20 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
             scores = self.bart_scorer.score(
                 [input], [refs[0] if refs else ""], batch_size=self.batch_size
             )
-        return scores[0]
+            
+        result = scores[0]
+        
+        if not self.persistent:
+            self._unload_model()
+            
+        return result
 
     def _calculate_batched_impl(
         self, inputs: List[str], outputs: List[str], references=None, **kwargs
     ):
+        if self.bart_scorer is None:
+            self._load_model()
+            
         refs = references or [[] for _ in inputs]
         groups = {}
         for i, r in enumerate(refs):
@@ -355,6 +380,9 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
                 )
             for idx, score in zip(idxs, sc):
                 all_scores[idx] = score
+                
+        if not self.persistent:
+            self._unload_model()
 
         return all_scores
 

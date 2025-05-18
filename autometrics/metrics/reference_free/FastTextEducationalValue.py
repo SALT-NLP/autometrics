@@ -173,8 +173,6 @@ FastText
         os.makedirs(base_dir, exist_ok=True)
         self.cache_dir = base_dir
         self.model = None
-        if self.persistent:
-            self._load_model()
 
         self.exclude_from_cache_key('persistent', 'data_dir')
 

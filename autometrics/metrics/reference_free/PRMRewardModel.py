@@ -140,8 +140,6 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = None
         self.model = None
-        if self.persistent:
-            self._load_model()
 
         self.exclude_from_cache_key('device_map', 'persistent')
 

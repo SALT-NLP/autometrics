@@ -165,7 +165,7 @@ where:
             
         self.scorer = ParaScorer(**scorer_kwargs)
 
-    def _calculate_impl(self, input, output, **kwargs):
+    def _calculate_impl(self, input, output, references=None, **kwargs):
         cands = [output]
         srcs = [input]
         P, R, F = self.scorer.free_score(cands, srcs, **kwargs)

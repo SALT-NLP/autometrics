@@ -271,13 +271,11 @@ $$
         persistent: bool = True,
         **kwargs
     ):
-        super().__init__(name, description, submetric_names=['avg_prob', 'avg_fscore'])
+        super().__init__(name, description, submetric_names=['avg_prob', 'avg_fscore'], **kwargs)
         self.spacy_model = spacy_model
         self.persistent = persistent
         self.qg: QG_masked = None
         self.qa: QA_Metric = None
-        if self.persistent:
-            self._init_models()
 
         self.exclude_from_cache_key('persistent')
 

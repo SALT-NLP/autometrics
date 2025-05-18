@@ -53,9 +53,6 @@ class FastTextClassifier(ReferenceFreeMetric):
         
         # Exclude parameters that don't affect results from cache key
         self.exclude_from_cache_key('persistent', 'data_dir')
-        
-        if self.persistent:
-            self._load_model()
 
     def _download_model(self):
         resp = requests.get(self.model_url, stream=True)

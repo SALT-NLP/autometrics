@@ -137,17 +137,16 @@ where $f$ is the classification function learned by the model, trained on synthe
         model_name: str = "manueldeprada/FactCC",
         device: str = None,
         batch_size: int = 8,
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description, model_name=model_name, device=device, batch_size=batch_size, persistent=persistent)
+        super().__init__(name, description, model_name=model_name, device=device, batch_size=batch_size, persistent=persistent, **kwargs)
         self.model_name = model_name
         self.device = torch.device(device) if device is not None else torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.batch_size = batch_size
         self.persistent = persistent
         self.tokenizer = None
         self.model = None
-        if self.persistent:
-            self._load_model()
 
         self.exclude_from_cache_key('model_name', 'device', 'batch_size', 'persistent')
 

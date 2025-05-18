@@ -176,8 +176,9 @@ The final score is the maximum $F$ across all references $R_i$.
         smoothing=1e-5,
         max_order=4,
         n_jobs=-1,
+        **kwargs
     ):
-        super().__init__(name, description, lambda_weight=lambda_weight, smoothing=smoothing, max_order=max_order)
+        super().__init__(name, description, lambda_weight=lambda_weight, smoothing=smoothing, max_order=max_order, **kwargs)
         self.lambda_weight = lambda_weight
         self.smoothing = smoothing
         self.max_order = max_order

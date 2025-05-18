@@ -198,16 +198,17 @@ where:
         name: str = "INFORMRewardModel",
         description: str = "INF-ORM-Llama3.1-70B outcome reward model (reference-free).",
         model_name: str = "infly/INF-ORM-Llama3.1-70B",
-        torch_dtype = torch.bfloat16,
+        torch_dtype = "bfloat16",
         device_map: Union[str, dict] = "auto",
         attn_implementation: str = "flash_attention_2",
         num_labels: int = 1,
         batch_size: int = 2,
-        persistent: bool = True
+        persistent: bool = True,
+        **kwargs
     ):
-        super().__init__(name, description, model_name=model_name, torch_dtype=torch_dtype, device_map=device_map, attn_implementation=attn_implementation, num_labels=num_labels, batch_size=batch_size, persistent=persistent)
+        super().__init__(name, description, model_name=model_name, torch_dtype=torch_dtype, device_map=device_map, attn_implementation=attn_implementation, num_labels=num_labels, batch_size=batch_size, persistent=persistent, **kwargs)
         self.model_name = model_name
-        self.torch_dtype = torch_dtype
+        self.torch_dtype = torch.bfloat16 if torch_dtype == "bfloat16" else torch.float16 if torch_dtype == "float16" else torch.float32
         self.device_map = device_map
         self.attn_implementation = attn_implementation
         self.num_labels = num_labels
@@ -216,9 +217,6 @@ where:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model: Optional[INFORMForSequenceClassification] = None
         self.tokenizer: Optional[PreTrainedTokenizerFast] = None
-
-        if self.persistent:
-            self._load_model()
 
         self.exclude_from_cache_key('model_name', 'device_map', 'attn_implementation', 'batch_size', 'persistent')
 
@@ -242,7 +240,7 @@ where:
             self.model = None
             self.tokenizer = None
 
-    def _calculate_impl(self, input: str, output: str, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
         # ensure model & tokenizer loaded
         if self.model is None:
             self._load_model()

@@ -1,7 +1,8 @@
 from autometrics.metrics.reference_free.ReferenceFreeMultiMetric import ReferenceFreeMultiMetric
 
 from autometrics.metrics.unieval.utils import convert_to_json
-from autometrics.metrics.unieval.evaluator import get_evaluator
+# Removing evaluator import to use lazy loading
+# from autometrics.metrics.unieval.evaluator import get_evaluator
 
 import torch
 
@@ -150,17 +151,34 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu  """
 
-    def __init__(self, device: str = "cuda", **kwargs):
+    def __init__(self, device: str = "cuda", persistent: bool = True, **kwargs):
         name = "UniEvalFact"
         description = "UniEvalFact is a metric for evaluating the factual consistency of generated text. It uses a pre-trained model to assess the factuality of the content, providing a score that indicates how well the generated text aligns with factual information. This metric is useful for tasks where factual accuracy is crucial, such as summarization and dialogue generation."
         self.submetrics = ["consistency"]
 
         self.task = 'fact'
         self.device = torch.device(device)
-        self.evaluator = get_evaluator(self.task, device=self.device)
+        self.persistent = persistent
+        self.evaluator = None
         
-        super().__init__(name, description, ["UniEvalFact-" + submetric for submetric in self.submetrics], device=device, **kwargs)
+        super().__init__(name, description, ["UniEvalFact-" + submetric for submetric in self.submetrics], 
+                          device=device, persistent=persistent, **kwargs)
+        
+        self.exclude_from_cache_key('persistent')
 
+    def _load_model(self):
+        """Load the UniEval model if not already loaded."""
+        if self.evaluator is None:
+            from autometrics.metrics.unieval.evaluator import get_evaluator
+            self.evaluator = get_evaluator(self.task, device=self.device)
+            
+    def _unload_model(self):
+        """Unload model to free resources."""
+        if self.evaluator is not None:
+            del self.evaluator
+            torch.cuda.empty_cache()
+            self.evaluator = None
+    
     def _parse_unieval(self, result):
       results = [result[submetric] for submetric in self.submetrics]
       return results
@@ -169,18 +187,28 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
         """
         Calculate UniEvalFact scores for the given input and output.
         """
+        if self.evaluator is None:
+            self._load_model()
+            
         # Prepare data for pre-trained evaluators
         data = convert_to_json(output_list=[output], src_list=[input])
 
         # Get multi-dimensional evaluation scores
         eval_scores = self.evaluator.evaluate(data)
         
-        return self._parse_unieval(eval_scores[0])
+        result = self._parse_unieval(eval_scores[0])
+        
+        if not self.persistent:
+            self._unload_model()
+            
+        return result
     
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
         Calculate UniEvalFact scores for the given inputs and outputs in batches.
         """
+        if self.evaluator is None:
+            self._load_model()
 
         # Prepare data for pre-trained evaluators
         data = convert_to_json(output_list=outputs, src_list=inputs)
@@ -195,6 +223,9 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
 
         # Convert to list of lists
         results = [list(result) for result in results]
+        
+        if not self.persistent:
+            self._unload_model()
 
         return results
 

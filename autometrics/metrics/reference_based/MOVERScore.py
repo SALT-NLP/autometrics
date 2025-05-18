@@ -179,9 +179,6 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         super().__init__(name, description, model_name=model_name, device=device, **kwargs)
         self.exclude_from_cache_key("device", "persistent")
 
-        if self.persistent:
-            self._load_model()
-
     def _load_model(self):
         """Load the model and tokenizer."""
         if self.model is None:

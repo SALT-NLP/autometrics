@@ -157,7 +157,8 @@ FastText
     def __init__(
         self,
         persistent: bool = True,
-        data_dir: str = None
+        data_dir: str = None,
+        **kwargs
     ):
         super().__init__(
             name="FastTextNSFW",
@@ -165,5 +166,6 @@ FastText
             model_url="https://dolma-artifacts.org/fasttext_models/jigsaw_fasttext_bigrams_20230515/jigsaw_fasttext_bigrams_nsfw_final.bin",
             negative_label="nsfw",
             persistent=persistent,
-            data_dir=data_dir
+            data_dir=data_dir,
+            **kwargs
         ) 

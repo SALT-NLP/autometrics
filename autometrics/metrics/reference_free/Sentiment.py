@@ -162,7 +162,7 @@ $$
         name: str = "Sentiment",
         description: str = "Twitter sentiment score (positive vs negative) regression.",
         model_name: str = "cardiffnlp/twitter-roberta-base-sentiment-latest",
-        torch_dtype = torch.float32,
+        torch_dtype = "float32",
         device_map: Union[str, dict] = None,
         batch_size: int = 8,
         persistent: bool = True,
@@ -170,7 +170,7 @@ $$
     ):
         super().__init__(name, description, model_name=model_name, torch_dtype=torch_dtype, device_map=device_map, batch_size=batch_size, persistent=persistent, **kwargs)
         self.model_name = model_name
-        self.torch_dtype = torch_dtype
+        self.torch_dtype = torch.float32 if torch_dtype == "float32" else torch.float16 if torch_dtype == "float16" else torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32
         self.device_map = device_map
         self.batch_size = batch_size
         self.persistent = persistent
@@ -178,8 +178,6 @@ $$
         self.tokenizer = None
         self.model = None
         self.config = None
-        if self.persistent:
-            self._load_model()
 
         self.exclude_from_cache_key('batch_size', 'device_map', 'persistent')
 
@@ -218,7 +216,7 @@ $$
                 tokens.append(t)
         return " ".join(tokens)
 
-    def _calculate_impl(self, input: str, output: str, **kwargs) -> float:
+    def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
         """Compute sentiment regression for a single text."""
         if self.model is None:
             self._load_model()
@@ -234,7 +232,7 @@ $$
             self._unload_model()
         return score
 
-    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], references=None, **kwargs) -> List[float]:
         """Compute sentiment regression for batches of texts."""
         if self.model is None:
             self._load_model()

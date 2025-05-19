@@ -208,8 +208,21 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         ref = references[0] if isinstance(references, (list, tuple)) and references else (
             references if isinstance(references, str) else ""
         )
-        # tokenize single pair
-        inputs = self.tokenizer([ref], [output], padding='longest', return_tensors='pt').to(self.device)
+        # tokenize single pair with explicit max_length to prevent position embedding issues
+        inputs = self.tokenizer(
+            [ref], 
+            [output], 
+            padding='longest', 
+            truncation=True,
+            max_length=512,  # Explicitly set max_length to avoid position embedding errors
+            return_tensors='pt'
+        )
+        
+        # Move tensors to the correct device
+        for key in inputs:
+            if isinstance(inputs[key], torch.Tensor):
+                inputs[key] = inputs[key].to(self.device)
+        
         with torch.no_grad():
             logits = self.model(**inputs).logits.flatten()
         score = logits[0].cpu().item()
@@ -242,7 +255,20 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         for i in range(0, len(outputs_list), self.batch_size):
             chunk_refs = refs_flat[i:i+self.batch_size]
             chunk_outs = outputs_list[i:i+self.batch_size]
-            inputs = self.tokenizer(chunk_refs, chunk_outs, padding='longest', return_tensors='pt').to(self.device)
+            inputs = self.tokenizer(
+                chunk_refs, 
+                chunk_outs, 
+                padding='longest', 
+                truncation=True,
+                max_length=512,  # Explicitly set max_length to avoid position embedding errors
+                return_tensors='pt'
+            )
+            
+            # Move tensors to the correct device
+            for key in inputs:
+                if isinstance(inputs[key], torch.Tensor):
+                    inputs[key] = inputs[key].to(self.device)
+            
             with torch.no_grad():
                 logits = self.model(**inputs).logits.flatten().cpu().tolist()
             # flatten to list

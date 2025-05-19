@@ -36,7 +36,8 @@ class YiSiModel(nn.Module):
         device = input_ids.device
         idf_matrix = torch.tensor(
             [[self.idf_weights.get(tok.item(), 1.0) for tok in seq] for seq in input_ids],
-            device=device
+            device=device,
+            dtype=similarities.dtype  # Explicitly match the data type of similarities
         )
         weighted_sum = torch.bmm(similarities.unsqueeze(1), idf_matrix.unsqueeze(2)).squeeze(-1)
         total_weight = idf_matrix.sum(dim=1, keepdim=True)

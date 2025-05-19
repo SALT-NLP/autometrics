@@ -1,7 +1,7 @@
 from parascore import ParaScorer
-from autometrics.metrics.reference_based.ReferenceBasedMultiMetric import ReferenceBasedMultiMetric
+from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
-class ParaScore(ReferenceBasedMultiMetric):
+class ParaScore(ReferenceBasedMetric):
     """---
 # Metric Card for ParaScore
 
@@ -145,8 +145,8 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
     def __init__(
         self,
         name: str = "ParaScore",
-        description: str = "ParaScore: reference-based paraphrase evaluation (P, R, F).",
-        submetric_names: list[str] = ["ParaScore_P", "ParaScore_R", "ParaScore_F"],
+        description: str = "ParaScore: reference-based paraphrase evaluation.",
+        seed: int = 42,
         **scorer_kwargs
     ):
         if "lang" not in scorer_kwargs:
@@ -155,31 +155,47 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
         if "model_type" not in scorer_kwargs:
             scorer_kwargs["model_type"] = "bert-base-uncased"
 
-        super().__init__(name, description, submetric_names, **scorer_kwargs)
+        super().__init__(name=name, description=description, seed=seed, **scorer_kwargs)
         self.scorer = ParaScorer(**scorer_kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):
         if not references:
             raise ValueError("ParaScore (reference-based) requires `references`.")
+        
         # singleton batch
         cands = [output]
         srcs = [input]
+        
         # ensure list-of-lists
         if isinstance(references[0], list):
             refs_batch = references
         else:
             refs_batch = [references]
+            
         # use hybrid base_score
-        P_list = self.scorer.base_score(cands, srcs, refs_batch, **kwargs)
-        # base_score returns a list of floats
-        return P_list[0], P_list[1], P_list[2]
+        result = self.scorer.base_score(cands, srcs, refs_batch, **kwargs)
+        
+        # If we got an empty list, return zero
+        if not result:
+            return 0.0
+            
+        # ParaScorer returns a list with a single value
+        return result[0]
 
     def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+        """
+        Calculate scores for a batch of inputs/outputs.
+        ParaScorer.base_score returns a list of scores [score1, score2, ...] for each input.
+        """
         # inputs: List[source], outputs: List[candidate]
         refs_batch = references if references is not None else [[] for _ in inputs]
-        P_list = self.scorer.base_score(outputs, inputs, refs_batch, **kwargs)
-        # P_list is [score1, score2, ...] but for MultiMetric we need three lists
-        # actually base_score returns List[float] of length len(inputs)
-        # to create three identical lists (P,R,F) we assume base_score yields final single metric
-        # so replicate for each submetric
-        return P_list, P_list, P_list
+        
+        # Get scores
+        scores_list = self.scorer.base_score(outputs, inputs, refs_batch, **kwargs)
+        
+        # If we got an empty list or the scores don't match the inputs, return zeros
+        if not scores_list or len(scores_list) != len(inputs):
+            return [0.0] * len(inputs)
+        
+        # Return the scores directly
+        return scores_list

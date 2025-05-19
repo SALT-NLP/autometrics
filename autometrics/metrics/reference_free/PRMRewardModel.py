@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoModel, AutoTokenizer
 from autometrics.metrics.reference_free.ReferenceFreeMultiMetric import ReferenceFreeMultiMetric
+from autometrics.metrics.utils.device_utils import get_model_device, ensure_tensor_on_device
 from typing import Tuple, List
 
 class MathProcessRewardModel(ReferenceFreeMultiMetric):
@@ -133,7 +134,7 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
         persistent: bool = True,
         **kwargs
     ):
-        super().__init__(name, description, submetric_names=["min", "max", "mean"], model_id=model_name, device_map=device_map, persistent=persistent, **kwargs)
+        super().__init__(name, description, submetric_names=["min", "max", "mean"], model_name=model_name, device_map=device_map, persistent=persistent, **kwargs)
         self.model_name = model_name
         self.device_map = device_map
         self.persistent = persistent
@@ -197,8 +198,15 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
         conv_str = self.tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=False
         )
+        
+        # Get the model's device and ensure tensors are on that device
+        model_device = get_model_device(self.model, fallback_device=self.device)
+        
+        # Tokenize and ensure tensor is on the model's device
+        input_ids = self.tokenizer.encode(conv_str, return_tensors="pt")
+        input_ids = ensure_tensor_on_device(input_ids, model_device)
+        
         # Single forward pass
-        input_ids = self.tokenizer.encode(conv_str, return_tensors="pt").to(self.device)
         outputs = self.model(input_ids=input_ids)
         logits = outputs.logits if hasattr(outputs, 'logits') else outputs[0]
         # Identify step separators and compute masks

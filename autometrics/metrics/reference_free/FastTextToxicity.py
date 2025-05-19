@@ -163,12 +163,14 @@ FastText
     def __init__(self,
                  persistent: bool = True,
                  data_dir: str = None,
+                 model_url: str = "https://dolma-artifacts.org/fasttext_models/jigsaw_fasttext_bigrams_20230515/jigsaw_fasttext_bigrams_hatespeech_final.bin",
+                 negative_label: str = "toxic",
                  **kwargs):
         super().__init__(
             name="FastTextToxicity",
             description="fastText classifier for toxic vs non-toxic text using Jigsaw hate-speech model",
-            model_url="https://dolma-artifacts.org/fasttext_models/jigsaw_fasttext_bigrams_20230515/jigsaw_fasttext_bigrams_hatespeech_final.bin",
-            negative_label="toxic",
+            model_url=model_url,
+            negative_label=negative_label,
             persistent=persistent,
             data_dir=data_dir,
             **kwargs

@@ -60,7 +60,7 @@ def measure_metric_phases(metric_class_path: str, constructor_kwargs: Optional[D
             cmd, 
             capture_output=True, 
             text=True,
-            timeout=60  # Add a 60-second timeout
+            timeout=1800  # Add a 30-minute timeout
         )
         
         # Check for errors
@@ -168,7 +168,7 @@ def measure_metric_phases(metric_class_path: str, constructor_kwargs: Optional[D
         return output
         
     except subprocess.TimeoutExpired:
-        print(f"Timeout while profiling metric {metric_class_path} (exceeded 60 seconds)", file=sys.stderr)
+        print(f"Timeout while profiling metric {metric_class_path} (exceeded 10 minutes)", file=sys.stderr)
         return []
     except Exception as e:
         print(f"Unexpected error profiling metric {metric_class_path}: {str(e)}", file=sys.stderr)

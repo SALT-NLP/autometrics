@@ -95,7 +95,8 @@ The model is trained using human-annotated quality scores from simplification co
   Designed specifically for simplification; using it for other tasks may result in misleading evaluations.
 
 - **Failure Cases:**  
-  Needs more information.
+  - Very long input texts may cause padding errors in the model
+  - For best results, texts should be sentence-level rather than long passages
 
 ## Related Metrics
 
@@ -148,22 +149,34 @@ The model is trained using human-annotated quality scores from simplification co
         batch_size: int = 16,
         devices: List[int] = None,
         persistent: bool = True,
+        max_length: int = 512,
+        max_retries: int = 3,
         **kwargs
     ):
-        super().__init__(name, description, model_id=model_id, batch_size=batch_size, devices=devices, persistent=persistent, **kwargs)
+        super().__init__(name, description, model_id=model_id, batch_size=batch_size, devices=devices, persistent=persistent, max_length=max_length, max_retries=max_retries, **kwargs)
         self.model_id = model_id
         self.batch_size = batch_size
         self.devices = devices
         self.persistent = persistent
         self.model = None
-
-        self.exclude_from_cache_key('batch_size', 'devices', 'persistent')
+        self.input_column = "src"
+        self.output_column = "edit_id_simplified"
+        self.max_length = max_length
+        self.max_retries = max_retries
+        
+        # Standard XLM-RoBERTa model has 512 token limit (LENS uses this model)
+        self.model_token_limit = 512
+        
+        self.exclude_from_cache_key('batch_size', 'devices', 'persistent', 'max_retries')
 
     def _load_model(self):
         """Download SALSA checkpoint and load the LENS_SALSA model."""
         if self.model is None:
             ckpt_path = download_model(self.model_id)
             self.model = _LENS_SALSA_Model(ckpt_path)
+            # Update column names to match what the model expects
+            self.input_column = self.model.source_column
+            self.output_column = self.model.target_column
 
     def _unload_model(self):
         """Unload SALSA model to free resources."""
@@ -171,7 +184,104 @@ The model is trained using human-annotated quality scores from simplification co
             del self.model
             torch.cuda.empty_cache()
             self.model = None
+    
+    def _get_tokenizer_length(self, text: str) -> int:
+        """
+        Get an approximate token count using the model's tokenizer.
+        If the model isn't loaded, make a rough estimate based on whitespace.
+        """
+        if self.model is not None and hasattr(self.model.model, "encoder"):
+            if hasattr(self.model.model.encoder, "tokenizer"):
+                # If we have access to the tokenizer, use it for accurate counts
+                return len(self.model.model.encoder.tokenizer.tokenize(text))
+        
+        # Fallback: rough estimate based on whitespace tokens
+        # Rule of thumb: ~1.5 tokens per word for multilingual models
+        return len(text.split()) * 2
 
+    def _truncate_text(self, text: str, max_tokens: int = None) -> str:
+        """
+        Truncate text based on approximate token count to avoid model errors.
+        Uses max_tokens if specified, otherwise defaults to half the model limit
+        to account for both input and output texts being concatenated.
+        """
+        if not text:
+            return text
+        
+        if max_tokens is None:
+            # Default to a conservative limit (half of model token limit)
+            # since input and output texts will be concatenated
+            max_tokens = self.model_token_limit // 2
+            
+        # Start with a rough character-based truncation for efficiency
+        # (most multilingual tokenizers average ~4 chars per token)
+        if len(text) > max_tokens * 6:
+            text = text[:max_tokens * 6]
+            
+        # Then do a more precise token-based truncation
+        approx_tokens = self._get_tokenizer_length(text)
+        
+        if approx_tokens <= max_tokens:
+            return text
+        
+        # Truncate by recursively removing words from end until under token limit
+        words = text.split()
+        while words and self._get_tokenizer_length(" ".join(words)) > max_tokens:
+            words.pop()
+            
+        return " ".join(words)
+
+    def _calculate_with_fallback(self, input_text: str, output_text: str) -> float:
+        """
+        Try to calculate score with progressively shorter inputs if needed.
+        Raises an exception if all attempts fail.
+        """
+        # Start with full text
+        truncated_input = self._truncate_text(input_text)
+        truncated_output = self._truncate_text(output_text)
+        
+        # First attempt with standard truncation
+        try:
+            all_data = [{
+                self.input_column: truncated_input.lower(),
+                self.output_column: truncated_output.lower(),
+                "id": "0"
+            }]
+            
+            prediction = self.model.model.predict(
+                all_data,
+                batch_size=self.batch_size,
+                devices=self.devices
+            )
+            
+            return float(prediction.scores[0]) * 100
+        except Exception as e:
+            # If that fails, try more aggressive truncation
+            for attempt in range(1, self.max_retries):
+                try:
+                    # Reduce text length by half each attempt
+                    max_tokens = self.model_token_limit // (2 * (attempt + 1))
+                    truncated_input = self._truncate_text(input_text, max_tokens)
+                    truncated_output = self._truncate_text(output_text, max_tokens)
+                    
+                    all_data = [{
+                        self.input_column: truncated_input.lower(),
+                        self.output_column: truncated_output.lower(),
+                        "id": "0"
+                    }]
+                    
+                    prediction = self.model.model.predict(
+                        all_data,
+                        batch_size=self.batch_size,
+                        devices=self.devices
+                    )
+                    
+                    return float(prediction.scores[0]) * 100
+                except Exception as retry_e:
+                    if attempt == self.max_retries - 1:
+                        # All attempts failed, raise the last exception
+                        raise retry_e
+        
     def _calculate_impl(self,
                   input: str,
                   output: str,
@@ -183,17 +293,19 @@ The model is trained using human-annotated quality scores from simplification co
         """
         if self.model is None:
             self._load_model()
-        # prepare references argument
-        refs_arg = references if references else None
-        scores, _ = self.model.score(
-            [input], [output], [refs_arg] if refs_arg is not None else None,
-            batch_size=self.batch_size,
-            devices=self.devices
-        )
-        result = float(scores[0])
-        if not self.persistent:
-            self._unload_model()
-        return result
+        
+        try:
+            result = self._calculate_with_fallback(input, output)
+            
+            if not self.persistent:
+                self._unload_model()
+                
+            return result
+        except Exception as e:
+            # Re-raise the exception to the caller
+            if not self.persistent:
+                self._unload_model()
+            raise RuntimeError(f"LENS_SALSA failed after {self.max_retries} attempts with progressively shorter inputs: {str(e)}")
 
     def _calculate_batched_impl(self,
                           inputs: List[str],
@@ -202,19 +314,33 @@ The model is trained using human-annotated quality scores from simplification co
                           **kwargs) -> List[float]:
         """
         Compute overall SALSA scores for a batch of examples.
-        Returns list of float scores.
+        
+        This implementation processes each input individually with fallback
+        to ensure maximum robustness, rather than using batch processing.
         """
         if self.model is None:
             self._load_model()
-        refs_arg = references if references is not None else None
-        scores, _ = self.model.score(
-            inputs,
-            outputs,
-            refs_arg,
-            batch_size=self.batch_size,
-            devices=self.devices
-        )
-        results = [float(s) for s in scores]
+        
+        results = []
+        errors = []
+        
+        for idx, (input_text, output_text) in enumerate(zip(inputs, outputs)):
+            try:
+                # Process each example with the fallback mechanism
+                score = self._calculate_with_fallback(input_text, output_text)
+                results.append(score)
+            except Exception as e:
+                # Record error and raise later
+                errors.append((idx, str(e)))
+                # Add None as placeholder
+                results.append(None)
+        
         if not self.persistent:
             self._unload_model()
+            
+        # If any errors occurred, raise an exception
+        if errors:
+            error_msg = "; ".join([f"Example {idx}: {err}" for idx, err in errors])
+            raise RuntimeError(f"LENS_SALSA failed on {len(errors)} examples: {error_msg}")
+            
         return results 

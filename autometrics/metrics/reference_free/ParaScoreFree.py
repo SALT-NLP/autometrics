@@ -1,7 +1,7 @@
 from parascore import ParaScorer
-from autometrics.metrics.reference_free.ReferenceFreeMultiMetric import ReferenceFreeMultiMetric
+from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 
-class ParaScoreFree(ReferenceFreeMultiMetric):
+class ParaScoreFree(ReferenceFreeMetric):
     """---
 # Metric Card for ParaScoreFree
 
@@ -151,11 +151,11 @@ where:
     def __init__(
         self,
         name: str = "ParaScoreFree",
-        description: str = "ParaScore: reference-free paraphrase evaluation (P, R, F).",
-        submetric_names: list[str] = ["ParaScoreFree_P", "ParaScoreFree_R", "ParaScoreFree_F"],
+        description: str = "ParaScore: reference-free paraphrase evaluation.",
+        seed: int = 42,
         **scorer_kwargs
     ):
-        super().__init__(name, description, submetric_names, **scorer_kwargs)
+        super().__init__(name, description, **scorer_kwargs)
 
         if "lang" not in scorer_kwargs:
             scorer_kwargs["lang"] = "en"
@@ -168,11 +168,11 @@ where:
     def _calculate_impl(self, input, output, references=None, **kwargs):
         cands = [output]
         srcs = [input]
-        P, R, F = self.scorer.free_score(cands, srcs, **kwargs)
-        # tensors of shape (1,)
-        return float(P[0].cpu().item()), float(R[0].cpu().item()), float(F[0].cpu().item())
+        result = self.scorer.free_score(cands, srcs, **kwargs)
+
+        return float(result[0].cpu().item())
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
-        P, R, F = self.scorer.free_score(outputs, inputs, **kwargs)
-        # return three lists
-        return P.cpu().tolist(), R.cpu().tolist(), F.cpu().tolist()
+        results = self.scorer.free_score(outputs, inputs, **kwargs)
+
+        return results.cpu().tolist()

@@ -89,7 +89,8 @@ The model is trained using human-annotated quality scores from simplification co
   Designed specifically for simplification; using it for other tasks may result in misleading evaluations.
 
 - **Failure Cases:**  
-  Needs more information.
+  - Very long input texts may cause padding errors in the model
+  - For best results, texts should be sentence-level rather than long passages
 
 ## Related Metrics
 

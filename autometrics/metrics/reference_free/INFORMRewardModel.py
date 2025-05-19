@@ -5,6 +5,7 @@ from typing import List, Optional, Union
 from transformers import LlamaPreTrainedModel, LlamaModel, PreTrainedTokenizerFast
 from transformers.modeling_outputs import SequenceClassifierOutputWithPast
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
+from autometrics.metrics.utils.device_utils import get_model_device, ensure_tensor_on_device
 
 
 class INFORMForSequenceClassification(LlamaPreTrainedModel):
@@ -245,17 +246,30 @@ where:
         if self.model is None:
             self._load_model()
 
+        # Get model device for proper tensor placement
+        model_device = get_model_device(self.model, fallback_device=self.device)
+
         # wrap into chat history
         conv = [
             {"role": "user", "content": input},
             {"role": "assistant", "content": output}
         ]
-        tok = self.tokenizer.apply_chat_template(
+        
+        # Get tokenized input_ids
+        input_ids = self.tokenizer.apply_chat_template(
             conv, tokenize=True, return_tensors="pt"
-        ).to(self.device)
+        ).to(model_device)
+        
+        # Create proper input dict for model
+        model_inputs = {'input_ids': input_ids}
+        
+        # If we need an attention mask (recommended for variable length inputs)
+        if input_ids.dim() > 1:  # batch dimension exists
+            attention_mask = torch.ones_like(input_ids)
+            model_inputs['attention_mask'] = attention_mask
 
         with torch.no_grad():
-            out = self.model(**tok).logits
+            out = self.model(**model_inputs).logits
             score = out.squeeze().cpu().item()
 
         if not self.persistent:
@@ -267,6 +281,9 @@ where:
         if self.model is None:
             self._load_model()
 
+        # Get model device for proper tensor placement
+        model_device = get_model_device(self.model, fallback_device=self.device)
+
         all_scores: List[float] = []
         # process in chunks
         for i in range(0, len(inputs), self.batch_size):
@@ -277,11 +294,22 @@ where:
                     {"role": "user", "content": inp},
                     {"role": "assistant", "content": out}
                 ]
-                tok = self.tokenizer.apply_chat_template(
+                
+                # Get tokenized input_ids
+                input_ids = self.tokenizer.apply_chat_template(
                     conv, tokenize=True, return_tensors="pt"
-                ).to(self.device)
+                ).to(model_device)
+                
+                # Create proper input dict for model
+                model_inputs = {'input_ids': input_ids}
+                
+                # If we need an attention mask
+                if input_ids.dim() > 1:  # batch dimension exists
+                    attention_mask = torch.ones_like(input_ids)
+                    model_inputs['attention_mask'] = attention_mask
+                
                 with torch.no_grad():
-                    sco = self.model(**tok).logits.squeeze().cpu().item()
+                    sco = self.model(**model_inputs).logits.squeeze().cpu().item()
                 all_scores.append(sco)
 
         if not self.persistent:

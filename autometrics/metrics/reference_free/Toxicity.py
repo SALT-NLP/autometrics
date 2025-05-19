@@ -179,6 +179,7 @@ $$
         metric_id: str = "toxicity",
         score_key: str = "toxicity",
         load_kwargs: dict = None,
+        compute_kwargs: dict = {},
         **kwargs
     ):
         # Default: use module_type measurement for toxicity
@@ -190,6 +191,6 @@ $$
             metric_id=metric_id,
             score_key=score_key,
             load_kwargs=load_kwargs,
-            compute_kwargs={},
+            compute_kwargs=compute_kwargs,
             **kwargs
         ) 

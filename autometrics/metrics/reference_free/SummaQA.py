@@ -37,37 +37,90 @@ class QA_Bert:
     """
     BERT-based QA model (SQuAD) to answer cloze questions.
     """
-    def __init__(self):
+    def __init__(self, device=None):
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.model = BertForQuestionAnswering.from_pretrained(
             'bert-large-uncased-whole-word-masking-finetuned-squad'
         )
         self.sep_id = self.tokenizer.encode('[SEP]', add_special_tokens=False)[0]
         self.model.eval()
+        
+        # Set device (use GPU if available by default)
+        if device is None:
+            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        else:
+            self.device = torch.device(device)
+        
+        self.model = self.model.to(self.device)
+        self.max_seq_length = 512  # BERT's maximum sequence length
 
     def predict(self, question: str, text: str) -> Tuple[str, float]:
         """
         Return the predicted answer string and its probability.
+        Handles long sequences by truncating to fit BERT's max length.
         """
-        # Build input: [CLS] question [SEP] text [SEP]
-        input_text = f"[CLS] {question} [SEP] {text} [SEP]"
-        input_ids = self.tokenizer.encode(input_text)
-        # token_type_ids: 0 for question, 1 for context
-        sep_index = input_ids.index(self.sep_id)
-        token_type_ids = [0 if i <= sep_index else 1 for i in range(len(input_ids))]
-        with torch.no_grad():
-            start_scores, end_scores = self.model(
-                torch.tensor([input_ids]), token_type_ids=torch.tensor([token_type_ids])
+        try:
+            # Build input: [CLS] question [SEP] text [SEP]
+            input_text = f"[CLS] {question} [SEP] {text} [SEP]"
+            
+            # Tokenize with truncation
+            encoded_dict = self.tokenizer.encode_plus(
+                question, 
+                text,
+                add_special_tokens=True,
+                max_length=self.max_seq_length,
+                padding='max_length',
+                truncation='only_second',  # Truncate the text, preserve the question
+                return_tensors='pt',
+                return_token_type_ids=True
             )
-            start_probs = torch.softmax(start_scores, dim=-1) * torch.tensor(token_type_ids, dtype=torch.float)
-            end_probs = torch.softmax(end_scores, dim=-1) * torch.tensor(token_type_ids, dtype=torch.float)
-        # Get best start and end
-        start_index = torch.argmax(start_probs)
-        end_index = torch.argmax(end_probs)
-        all_tokens = self.tokenizer.convert_ids_to_tokens(input_ids)
-        answer = ' '.join(all_tokens[start_index:end_index + 1])
-        prob = float(start_probs[0, start_index] * end_probs[0, end_index])
-        return answer, prob
+            
+            # Get input IDs and token type IDs
+            input_ids = encoded_dict['input_ids']
+            token_type_ids = encoded_dict['token_type_ids']
+            
+            # Move to correct device
+            input_ids = input_ids.to(self.device)
+            token_type_ids = token_type_ids.to(self.device)
+            
+            with torch.no_grad():
+                # Get model outputs
+                outputs = self.model(input_ids, token_type_ids=token_type_ids)
+                
+                # Extract start and end logits
+                start_scores = outputs.start_logits
+                end_scores = outputs.end_logits
+                
+                # Get token type IDs for masking (only consider answer in context)
+                token_type_tensor = token_type_ids.float()
+                
+                # Apply softmax to get probabilities and mask with token_type_ids
+                # Only consider answers from the context (token_type_id = 1)
+                start_probs = torch.softmax(start_scores, dim=-1) * token_type_tensor
+                end_probs = torch.softmax(end_scores, dim=-1) * token_type_tensor
+            
+            # Get best start and end indices
+            start_index = torch.argmax(start_probs).item()
+            end_index = torch.argmax(end_probs).item()
+            
+            # Check indices are valid and end comes after start
+            if end_index < start_index:
+                end_index = start_index
+                
+            # Get the tokens and convert to text
+            all_tokens = self.tokenizer.convert_ids_to_tokens(input_ids[0])
+            answer = ' '.join(all_tokens[start_index:end_index + 1])
+            
+            # Extract probabilities for best indices
+            prob = float(start_probs[0, start_index] * end_probs[0, end_index])
+            
+            return answer, prob
+        
+        except Exception as e:
+            # Log the error (in a real application, you might want to use a proper logger)
+            print(f"Error in QA_Bert.predict: {e}")
+            # Return empty answer and 0 probability on error
+            return "", 0.0
 
 
 class QG_masked:
@@ -97,8 +150,8 @@ class QA_Metric:
     """
     Computes average answer probability and F1 over a set of cloze questions.
     """
-    def __init__(self, model: QA_Bert = None):
-        self.model = model or QA_Bert()
+    def __init__(self, model: QA_Bert = None, device=None):
+        self.model = model or QA_Bert(device=device)
 
     def compute(self, questions: List[str], true_asws: List[str], evaluated_text: str) -> Dict[str, float]:
         if not questions:
@@ -269,19 +322,22 @@ $$
         description: str = 'QA-based summary evaluation via entity cloze and BERT QA',
         spacy_model: str = 'en_core_web_sm',
         persistent: bool = True,
+        device=None,
         **kwargs
     ):
         super().__init__(name, description, submetric_names=['avg_prob', 'avg_fscore'], **kwargs)
         self.spacy_model = spacy_model
         self.persistent = persistent
+        self.device = device
         self.qg: QG_masked = None
         self.qa: QA_Metric = None
 
         self.exclude_from_cache_key('persistent')
+        self.exclude_from_cache_key('device')
 
     def _init_models(self):
         self.qg = QG_masked(self.spacy_model)
-        self.qa = QA_Metric()
+        self.qa = QA_Metric(device=self.device)
 
     def _unload_models(self):
         # Clear heavy models

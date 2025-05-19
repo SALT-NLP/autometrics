@@ -321,7 +321,7 @@ This method provides a **more realistic** evaluation of model fluency while effi
             "In the context of language models, it quantifies how well the model predicts a sequence of words. "
             "Lower perplexity indicates better performance."
         )
-        super().__init__(name, description, model_id=model, batch_size=batch_size, stride=stride, 
+        super().__init__(name, description, model=model, batch_size=batch_size, stride=stride, 
                          progress_bar=progress_bar, persistent=persistent, **kwargs)
         
         self.model_name = model

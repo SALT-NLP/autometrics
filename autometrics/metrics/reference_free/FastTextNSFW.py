@@ -158,13 +158,15 @@ FastText
         self,
         persistent: bool = True,
         data_dir: str = None,
+        model_url: str = "https://dolma-artifacts.org/fasttext_models/jigsaw_fasttext_bigrams_20230515/jigsaw_fasttext_bigrams_nsfw_final.bin",
+        negative_label: str = "nsfw",
         **kwargs
     ):
         super().__init__(
             name="FastTextNSFW",
             description="fastText classifier for NSFW vs non-NSFW content",
-            model_url="https://dolma-artifacts.org/fasttext_models/jigsaw_fasttext_bigrams_20230515/jigsaw_fasttext_bigrams_nsfw_final.bin",
-            negative_label="nsfw",
+            model_url=model_url,
+            negative_label=negative_label,
             persistent=persistent,
             data_dir=data_dir,
             **kwargs

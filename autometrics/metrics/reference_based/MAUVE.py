@@ -188,6 +188,9 @@ where $c$ is a scaling factor (default: 5), and AUC is the area under the curve 
         description: str = "MAUVE reference-based metric (GAN diversity assessment)",
         persistent: bool = True,
         aggregation: str = "max",
+        metric_id: str = "mauve",
+        score_key: str = "mauve",
+        load_kwargs: dict = {},
         **kwargs
     ):
         # Add aggregation to the name if provided
@@ -200,9 +203,9 @@ where $c$ is a scaling factor (default: 5), and AUC is the area under the curve 
         super().__init__(
             name=metric_name,
             description=description,
-            metric_id="mauve",
-            score_key="mauve",
-            load_kwargs={},
+            metric_id=metric_id,
+            score_key=score_key,
+            load_kwargs=load_kwargs,
             persistent=persistent,
             aggregation=aggregation,
             **kwargs

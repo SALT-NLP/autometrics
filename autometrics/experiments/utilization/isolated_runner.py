@@ -78,7 +78,7 @@ def run_isolated_category(
             capture_output=True, 
             text=True,
             env={**os.environ, "PYTHONHASHSEED": str(seed)},  # Add deterministic hashing
-            timeout=600  # 10-minute timeout
+            timeout=3600  # 1-hour timeout
         )
         
         # Check for errors

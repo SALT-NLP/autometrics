@@ -1,1367 +1,3 @@
-
-Detecting hardware information...
-
-HARDWARE INFORMATION:
-System: Linux
-Processor: x86_64
-CPU Count: 96
-GPU Count: 1
-  GPU 0: NVIDIA RTX 6000 Ada Generation (47.51 GB)
-Hardware information saved to outputs/utilization/hardware_info.json
-
-STARTING METRIC UTILIZATION BENCHMARKING
-Output directory: outputs/utilization
-Number of examples: 50
-Burn-in samples: 5
-Length categories: short,medium,long
-Including 17 reference-free metrics:
-  - FKGL
-  - UniEvalFact
-  - Perplexity_gpt2-large
-  - ParaScoreFree
-  - INFORMRewardModel
-  - PRMRewardModel
-  - SummaQA
-  - DistinctNGram
-  - FastTextToxicity
-  - FastTextNSFW
-  - FastTextEducationalValue
-  - SelfBLEU
-  - FactCC
-  - Toxicity
-  - Sentiment
-  - GRMRewardModel
-  - LENS_SALSA
-
-Total metrics to process: 17
-
-Processing metric 1/17: FKGL
-
-================================================================================
-STARTING BENCHMARK FOR: FKGL
-================================================================================
-Configuring experiment for FKGL...
-Running benchmark for FKGL...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1300.52 MB
-  GPU RAM: 13811.96 MB
-Testing metric: FKGL
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-    start→after_import:
-      CPU RAM: 71.15 MB
-      GPU RAM: 0.00 MB
-      Duration: 778.33 ms
-    after_import→after_construct:
-      CPU RAM: 0.92 MB
-      GPU RAM: 0.00 MB
-      Duration: 234.35 ms
-    after_construct→after_first_call:
-      CPU RAM: 0.03 MB
-      GPU RAM: 0.00 MB
-      Duration: 4.31 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-FKGL import and construction:
-  start→after_import:
-    CPU RAM: 71.15 MB
-    GPU RAM: 0.00 MB
-    Duration: 778.33 ms
-  after_import→after_construct:
-    CPU RAM: 0.92 MB
-    GPU RAM: 0.00 MB
-    Duration: 234.35 ms
-  after_construct→after_first_call:
-    CPU RAM: 0.03 MB
-    GPU RAM: 0.00 MB
-    Duration: 4.31 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 72.10 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-Saving results for FKGL...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: FKGL
-================================================================================
-
-
---------------------------------------------------
-Progress: 1/17 metrics processed
-Status: 1 completed, 0 skipped, 0 failed
---------------------------------------------------
-
-
-Processing metric 2/17: UniEvalFact
-
-================================================================================
-STARTING BENCHMARK FOR: UniEvalFact
-================================================================================
-Configuring experiment for UniEvalFact...
-Running benchmark for UniEvalFact...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1301.18 MB
-  GPU RAM: 13811.96 MB
-Testing metric: UniEvalFact
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'device': 'cuda'}
-    start→after_import:
-      CPU RAM: 25.37 MB
-      GPU RAM: 0.00 MB
-      Duration: 1634.91 ms
-    after_import→after_construct:
-      CPU RAM: 263.74 MB
-      GPU RAM: 3132.48 MB
-      Duration: 3903.71 ms
-    after_construct→after_first_call:
-      CPU RAM: 481.61 MB
-      GPU RAM: 8.12 MB
-      Duration: 3770.73 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-UniEvalFact import and construction:
-  start→after_import:
-    CPU RAM: 25.37 MB
-    GPU RAM: 0.00 MB
-    Duration: 1634.91 ms
-  after_import→after_construct:
-    CPU RAM: 263.74 MB
-    GPU RAM: 3132.48 MB
-    Duration: 3903.71 ms
-  after_construct→after_first_call:
-    CPU RAM: 481.61 MB
-    GPU RAM: 8.12 MB
-    Duration: 3770.73 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 770.71 MB
-    GPU RAM: 3140.61 MB
-
-=== RUNTIME COSTS ===
-
-UniEvalFact - short:
-  Duration (ms): 56.23 ±0.49
-  CPU RAM - Baseline: 3167.11 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 3167.11 MB
-  GPU RAM - Baseline: 3140.61 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 3140.61 MB
-  CPU RAM - With Import: 289.11 MB (import: 289.11 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 3132.48 MB (import: 3132.48 MB + runtime: 0.00 MB)
-
-UniEvalFact - medium:
-  Duration (ms): 57.40 ±0.66
-  CPU RAM - Baseline: 1581.29 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 1581.29 MB
-  GPU RAM - Baseline: 3140.61 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 3140.61 MB
-  CPU RAM - With Import: 289.11 MB (import: 289.11 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 3132.48 MB (import: 3132.48 MB + runtime: 0.00 MB)
-
-UniEvalFact - long:
-  Duration (ms): 60.77 ±0.64
-  CPU RAM - Baseline: 1564.37 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 1564.37 MB
-  GPU RAM - Baseline: 3140.61 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 3140.61 MB
-  CPU RAM - With Import: 289.11 MB (import: 289.11 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 3132.48 MB (import: 3132.48 MB + runtime: 0.00 MB)
-Saving results for UniEvalFact...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: UniEvalFact
-================================================================================
-
-
---------------------------------------------------
-Progress: 2/17 metrics processed
-Status: 2 completed, 0 skipped, 0 failed
---------------------------------------------------
-
-
-Processing metric 3/17: Perplexity_gpt2-large
-
-================================================================================
-STARTING BENCHMARK FOR: Perplexity_gpt2-large
-================================================================================
-Configuring experiment for Perplexity_gpt2-large...
-Running benchmark for Perplexity_gpt2-large...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1343.82 MB
-  GPU RAM: 13811.96 MB
-Testing metric: Perplexity_gpt2-large
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'stride': 512}
-    start→after_import:
-      CPU RAM: 170.16 MB
-      GPU RAM: 0.00 MB
-      Duration: 2117.17 ms
-    after_import→after_construct:
-      CPU RAM: 168.16 MB
-      GPU RAM: 3061.31 MB
-      Duration: 1323.99 ms
-    after_construct→after_first_call:
-      CPU RAM: 339.40 MB
-      GPU RAM: 8.12 MB
-      Duration: 828.73 ms
-    after_first_call→after_unload:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 81.69 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-Perplexity_gpt2-large import and construction:
-  start→after_import:
-    CPU RAM: 170.16 MB
-    GPU RAM: 0.00 MB
-    Duration: 2117.17 ms
-  after_import→after_construct:
-    CPU RAM: 168.16 MB
-    GPU RAM: 3061.31 MB
-    Duration: 1323.99 ms
-  after_construct→after_first_call:
-    CPU RAM: 339.40 MB
-    GPU RAM: 8.12 MB
-    Duration: 828.73 ms
-  after_first_call→after_unload:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 81.69 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 677.72 MB
-    GPU RAM: 3069.44 MB
-
-=== RUNTIME COSTS ===
-Saving results for Perplexity_gpt2-large...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: Perplexity_gpt2-large
-================================================================================
-
-
---------------------------------------------------
-Progress: 3/17 metrics processed
-Status: 3 completed, 0 skipped, 0 failed
---------------------------------------------------
-
-
-Processing metric 4/17: ParaScoreFree
-
-================================================================================
-STARTING BENCHMARK FOR: ParaScoreFree
-================================================================================
-Configuring experiment for ParaScoreFree...
-Running benchmark for ParaScoreFree...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1343.79 MB
-  GPU RAM: 13811.96 MB
-Testing metric: ParaScoreFree
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-  ⚠️ Warning: No checkpoints returned from metric profiler
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== RUNTIME COSTS ===
-Saving results for ParaScoreFree...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: ParaScoreFree
-================================================================================
-
-
---------------------------------------------------
-Progress: 4/17 metrics processed
-Status: 4 completed, 0 skipped, 0 failed
---------------------------------------------------
-
-
-Processing metric 5/17: INFORMRewardModel
-
-================================================================================
-STARTING BENCHMARK FOR: INFORMRewardModel
-================================================================================
-Configuring experiment for INFORMRewardModel...
-Running benchmark for INFORMRewardModel...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1343.79 MB
-  GPU RAM: 13811.96 MB
-Testing metric: INFORMRewardModel
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'torch_dtype': torch.bfloat16, 'num_labels': 1}
-  ⚠️ Error measuring import costs: Object of type dtype is not JSON serializable
-  Traceback: Traceback (most recent call last):
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 409, in run
-    checkpoints = measure_metric_phases(
-                  ^^^^^^^^^^^^^^^^^^^^^^
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/metric_profiler.py", line 50, in measure_metric_phases
-    json.dumps(payload)
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/__init__.py", line 231, in dumps
-    return _default_encoder.encode(obj)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 200, in encode
-    chunks = self.iterencode(o, _one_shot=True)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 258, in iterencode
-    return _iterencode(o, 0)
-           ^^^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 180, in default
-    raise TypeError(f'Object of type {o.__class__.__name__} '
-TypeError: Object of type dtype is not JSON serializable
-
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-BENCHMARK FAILED FOR: INFORMRewardModel
-Error: Object of type dtype is not JSON serializable
-See error log for details
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
---------------------------------------------------
-Progress: 5/17 metrics processed
-Status: 4 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 6/17: PRMRewardModel
-
-================================================================================
-STARTING BENCHMARK FOR: PRMRewardModel
-================================================================================
-Configuring experiment for PRMRewardModel...
-Running benchmark for PRMRewardModel...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1343.79 MB
-  GPU RAM: 13811.96 MB
-Testing metric: PRMRewardModel
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-  ⚠️ Warning: No checkpoints returned from metric profiler
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== RUNTIME COSTS ===
-Saving results for PRMRewardModel...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: PRMRewardModel
-================================================================================
-
-
---------------------------------------------------
-Progress: 6/17 metrics processed
-Status: 5 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 7/17: SummaQA
-
-================================================================================
-STARTING BENCHMARK FOR: SummaQA
-================================================================================
-Configuring experiment for SummaQA...
-Running benchmark for SummaQA...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1343.76 MB
-  GPU RAM: 13811.96 MB
-Testing metric: SummaQA
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-  ⚠️ Warning: No checkpoints returned from metric profiler
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== RUNTIME COSTS ===
-Saving results for SummaQA...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: SummaQA
-================================================================================
-
-
---------------------------------------------------
-Progress: 7/17 metrics processed
-Status: 6 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 8/17: DistinctNGram
-
-================================================================================
-STARTING BENCHMARK FOR: DistinctNGram
-================================================================================
-Configuring experiment for DistinctNGram...
-Running benchmark for DistinctNGram...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1343.76 MB
-  GPU RAM: 13811.96 MB
-Testing metric: DistinctNGram
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'n_values': [1, 2, 3, 4]}
-    start→after_import:
-      CPU RAM: 0.02 MB
-      GPU RAM: 0.00 MB
-      Duration: 7.50 ms
-    after_import→after_construct:
-      CPU RAM: 0.90 MB
-      GPU RAM: 0.00 MB
-      Duration: 149.53 ms
-    after_construct→after_first_call:
-      CPU RAM: 4.30 MB
-      GPU RAM: 0.00 MB
-      Duration: 101.77 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-DistinctNGram import and construction:
-  start→after_import:
-    CPU RAM: 0.02 MB
-    GPU RAM: 0.00 MB
-    Duration: 7.50 ms
-  after_import→after_construct:
-    CPU RAM: 0.90 MB
-    GPU RAM: 0.00 MB
-    Duration: 149.53 ms
-  after_construct→after_first_call:
-    CPU RAM: 4.30 MB
-    GPU RAM: 0.00 MB
-    Duration: 101.77 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 5.22 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-
-DistinctNGram - short:
-  Duration (ms): 9.60 ±0.39
-  CPU RAM - Baseline: 728.82 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 728.82 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 0.92 MB (import: 0.92 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-DistinctNGram - medium:
-  Duration (ms): 12.56 ±0.47
-  CPU RAM - Baseline: 730.36 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 730.36 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 0.92 MB (import: 0.92 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-DistinctNGram - long:
-  Duration (ms): 18.31 ±0.56
-  CPU RAM - Baseline: 728.91 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 728.91 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 0.92 MB (import: 0.92 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-Saving results for DistinctNGram...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: DistinctNGram
-================================================================================
-
-
---------------------------------------------------
-Progress: 8/17 metrics processed
-Status: 7 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 9/17: FastTextToxicity
-
-================================================================================
-STARTING BENCHMARK FOR: FastTextToxicity
-================================================================================
-Configuring experiment for FastTextToxicity...
-Running benchmark for FastTextToxicity...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1384.16 MB
-  GPU RAM: 13811.96 MB
-Testing metric: FastTextToxicity
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-    start→after_import:
-      CPU RAM: 3.05 MB
-      GPU RAM: 0.00 MB
-      Duration: 179.32 ms
-    after_import→after_construct:
-      CPU RAM: 0.95 MB
-      GPU RAM: 0.00 MB
-      Duration: 100.59 ms
-    after_construct→after_first_call:
-      CPU RAM: 988.79 MB
-      GPU RAM: 0.00 MB
-      Duration: 8660.96 ms
-    after_first_call→after_unload:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 51.58 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-FastTextToxicity import and construction:
-  start→after_import:
-    CPU RAM: 3.05 MB
-    GPU RAM: 0.00 MB
-    Duration: 179.32 ms
-  after_import→after_construct:
-    CPU RAM: 0.95 MB
-    GPU RAM: 0.00 MB
-    Duration: 100.59 ms
-  after_construct→after_first_call:
-    CPU RAM: 988.79 MB
-    GPU RAM: 0.00 MB
-    Duration: 8660.96 ms
-  after_first_call→after_unload:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 51.58 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 992.79 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-Saving results for FastTextToxicity...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: FastTextToxicity
-================================================================================
-
-
---------------------------------------------------
-Progress: 9/17 metrics processed
-Status: 8 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 10/17: FastTextNSFW
-
-================================================================================
-STARTING BENCHMARK FOR: FastTextNSFW
-================================================================================
-Configuring experiment for FastTextNSFW...
-Running benchmark for FastTextNSFW...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1384.13 MB
-  GPU RAM: 13811.96 MB
-Testing metric: FastTextNSFW
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-    start→after_import:
-      CPU RAM: 3.21 MB
-      GPU RAM: 0.00 MB
-      Duration: 164.46 ms
-    after_import→after_construct:
-      CPU RAM: 0.94 MB
-      GPU RAM: 0.00 MB
-      Duration: 95.09 ms
-    after_construct→after_first_call:
-      CPU RAM: 988.17 MB
-      GPU RAM: 0.00 MB
-      Duration: 8663.72 ms
-    after_first_call→after_unload:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 51.17 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-FastTextNSFW import and construction:
-  start→after_import:
-    CPU RAM: 3.21 MB
-    GPU RAM: 0.00 MB
-    Duration: 164.46 ms
-  after_import→after_construct:
-    CPU RAM: 0.94 MB
-    GPU RAM: 0.00 MB
-    Duration: 95.09 ms
-  after_construct→after_first_call:
-    CPU RAM: 988.17 MB
-    GPU RAM: 0.00 MB
-    Duration: 8663.72 ms
-  after_first_call→after_unload:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 51.17 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 992.33 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-Saving results for FastTextNSFW...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: FastTextNSFW
-================================================================================
-
-
---------------------------------------------------
-Progress: 10/17 metrics processed
-Status: 9 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 11/17: FastTextEducationalValue
-
-================================================================================
-STARTING BENCHMARK FOR: FastTextEducationalValue
-================================================================================
-Configuring experiment for FastTextEducationalValue...
-Running benchmark for FastTextEducationalValue...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1384.11 MB
-  GPU RAM: 13811.96 MB
-Testing metric: FastTextEducationalValue
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'repo_id': 'kenhktsui/llm-data-textbook-quality-fasttext-classifier-v2', 'filename': 'model_quantized.bin'}
-    start→after_import:
-      CPU RAM: 5.07 MB
-      GPU RAM: 0.00 MB
-      Duration: 182.19 ms
-    after_import→after_construct:
-      CPU RAM: 1.03 MB
-      GPU RAM: 0.00 MB
-      Duration: 96.55 ms
-    after_construct→after_first_call:
-      CPU RAM: 3094.60 MB
-      GPU RAM: 0.00 MB
-      Duration: 17140.99 ms
-    after_first_call→after_unload:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 564.64 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-FastTextEducationalValue import and construction:
-  start→after_import:
-    CPU RAM: 5.07 MB
-    GPU RAM: 0.00 MB
-    Duration: 182.19 ms
-  after_import→after_construct:
-    CPU RAM: 1.03 MB
-    GPU RAM: 0.00 MB
-    Duration: 96.55 ms
-  after_construct→after_first_call:
-    CPU RAM: 3094.60 MB
-    GPU RAM: 0.00 MB
-    Duration: 17140.99 ms
-  after_first_call→after_unload:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 564.64 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 3100.70 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-
-FastTextEducationalValue - short:
-  Duration (ms): 4.93 ±0.10
-  CPU RAM - Baseline: 3818.62 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 3818.62 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 6.10 MB (import: 6.10 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-FastTextEducationalValue - medium:
-  Duration (ms): 5.43 ±0.09
-  CPU RAM - Baseline: 3818.91 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 3818.92 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 6.11 MB (import: 6.10 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-FastTextEducationalValue - long:
-  Duration (ms): 5.67 ±0.10
-  CPU RAM - Baseline: 3819.45 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 3819.46 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 6.10 MB (import: 6.10 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-Saving results for FastTextEducationalValue...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: FastTextEducationalValue
-================================================================================
-
-
---------------------------------------------------
-Progress: 11/17 metrics processed
-Status: 10 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 12/17: SelfBLEU
-
-================================================================================
-STARTING BENCHMARK FOR: SelfBLEU
-================================================================================
-Configuring experiment for SelfBLEU...
-Running benchmark for SelfBLEU...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1415.10 MB
-  GPU RAM: 13811.96 MB
-Testing metric: SelfBLEU
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'gram': 3, 'sample_size': 500}
-    start→after_import:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 6.94 ms
-    after_import→after_construct:
-      CPU RAM: 0.91 MB
-      GPU RAM: 0.00 MB
-      Duration: 89.01 ms
-    after_construct→after_first_call:
-      CPU RAM: 3.82 MB
-      GPU RAM: 0.00 MB
-      Duration: 62.48 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-SelfBLEU import and construction:
-  start→after_import:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 6.94 ms
-  after_import→after_construct:
-    CPU RAM: 0.91 MB
-    GPU RAM: 0.00 MB
-    Duration: 89.01 ms
-  after_construct→after_first_call:
-    CPU RAM: 3.82 MB
-    GPU RAM: 0.00 MB
-    Duration: 62.48 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 4.73 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-
-SelfBLEU - short:
-  Duration (ms): 5.32 ±0.10
-  CPU RAM - Baseline: 728.73 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 728.73 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 0.91 MB (import: 0.91 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-SelfBLEU - medium:
-  Duration (ms): 4.96 ±0.10
-  CPU RAM - Baseline: 728.35 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 728.35 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 0.91 MB (import: 0.91 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-SelfBLEU - long:
-  Duration (ms): 5.51 ±0.08
-  CPU RAM - Baseline: 728.43 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 728.43 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 0.91 MB (import: 0.91 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-Saving results for SelfBLEU...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: SelfBLEU
-================================================================================
-
-
---------------------------------------------------
-Progress: 12/17 metrics processed
-Status: 11 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 13/17: FactCC
-
-================================================================================
-STARTING BENCHMARK FOR: FactCC
-================================================================================
-Configuring experiment for FactCC...
-Running benchmark for FactCC...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1430.39 MB
-  GPU RAM: 13811.96 MB
-Testing metric: FactCC
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-    start→after_import:
-      CPU RAM: 25.27 MB
-      GPU RAM: 0.00 MB
-      Duration: 713.51 ms
-    after_import→after_construct:
-      CPU RAM: 0.90 MB
-      GPU RAM: 0.00 MB
-      Duration: 98.67 ms
-    after_construct→after_first_call:
-      CPU RAM: 502.08 MB
-      GPU RAM: 426.86 MB
-      Duration: 6000.97 ms
-    after_first_call→after_unload:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 14.13 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-FactCC import and construction:
-  start→after_import:
-    CPU RAM: 25.27 MB
-    GPU RAM: 0.00 MB
-    Duration: 713.51 ms
-  after_import→after_construct:
-    CPU RAM: 0.90 MB
-    GPU RAM: 0.00 MB
-    Duration: 98.67 ms
-  after_construct→after_first_call:
-    CPU RAM: 502.08 MB
-    GPU RAM: 426.86 MB
-    Duration: 6000.97 ms
-  after_first_call→after_unload:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 14.13 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 528.25 MB
-    GPU RAM: 426.86 MB
-
-=== RUNTIME COSTS ===
-
-FactCC - short:
-  Duration (ms): 15.55 ±0.59
-  CPU RAM - Baseline: 1316.68 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 1316.68 MB
-  GPU RAM - Baseline: 426.86 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 426.86 MB
-  CPU RAM - With Import: 26.17 MB (import: 26.17 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-FactCC - medium:
-  Duration (ms): 16.18 ±0.64
-  CPU RAM - Baseline: 1317.59 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 1317.59 MB
-  GPU RAM - Baseline: 426.86 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 426.86 MB
-  CPU RAM - With Import: 26.17 MB (import: 26.17 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-FactCC - long:
-  Duration (ms): 16.60 ±0.57
-  CPU RAM - Baseline: 1300.43 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 1300.43 MB
-  GPU RAM - Baseline: 426.86 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 426.86 MB
-  CPU RAM - With Import: 26.17 MB (import: 26.17 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-Saving results for FactCC...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: FactCC
-================================================================================
-
-
---------------------------------------------------
-Progress: 13/17 metrics processed
-Status: 12 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 14/17: Toxicity
-
-================================================================================
-STARTING BENCHMARK FOR: Toxicity
-================================================================================
-Configuring experiment for Toxicity...
-Running benchmark for Toxicity...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1430.57 MB
-  GPU RAM: 13811.96 MB
-Testing metric: Toxicity
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'metric_id': 'toxicity', 'score_key': 'toxicity', 'load_kwargs': {'module_type': 'measurement'}}
-    start→after_import:
-      CPU RAM: 175.62 MB
-      GPU RAM: 0.00 MB
-      Duration: 2540.22 ms
-    after_import→after_construct:
-      CPU RAM: 0.85 MB
-      GPU RAM: 0.00 MB
-      Duration: 99.55 ms
-    after_construct→after_first_call:
-      CPU RAM: 441.55 MB
-      GPU RAM: 484.86 MB
-      Duration: 21768.48 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-Toxicity import and construction:
-  start→after_import:
-    CPU RAM: 175.62 MB
-    GPU RAM: 0.00 MB
-    Duration: 2540.22 ms
-  after_import→after_construct:
-    CPU RAM: 0.85 MB
-    GPU RAM: 0.00 MB
-    Duration: 99.55 ms
-  after_construct→after_first_call:
-    CPU RAM: 441.55 MB
-    GPU RAM: 484.86 MB
-    Duration: 21768.48 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 618.02 MB
-    GPU RAM: 484.86 MB
-
-=== RUNTIME COSTS ===
-Saving results for Toxicity...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: Toxicity
-================================================================================
-
-
---------------------------------------------------
-Progress: 14/17 metrics processed
-Status: 13 completed, 0 skipped, 1 failed
---------------------------------------------------
-
-
-Processing metric 15/17: Sentiment
-
-================================================================================
-STARTING BENCHMARK FOR: Sentiment
-================================================================================
-Configuring experiment for Sentiment...
-Running benchmark for Sentiment...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1430.57 MB
-  GPU RAM: 13811.96 MB
-Testing metric: Sentiment
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'model_name': 'cardiffnlp/twitter-roberta-base-sentiment-latest', 'torch_dtype': torch.float32}
-  ⚠️ Error measuring import costs: Object of type dtype is not JSON serializable
-  Traceback: Traceback (most recent call last):
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 409, in run
-    checkpoints = measure_metric_phases(
-                  ^^^^^^^^^^^^^^^^^^^^^^
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/metric_profiler.py", line 50, in measure_metric_phases
-    json.dumps(payload)
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/__init__.py", line 231, in dumps
-    return _default_encoder.encode(obj)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 200, in encode
-    chunks = self.iterencode(o, _one_shot=True)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 258, in iterencode
-    return _iterencode(o, 0)
-           ^^^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 180, in default
-    raise TypeError(f'Object of type {o.__class__.__name__} '
-TypeError: Object of type dtype is not JSON serializable
-
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-BENCHMARK FAILED FOR: Sentiment
-Error: Object of type dtype is not JSON serializable
-See error log for details
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
---------------------------------------------------
-Progress: 15/17 metrics processed
-Status: 13 completed, 0 skipped, 2 failed
---------------------------------------------------
-
-
-Processing metric 16/17: GRMRewardModel
-
-================================================================================
-STARTING BENCHMARK FOR: GRMRewardModel
-================================================================================
-Configuring experiment for GRMRewardModel...
-Running benchmark for GRMRewardModel...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1430.57 MB
-  GPU RAM: 13811.96 MB
-Testing metric: GRMRewardModel
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'torch_dtype': torch.float16}
-  ⚠️ Error measuring import costs: Object of type dtype is not JSON serializable
-  Traceback: Traceback (most recent call last):
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/utilization.py", line 409, in run
-    checkpoints = measure_metric_phases(
-                  ^^^^^^^^^^^^^^^^^^^^^^
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/utilization/metric_profiler.py", line 50, in measure_metric_phases
-    json.dumps(payload)
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/__init__.py", line 231, in dumps
-    return _default_encoder.encode(obj)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 200, in encode
-    chunks = self.iterencode(o, _one_shot=True)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 258, in iterencode
-    return _iterencode(o, 0)
-           ^^^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/json/encoder.py", line 180, in default
-    raise TypeError(f'Object of type {o.__class__.__name__} '
-TypeError: Object of type dtype is not JSON serializable
-
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-BENCHMARK FAILED FOR: GRMRewardModel
-Error: Object of type dtype is not JSON serializable
-See error log for details
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
---------------------------------------------------
-Progress: 16/17 metrics processed
-Status: 13 completed, 0 skipped, 3 failed
---------------------------------------------------
-
-
-Processing metric 17/17: LENS_SALSA
-
-================================================================================
-STARTING BENCHMARK FOR: LENS_SALSA
-================================================================================
-Configuring experiment for LENS_SALSA...
-Running benchmark for LENS_SALSA...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1430.57 MB
-  GPU RAM: 13811.96 MB
-Testing metric: LENS_SALSA
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'model_id': 'davidheineman/lens-salsa'}
-  ⚠️ Warning: No checkpoints returned from metric profiler
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== RUNTIME COSTS ===
-Saving results for LENS_SALSA...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: LENS_SALSA
-================================================================================
-
-
---------------------------------------------------
-Progress: 17/17 metrics processed
-Status: 14 completed, 0 skipped, 3 failed
---------------------------------------------------
-
-
-Aggregating results from all metrics...
-Found 39 summary files to aggregate
-Processing summary for ROUGE (long)
-Processing summary for ROUGE (medium)
-Processing summary for ROUGE (short)
-Processing summary for CHRF (long)
-Processing summary for CHRF (medium)
-Processing summary for CHRF (short)
-Processing summary for DistinctNGram (long)
-Processing summary for DistinctNGram (short)
-Processing summary for DistinctNGram (medium)
-Processing summary for LENS (medium)
-Processing summary for LENS (short)
-Processing summary for LENS (long)
-Processing summary for MOVERScore_distilbert-base-uncased (short)
-Processing summary for MOVERScore_distilbert-base-uncased (long)
-Processing summary for MOVERScore_distilbert-base-uncased (medium)
-Processing summary for SelfBLEU (short)
-Processing summary for SelfBLEU (long)
-Processing summary for SelfBLEU (medium)
-Processing summary for FastTextEducationalValue (medium)
-Processing summary for FastTextEducationalValue (short)
-Processing summary for FastTextEducationalValue (long)
-Processing summary for UniEvalFact (long)
-Processing summary for UniEvalFact (short)
-Processing summary for UniEvalFact (medium)
-Processing summary for FactCC (medium)
-Processing summary for FactCC (short)
-Processing summary for FactCC (long)
-Processing summary for GLEU (long)
-Processing summary for GLEU (medium)
-Processing summary for GLEU (short)
-Processing summary for SARI (medium)
-Processing summary for SARI (long)
-Processing summary for SARI (short)
-Processing summary for BLEU (medium)
-Processing summary for BLEU (short)
-Processing summary for BLEU (long)
-Processing summary for BERTScore_roberta-large (long)
-Processing summary for BERTScore_roberta-large (medium)
-Processing summary for BERTScore_roberta-large (short)
-Aggregated results saved to outputs/utilization/aggregated_results.csv
-
-================================================================================
-BENCHMARK COMPLETE
-================================================================================
-Total metrics: 17
-Completed metrics: 14
-Skipped metrics (already had results): 0
-Failed metrics: 3
-
-Failed metrics:
-  - INFORMRewardModel
-  - Sentiment
-  - GRMRewardModel
-
-See error logs in outputs/utilization/errors for details
-
-Aggregated results saved to outputs/utilization/aggregated_results.csv
-Benchmark summary saved to outputs/utilization/benchmark_summary.csv
-
-Total runtime: 18.20 minutes (0.30 hours)
 Successfully patched isolated_runner.py for better JSON serialization
 
 Detecting hardware information...
@@ -1370,8 +6,11 @@ HARDWARE INFORMATION:
 System: Linux
 Processor: x86_64
 CPU Count: 96
-GPU Count: 1
-  GPU 0: NVIDIA RTX 6000 Ada Generation (47.51 GB)
+GPU Count: 4
+  GPU 0: NVIDIA RTX A6000 (47.54 GB)
+  GPU 1: NVIDIA RTX A6000 (47.54 GB)
+  GPU 2: NVIDIA RTX A6000 (47.54 GB)
+  GPU 3: NVIDIA RTX A6000 (47.54 GB)
 Hardware information saved to outputs/utilization/hardware_info.json
 
 STARTING METRIC UTILIZATION BENCHMARKING
@@ -1401,240 +40,16 @@ Including 17 reference-free metrics:
 Total metrics to process: 17
 
 Processing metric 1/17: FKGL
-
-================================================================================
-STARTING BENCHMARK FOR: FKGL
-================================================================================
-Filtered constructor params for FKGL: {'name': 'FKGL', 'description': 'Flesch-Kincaid Grade Level (FKGL) is a metric that estimates the readability of a text based on the average number of syllables per word and the average number of words per sentence. Lower scores indicate easier-to-read text.'}
-Configuring experiment for FKGL...
-Running benchmark for FKGL...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1169.24 MB
-  GPU RAM: 3736.54 MB
-Testing metric: FKGL
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-    start→after_import:
-      CPU RAM: 71.11 MB
-      GPU RAM: 0.00 MB
-      Duration: 775.21 ms
-    after_import→after_construct:
-      CPU RAM: 1.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 97.96 ms
-    after_construct→after_first_call:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 2.06 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-FKGL import and construction:
-  start→after_import:
-    CPU RAM: 71.11 MB
-    GPU RAM: 0.00 MB
-    Duration: 775.21 ms
-  after_import→after_construct:
-    CPU RAM: 1.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 97.96 ms
-  after_construct→after_first_call:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 2.06 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 72.12 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-
-FKGL - short:
-  Duration (ms): 5.10 ±0.07
-  CPU RAM - Baseline: 894.08 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 894.08 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 72.11 MB (import: 72.11 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-FKGL - medium:
-  Duration (ms): 5.59 ±0.14
-  CPU RAM - Baseline: 892.57 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 892.57 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 72.11 MB (import: 72.11 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-FKGL - long:
-  Duration (ms): 6.03 ±0.12
-  CPU RAM - Baseline: 892.70 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 892.70 MB
-  GPU RAM - Baseline: 0.00 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 0.00 MB
-  CPU RAM - With Import: 72.11 MB (import: 72.11 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-Saving results for FKGL...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: FKGL
-================================================================================
-
-
---------------------------------------------------
-Progress: 1/17 metrics processed
-Status: 1 completed, 0 skipped, 0 failed
---------------------------------------------------
-
+Skipping FKGL - results already exist
 
 Processing metric 2/17: UniEvalFact
 Skipping UniEvalFact - results already exist
 
 Processing metric 3/17: Perplexity_gpt2-large
-
-================================================================================
-STARTING BENCHMARK FOR: Perplexity_gpt2-large
-================================================================================
-Filtered constructor params for Perplexity_gpt2-large: {'batch_size': 2, 'stride': 512, 'progress_bar': True, 'persistent': True}
-Configuring experiment for Perplexity_gpt2-large...
-Running benchmark for Perplexity_gpt2-large...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1218.89 MB
-  GPU RAM: 3736.54 MB
-Testing metric: Perplexity_gpt2-large
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'stride': 512}
-    start→after_import:
-      CPU RAM: 169.50 MB
-      GPU RAM: 0.00 MB
-      Duration: 2590.25 ms
-    after_import→after_construct:
-      CPU RAM: 167.33 MB
-      GPU RAM: 3061.31 MB
-      Duration: 1342.03 ms
-    after_construct→after_first_call:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 2.18 ms
-    after_first_call→after_unload:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 75.84 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-Perplexity_gpt2-large import and construction:
-  start→after_import:
-    CPU RAM: 169.50 MB
-    GPU RAM: 0.00 MB
-    Duration: 2590.25 ms
-  after_import→after_construct:
-    CPU RAM: 167.33 MB
-    GPU RAM: 3061.31 MB
-    Duration: 1342.03 ms
-  after_construct→after_first_call:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 2.18 ms
-  after_first_call→after_unload:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 75.84 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 336.83 MB
-    GPU RAM: 3061.31 MB
-
-=== RUNTIME COSTS ===
-Saving results for Perplexity_gpt2-large...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: Perplexity_gpt2-large
-================================================================================
-
-
---------------------------------------------------
-Progress: 3/17 metrics processed
-Status: 2 completed, 1 skipped, 0 failed
---------------------------------------------------
-
+Skipping Perplexity_gpt2-large - results already exist
 
 Processing metric 4/17: ParaScoreFree
-
-================================================================================
-STARTING BENCHMARK FOR: ParaScoreFree
-================================================================================
-Filtered constructor params for ParaScoreFree: {'name': 'ParaScoreFree', 'description': 'ParaScore: reference-free paraphrase evaluation (P, R, F).'}
-Configuring experiment for ParaScoreFree...
-Running benchmark for ParaScoreFree...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1218.89 MB
-  GPU RAM: 3736.54 MB
-Testing metric: ParaScoreFree
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-  ⚠️ Warning: No checkpoints returned from metric profiler
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== RUNTIME COSTS ===
-Saving results for ParaScoreFree...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: ParaScoreFree
-================================================================================
-
-
---------------------------------------------------
-Progress: 4/17 metrics processed
-Status: 3 completed, 1 skipped, 0 failed
---------------------------------------------------
-
+Skipping ParaScoreFree - results already exist
 
 Processing metric 5/17: INFORMRewardModel
 
@@ -1649,7 +64,7 @@ Using 5 burn-in samples
 Running utilization experiment with 1 metrics
 Testing 50 synthetic examples per length category: short, medium, long
 Initial memory footprint (before experiment):
-  CPU RAM: 1218.87 MB
+  CPU RAM: 1165.42 MB
   GPU RAM: 3736.54 MB
 Testing metric: INFORMRewardModel
   Measuring import and construction costs in clean process...
@@ -1657,10 +72,8 @@ Testing metric: INFORMRewardModel
   ⚠️ Warning: No checkpoints returned from metric profiler
   Testing with short inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
   Testing with medium inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
   Testing with long inputs/outputs
   Running in isolated subprocess for clean memory measurements...
   ⚠️ Error: Failed to run isolated trials for long
@@ -1668,6 +81,24 @@ Testing metric: INFORMRewardModel
 Utilization Experiment Results Summary:
 
 === RUNTIME COSTS ===
+
+INFORMRewardModel - short:
+  Duration (ms): 273.63 ±0.41
+  CPU RAM - Baseline: 2088.92 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 2088.92 MB
+  GPU RAM - Baseline: 132727.05 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 132727.05 MB
+
+INFORMRewardModel - medium:
+  Duration (ms): 440.16 ±32.47
+  CPU RAM - Baseline: 2089.34 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 2089.34 MB
+  GPU RAM - Baseline: 132727.05 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 132727.05 MB
 Saving results for INFORMRewardModel...
 
 ================================================================================
@@ -1677,7 +108,7 @@ BENCHMARK COMPLETED SUCCESSFULLY FOR: INFORMRewardModel
 
 --------------------------------------------------
 Progress: 5/17 metrics processed
-Status: 4 completed, 1 skipped, 0 failed
+Status: 1 completed, 4 skipped, 0 failed
 --------------------------------------------------
 
 
@@ -1686,7 +117,7 @@ Processing metric 6/17: PRMRewardModel
 ================================================================================
 STARTING BENCHMARK FOR: PRMRewardModel
 ================================================================================
-Filtered constructor params for PRMRewardModel: {'device_map': None, 'persistent': True, 'name': 'PRMRewardModel', 'description': 'Process Reward Model Qwen2.5-Math-PRM-7B sentence-based min/max/mean'}
+Filtered constructor params for PRMRewardModel: {'model_name': 'Qwen/Qwen2.5-Math-PRM-7B', 'device_map': None, 'persistent': True, 'name': 'PRMRewardModel', 'description': 'Process Reward Model Qwen2.5-Math-PRM-7B sentence-based min/max/mean'}
 Configuring experiment for PRMRewardModel...
 Running benchmark for PRMRewardModel...
 Testing with 50 examples per length category: short,medium,long
@@ -1694,15 +125,29 @@ Using 5 burn-in samples
 Running utilization experiment with 1 metrics
 Testing 50 synthetic examples per length category: short, medium, long
 Initial memory footprint (before experiment):
-  CPU RAM: 1218.84 MB
+  CPU RAM: 1196.58 MB
   GPU RAM: 3736.54 MB
 Testing metric: PRMRewardModel
   Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-  ⚠️ Warning: No checkpoints returned from metric profiler
+    Constructor kwargs: {'model_name': 'Qwen/Qwen2.5-Math-PRM-7B'}
+    start→after_import:
+      CPU RAM: 25.40 MB
+      GPU RAM: 0.00 MB
+      Duration: 1669.36 ms
+    after_import→after_construct:
+      CPU RAM: 0.85 MB
+      GPU RAM: 0.00 MB
+      Duration: 96.08 ms
+    after_construct→after_first_call:
+      CPU RAM: 12985.18 MB
+      GPU RAM: 0.00 MB
+      Duration: 173266.19 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 258.25 ms
   Testing with short inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
   Testing with medium inputs/outputs
   Running in isolated subprocess for clean memory measurements...
   ⚠️ Error: Failed to run isolated trials for medium
@@ -1712,7 +157,41 @@ Testing metric: PRMRewardModel
 
 Utilization Experiment Results Summary:
 
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+PRMRewardModel import and construction:
+  start→after_import:
+    CPU RAM: 25.40 MB
+    GPU RAM: 0.00 MB
+    Duration: 1669.36 ms
+  after_import→after_construct:
+    CPU RAM: 0.85 MB
+    GPU RAM: 0.00 MB
+    Duration: 96.08 ms
+  after_construct→after_first_call:
+    CPU RAM: 12985.18 MB
+    GPU RAM: 0.00 MB
+    Duration: 173266.19 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 258.25 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 13011.43 MB
+    GPU RAM: 0.00 MB
+
 === RUNTIME COSTS ===
+
+PRMRewardModel - short:
+  Duration (ms): 6337.56 ±21.15
+  CPU RAM - Baseline: 13970.72 MB
+  CPU RAM - Used by metric: 0.20 MB ±0.14
+  CPU RAM - Total: 13970.92 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 26.45 MB (import: 26.25 MB + runtime: 0.20 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
 Saving results for PRMRewardModel...
 
 ================================================================================
@@ -1722,7 +201,7 @@ BENCHMARK COMPLETED SUCCESSFULLY FOR: PRMRewardModel
 
 --------------------------------------------------
 Progress: 6/17 metrics processed
-Status: 5 completed, 1 skipped, 0 failed
+Status: 2 completed, 4 skipped, 0 failed
 --------------------------------------------------
 
 
@@ -1739,25 +218,85 @@ Using 5 burn-in samples
 Running utilization experiment with 1 metrics
 Testing 50 synthetic examples per length category: short, medium, long
 Initial memory footprint (before experiment):
-  CPU RAM: 1218.83 MB
+  CPU RAM: 1211.72 MB
   GPU RAM: 3736.54 MB
 Testing metric: SummaQA
   Measuring import and construction costs in clean process...
     Constructor kwargs: {}
-  ⚠️ Warning: No checkpoints returned from metric profiler
+    start→after_import:
+      CPU RAM: 183.73 MB
+      GPU RAM: 0.00 MB
+      Duration: 3965.29 ms
+    after_import→after_construct:
+      CPU RAM: 0.85 MB
+      GPU RAM: 0.00 MB
+      Duration: 94.46 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.01 MB
+      GPU RAM: 0.00 MB
+      Duration: 2.34 ms
   Testing with short inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
   Testing with medium inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
   Testing with long inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
 
 Utilization Experiment Results Summary:
 
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+SummaQA import and construction:
+  start→after_import:
+    CPU RAM: 183.73 MB
+    GPU RAM: 0.00 MB
+    Duration: 3965.29 ms
+  after_import→after_construct:
+    CPU RAM: 0.85 MB
+    GPU RAM: 0.00 MB
+    Duration: 94.46 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.01 MB
+    GPU RAM: 0.00 MB
+    Duration: 2.34 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 184.59 MB
+    GPU RAM: 0.00 MB
+
 === RUNTIME COSTS ===
+
+SummaQA - short:
+  Duration (ms): 1.81 ±0.02
+  CPU RAM - Baseline: 985.70 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 985.70 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 184.59 MB (import: 184.58 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+SummaQA - medium:
+  Duration (ms): 1.71 ±0.02
+  CPU RAM - Baseline: 984.96 MB
+  CPU RAM - Used by metric: 0.01 MB ±0.01
+  CPU RAM - Total: 984.96 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 184.59 MB (import: 184.58 MB + runtime: 0.01 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+SummaQA - long:
+  Duration (ms): 831.36 ±47.35
+  CPU RAM - Baseline: 1542.46 MB
+  CPU RAM - Used by metric: 2.83 MB ±0.56
+  CPU RAM - Total: 1545.30 MB
+  GPU RAM - Baseline: 1283.38 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 1283.38 MB
+  CPU RAM - With Import: 187.41 MB (import: 184.58 MB + runtime: 2.83 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
 Saving results for SummaQA...
 
 ================================================================================
@@ -1767,7 +306,7 @@ BENCHMARK COMPLETED SUCCESSFULLY FOR: SummaQA
 
 --------------------------------------------------
 Progress: 7/17 metrics processed
-Status: 6 completed, 1 skipped, 0 failed
+Status: 3 completed, 4 skipped, 0 failed
 --------------------------------------------------
 
 
@@ -1775,170 +314,10 @@ Processing metric 8/17: DistinctNGram
 Skipping DistinctNGram - results already exist
 
 Processing metric 9/17: FastTextToxicity
-
-================================================================================
-STARTING BENCHMARK FOR: FastTextToxicity
-================================================================================
-Filtered constructor params for FastTextToxicity: {'persistent': True, 'data_dir': None}
-Configuring experiment for FastTextToxicity...
-Running benchmark for FastTextToxicity...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1218.80 MB
-  GPU RAM: 3736.54 MB
-Testing metric: FastTextToxicity
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-    start→after_import:
-      CPU RAM: 3.29 MB
-      GPU RAM: 0.00 MB
-      Duration: 149.56 ms
-    after_import→after_construct:
-      CPU RAM: 0.81 MB
-      GPU RAM: 0.00 MB
-      Duration: 171.06 ms
-    after_construct→after_first_call:
-      CPU RAM: 0.02 MB
-      GPU RAM: 0.00 MB
-      Duration: 1.20 ms
-    after_first_call→after_unload:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 0.13 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-FastTextToxicity import and construction:
-  start→after_import:
-    CPU RAM: 3.29 MB
-    GPU RAM: 0.00 MB
-    Duration: 149.56 ms
-  after_import→after_construct:
-    CPU RAM: 0.81 MB
-    GPU RAM: 0.00 MB
-    Duration: 171.06 ms
-  after_construct→after_first_call:
-    CPU RAM: 0.02 MB
-    GPU RAM: 0.00 MB
-    Duration: 1.20 ms
-  after_first_call→after_unload:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 0.13 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 4.12 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-Saving results for FastTextToxicity...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: FastTextToxicity
-================================================================================
-
-
---------------------------------------------------
-Progress: 9/17 metrics processed
-Status: 7 completed, 2 skipped, 0 failed
---------------------------------------------------
-
+Skipping FastTextToxicity - results already exist
 
 Processing metric 10/17: FastTextNSFW
-
-================================================================================
-STARTING BENCHMARK FOR: FastTextNSFW
-================================================================================
-Filtered constructor params for FastTextNSFW: {'persistent': True, 'data_dir': None}
-Configuring experiment for FastTextNSFW...
-Running benchmark for FastTextNSFW...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1218.78 MB
-  GPU RAM: 3736.54 MB
-Testing metric: FastTextNSFW
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {}
-    start→after_import:
-      CPU RAM: 2.96 MB
-      GPU RAM: 0.00 MB
-      Duration: 157.17 ms
-    after_import→after_construct:
-      CPU RAM: 1.07 MB
-      GPU RAM: 0.00 MB
-      Duration: 165.41 ms
-    after_construct→after_first_call:
-      CPU RAM: 0.02 MB
-      GPU RAM: 0.00 MB
-      Duration: 1.65 ms
-    after_first_call→after_unload:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 0.36 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-FastTextNSFW import and construction:
-  start→after_import:
-    CPU RAM: 2.96 MB
-    GPU RAM: 0.00 MB
-    Duration: 157.17 ms
-  after_import→after_construct:
-    CPU RAM: 1.07 MB
-    GPU RAM: 0.00 MB
-    Duration: 165.41 ms
-  after_construct→after_first_call:
-    CPU RAM: 0.02 MB
-    GPU RAM: 0.00 MB
-    Duration: 1.65 ms
-  after_first_call→after_unload:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 0.36 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 4.05 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-Saving results for FastTextNSFW...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: FastTextNSFW
-================================================================================
-
-
---------------------------------------------------
-Progress: 10/17 metrics processed
-Status: 8 completed, 2 skipped, 0 failed
---------------------------------------------------
-
+Skipping FastTextNSFW - results already exist
 
 Processing metric 11/17: FastTextEducationalValue
 Skipping FastTextEducationalValue - results already exist
@@ -1950,192 +329,10 @@ Processing metric 13/17: FactCC
 Skipping FactCC - results already exist
 
 Processing metric 14/17: Toxicity
-
-================================================================================
-STARTING BENCHMARK FOR: Toxicity
-================================================================================
-Filtered constructor params for Toxicity: {'metric_id': 'toxicity', 'score_key': 'toxicity', 'load_kwargs': {'module_type': 'measurement'}, 'name': 'Toxicity', 'description': 'Toxicity score via HF Evaluate measurement'}
-Configuring experiment for Toxicity...
-Running benchmark for Toxicity...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1218.78 MB
-  GPU RAM: 3736.54 MB
-Testing metric: Toxicity
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'metric_id': 'toxicity', 'score_key': 'toxicity', 'load_kwargs': {'module_type': 'measurement'}}
-    start→after_import:
-      CPU RAM: 175.21 MB
-      GPU RAM: 0.00 MB
-      Duration: 2560.28 ms
-    after_import→after_construct:
-      CPU RAM: 0.75 MB
-      GPU RAM: 0.00 MB
-      Duration: 159.93 ms
-    after_construct→after_first_call:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 1.53 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-Toxicity import and construction:
-  start→after_import:
-    CPU RAM: 175.21 MB
-    GPU RAM: 0.00 MB
-    Duration: 2560.28 ms
-  after_import→after_construct:
-    CPU RAM: 0.75 MB
-    GPU RAM: 0.00 MB
-    Duration: 159.93 ms
-  after_construct→after_first_call:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 1.53 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 175.96 MB
-    GPU RAM: 0.00 MB
-
-=== RUNTIME COSTS ===
-Saving results for Toxicity...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: Toxicity
-================================================================================
-
-
---------------------------------------------------
-Progress: 14/17 metrics processed
-Status: 9 completed, 5 skipped, 0 failed
---------------------------------------------------
-
+Skipping Toxicity - results already exist
 
 Processing metric 15/17: Sentiment
-
-================================================================================
-STARTING BENCHMARK FOR: Sentiment
-================================================================================
-Filtered constructor params for Sentiment: {'model_name': 'cardiffnlp/twitter-roberta-base-sentiment-latest', 'torch_dtype': 'float32', 'device_map': None, 'batch_size': 8, 'persistent': True, 'name': 'Sentiment', 'description': 'Twitter sentiment score (positive vs negative) regression.'}
-Configuring experiment for Sentiment...
-Running benchmark for Sentiment...
-Testing with 50 examples per length category: short,medium,long
-Using 5 burn-in samples
-Running utilization experiment with 1 metrics
-Testing 50 synthetic examples per length category: short, medium, long
-Initial memory footprint (before experiment):
-  CPU RAM: 1218.78 MB
-  GPU RAM: 3736.54 MB
-Testing metric: Sentiment
-  Measuring import and construction costs in clean process...
-    Constructor kwargs: {'model_name': 'cardiffnlp/twitter-roberta-base-sentiment-latest', 'torch_dtype': 'float32'}
-    start→after_import:
-      CPU RAM: 25.27 MB
-      GPU RAM: 0.00 MB
-      Duration: 781.28 ms
-    after_import→after_construct:
-      CPU RAM: 0.97 MB
-      GPU RAM: 0.00 MB
-      Duration: 164.12 ms
-    after_construct→after_first_call:
-      CPU RAM: 541.51 MB
-      GPU RAM: 484.86 MB
-      Duration: 7074.98 ms
-    after_first_call→after_unload:
-      CPU RAM: 0.00 MB
-      GPU RAM: 0.00 MB
-      Duration: 17.02 ms
-  Testing with short inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with medium inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-  Testing with long inputs/outputs
-  Running in isolated subprocess for clean memory measurements...
-
-Utilization Experiment Results Summary:
-
-=== IMPORT AND CONSTRUCTION COSTS ===
-
-Sentiment import and construction:
-  start→after_import:
-    CPU RAM: 25.27 MB
-    GPU RAM: 0.00 MB
-    Duration: 781.28 ms
-  after_import→after_construct:
-    CPU RAM: 0.97 MB
-    GPU RAM: 0.00 MB
-    Duration: 164.12 ms
-  after_construct→after_first_call:
-    CPU RAM: 541.51 MB
-    GPU RAM: 484.86 MB
-    Duration: 7074.98 ms
-  after_first_call→after_unload:
-    CPU RAM: 0.00 MB
-    GPU RAM: 0.00 MB
-    Duration: 17.02 ms
-  TOTAL IMPORT COSTS:
-    CPU RAM: 567.75 MB
-    GPU RAM: 484.86 MB
-
-=== RUNTIME COSTS ===
-
-Sentiment - short:
-  Duration (ms): 15.05 ±0.55
-  CPU RAM - Baseline: 1393.81 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 1393.81 MB
-  GPU RAM - Baseline: 484.86 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 484.86 MB
-  CPU RAM - With Import: 26.24 MB (import: 26.24 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-Sentiment - medium:
-  Duration (ms): 15.93 ±0.57
-  CPU RAM - Baseline: 1381.45 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 1381.45 MB
-  GPU RAM - Baseline: 484.86 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 484.86 MB
-  CPU RAM - With Import: 26.24 MB (import: 26.24 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-
-Sentiment - long:
-  Duration (ms): 18.05 ±0.94
-  CPU RAM - Baseline: 1358.04 MB
-  CPU RAM - Used by metric: 0.00 MB ±0.00
-  CPU RAM - Total: 1358.04 MB
-  GPU RAM - Baseline: 484.86 MB
-  GPU RAM - Used by metric: 0.00 MB ±0.00
-  GPU RAM - Total: 484.86 MB
-  CPU RAM - With Import: 26.24 MB (import: 26.24 MB + runtime: 0.00 MB)
-  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
-Saving results for Sentiment...
-
-================================================================================
-BENCHMARK COMPLETED SUCCESSFULLY FOR: Sentiment
-================================================================================
-
-
---------------------------------------------------
-Progress: 15/17 metrics processed
-Status: 10 completed, 5 skipped, 0 failed
---------------------------------------------------
-
+Skipping Sentiment - results already exist
 
 Processing metric 16/17: GRMRewardModel
 
@@ -2150,25 +347,93 @@ Using 5 burn-in samples
 Running utilization experiment with 1 metrics
 Testing 50 synthetic examples per length category: short, medium, long
 Initial memory footprint (before experiment):
-  CPU RAM: 1237.88 MB
+  CPU RAM: 1236.27 MB
   GPU RAM: 3736.54 MB
 Testing metric: GRMRewardModel
   Measuring import and construction costs in clean process...
     Constructor kwargs: {'torch_dtype': 'float16'}
-  ⚠️ Warning: No checkpoints returned from metric profiler
+    start→after_import:
+      CPU RAM: 25.19 MB
+      GPU RAM: 0.00 MB
+      Duration: 1354.44 ms
+    after_import→after_construct:
+      CPU RAM: 1.02 MB
+      GPU RAM: 0.00 MB
+      Duration: 92.28 ms
+    after_construct→after_first_call:
+      CPU RAM: 1179.57 MB
+      GPU RAM: 6160.84 MB
+      Duration: 81038.83 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.04 MB
+      GPU RAM: 0.00 MB
+      Duration: 23.56 ms
   Testing with short inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
   Testing with medium inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
   Testing with long inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for long
 
 Utilization Experiment Results Summary:
 
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+GRMRewardModel import and construction:
+  start→after_import:
+    CPU RAM: 25.19 MB
+    GPU RAM: 0.00 MB
+    Duration: 1354.44 ms
+  after_import→after_construct:
+    CPU RAM: 1.02 MB
+    GPU RAM: 0.00 MB
+    Duration: 92.28 ms
+  after_construct→after_first_call:
+    CPU RAM: 1179.57 MB
+    GPU RAM: 6160.84 MB
+    Duration: 81038.83 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.04 MB
+    GPU RAM: 0.00 MB
+    Duration: 23.56 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 1205.81 MB
+    GPU RAM: 6160.84 MB
+
 === RUNTIME COSTS ===
+
+GRMRewardModel - short:
+  Duration (ms): 49.01 ±0.70
+  CPU RAM - Baseline: 1999.19 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1999.19 MB
+  GPU RAM - Baseline: 6160.84 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 6160.84 MB
+  CPU RAM - With Import: 26.21 MB (import: 26.21 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+GRMRewardModel - medium:
+  Duration (ms): 50.79 ±0.60
+  CPU RAM - Baseline: 1989.02 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 1989.02 MB
+  GPU RAM - Baseline: 6160.84 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 6160.84 MB
+  CPU RAM - With Import: 26.21 MB (import: 26.21 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+GRMRewardModel - long:
+  Duration (ms): 60.63 ±0.49
+  CPU RAM - Baseline: 2003.94 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 2003.94 MB
+  GPU RAM - Baseline: 6160.84 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 6160.84 MB
+  CPU RAM - With Import: 26.21 MB (import: 26.21 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
 Saving results for GRMRewardModel...
 
 ================================================================================
@@ -2178,7 +443,7 @@ BENCHMARK COMPLETED SUCCESSFULLY FOR: GRMRewardModel
 
 --------------------------------------------------
 Progress: 16/17 metrics processed
-Status: 11 completed, 5 skipped, 0 failed
+Status: 4 completed, 12 skipped, 0 failed
 --------------------------------------------------
 
 
@@ -2187,7 +452,7 @@ Processing metric 17/17: LENS_SALSA
 ================================================================================
 STARTING BENCHMARK FOR: LENS_SALSA
 ================================================================================
-Filtered constructor params for LENS_SALSA: {'model_id': 'davidheineman/lens-salsa', 'batch_size': 16, 'devices': None, 'persistent': True, 'name': 'LENS_SALSA', 'description': 'LENS-SALSA reference-free simplification metric (overall score).'}
+Filtered constructor params for LENS_SALSA: {'model_id': 'davidheineman/lens-salsa', 'batch_size': 16, 'devices': None, 'persistent': True, 'max_length': 512, 'name': 'LENS_SALSA', 'description': 'LENS-SALSA reference-free simplification metric (overall score).'}
 Configuring experiment for LENS_SALSA...
 Running benchmark for LENS_SALSA...
 Testing with 50 examples per length category: short,medium,long
@@ -2195,25 +460,83 @@ Using 5 burn-in samples
 Running utilization experiment with 1 metrics
 Testing 50 synthetic examples per length category: short, medium, long
 Initial memory footprint (before experiment):
-  CPU RAM: 1237.85 MB
+  CPU RAM: 1251.59 MB
   GPU RAM: 3736.54 MB
 Testing metric: LENS_SALSA
   Measuring import and construction costs in clean process...
-    Constructor kwargs: {'model_id': 'davidheineman/lens-salsa'}
-  ⚠️ Warning: No checkpoints returned from metric profiler
+    Constructor kwargs: {'model_id': 'davidheineman/lens-salsa', 'max_length': 512}
+    start→after_import:
+      CPU RAM: 172.90 MB
+      GPU RAM: 0.00 MB
+      Duration: 2525.42 ms
+    after_import→after_construct:
+      CPU RAM: 1.04 MB
+      GPU RAM: 0.00 MB
+      Duration: 93.04 ms
+    after_construct→after_first_call:
+      CPU RAM: 1768.43 MB
+      GPU RAM: 0.00 MB
+      Duration: 77545.00 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.44 ms
   Testing with short inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for short
   Testing with medium inputs/outputs
   Running in isolated subprocess for clean memory measurements...
-  ⚠️ Error: Failed to run isolated trials for medium
   Testing with long inputs/outputs
   Running in isolated subprocess for clean memory measurements...
   ⚠️ Error: Failed to run isolated trials for long
 
 Utilization Experiment Results Summary:
 
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+LENS_SALSA import and construction:
+  start→after_import:
+    CPU RAM: 172.90 MB
+    GPU RAM: 0.00 MB
+    Duration: 2525.42 ms
+  after_import→after_construct:
+    CPU RAM: 1.04 MB
+    GPU RAM: 0.00 MB
+    Duration: 93.04 ms
+  after_construct→after_first_call:
+    CPU RAM: 1768.43 MB
+    GPU RAM: 0.00 MB
+    Duration: 77545.00 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.44 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 1942.38 MB
+    GPU RAM: 0.00 MB
+
 === RUNTIME COSTS ===
+
+LENS_SALSA - short:
+  Duration (ms): 198.81 ±8.09
+  CPU RAM - Baseline: 2803.87 MB
+  CPU RAM - Used by metric: 0.07 MB ±0.08
+  CPU RAM - Total: 2803.94 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 174.02 MB (import: 173.95 MB + runtime: 0.07 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+LENS_SALSA - medium:
+  Duration (ms): 380.10 ±46.38
+  CPU RAM - Baseline: 2909.67 MB
+  CPU RAM - Used by metric: 0.11 MB ±0.12
+  CPU RAM - Total: 2909.78 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 174.06 MB (import: 173.95 MB + runtime: 0.11 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
 Saving results for LENS_SALSA...
 
 ================================================================================
@@ -2223,25 +546,41 @@ BENCHMARK COMPLETED SUCCESSFULLY FOR: LENS_SALSA
 
 --------------------------------------------------
 Progress: 17/17 metrics processed
-Status: 12 completed, 5 skipped, 0 failed
+Status: 5 completed, 12 skipped, 0 failed
 --------------------------------------------------
 
 
 Aggregating results from all metrics...
-Found 79 summary files to aggregate
+Found 136 summary files to aggregate
+Processing summary for iBLEU (long)
+Processing summary for iBLEU (short)
+Processing summary for iBLEU (medium)
 Processing summary for ROUGE (long)
 Processing summary for ROUGE (medium)
 Processing summary for ROUGE (short)
+Processing summary for Toxicity (short)
+Processing summary for Toxicity (medium)
+Processing summary for Toxicity (long)
 Processing summary for CHRF (long)
 Processing summary for CHRF (medium)
 Processing summary for CHRF (short)
+Processing summary for ParaScore (short)
+Processing summary for ParaScore (medium)
+Processing summary for ParaScore (long)
 Processing summary for HammingDistance_min (long)
 Processing summary for HammingDistance_min (medium)
 Processing summary for HammingDistance_min (short)
+Processing summary for TER (medium)
 Processing summary for TER (short)
 Processing summary for DistinctNGram (long)
 Processing summary for DistinctNGram (short)
 Processing summary for DistinctNGram (medium)
+Processing summary for PseudoPARENT (medium)
+Processing summary for PseudoPARENT (long)
+Processing summary for PseudoPARENT (short)
+Processing summary for Perplexity_gpt2-large (short)
+Processing summary for Perplexity_gpt2-large (medium)
+Processing summary for Perplexity_gpt2-large (long)
 Processing summary for LENS (medium)
 Processing summary for LENS (short)
 Processing summary for LENS (long)
@@ -2260,6 +599,9 @@ Processing summary for FastTextEducationalValue (long)
 Processing summary for JaroWinklerSimilarity_max (short)
 Processing summary for JaroWinklerSimilarity_max (medium)
 Processing summary for JaroWinklerSimilarity_max (long)
+Processing summary for BLEURT (medium)
+Processing summary for BLEURT (long)
+Processing summary for BLEURT (short)
 Processing summary for JaroSimilarity_max (long)
 Processing summary for JaroSimilarity_max (medium)
 Processing summary for JaroSimilarity_max (short)
@@ -2269,9 +611,21 @@ Processing summary for UniEvalSum (medium)
 Processing summary for METEOR (medium)
 Processing summary for METEOR (short)
 Processing summary for METEOR (long)
+Processing summary for PRMRewardModel (short)
 Processing summary for UniEvalFact (long)
 Processing summary for UniEvalFact (short)
 Processing summary for UniEvalFact (medium)
+Processing summary for INFORMRewardModel (short)
+Processing summary for INFORMRewardModel (medium)
+Processing summary for NIST (long)
+Processing summary for NIST (medium)
+Processing summary for NIST (short)
+Processing summary for InfoLM (medium)
+Processing summary for InfoLM (short)
+Processing summary for InfoLM (long)
+Processing summary for ParaScoreFree (long)
+Processing summary for ParaScoreFree (medium)
+Processing summary for ParaScoreFree (short)
 Processing summary for FactCC (medium)
 Processing summary for FactCC (short)
 Processing summary for FactCC (long)
@@ -2284,12 +638,20 @@ Processing summary for LevenshteinRatio_max (short)
 Processing summary for JaccardDistance_min (medium)
 Processing summary for JaccardDistance_min (short)
 Processing summary for JaccardDistance_min (long)
+Processing summary for GRMRewardModel (medium)
+Processing summary for GRMRewardModel (long)
+Processing summary for GRMRewardModel (short)
 Processing summary for UniEvalDialogue (long)
 Processing summary for UniEvalDialogue (short)
 Processing summary for UniEvalDialogue (medium)
 Processing summary for CIDEr_n4_sig6.0 (long)
 Processing summary for CIDEr_n4_sig6.0 (medium)
 Processing summary for CIDEr_n4_sig6.0 (short)
+Processing summary for LENS_SALSA (medium)
+Processing summary for LENS_SALSA (short)
+Processing summary for SummaQA (medium)
+Processing summary for SummaQA (long)
+Processing summary for SummaQA (short)
 Processing summary for BARTScore_bart-large-cnn (long)
 Processing summary for BARTScore_bart-large-cnn (short)
 Processing summary for BARTScore_bart-large-cnn (medium)
@@ -2305,20 +667,38 @@ Processing summary for SARI (short)
 Processing summary for BLEU (medium)
 Processing summary for BLEU (short)
 Processing summary for BLEU (long)
+Processing summary for FastTextNSFW (long)
+Processing summary for FastTextNSFW (medium)
+Processing summary for FastTextNSFW (short)
+Processing summary for UpdateROUGE (long)
+Processing summary for UpdateROUGE (medium)
+Processing summary for UpdateROUGE (short)
+Processing summary for YiSi (medium)
+Processing summary for YiSi (long)
+Processing summary for YiSi (short)
+Processing summary for MAUVE_max (medium)
+Processing summary for MAUVE_max (short)
+Processing summary for MAUVE_max (long)
+Processing summary for FastTextToxicity (short)
+Processing summary for FastTextToxicity (long)
+Processing summary for FastTextToxicity (medium)
 Processing summary for BERTScore_roberta-large (long)
 Processing summary for BERTScore_roberta-large (medium)
 Processing summary for BERTScore_roberta-large (short)
+Processing summary for CharCut (short)
+Processing summary for CharCut (long)
+Processing summary for CharCut (medium)
 Aggregated results saved to outputs/utilization/aggregated_results.csv
 
 ================================================================================
 BENCHMARK COMPLETE
 ================================================================================
 Total metrics: 17
-Completed metrics: 12
-Skipped metrics (already had results): 5
+Completed metrics: 5
+Skipped metrics (already had results): 12
 Failed metrics: 0
 
 Aggregated results saved to outputs/utilization/aggregated_results.csv
 Benchmark summary saved to outputs/utilization/benchmark_summary.csv
 
-Total runtime: 21.48 minutes (0.36 hours)
+Total runtime: 98.24 minutes (1.64 hours)

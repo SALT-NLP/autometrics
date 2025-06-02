@@ -92,8 +92,8 @@ class LLMJudgeProposer(Generator):
 
         good_examples, bad_examples = get_good_bad_examples(df, target_column)
 
-        good_examples_formatted = [self.formatter(row) for _, row in good_examples.iterrows()]
-        bad_examples_formatted = [self.formatter(row) for _, row in bad_examples.iterrows()]
+        good_examples_formatted = [self.formatter(row) for row in good_examples.iterrows()]
+        bad_examples_formatted = [self.formatter(row) for row in bad_examples.iterrows()]
 
         return good_examples_formatted, bad_examples_formatted
     

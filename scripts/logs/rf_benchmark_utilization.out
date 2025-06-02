@@ -702,3 +702,582 @@ Aggregated results saved to outputs/utilization/aggregated_results.csv
 Benchmark summary saved to outputs/utilization/benchmark_summary.csv
 
 Total runtime: 98.24 minutes (1.64 hours)
+Successfully patched isolated_runner.py for better JSON serialization
+
+Detecting hardware information...
+
+HARDWARE INFORMATION:
+System: Linux
+Processor: x86_64
+CPU Count: 96
+GPU Count: 4
+  GPU 0: NVIDIA RTX A6000 (47.54 GB)
+  GPU 1: NVIDIA RTX A6000 (47.54 GB)
+  GPU 2: NVIDIA RTX A6000 (47.54 GB)
+  GPU 3: NVIDIA RTX A6000 (47.54 GB)
+Hardware information saved to outputs/utilization/hardware_info.json
+
+STARTING METRIC UTILIZATION BENCHMARKING
+Output directory: outputs/utilization
+Number of examples: 50
+Burn-in samples: 5
+Length categories: short,medium,long
+Including 17 reference-free metrics:
+  - FKGL
+  - UniEvalFact
+  - Perplexity_gpt2-large
+  - ParaScoreFree
+  - INFORMRewardModel
+  - PRMRewardModel
+  - SummaQA
+  - DistinctNGram
+  - FastTextToxicity
+  - FastTextNSFW
+  - FastTextEducationalValue
+  - SelfBLEU
+  - FactCC
+  - Toxicity
+  - Sentiment
+  - GRMRewardModel
+  - LENS_SALSA
+
+Total metrics to process: 17
+
+Processing metric 1/17: FKGL
+Skipping FKGL - results already exist
+
+Processing metric 2/17: UniEvalFact
+Skipping UniEvalFact - results already exist
+
+Processing metric 3/17: Perplexity_gpt2-large
+Skipping Perplexity_gpt2-large - results already exist
+
+Processing metric 4/17: ParaScoreFree
+Skipping ParaScoreFree - results already exist
+
+Processing metric 5/17: INFORMRewardModel
+
+================================================================================
+STARTING BENCHMARK FOR: INFORMRewardModel
+================================================================================
+Filtered constructor params for INFORMRewardModel: {'model_name': 'infly/INF-ORM-Llama3.1-70B', 'torch_dtype': 'bfloat16', 'device_map': 'auto', 'attn_implementation': 'flash_attention_2', 'num_labels': 1, 'batch_size': 2, 'persistent': True, 'name': 'INFORMRewardModel', 'description': 'INF-ORM-Llama3.1-70B outcome reward model (reference-free).'}
+Configuring experiment for INFORMRewardModel...
+Running benchmark for INFORMRewardModel...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 1145.57 MB
+  GPU RAM: 3736.54 MB
+Testing metric: INFORMRewardModel
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'torch_dtype': 'bfloat16', 'num_labels': 1}
+    start→after_import:
+      CPU RAM: 149.78 MB
+      GPU RAM: 0.00 MB
+      Duration: 2940.98 ms
+    after_import→after_construct:
+      CPU RAM: 0.72 MB
+      GPU RAM: 0.00 MB
+      Duration: 91.20 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 2.05 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.27 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+INFORMRewardModel import and construction:
+  start→after_import:
+    CPU RAM: 149.78 MB
+    GPU RAM: 0.00 MB
+    Duration: 2940.98 ms
+  after_import→after_construct:
+    CPU RAM: 0.72 MB
+    GPU RAM: 0.00 MB
+    Duration: 91.20 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 2.05 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.27 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 150.51 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+INFORMRewardModel - short:
+  Duration (ms): 1.46 ±0.04
+  CPU RAM - Baseline: 939.53 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 939.53 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 150.51 MB (import: 150.50 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+INFORMRewardModel - medium:
+  Duration (ms): 1.51 ±0.03
+  CPU RAM - Baseline: 937.87 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 937.87 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 150.51 MB (import: 150.50 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+INFORMRewardModel - long:
+  Duration (ms): 1040.22 ±1.26
+  CPU RAM - Baseline: 2070.61 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 2070.61 MB
+  GPU RAM - Baseline: 132727.05 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 132727.05 MB
+  CPU RAM - With Import: 150.51 MB (import: 150.50 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for INFORMRewardModel...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: INFORMRewardModel
+================================================================================
+
+
+--------------------------------------------------
+Progress: 5/17 metrics processed
+Status: 1 completed, 4 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 6/17: PRMRewardModel
+
+================================================================================
+STARTING BENCHMARK FOR: PRMRewardModel
+================================================================================
+Filtered constructor params for PRMRewardModel: {'model_name': 'Qwen/Qwen2.5-Math-PRM-7B', 'device_map': None, 'persistent': True, 'name': 'PRMRewardModel', 'description': 'Process Reward Model Qwen2.5-Math-PRM-7B sentence-based min/max/mean'}
+Configuring experiment for PRMRewardModel...
+Running benchmark for PRMRewardModel...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 1190.99 MB
+  GPU RAM: 3736.54 MB
+Testing metric: PRMRewardModel
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'model_name': 'Qwen/Qwen2.5-Math-PRM-7B'}
+    start→after_import:
+      CPU RAM: 25.31 MB
+      GPU RAM: 0.00 MB
+      Duration: 2343.41 ms
+    after_import→after_construct:
+      CPU RAM: 1.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 151.51 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.01 MB
+      GPU RAM: 0.00 MB
+      Duration: 2.02 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.37 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+PRMRewardModel import and construction:
+  start→after_import:
+    CPU RAM: 25.31 MB
+    GPU RAM: 0.00 MB
+    Duration: 2343.41 ms
+  after_import→after_construct:
+    CPU RAM: 1.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 151.51 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.01 MB
+    GPU RAM: 0.00 MB
+    Duration: 2.02 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.37 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 26.32 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+PRMRewardModel - short:
+  Duration (ms): 1.32 ±0.02
+  CPU RAM - Baseline: 753.17 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 753.17 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 26.32 MB (import: 26.31 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+PRMRewardModel - medium:
+  Duration (ms): 15302.06 ±7934.22
+  CPU RAM - Baseline: 753.62 MB
+  CPU RAM - Used by metric: 292.99 MB ±455.04
+  CPU RAM - Total: 1046.62 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 319.31 MB (import: 26.31 MB + runtime: 292.99 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+PRMRewardModel - long:
+  Duration (ms): 60441.50 ±6847.39
+  CPU RAM - Baseline: 752.68 MB
+  CPU RAM - Used by metric: 351.79 MB ±688.87
+  CPU RAM - Total: 1104.48 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 378.11 MB (import: 26.31 MB + runtime: 351.79 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for PRMRewardModel...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: PRMRewardModel
+================================================================================
+
+
+--------------------------------------------------
+Progress: 6/17 metrics processed
+Status: 2 completed, 4 skipped, 0 failed
+--------------------------------------------------
+
+
+Processing metric 7/17: SummaQA
+Skipping SummaQA - results already exist
+
+Processing metric 8/17: DistinctNGram
+Skipping DistinctNGram - results already exist
+
+Processing metric 9/17: FastTextToxicity
+Skipping FastTextToxicity - results already exist
+
+Processing metric 10/17: FastTextNSFW
+Skipping FastTextNSFW - results already exist
+
+Processing metric 11/17: FastTextEducationalValue
+Skipping FastTextEducationalValue - results already exist
+
+Processing metric 12/17: SelfBLEU
+Skipping SelfBLEU - results already exist
+
+Processing metric 13/17: FactCC
+Skipping FactCC - results already exist
+
+Processing metric 14/17: Toxicity
+Skipping Toxicity - results already exist
+
+Processing metric 15/17: Sentiment
+Skipping Sentiment - results already exist
+
+Processing metric 16/17: GRMRewardModel
+Skipping GRMRewardModel - results already exist
+
+Processing metric 17/17: LENS_SALSA
+
+================================================================================
+STARTING BENCHMARK FOR: LENS_SALSA
+================================================================================
+Filtered constructor params for LENS_SALSA: {'model_id': 'davidheineman/lens-salsa', 'batch_size': 16, 'devices': None, 'persistent': True, 'max_length': 512, 'max_retries': 3, 'name': 'LENS_SALSA', 'description': 'LENS-SALSA reference-free simplification metric (overall score).'}
+Configuring experiment for LENS_SALSA...
+Running benchmark for LENS_SALSA...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 1215.63 MB
+  GPU RAM: 3736.54 MB
+Testing metric: LENS_SALSA
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {'model_id': 'davidheineman/lens-salsa', 'max_length': 512}
+    start→after_import:
+      CPU RAM: 172.53 MB
+      GPU RAM: 0.00 MB
+      Duration: 8389.79 ms
+    after_import→after_construct:
+      CPU RAM: 0.97 MB
+      GPU RAM: 0.00 MB
+      Duration: 122.70 ms
+    after_construct→after_first_call:
+      CPU RAM: 0.01 MB
+      GPU RAM: 0.00 MB
+      Duration: 2.36 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 0.37 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+LENS_SALSA import and construction:
+  start→after_import:
+    CPU RAM: 172.53 MB
+    GPU RAM: 0.00 MB
+    Duration: 8389.79 ms
+  after_import→after_construct:
+    CPU RAM: 0.97 MB
+    GPU RAM: 0.00 MB
+    Duration: 122.70 ms
+  after_construct→after_first_call:
+    CPU RAM: 0.01 MB
+    GPU RAM: 0.00 MB
+    Duration: 2.36 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 0.37 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 173.51 MB
+    GPU RAM: 0.00 MB
+
+=== RUNTIME COSTS ===
+
+LENS_SALSA - short:
+  Duration (ms): 1.54 ±0.03
+  CPU RAM - Baseline: 973.65 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 973.65 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 173.50 MB (import: 173.50 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+LENS_SALSA - medium:
+  Duration (ms): 1.41 ±0.03
+  CPU RAM - Baseline: 975.05 MB
+  CPU RAM - Used by metric: 0.01 MB ±0.01
+  CPU RAM - Total: 975.06 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 173.51 MB (import: 173.50 MB + runtime: 0.01 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+LENS_SALSA - long:
+  Duration (ms): 514.50 ±2.25
+  CPU RAM - Baseline: 2916.42 MB
+  CPU RAM - Used by metric: 0.20 MB ±0.13
+  CPU RAM - Total: 2916.61 MB
+  GPU RAM - Baseline: 0.00 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 0.00 MB
+  CPU RAM - With Import: 173.70 MB (import: 173.50 MB + runtime: 0.20 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for LENS_SALSA...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: LENS_SALSA
+================================================================================
+
+
+--------------------------------------------------
+Progress: 17/17 metrics processed
+Status: 3 completed, 14 skipped, 0 failed
+--------------------------------------------------
+
+
+Aggregating results from all metrics...
+Found 141 summary files to aggregate
+Processing summary for iBLEU (long)
+Processing summary for iBLEU (short)
+Processing summary for iBLEU (medium)
+Processing summary for ROUGE (long)
+Processing summary for ROUGE (medium)
+Processing summary for ROUGE (short)
+Processing summary for Toxicity (short)
+Processing summary for Toxicity (medium)
+Processing summary for Toxicity (long)
+Processing summary for CHRF (long)
+Processing summary for CHRF (medium)
+Processing summary for CHRF (short)
+Processing summary for ParaScore (short)
+Processing summary for ParaScore (medium)
+Processing summary for ParaScore (long)
+Processing summary for HammingDistance_min (long)
+Processing summary for HammingDistance_min (medium)
+Processing summary for HammingDistance_min (short)
+Processing summary for TER (long)
+Processing summary for TER (medium)
+Processing summary for TER (short)
+Processing summary for DistinctNGram (long)
+Processing summary for DistinctNGram (short)
+Processing summary for DistinctNGram (medium)
+Processing summary for PseudoPARENT (medium)
+Processing summary for PseudoPARENT (long)
+Processing summary for PseudoPARENT (short)
+Processing summary for Perplexity_gpt2-large (short)
+Processing summary for Perplexity_gpt2-large (medium)
+Processing summary for Perplexity_gpt2-large (long)
+Processing summary for LENS (medium)
+Processing summary for LENS (short)
+Processing summary for LENS (long)
+Processing summary for MOVERScore_distilbert-base-uncased (short)
+Processing summary for MOVERScore_distilbert-base-uncased (long)
+Processing summary for MOVERScore_distilbert-base-uncased (medium)
+Processing summary for Sentiment (short)
+Processing summary for Sentiment (long)
+Processing summary for Sentiment (medium)
+Processing summary for SelfBLEU (short)
+Processing summary for SelfBLEU (long)
+Processing summary for SelfBLEU (medium)
+Processing summary for FastTextEducationalValue (medium)
+Processing summary for FastTextEducationalValue (short)
+Processing summary for FastTextEducationalValue (long)
+Processing summary for JaroWinklerSimilarity_max (short)
+Processing summary for JaroWinklerSimilarity_max (medium)
+Processing summary for JaroWinklerSimilarity_max (long)
+Processing summary for BLEURT (medium)
+Processing summary for BLEURT (long)
+Processing summary for BLEURT (short)
+Processing summary for JaroSimilarity_max (long)
+Processing summary for JaroSimilarity_max (medium)
+Processing summary for JaroSimilarity_max (short)
+Processing summary for UniEvalSum (short)
+Processing summary for UniEvalSum (long)
+Processing summary for UniEvalSum (medium)
+Processing summary for METEOR (medium)
+Processing summary for METEOR (short)
+Processing summary for METEOR (long)
+Processing summary for PRMRewardModel (medium)
+Processing summary for PRMRewardModel (long)
+Processing summary for PRMRewardModel (short)
+Processing summary for UniEvalFact (long)
+Processing summary for UniEvalFact (short)
+Processing summary for UniEvalFact (medium)
+Processing summary for INFORMRewardModel (long)
+Processing summary for INFORMRewardModel (short)
+Processing summary for INFORMRewardModel (medium)
+Processing summary for NIST (long)
+Processing summary for NIST (medium)
+Processing summary for NIST (short)
+Processing summary for InfoLM (medium)
+Processing summary for InfoLM (short)
+Processing summary for InfoLM (long)
+Processing summary for ParaScoreFree (long)
+Processing summary for ParaScoreFree (medium)
+Processing summary for ParaScoreFree (short)
+Processing summary for FactCC (medium)
+Processing summary for FactCC (short)
+Processing summary for FactCC (long)
+Processing summary for FKGL (short)
+Processing summary for FKGL (long)
+Processing summary for FKGL (medium)
+Processing summary for LevenshteinRatio_max (long)
+Processing summary for LevenshteinRatio_max (medium)
+Processing summary for LevenshteinRatio_max (short)
+Processing summary for JaccardDistance_min (medium)
+Processing summary for JaccardDistance_min (short)
+Processing summary for JaccardDistance_min (long)
+Processing summary for GRMRewardModel (medium)
+Processing summary for GRMRewardModel (long)
+Processing summary for GRMRewardModel (short)
+Processing summary for UniEvalDialogue (long)
+Processing summary for UniEvalDialogue (short)
+Processing summary for UniEvalDialogue (medium)
+Processing summary for CIDEr_n4_sig6.0 (long)
+Processing summary for CIDEr_n4_sig6.0 (medium)
+Processing summary for CIDEr_n4_sig6.0 (short)
+Processing summary for LENS_SALSA (medium)
+Processing summary for LENS_SALSA (long)
+Processing summary for LENS_SALSA (short)
+Processing summary for SummaQA (medium)
+Processing summary for SummaQA (long)
+Processing summary for SummaQA (short)
+Processing summary for BARTScore_bart-large-cnn (long)
+Processing summary for BARTScore_bart-large-cnn (short)
+Processing summary for BARTScore_bart-large-cnn (medium)
+Processing summary for GLEU (long)
+Processing summary for GLEU (medium)
+Processing summary for GLEU (short)
+Processing summary for LevenshteinDistance_min (medium)
+Processing summary for LevenshteinDistance_min (short)
+Processing summary for LevenshteinDistance_min (long)
+Processing summary for SARI (medium)
+Processing summary for SARI (long)
+Processing summary for SARI (short)
+Processing summary for BLEU (medium)
+Processing summary for BLEU (short)
+Processing summary for BLEU (long)
+Processing summary for FastTextNSFW (long)
+Processing summary for FastTextNSFW (medium)
+Processing summary for FastTextNSFW (short)
+Processing summary for UpdateROUGE (long)
+Processing summary for UpdateROUGE (medium)
+Processing summary for UpdateROUGE (short)
+Processing summary for YiSi (medium)
+Processing summary for YiSi (long)
+Processing summary for YiSi (short)
+Processing summary for MAUVE_max (medium)
+Processing summary for MAUVE_max (short)
+Processing summary for MAUVE_max (long)
+Processing summary for FastTextToxicity (short)
+Processing summary for FastTextToxicity (long)
+Processing summary for FastTextToxicity (medium)
+Processing summary for BERTScore_roberta-large (long)
+Processing summary for BERTScore_roberta-large (medium)
+Processing summary for BERTScore_roberta-large (short)
+Processing summary for CharCut (short)
+Processing summary for CharCut (long)
+Processing summary for CharCut (medium)
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+
+================================================================================
+BENCHMARK COMPLETE
+================================================================================
+Total metrics: 17
+Completed metrics: 3
+Skipped metrics (already had results): 14
+Failed metrics: 0
+
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+Benchmark summary saved to outputs/utilization/benchmark_summary.csv
+
+Total runtime: 98.37 minutes (1.64 hours)

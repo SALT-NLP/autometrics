@@ -1,232 +1,263 @@
-import os
-import sys
-import tempfile
-import subprocess
 import json
+import re
+import time
 from typing import Optional, List, Any
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 
-# Try to import DSPy's Python interpreter, but be conservative about when to use it
+# Import our custom interpreter first
+try:
+    from autometrics.util.custom_python_interpreter import CustomPythonInterpreter
+    CUSTOM_INTERPRETER_AVAILABLE = True
+except ImportError:
+    CUSTOM_INTERPRETER_AVAILABLE = False
+    CustomPythonInterpreter = None
+
+# Import DSPy's Python interpreter as fallback
 try:
     from dspy.primitives.python_interpreter import PythonInterpreter as DSPyInterpreter
     DSPY_INTERPRETER_AVAILABLE = True
-    # Test if DSPy interpreter can handle our required libraries
-    def test_dspy_libraries():
-        """Test if DSPy interpreter supports our required libraries"""
-        test_code = """
-try:
-    import numpy
-    import math
-    import re
-    import collections
-    result = True
-except ImportError:
-    result = False
-return result
-"""
-        try:
-            with DSPyInterpreter() as interp:
-                result = interp.execute(test_code)
-                return result
-        except:
-            return False
-    
-    DSPY_SUPPORTS_LIBRARIES = test_dspy_libraries()
 except ImportError:
     DSPY_INTERPRETER_AVAILABLE = False
-    DSPY_SUPPORTS_LIBRARIES = False
     DSPyInterpreter = None
 
-# Always implement our own interpreter as backup
-class PythonInterpreter:
-    def __init__(self, use_dspy=False):
-        self.use_dspy = use_dspy and DSPY_INTERPRETER_AVAILABLE and DSPY_SUPPORTS_LIBRARIES
-        if self.use_dspy:
-            self._dspy_interpreter = DSPyInterpreter()
-        else:
-            self._dspy_interpreter = None
-    
-    def __enter__(self):
-        if self.use_dspy and self._dspy_interpreter:
-            return self._dspy_interpreter.__enter__()
-        return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.use_dspy and self._dspy_interpreter:
-            return self._dspy_interpreter.__exit__(exc_type, exc_val, exc_tb)
-        pass
-    
-    def execute(self, code, variables=None):
-        if self.use_dspy and self._dspy_interpreter:
-            # Try DSPy first, fall back to subprocess if it fails
-            try:
-                return self._dspy_interpreter.execute(code, variables)
-            except Exception as e:
-                print(f"DSPy interpreter failed, falling back to subprocess: {e}")
-                return self._execute_subprocess(code, variables or {})
-        else:
-            # Use subprocess directly
-            return self._execute_subprocess(code, variables or {})
-    
-    def _execute_subprocess(self, code, variables):
-        """Execute code using subprocess for basic sandboxing"""
-        # Create a temporary script
-        script_template = '''
-import sys
-import json
-import math
-import re
-import collections
-from typing import *
-
-# Import numpy if available (only library we can rely on)
-try:
-    import numpy
-    import numpy as np
-    HAS_NUMPY = True
-except ImportError:
-    HAS_NUMPY = False
-    # Create dummy numpy for basic operations if not available
-    class DummyNumpy:
-        def mean(self, arr): return sum(arr) / len(arr) if arr else 0
-        def std(self, arr): 
-            if not arr: return 0
-            mean_val = self.mean(arr)
-            return (sum((x - mean_val) ** 2 for x in arr) / len(arr)) ** 0.5
-        def array(self, arr): return arr
-    numpy = DummyNumpy()
-    np = numpy
-
-# Inject variables
-{variable_assignments}
-
-# User code
-def compute_score_func():
-{indented_code}
-
-try:
-    result = compute_score_func()
-    print(json.dumps({{"result": result, "success": True}}))
-except Exception as e:
-    print(json.dumps({{"error": str(e), "success": False}}))
-'''
-        
-        # Prepare variable assignments
-        var_assignments = []
-        for key, value in variables.items():
-            if isinstance(value, str):
-                var_assignments.append(f'{key} = {repr(value)}')
-            elif isinstance(value, list):
-                # Handle list variables specially for references
-                var_assignments.append(f'{key} = {repr(value)}')
-            else:
-                var_assignments.append(f'{key} = {value}')
-        
-        # Indent the user code
-        indented_code = '\n'.join('    ' + line for line in code.split('\n'))
-        
-        script_content = script_template.format(
-            variable_assignments='\n'.join(var_assignments),
-            indented_code=indented_code
-        )
-        
-        # Write to temporary file and execute
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-            f.write(script_content)
-            temp_file = f.name
-        
-        try:
-            result = subprocess.run(
-                [sys.executable, temp_file],
-                capture_output=True,
-                text=True,
-                timeout=30  # 30 second timeout
-            )
-            
-            if result.stdout:
-                try:
-                    output = json.loads(result.stdout.strip())
-                    if output.get("success"):
-                        return output["result"]
-                    else:
-                        raise RuntimeError(f"Code execution failed: {output.get('error', 'Unknown error')}")
-                except json.JSONDecodeError:
-                    raise RuntimeError(f"Invalid JSON output: {result.stdout}")
-            else:
-                raise RuntimeError(f"No output from code execution. stderr: {result.stderr}")
-                
-        except subprocess.TimeoutExpired:
-            raise RuntimeError("Code execution timed out")
-        finally:
-            # Clean up temporary file
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
+class SecurityError(Exception):
+    """Raised when secure execution is not available"""
+    pass
 
 class GeneratedCodeMetricBase:
     """Base class for generated code metrics with common functionality"""
     
-    def __init__(self, name: str, description: str, generated_code: str, task_description: Optional[str] = None, 
-                 prefer_dspy_interpreter: bool = False, **kwargs):
+    def __init__(self, name: str, description: str, generated_code: str, task_description: Optional[str] = None, **kwargs):
         self.generated_code = generated_code
         self.task_description = task_description
-        self.prefer_dspy_interpreter = prefer_dspy_interpreter
         self._interpreter = None
         super().__init__(name, description, **kwargs)
         
         # Store code-related parameters for caching
         self._init_params.update({
             'generated_code': generated_code,
-            'task_description': task_description,
-            'prefer_dspy_interpreter': prefer_dspy_interpreter
+            'task_description': task_description
         })
     
     def _get_interpreter(self):
-        """Get or create a Python interpreter instance"""
+        """Get or create an interpreter instance, preferring our custom one"""
         if self._interpreter is None:
-            # Default to subprocess interpreter for reliability with all libraries
-            # Only use DSPy if explicitly requested and libraries are supported
-            use_dspy = self.prefer_dspy_interpreter and DSPY_INTERPRETER_AVAILABLE and DSPY_SUPPORTS_LIBRARIES
-            self._interpreter = PythonInterpreter(use_dspy=use_dspy)
+            # Prefer our custom interpreter with enhanced package loading
+            if CUSTOM_INTERPRETER_AVAILABLE:
+                self._interpreter = CustomPythonInterpreter()
+            elif DSPY_INTERPRETER_AVAILABLE:
+                self._interpreter = DSPyInterpreter()
+            else:
+                raise SecurityError(
+                    "No Python interpreter available. Please install DSPy for secure code execution: "
+                    "pip install dspy-ai"
+                )
         return self._interpreter
+    
+    def _parse_generated_code(self, code: str) -> tuple[str, str]:
+        """
+        Parse generated code to separate imports from the main logic.
+        Returns (imports_section, logic_section)
+        """
+        lines = code.strip().split('\n')
+        import_lines = []
+        logic_lines = []
+        
+        # Track if we're still in the imports section
+        in_imports = True
+        
+        for line in lines:
+            stripped_line = line.strip()
+            
+            # Check if this line is an import statement
+            if (stripped_line.startswith('import ') or 
+                stripped_line.startswith('from ') or
+                stripped_line == '' and in_imports):  # Empty lines in imports section
+                import_lines.append(line)
+            else:
+                # Once we hit non-import code, everything else is logic
+                in_imports = False
+                logic_lines.append(line)
+        
+        imports_section = '\n'.join(import_lines)
+        logic_section = '\n'.join(logic_lines)
+        
+        return imports_section.strip(), logic_section.strip()
+    
+    def _create_function_signature(self, has_references: bool) -> str:
+        """Create the appropriate function signature based on metric type"""
+        if has_references:
+            return "def compute_score(input, output, references=None):"
+        else:
+            return "def compute_score(input, output):"
     
     def _execute_generated_code(self, input_text: str, output_text: str, references: Optional[List[str]] = None) -> float:
         """Execute the generated code with the given inputs"""
+        # Use the batched version with a single item to avoid code duplication
+        inputs = [input_text]
+        outputs = [output_text]
+        references_list = [references] if references is not None else None
+        
+        results = self._execute_generated_code_batched(inputs, outputs, references_list)
+        return results[0] if results else 0.0
+
+    def _execute_generated_code_batched(self, inputs: List[str], outputs: List[str], references_list: Optional[List[List[str]]] = None) -> List[float]:
+        """Execute the generated code with batched inputs for better performance"""
+        
+        if not inputs or len(inputs) != len(outputs):
+            raise ValueError("inputs and outputs must be non-empty lists of the same length")
+        
+        if references_list is not None and len(references_list) != len(inputs):
+            raise ValueError("references_list must be None or the same length as inputs")
+        
         interpreter = self._get_interpreter()
         
-        # Prepare variables for the code execution
-        variables = {
-            'input': input_text,
-            'output': output_text
-        }
+        # Parse the generated code to separate imports from logic (setup once)
+        imports_section, logic_section = self._parse_generated_code(self.generated_code)
         
-        if references is not None:
-            variables['references'] = references
+        has_references = references_list is not None
         
-        try:
-            with interpreter:
-                result = interpreter.execute(self.generated_code, variables)
+        # Create the function signature (setup once)
+        function_signature = self._create_function_signature(has_references)
+        
+        # Indent the logic section for function body (setup once)
+        indented_logic = self._indent_code(logic_section) if logic_section else "    return 0.0"
+        
+        # Build the function definition part (setup once)
+        setup_code_parts = []
+        
+        # Add imports at module level (unindented)
+        if imports_section:
+            setup_code_parts.append(imports_section)
+            setup_code_parts.append("")  # Empty line after imports
+        
+        # Add the function definition
+        setup_code_parts.append(function_signature)
+        setup_code_parts.append(indented_logic)
+        setup_code_parts.append("")  # Empty line after function
+        
+        setup_code = '\n'.join(setup_code_parts)
+        
+        # Lint the setup code before execution
+        lint_result = self._lint_code(setup_code + "\nresult = 0.0\nresult")
+        if not lint_result['valid']:
+            raise SyntaxError(f"Generated code has syntax errors: {lint_result['error']}")
+        
+        # Execute the setup code once to define the function and load packages
+        max_retries = 2
+        
+        for attempt in range(max_retries):
+            try:
+                # Execute setup code to define the function
+                setup_result = interpreter.execute(setup_code, {})
                 
-                # Ensure result is a number
-                if result is None:
-                    return 0.0
-                elif isinstance(result, (int, float)):
-                    return float(result)
-                elif isinstance(result, bool):
-                    return float(result)
+                # Check if this still looks like a loading message (edge case)
+                if isinstance(setup_result, str) and self._is_loading_message(setup_result):
+                    if attempt < max_retries - 1:
+                        time.sleep(5)
+                        continue
+                
+                break  # Setup successful
+                
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    time.sleep(2)
+                    continue
                 else:
-                    # Try to convert to float
-                    try:
-                        return float(result)
-                    except (ValueError, TypeError):
-                        print(f"Warning: Generated code returned non-numeric result: {result}. Using 0.0")
-                        return 0.0
-                        
-        except Exception as e:
-            print(f"Error executing generated code for metric {self.name}: {e}")
+                    raise e
+        
+        # Now execute the function for each input/output pair
+        results = []
+        
+        for i in range(len(inputs)):
+            input_text = inputs[i]
+            output_text = outputs[i]
+            references = references_list[i] if references_list else None
+            
+            # Prepare variables for this execution
+            variables = {
+                'input': input_text,
+                'output': output_text
+            }
+            
+            if has_references:
+                variables['references'] = references
+            
+            # Create the function call code
+            if has_references:
+                call_code = "result = compute_score(input, output, references)\nresult"
+            else:
+                call_code = "result = compute_score(input, output)\nresult"
+            
+            # Execute the function call
+            try:
+                result = interpreter.execute(call_code, variables)
+                
+                # Convert to numeric result
+                numeric_result = self._ensure_numeric_result(result)
+                results.append(numeric_result)
+                
+            except Exception as e:
+                print(f"Error executing batched code for item {i}: {e}")
+                results.append(0.0)
+        
+        return results
+    
+    def _is_loading_message(self, result) -> bool:
+        """Check if a result looks like a package loading message"""
+        if not isinstance(result, str):
+            return False
+        
+        result_lower = result.lower()
+        loading_indicators = [
+            "loading ",
+            "downloading ",
+            "installing ",
+            "cdn.jsdelivr.net",
+            ".whl",
+            "pyodide",
+            "fetching",
+            "regex",
+            "sqlite3",
+            "nltk",
+            "package",
+            "wheel",
+            "download",
+            "failed to load"
+        ]
+        return any(indicator in result_lower for indicator in loading_indicators)
+    
+    def _ensure_numeric_result(self, result) -> float:
+        """Ensure the result is a numeric value"""
+        if result is None:
             return 0.0
+        elif isinstance(result, (int, float)):
+            return float(result)
+        elif isinstance(result, bool):
+            return float(result)
+        else:
+            try:
+                return float(result)
+            except (ValueError, TypeError):
+                print(f"Generated code returned non-numeric result: {result}")
+                return 0.0
+    
+    def _indent_code(self, code: str) -> str:
+        """Indent code for function wrapping - adds 4 spaces to ALL lines"""
+        if not code.strip():
+            return "    return 0.0"
+        
+        lines = code.split('\n')
+        indented_lines = []
+        
+        for line in lines:
+            if line.strip():  # Non-empty line - always add 4 spaces
+                indented_lines.append('    ' + line)
+            else:  # Empty line
+                indented_lines.append('')
+        
+        return '\n'.join(indented_lines)
     
     def get_generated_code(self) -> str:
         """Get the generated code for inspection"""
@@ -239,31 +270,186 @@ class GeneratedCodeMetricBase:
     def get_interpreter_info(self) -> dict:
         """Get information about the interpreter being used"""
         return {
+            'custom_available': CUSTOM_INTERPRETER_AVAILABLE,
             'dspy_available': DSPY_INTERPRETER_AVAILABLE,
-            'dspy_supports_libraries': DSPY_SUPPORTS_LIBRARIES if DSPY_INTERPRETER_AVAILABLE else False,
-            'prefer_dspy': self.prefer_dspy_interpreter,
-            'actual_interpreter': 'dspy' if (self.prefer_dspy_interpreter and DSPY_SUPPORTS_LIBRARIES) else 'subprocess'
+            'interpreter_type': 'custom' if CUSTOM_INTERPRETER_AVAILABLE else ('dspy' if DSPY_INTERPRETER_AVAILABLE else 'none')
         }
+    
+    def _extract_imports(self, code: str) -> List[str]:
+        """Extract import statements from code"""
+        imports = []
+        lines = code.split('\n')
+        for line in lines:
+            line = line.strip()
+            if line.startswith('import ') or line.startswith('from '):
+                imports.append(line)
+        return imports
+    
+    def _preload_packages(self, input_text: str, output_text: str, references: Optional[List[str]] = None):
+        """Pre-load packages using proper Pyodide package loading sequence"""
+        imports = self._extract_imports(self.generated_code)
+        if not imports:
+            return
+            
+        # Extract package names that need to be installed
+        packages_to_install = set()
+        for import_line in imports:
+            if import_line.startswith('import '):
+                # Extract package name from "import package" or "import package.module"
+                package = import_line[7:].split('.')[0].split(' as ')[0].strip()
+                if package not in ['sys', 'os', 'math', 're', 'json', 'time', 'collections', 'itertools']:
+                    # Skip built-in packages
+                    packages_to_install.add(package)
+            elif import_line.startswith('from '):
+                # Extract package name from "from package import ..."
+                package = import_line[5:].split('.')[0].split(' ')[0].strip()
+                if package not in ['sys', 'os', 'math', 're', 'json', 'time', 'collections', 'itertools']:
+                    packages_to_install.add(package)
+        
+        if not packages_to_install:
+            return
+        
+        interpreter = self._get_interpreter()
+        
+        variables = {
+            'input': input_text,
+            'output': output_text
+        }
+        if references is not None:
+            variables['references'] = references
+            
+        # Use the correct Pyodide package loading sequence
+        for package in packages_to_install:
+            # First try loadPackage() for built-in Pyodide packages
+            load_code = f"""
+import pyodide_js
+await pyodide_js.loadPackage("{package}")
+print(f"Successfully loaded {package} via loadPackage")
+"""
+            try:
+                result = interpreter.execute(load_code, variables)
+                if not self._is_loading_message(result):
+                    continue  # Success, move to next package
+            except Exception as e:
+                pass
+            
+            # If loadPackage fails, try micropip.install()
+            install_code = f"""
+import pyodide_js
+await pyodide_js.loadPackage("micropip")
+import micropip
+await micropip.install("{package}")
+print(f"Successfully installed {package} via micropip")
+"""
+            try:
+                result = interpreter.execute(install_code, variables)
+            except Exception as e:
+                continue
+
+    def _lint_code(self, code: str) -> dict:
+        """Lint the code using Python's ast module to catch syntax errors"""
+        import ast
+        import re
+        
+        try:
+            # First, check for obvious indentation issues
+            lines = code.split('\n')
+            in_function = False
+            
+            for i, line in enumerate(lines, 1):
+                stripped = line.strip()
+                
+                # Skip empty lines and comments
+                if not stripped or stripped.startswith('#'):
+                    continue
+                
+                # Check for mixed tabs and spaces (common issue)
+                if '\t' in line and '    ' in line:
+                    return {
+                        'valid': False,
+                        'error': f"Line {i}: Mixed tabs and spaces detected"
+                    }
+                
+                # Track if we're inside a function
+                if stripped.startswith('def '):
+                    in_function = True
+                    continue
+                elif not line.startswith((' ', '\t')) and not stripped.startswith(('import ', 'from ')):
+                    # This is a top-level statement, we're no longer in a function
+                    in_function = False
+                
+                # Check for indentation issues inside functions
+                if in_function and stripped:
+                    # Inside a function, code should be indented
+                    if not line.startswith(('    ', '\t')):
+                        return {
+                            'valid': False,
+                            'error': f"Line {i}: Code inside function should be indented - '{stripped[:50]}'"
+                        }
+            
+            # Check for common variable reference issues
+            # Look for patterns like using WordNetLemmatizer without instantiation
+            common_class_patterns = [
+                (r'lemmatizer\.(lemmatize|pos_tag)', 'lemmatizer = WordNetLemmatizer()'),
+                (r'vectorizer\.(fit_transform|transform)', 'vectorizer = TfidfVectorizer()'),
+                (r'stemmer\.(stem)', 'stemmer = PorterStemmer()'),
+            ]
+            
+            for pattern, suggestion in common_class_patterns:
+                if re.search(pattern, code):
+                    # Check if the variable is defined
+                    var_name = pattern.split('.')[0].replace('\\', '')
+                    if f'{var_name} =' not in code:
+                        return {
+                            'valid': False,
+                            'error': f"Variable '{var_name}' is used but not defined. Add: {suggestion}"
+                        }
+            
+            # Try to parse with ast
+            ast.parse(code)
+            
+            return {'valid': True, 'error': None}
+            
+        except SyntaxError as e:
+            error_msg = f"Syntax error at line {e.lineno}: {e.msg}"
+            if e.text:
+                error_msg += f" (in: '{e.text.strip()}')"
+            return {
+                'valid': False,
+                'error': error_msg
+            }
+        except Exception as e:
+            return {
+                'valid': False,
+                'error': f"Linting error: {str(e)}"
+            }
 
 class GeneratedCodeReferenceBasedMetric(GeneratedCodeMetricBase, ReferenceBasedMetric):
     """Reference-based metric that executes generated code"""
     
-    def __init__(self, name: str, description: str, generated_code: str, task_description: Optional[str] = None, 
-                 prefer_dspy_interpreter: bool = False, **kwargs):
-        super().__init__(name, description, generated_code, task_description, prefer_dspy_interpreter, **kwargs)
+    def __init__(self, name: str, description: str, generated_code: str, task_description: Optional[str] = None, **kwargs):
+        super().__init__(name, description, generated_code, task_description, **kwargs)
     
     def _calculate_impl(self, input: str, output: str, references: Optional[List[str]] = None, **kwargs) -> float:
         """Calculate the metric using the generated code"""
         return self._execute_generated_code(input, output, references)
 
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], references_list: Optional[List[List[str]]] = None, **kwargs) -> List[float]:
+        """Calculate the metric using the generated code for multiple inputs efficiently"""
+        return self._execute_generated_code_batched(inputs, outputs, references_list)
+
 class GeneratedCodeReferenceFreeMetric(GeneratedCodeMetricBase, ReferenceFreeMetric):
     """Reference-free metric that executes generated code"""
     
-    def __init__(self, name: str, description: str, generated_code: str, task_description: Optional[str] = None, 
-                 prefer_dspy_interpreter: bool = False, **kwargs):
-        super().__init__(name, description, generated_code, task_description, prefer_dspy_interpreter, **kwargs)
+    def __init__(self, name: str, description: str, generated_code: str, task_description: Optional[str] = None, **kwargs):
+        super().__init__(name, description, generated_code, task_description, **kwargs)
     
     def _calculate_impl(self, input: str, output: str, references: Optional[List[str]] = None, **kwargs) -> float:
         """Calculate the metric using the generated code"""
         # For reference-free metrics, we don't pass references
-        return self._execute_generated_code(input, output, None) 
+        return self._execute_generated_code(input, output, None)
+
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], references_list: Optional[List[List[str]]] = None, **kwargs) -> List[float]:
+        """Calculate the metric using the generated code for multiple inputs efficiently"""
+        # For reference-free metrics, we don't pass references
+        return self._execute_generated_code_batched(inputs, outputs, None) 

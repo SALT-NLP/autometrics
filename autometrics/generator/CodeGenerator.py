@@ -2,10 +2,85 @@ import dspy
 from autometrics.generator.Generator import Generator
 from autometrics.util.format import get_default_formatter
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import re
+# autometrics/generator/CodeGenerator.py
+import re, textwrap          # add textwrap
 
 # This is a code generator that uses a LLM to generate code.
 # It is used to generate code for the metrics.
+
+_HEADER_RE = re.compile(r"""(?mx)
+    ^\s*def\s+compute_score\s*\([^)]*\)
+    \s*(?:->\s*[^:]+)?\s*:\s*   # up to the colon
+    \n                          # newline ONLY – leave the 4 spaces
+""")
+
+def _strip_header_and_dedent(code: str) -> str:
+    code_lines = code.split("\n")
+    code = ""
+    for line in code_lines:
+        if not line.startswith("#"):
+            code += line + "\n"
+    if "```python" in code:
+        code = code.split("```python")[1].split("```")[0]
+    elif "```" in code:
+        code = code.split("```")[1]
+    
+    code = _HEADER_RE.split(code)
+    if len(code) > 1:
+        # Found function header, dedent the function body
+        dedented_body = _smart_dedent(code[1])
+        result = code[0] + dedented_body.rstrip()
+        return result
+    else:
+        # No header found, apply smart dedent to whole code in case it's uniformly indented
+        result = _smart_dedent(code[0])
+        return result
+
+def _smart_dedent(code: str) -> str:
+    """
+    Smart dedent that preserves relative indentation while removing base indentation.
+    Fixed to handle code structure properly - considers ALL lines when determining indentation.
+    """
+    lines = code.split('\n')
+    
+    # Find non-empty lines
+    non_empty_lines = [line for line in lines if line.strip()]
+    if not non_empty_lines:
+        return code
+    
+    # Calculate indentation for ALL non-empty lines (not just indented ones)
+    indentations = [len(line) - len(line.lstrip()) for line in non_empty_lines]
+    
+    # Find the minimum indentation level
+    min_indent = min(indentations)
+    
+    # If minimum is 0, check if we have a uniform base indentation we can remove
+    if min_indent == 0:
+        # Check if most lines (excluding imports) have a common indentation
+        code_lines = [line for line in non_empty_lines 
+                     if not line.strip().startswith(('import ', 'from '))]
+        if code_lines:
+            code_indentations = [len(line) - len(line.lstrip()) for line in code_lines]
+            # If most code lines have the same indentation level > 0, use that as base
+            from collections import Counter
+            indent_counts = Counter(code_indentations)
+            most_common_indent = indent_counts.most_common(1)[0][0]
+            if most_common_indent > 0 and indent_counts[most_common_indent] > len(code_lines) / 2:
+                min_indent = most_common_indent
+    
+    # Remove the minimum indentation from all lines
+    dedented_lines = []
+    for line in lines:
+        if line.strip():  # Non-empty line
+            current_indent = len(line) - len(line.lstrip())
+            if current_indent >= min_indent:
+                dedented_lines.append(line[min_indent:])
+            else:
+                dedented_lines.append(line)  # Keep as-is if less indented
+        else:
+            dedented_lines.append('')  # Empty line
+    
+    return '\n'.join(dedented_lines)
 
 def get_good_bad_examples(df, target_column, num_examples=5, flip=False):
     '''
@@ -89,11 +164,15 @@ return len(set(output.lower().split()) & set(input.lower().split())) / len(set(i
 Your metric can be a simple function like above or it can be a more complex function spanning multiple lines and using the following libraries:
 
 - numpy (for numerical operations)
+- nltk (for tokenization and other text operations) 
+- scipy (for scientific operations)
 - Standard Python libraries (math, re, collections, etc.)
 
-Do not use any other external libraries like pandas, scipy, sklearn, or nltk as they may not be available in all environments.
+Please limit imports since they increase load time and memory usage.
 
-You will be provided some examples of good and bad model outputs. Pay attention to the formatting of these inputs and outputs because they may inform your code. For instance if the model output is code this changes the possibilities of what your evaluation can assess."""
+You will be provided some examples of good and bad model outputs. Pay attention to the formatting of these inputs and outputs because they may inform your code. For instance if the model output is code this changes the possibilities of what your evaluation can assess.
+
+IMPORTANT!!! DO NOT DEFINE A FUNCTION TO BE RUN WITH ANY OTHER NAME THAN compute_score.  Ideally you should not define any functions at all (just output the contents of the compute_score function), but if you do, make sure to call it compute_score.  Otherwise the code will not be runnable."""
 
     task_description = dspy.InputField(desc="A description of the task that the model is trying to solve.")
     measurement_name = dspy.InputField(desc="The name of the measurement.")
@@ -141,11 +220,15 @@ return len(set(output.lower().split()) & set(input.lower().split())) / len(set(i
 Your metric can be a simple function like above or it can be a more complex function spanning multiple lines and using the following libraries:
 
 - numpy (for numerical operations)
+- nltk (for tokenization and other text operations)
+- scipy (for scientific operations)
 - Standard Python libraries (math, re, collections, etc.)
 
-Do not use any other external libraries like pandas, scipy, sklearn, or nltk as they may not be available in all environments.
+Please limit imports since they increase load time and memory usage.  The environment you are running this metric in will NOT have multithreading enabled, so refrain from using any libraries that require multithreading.
 
-You will be provided some examples of good and bad model outputs. Pay attention to the formatting of these inputs and outputs because they may inform your code. For instance if the model output is code this changes the possibilities of what your evaluation can assess."""
+You will be provided some examples of good and bad model outputs. Pay attention to the formatting of these inputs and outputs because they may inform your code. For instance if the model output is code this changes the possibilities of what your evaluation can assess.
+
+IMPORTANT!!! DO NOT DEFINE A FUNCTION TO BE RUN WITH ANY OTHER NAME THAN compute_score.  Ideally you should not define any functions at all (just output the contents of the compute_score function), but if you do, make sure to call it compute_score.  Otherwise the code will not be runnable."""
 
     task_description = dspy.InputField(desc="A description of the task that the model is trying to solve.")
     measurement_name = dspy.InputField(desc="The name of the measurement.")
@@ -160,6 +243,9 @@ class CodeGenReferenceBased(dspy.Module):
 
     def forward(self, task_description: str, measurement_name: str, good_examples: list[str], bad_examples: list[str]):
         output = self.code_gen.forward(task_description=task_description, measurement_name=measurement_name, good_examples=good_examples, bad_examples=bad_examples)
+
+        # Clean the generated code (remove markdown and dedent)
+        output.code = _strip_header_and_dedent(output.code)
         return output.metric_name, output.code
 
 class CodeGenReferenceFree(dspy.Module):
@@ -167,24 +253,39 @@ class CodeGenReferenceFree(dspy.Module):
         self.code_gen = dspy.ChainOfThought(CodeGenReferenceFreeSignature)
 
     def forward(self, task_description: str, measurement_name: str, good_examples: list[str], bad_examples: list[str]):
-        output = self.code_gen.forward(task_description=task_description, measurement_name=measurement_name, good_examples=good_examples, bad_examples=bad_examples)
+        try:
+            output = self.code_gen.forward(task_description=task_description, measurement_name=measurement_name, good_examples=good_examples, bad_examples=bad_examples)
+        except Exception as e:
+            output = dspy.Prediction(metric_name="ERROR", code="ERROR: " + str(e))
+
+        # Clean the generated code (remove markdown and dedent)
+        output.code = _strip_header_and_dedent(output.code)
         return output.metric_name, output.code
 
 class CodeGenerator(Generator):
     def __init__(self, name="CodeGenerator", description="Generate new code-based metrics using LLM", train_dataset=None, task_description=None, formatter=None, proposer_model=None, generate_axes=True):
-        self.task_description = task_description
         self.dataset = train_dataset
-        self.proposer_model = proposer_model
-        self.formatter = formatter
         self.generate_axes = generate_axes
+    
+        if task_description is None:
+            self.task_description = train_dataset.get_task_description()
+        else:
+            self.task_description = task_description
+
+        if proposer_model is None:
+            self.proposer_model = dspy.settings.lm
+        else:
+            self.proposer_model = proposer_model
         
         if formatter is None:
             self.formatter = self._get_formatter(train_dataset)
+        else:
+            self.formatter = formatter
 
         super().__init__(name, description)
 
     def _get_formatter(self, dataset):
-        if self.formatter:
+        if hasattr(self, "formatter"):
             return self.formatter
         if not dataset:
             return lambda x: str(x)
@@ -292,33 +393,50 @@ class CodeGenerator(Generator):
 
             # Collect results
             for future, metric_type_generated, measurement_name, axis in futures:
+                
+                with dspy.settings.context(lm=self.proposer_model):
+                    metric_name, code = future.result()
+                
+                # Clean the generated code
+                code = self._clean_generated_code(code)
+
+                if code.count("import") > 10: # If the code has more than 10 imports, it is probably not a good metric (may even just be repeating the same import over and over)
+                    continue
+                
+                # Create appropriate metric instance
+                if metric_type_generated == "reference_based":
+                    metric = GeneratedCodeReferenceBasedMetric(
+                        name=f"{metric_name}_generated_ref",
+                        description=f"Generated reference-based metric for {axis}",
+                        generated_code=code,
+                        task_description=self.task_description
+                    )
+                else:  # reference_free
+                    metric = GeneratedCodeReferenceFreeMetric(
+                        name=f"{metric_name}_generated_free",
+                        description=f"Generated reference-free metric for {axis}",
+                        generated_code=code,
+                        task_description=self.task_description
+                    )
+
+                # Try to run the metric once on a test example
+                train_dataset = train_dataset or self.dataset
+                test_example = train_dataset.get_dataframe().iloc[0]
+                test_input = test_example[train_dataset.get_input_column()]
+                test_output = test_example[train_dataset.get_output_column()]
+                if metric_type_generated == "reference_based":
+                    test_references = test_example[train_dataset.get_reference_columns()].tolist()
+                else:
+                    test_references = None
+
                 try:
-                    with dspy.settings.context(lm=self.proposer_model):
-                        metric_name, code = future.result()
-                    
-                    # Clean the generated code
-                    code = self._clean_generated_code(code)
-                    
-                    # Create appropriate metric instance
-                    if metric_type_generated == "reference_based":
-                        metric = GeneratedCodeReferenceBasedMetric(
-                            name=f"{metric_name}_generated_ref",
-                            description=f"Generated reference-based metric for {axis}",
-                            generated_code=code,
-                            task_description=self.task_description
-                        )
-                    else:  # reference_free
-                        metric = GeneratedCodeReferenceFreeMetric(
-                            name=f"{metric_name}_generated_free",
-                            description=f"Generated reference-free metric for {axis}",
-                            generated_code=code,
-                            task_description=self.task_description
-                        )
-                    
+                    test_score = metric.calculate(test_input, test_output, test_references)
+                    # print(f"Test score for {metric_name}: {test_score}")
                     new_metrics.append(metric)
-                    
                 except Exception as e:
-                    print(f"Error generating metric for {measurement_name} ({metric_type_generated}): {e}")
+                    print(f"Error running metric for {metric_name}: {e}")
+                    # print(f"The code was: {code}")
+                    # Continue to the next metric instead of crashing
                     continue
 
         return new_metrics
@@ -330,13 +448,36 @@ class CodeGenerator(Generator):
             code = code.split("```python")[1].split("```")[0]
         elif "```" in code:
             code = code.split("```")[1].split("```")[0]
+
+        # Use the existing header stripping and dedenting function
+        code = _strip_header_and_dedent(code)
         
-        # Strip whitespace and ensure proper indentation
-        lines = code.strip().split('\n')
-        cleaned_lines = []
-        for line in lines:
-            # Remove any common leading whitespace but preserve relative indentation
-            cleaned_lines.append(line.rstrip())
+        # Strip any remaining whitespace
+        final_code = code.strip()
         
-        return '\n'.join(cleaned_lines)
+        return final_code
+
+if __name__ == "__main__":
+    import dspy
+    from autometrics.dataset.datasets.simplification import SimpDA
+    from autometrics.dataset.datasets.helpsteer.helpsteer import HelpSteer2
+    import os
+
+    # dspy_lm = dspy.LM("openai/gpt-4o-mini", api_key=os.environ["OPENAI_API_KEY"])
+    # dspy_lm = dspy.LM("litellm_proxy/qwen/Qwen3-8B", api_base="http://future-hgx-2:7420/v1", api_key="None", max_tokens=int(40960 * 0.8))
+    dspy_lm = dspy.LM("litellm_proxy/meta-llama/Meta-Llama-3.1-8B-Instruct", api_base="http://future-hgx-2:7400/v1", api_key="None")
+
+    dspy.configure(lm=dspy_lm)
+
+    dataset = SimpDA()
+    generator = CodeGenerator(train_dataset=dataset, task_description=dataset.get_task_description())
     
+    # Generate only reference-free metrics to simplify testing, but with multiple axes
+    metrics = generator.generate()
+    
+    print(f"\n=== SUCCESSFULLY GENERATED {len(metrics)} METRICS ===")
+    for metric in metrics:
+        print(f"Metric: {metric.get_name()}")
+        print(f"Description: {metric.get_description()}")
+        print(f"Code : {metric.get_generated_code()}")
+        print("---")

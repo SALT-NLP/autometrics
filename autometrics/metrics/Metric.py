@@ -13,7 +13,7 @@ class Metric(ABC):
     DEFAULT_USE_CACHE = True
     
     def __init__(self, name, description, use_cache=None, seed=None, cache_dir="./autometrics_cache", 
-                 cache_size_limit=None, cache_ttl=None, **kwargs):
+                 cache_size_limit=None, cache_ttl=None, force_cache=False, **kwargs):
         self.name = name
         self.description = description
         
@@ -52,11 +52,18 @@ class Metric(ABC):
             # Ensure cache_size_limit and cache_ttl have appropriate default values
             size_limit = cache_size_limit if cache_size_limit is not None else 10e9  # Default to 10GB
             ttl = cache_ttl if cache_ttl is not None else 0  # Default to no expiration (0)
-            self._cache = Cache(
-                cache_path,
-                size_limit=size_limit,  # Uses LRU eviction when limit is reached
-                timeout=ttl             # Time-based expiration
-            )
+            try:
+                self._cache = Cache(
+                    cache_path,
+                    size_limit=size_limit,  # Uses LRU eviction when limit is reached
+                    timeout=ttl             # Time-based expiration
+                )
+            except Exception as e:
+                print(f"Error initializing cache: {e}")
+                self._cache = None
+
+                if force_cache:
+                    raise e
 
     def exclude_from_cache_key(self, *param_names):
         """

@@ -7,7 +7,25 @@ class DummyMetric(Metric):
     def __init__(self, name=None, description=None):
         super().__init__(name, description)
 
+    def _calculate_impl(self, input, output, references=None, **kwargs):
+        """
+        Calculate the metric
+        """
+        pass
+
     def calculate(self, input, output, references=None, **kwargs):
+        """
+        Calculate the metric
+        """
+        pass
+
+    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+        """
+        Calculate the metric
+        """
+        pass
+
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         """
         Calculate the metric
         """

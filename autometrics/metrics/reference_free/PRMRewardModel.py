@@ -16,7 +16,7 @@ MathProcessRewardModel is a process-level reward model that evaluates each inter
 
 ### Metric Description
 
-MathProcessRewardModel evaluates step-by-step mathematical reasoning by assigning a reward score to each reasoning step in a sequence. The model inserts a special token (`<extra_0>`) after each reasoning step and computes the probability that the token is classified as “positive” using a softmax over logits. This yields a scalar between 0 and 1 indicating how helpful or correct the step is deemed to be. The model is trained on labels derived from whether a step leads to a correct solution trajectory, allowing it to generalize to unseen reasoning processes.
+MathProcessRewardModel evaluates step-by-step mathematical reasoning by assigning a reward score to each reasoning step in a sequence. The model inserts a special token (`<extra_0>`) after each reasoning step and computes the probability that the token is classified as "positive" using a softmax over logits. This yields a scalar between 0 and 1 indicating how helpful or correct the step is deemed to be. The model is trained on labels derived from whether a step leads to a correct solution trajectory, allowing it to generalize to unseen reasoning processes.
 
 - **Metric Type:** Semantic Similarity, Reference-Free, Faithfulness
 - **Range:** [0, 1]
@@ -26,7 +26,7 @@ MathProcessRewardModel evaluates step-by-step mathematical reasoning by assignin
 
 ### Formal Definition
 
-Let $x$ be a problem prompt, and $z_1, z_2, \dots, z_T$ be a sequence of reasoning steps. Let $<\!extra_0\!>$ be a separator token inserted after each step. Let $s_i$ denote the model’s score for step $z_i$.
+Let $x$ be a problem prompt, and $z_1, z_2, \dots, z_T$ be a sequence of reasoning steps. Let $<\!extra_0\!>$ be a separator token inserted after each step. Let $s_i$ denote the model's score for step $z_i$.
 
 For each step:
 $$
@@ -159,6 +159,12 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
                 torch_dtype=torch.bfloat16,
                 trust_remote_code=True
             ).eval()
+            # If no explicit device mapping was supplied, move the entire model
+            # to the default device (GPU if available, otherwise CPU). This
+            # ensures that the model tensors reside on the intended device and
+            # prevents inadvertent CPU placement when CUDA is available.
+            if self.device_map is None:
+                self.model.to(self.device)
 
     def _unload_model(self):
         if self.model is not None:

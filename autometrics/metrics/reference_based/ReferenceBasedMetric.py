@@ -56,7 +56,8 @@ class ReferenceBasedMetric(Metric):
         results = self.calculate_batched(inputs, outputs, references)
 
         if update_dataset:
-            df[self.name] = results
+            # Use assign to create a new DataFrame column without chained assignment issues
+            df = df.assign(**{self.name: results})
             dataset.set_dataframe(df)
 
             if self.name not in dataset.get_metric_columns():

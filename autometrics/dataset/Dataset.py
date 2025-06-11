@@ -131,13 +131,13 @@ class Dataset():
         test_items = items[train_size + val_size:]
 
         if split_column:
-            train_df = df[df[split_column].isin(train_items)]
-            val_df = df[df[split_column].isin(val_items)]
-            test_df = df[df[split_column].isin(test_items)]
+            train_df = df[df[split_column].isin(train_items)].copy()
+            val_df = df[df[split_column].isin(val_items)].copy()
+            test_df = df[df[split_column].isin(test_items)].copy()
         else:
-            train_df = df.iloc[train_items]
-            val_df = df.iloc[val_items]
-            test_df = df.iloc[test_items]
+            train_df = df.iloc[train_items].copy()
+            val_df = df.iloc[val_items].copy()
+            test_df = df.iloc[test_items].copy()
 
         train_dataset = Dataset(
             dataframe=train_df,
@@ -200,15 +200,15 @@ class Dataset():
                 items = np.arange(len(df))
                 test_size = int(test_ratio * len(items))
                 test_items = np.random.choice(np.arange(len(df)), test_size, replace=False)
-                test_df = df[df.index.isin(test_items)]
-                df = df[~df.index.isin(test_items)]
+                test_df = df[df.index.isin(test_items)].copy()
+                df = df[~df.index.isin(test_items)].copy()
                 train_df = df.copy()
             else:
                 items = df[split_column].unique()
                 test_size = int(test_ratio * len(items))
                 test_items = np.random.choice(df[split_column].unique(), test_size, replace=False)
-                test_df = df[df[split_column].isin(test_items)]
-                df = df[~df[split_column].isin(test_items)]
+                test_df = df[df[split_column].isin(test_items)].copy()
+                df = df[~df[split_column].isin(test_items)].copy()
                 train_df = df.copy()
         else:
             test_df = None
@@ -234,8 +234,8 @@ class Dataset():
             split_items = splits[i]
             non_split_items = np.concatenate([splits[j] for j in range(k) if j != i])
             if split_column:
-                split_df = df[df[split_column].isin(split_items)]
-                non_split_df = df[df[split_column].isin(non_split_items)]
+                split_df = df[df[split_column].isin(split_items)].copy()
+                non_split_df = df[df[split_column].isin(non_split_items)].copy()
             else:
                 split_df = df.iloc[split_items].copy()
                 non_split_df = df.iloc[non_split_items].copy()

@@ -58,7 +58,8 @@ class ReferenceBasedMultiMetric(MultiMetric):
 
         if update_dataset:
             for idx, name in enumerate(self.submetric_names):
-                df[name] = results[idx]
+                # Use assign to avoid chained assignment issues by creating a new DataFrame
+                df = df.assign(**{name: results[idx]})
                 dataset.set_dataframe(df)
 
                 if name not in dataset.get_metric_columns():

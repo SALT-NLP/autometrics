@@ -4,7 +4,7 @@ import pandas as pd
 from autometrics.metrics.dummy import DummyMetric
 
 class Primock57(Dataset):
-    def __init__(self, path='./autometrics/dataset/datasets/primock57/metric-scores.csv'):
+    def __init__(self, path='./autometrics/dataset/datasets/primock57/metric-scores.csv', include_precomputed=False):
         df = pd.read_csv(path)
 
         # add together incorrect_critical and incorrect_noncritical
@@ -21,6 +21,9 @@ class Primock57(Dataset):
         target_columns = ['time_sec', 'incorrect', 'omissions', 'inc_plus_omi']
         ignore_columns = ["consultation_id", "model_id", "evaluator", "generated_note", "human_note", "eval_note", "edited_note", "transcript"]
         metric_columns = [col for col in df.columns if col not in target_columns and col not in ignore_columns]
+
+        if not include_precomputed:
+            metric_columns = []
 
         name = "primock57"
 

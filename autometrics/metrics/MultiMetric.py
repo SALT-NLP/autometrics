@@ -31,6 +31,107 @@ class MultiMetric(Metric):
 
         return results
 
+    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+        """
+        Efficient batched version that is aware of *multi*-metric output shapes **and** integrates
+        seamlessly with the caching logic from ``Metric``.
+
+        Returns a list whose outer dimension enumerates sub-metrics and whose inner dimension
+        enumerates the examples (``[submetric][example]``), mirroring what ``_calculate_batched_impl``
+        produces for a cache-miss batch.
+        """
+        # Prepare references
+        if references is None:
+            references = [None] * len(inputs)
+        if not (len(inputs) == len(outputs) == len(references)):
+            raise ValueError("Length of inputs, outputs, and references must match")
+
+        n_examples = len(inputs)
+        expected_submetrics = len(self.submetric_names) if self.submetric_names else None
+        n_submetrics = expected_submetrics  # will stay None if unknown
+
+        # Allocate result container: results_by_submetric[sub_idx][example_idx]
+        # We'll fill with None placeholders and overwrite when values become available.
+        results_by_submetric = None  # allocate lazily when we know n_submetrics
+
+        # Track indices that still need to be computed
+        missing_indices = []
+        missing_inputs, missing_outputs, missing_refs = [], [], []
+
+        # First pass: try cache for every example
+        for idx, (inp, out, ref) in enumerate(zip(inputs, outputs, references)):
+            key = self._make_cache_key('calculate', inp, out, ref, **kwargs)
+            cached = self._cache.get(key) if (self.use_cache and self._cache is not None) else None
+
+            cache_valid = False
+            if cached is not None:
+                if isinstance(cached, (list, tuple)):
+                    # Check that cached length matches expected submetric count (if known)
+                    if expected_submetrics is None or len(cached) == expected_submetrics:
+                        cache_valid = True
+
+            if cache_valid:
+                # Lazy allocation if first valid cache hit
+                if results_by_submetric is None:
+                    n_submetrics = len(cached)
+                    results_by_submetric = [[None] * n_examples for _ in range(n_submetrics)]
+
+                for s_idx, val in enumerate(cached):
+                    results_by_submetric[s_idx][idx] = val
+            else:
+                # Remove malformed cache to avoid future issues
+                if cached is not None and self.use_cache and self._cache is not None:
+                    self._cache.pop(key, None)
+                missing_indices.append(idx)
+                missing_inputs.append(inp)
+                missing_outputs.append(out)
+                missing_refs.append(ref)
+
+        # If nothing allocated yet (all cache misses), allocate now using known submetric count later
+        if results_by_submetric is None:
+            # We still don't know n_submetrics – we'll discover after computing
+            pass  # postpone allocation
+
+        # Compute missing results, if any
+        if missing_indices:
+            batch_refs = missing_refs if any(r is not None for r in missing_refs) else None
+            # Call subclass implementation once for all missing examples
+            missing_results_by_submetric = self._calculate_batched_impl(
+                missing_inputs, missing_outputs, batch_refs, **kwargs)
+
+            # Determine n_submetrics if still unknown
+            if results_by_submetric is None:
+                n_submetrics = len(missing_results_by_submetric)
+                results_by_submetric = [[None] * n_examples for _ in range(n_submetrics)]
+
+            # Sanity check dimensions
+            if n_submetrics is not None and len(missing_results_by_submetric) != n_submetrics:
+                raise ValueError("Unexpected number of sub-metrics returned by _calculate_batched_impl")
+            for sub_list in missing_results_by_submetric:
+                if len(sub_list) != len(missing_indices):
+                    raise ValueError("_calculate_batched_impl must return len(missing_indices) results per sub-metric")
+
+            # Write computed values into result container and cache them example-wise
+            for local_idx, global_idx in enumerate(missing_indices):
+                # Collect values for this example across submetrics
+                example_values = [missing_results_by_submetric[s][local_idx] for s in range(n_submetrics)]
+
+                # Cache
+                if self.use_cache and self._cache is not None:
+                    key = self._make_cache_key('calculate', missing_inputs[local_idx], missing_outputs[local_idx], missing_refs[local_idx], **kwargs)
+                    self._cache[key] = example_values
+
+                # Fill results_by_submetric
+                for s_idx, val in enumerate(example_values):
+                    results_by_submetric[s_idx][global_idx] = val
+
+        # Final safety: no None should remain
+        for sub_idx, sub_list in enumerate(results_by_submetric):
+            if any(v is None for v in sub_list):
+                raise RuntimeError(f"Internal error: sub-metric {sub_idx} has unset results after batching")
+
+        return results_by_submetric
+
     def predict(self, dataset, update_dataset=True, **kwargs):
         """
         Calculate the metric for the dataset

@@ -3,7 +3,7 @@ import pandas as pd
 from autometrics.metrics.dummy import DummyMetric
 
 class SummEval(Dataset):
-    def __init__(self, path='./autometrics/dataset/datasets/summeval/model_annotations.aligned.paired.jsonl'):
+    def __init__(self, path='./autometrics/dataset/datasets/summeval/model_annotations.aligned.paired.jsonl', include_precomputed=False):
         # Load the JSONL file into a DataFrame.
         df = pd.read_json(path, lines=True)
 
@@ -48,6 +48,9 @@ class SummEval(Dataset):
                           if col not in target_columns 
                           and col not in ignore_columns 
                           and col not in new_reference_columns]
+        
+        if not include_precomputed:
+            metric_columns = []
         
         # Define Dataset parameters.
         name = "SummEval"

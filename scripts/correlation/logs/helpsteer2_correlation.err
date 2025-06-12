@@ -1,40 +1,0 @@
-2025-06-10 17:29:58,628 - INFO - PyTorch version 2.7.0 available.
-Traceback (most recent call last):
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/correlation/benchmark_correlation.py", line 270, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/correlation/benchmark_correlation.py", line 186, in main
-    from autometrics.metrics.MetricBank import reference_based_metrics, reference_free_metrics, all_metrics
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/MetricBank.py", line 51, in <module>
-    BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(),
-            ^^^^^^
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/CHRF.py", line 147, in __init__
-    super().__init__(
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py", line 8, in __init__
-    super().__init__(name, description, **kwargs)
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/Metric.py", line 55, in __init__
-    self._cache = Cache(
-                  ^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py", line 456, in __init__
-    sql = self._sql_retry
-          ^^^^^^^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py", line 652, in _sql_retry
-    sql = self._sql
-          ^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py", line 648, in _sql
-    return self._con.execute
-           ^^^^^^^^^
-  File "/nlp/scr/mryan0/miniconda3/envs/autometrics/lib/python3.12/site-packages/diskcache/core.py", line 636, in _con
-    settings = con.execute(select).fetchall()
-               ^^^^^^^^^^^^^^^^^^^
-sqlite3.DatabaseError: database disk image is malformed
-2025-06-10 17:34:45,314 - INFO - PyTorch version 2.7.0 available.
-2025-06-10 17:34:50,062 - INFO - Using default tokenizer.
-2025-06-10 17:34:53,729 - INFO - Writing outputs to: outputs/correlation/HelpSteer2
-2025-06-10 17:34:53,729 - INFO - Loading dataset: HelpSteer2
-2025-06-10 17:34:57,643 - INFO - Dataset has no reference columns ‑ automatically skipping reference-based metrics.
-2025-06-10 17:34:57,643 - INFO - Using 17 metrics.
-2025-06-10 17:34:57,643 - INFO - Running correlations: pearson, spearman, kendall
-Passing a tuple of `past_key_values` is deprecated and will be removed in Transformers v4.48.0. You should pass an instance of `EncoderDecoderCache` instead, e.g. `past_key_values=EncoderDecoderCache.from_legacy_cache(past_key_values)`.
-Token indices sequence length is longer than the specified maximum sequence length for this model (1049 > 1024). Running this sequence through the model will result in indexing errors
-Groups:   0%|          | 0/5 [00:00<?, ?it/s]Groups:  20%|██        | 1/5 [01:58<07:55, 118.91s/it]Groups:  40%|████      | 2/5 [02:06<02:39, 53.14s/it] Groups:  60%|██████    | 3/5 [02:06<00:57, 28.96s/it]Groups:  80%|████████  | 4/5 [02:06<00:17, 17.73s/it]Groups: 100%|██████████| 5/5 [02:07<00:00, 11.51s/it]Groups: 100%|██████████| 5/5 [02:07<00:00, 25.44s/it]

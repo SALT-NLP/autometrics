@@ -1,1104 +1,0 @@
-2025-06-10 15:53:51,944 - INFO - PyTorch version 2.7.0 available.
-2025-06-10 15:54:30,691 - INFO - Using default tokenizer.
-2025-06-10 15:56:28,760 - INFO - Writing outputs to: outputs/correlation/simpda
-2025-06-10 15:56:28,760 - INFO - Loading dataset: simpda
-Traceback (most recent call last):
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/correlation/benchmark_correlation.py", line 280, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/correlation/benchmark_correlation.py", line 195, in main
-    dataset = load_dataset(args.dataset)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/juice2/scr2/nlp/personal-rm/autometrics/autometrics/experiments/correlation/benchmark_correlation.py", line 127, in load_dataset
-    raise RuntimeError(f"Could not resolve dataset identifier '{identifier}'.")
-RuntimeError: Could not resolve dataset identifier 'simpda'.
-2025-06-10 15:56:42,279 - INFO - PyTorch version 2.7.0 available.
-2025-06-10 15:56:47,612 - INFO - Using default tokenizer.
-2025-06-10 15:56:51,473 - INFO - Writing outputs to: outputs/correlation/summeval
-2025-06-10 15:56:51,473 - INFO - Loading dataset: summeval
-2025-06-10 15:56:52,033 - INFO - Using 47 metrics.
-2025-06-10 15:56:52,033 - INFO - Running correlations: pearson, spearman, kendall
-2025-06-10 15:56:52,034 - INFO - 
-=== Running pearson correlation experiment ===
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-slurmstepd: error: *** JOB 10413961 ON jagupard36 CANCELLED AT 2025-06-10T15:57:34 DUE TO PREEMPTION ***
-2025-06-10 15:59:53,093 - INFO - PyTorch version 2.7.0 available.
-2025-06-10 15:59:58,597 - INFO - Using default tokenizer.
-2025-06-10 16:00:02,478 - INFO - Writing outputs to: outputs/correlation/summeval
-2025-06-10 16:00:02,479 - INFO - Loading dataset: summeval
-2025-06-10 16:00:02,805 - INFO - Using 47 metrics.
-2025-06-10 16:00:02,805 - INFO - Running correlations: pearson, spearman, kendall
-2025-06-10 16:00:02,805 - INFO - 
-=== Running pearson correlation experiment ===
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
-You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-DistilBertSdpaAttention is used but `torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True` or `head_mask`. Falling back to the manual attention implementation, but specifying the manual implementation will be required from Transformers version v5.0.0 onwards. This warning can be removed using the argument `attn_implementation="eager"` when loading the model.
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-Passing a tuple of `past_key_values` is deprecated and will be removed in Transformers v4.48.0. You should pass an instance of `EncoderDecoderCache` instead, e.g. `past_key_values=EncoderDecoderCache.from_legacy_cache(past_key_values)`.
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py:61: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[name] = results[idx]
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-The tokenizer class you load from this checkpoint is not the same type as the class this function is called from. It may result in unexpected tokenization. 
-The tokenizer class you load from this checkpoint is 'BleurtSPTokenizer'. 
-The class this function is called from is 'BertTokenizer'.
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-/juice2/scr2/nlp/personal-rm/autometrics/autometrics/metrics/reference_based/ReferenceBasedMetric.py:59: SettingWithCopyWarning: 
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  df[self.name] = results
-Downloading builder script:   0%|          | 0.00/7.24k [00:00<?, ?B/s]Downloading builder script: 100%|██████████| 7.24k/7.24k [00:00<00:00, 22.2MB/s]
-2025-06-10 16:17:37,960 - INFO - Loading faiss with AVX2 support.
-2025-06-10 16:17:38,950 - INFO - Successfully loaded faiss with AVX2 support.
-2025-06-10 16:17:39,004 - INFO - Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes. This is only an error if you're trying to use GPU Faiss.
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:01<00:00,  1.49s/it]Featurizing p: 100%|██████████| 1/1 [00:01<00:00,  1.49s/it]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.40it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.39it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.36it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.36it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.98it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.97it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.64it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.64it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.48it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.48it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  1.99it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  1.98it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.41it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.41it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.81it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.80it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.75it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.75it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.53it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.52it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.48it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.48it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.00it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.00it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.48it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.48it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.73it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.73it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.02it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.02it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.65it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.65it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.31it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.31it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.64it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.64it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.58it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.58it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.83it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.82it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.76it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.75it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.50it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.50it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.76it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.76it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.20it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.20it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.49it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.48it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.36it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.36it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.24it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.24it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.79it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.79it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.73it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.73it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.79it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.78it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.98it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.97it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.66it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.66it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.87it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.87it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.96it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.95it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.85it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.85it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.03it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.02it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.85it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.85it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.01it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.01it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.74it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.74it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.50it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.50it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.94it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.63it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.62it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.52it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.51it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.27it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.26it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.27it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.26it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.48it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.47it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.04it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.04it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.33it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.32it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.49it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.49it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.46it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.46it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.17it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.17it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.04it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.04it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.39it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.39it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.00it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.00it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.74it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.74it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.20it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.20it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.51it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.51it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.47it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.46it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.42it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.42it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.32it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.32it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.01it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.01it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.03it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.02it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.40it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.40it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.77it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.77it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.18it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.18it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.09it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.08it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.13it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.13it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.09it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.09it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.69it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.68it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.44it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.44it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.17it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.17it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.06it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.66it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.66it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.32it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.32it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.41it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.40it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.23it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.23it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.72it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.71it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.29it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.28it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.35it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.35it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.05it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.05it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.25it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.24it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.29it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.29it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.72it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.72it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.43it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.43it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.37it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.37it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.97it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.97it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.41it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.41it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.04it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.04it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.46it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.46it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.89it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.88it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.86it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.03it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.02it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.55it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.55it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.02it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.02it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.98it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.97it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.68it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.67it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.07it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.06it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.51it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.51it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.74it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.74it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.04it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.04it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.94it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.11it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.11it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.48it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.48it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.56it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.56it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.65it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.64it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.52it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.52it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.09it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.08it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.21it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.21it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.67it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.67it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.54it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.53it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.57it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.57it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.34it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.33it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.61it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.61it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.36it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.36it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.26it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.26it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.69it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.80it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.80it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.42it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.42it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.94it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.94it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.31it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.31it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.61it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.61it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.65it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.64it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.15it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.15it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.91it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.90it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.93it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.93it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.55it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.55it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.36it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.35it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.84it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.84it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.81it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.81it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.52it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.51it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.76it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.76it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.00it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.78it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.78it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.69it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.69it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.57it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.57it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.57it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.57it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.40it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.40it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.69it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.59it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.58it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.77it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.77it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.12it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.11it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.35it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.35it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.53it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.53it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.88it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.88it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.38it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.37it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.75it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.75it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.62it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.62it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.01it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.01it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.79it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.79it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.18it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.18it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.11it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.50it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.50it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.93it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.93it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.59it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.59it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.94it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.94it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.02it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.02it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.87it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.87it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.91it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.90it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.47it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.47it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.54it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.54it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.14it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.14it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.97it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.97it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.66it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.66it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.09it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.08it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.42it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.42it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.80it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.80it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.93it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.93it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.83it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.83it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.94it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.94it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.43it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.43it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.71it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.71it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.76it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.76it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.14it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.14it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.75it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.74it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.75it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.75it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.79it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.79it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.29it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.29it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.78it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.78it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.69it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.20it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.20it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.72it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.72it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.76it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.76it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.20it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.20it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.51it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.51it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.28it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.28it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.82it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.81it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.16it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.15it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.55it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.55it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.05it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.05it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.86it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.86it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.09it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.09it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.88it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.40it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.40it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.28it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.28it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.56it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.56it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.36it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.36it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.67it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.67it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.26it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.26it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.03it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.03it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.55it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.55it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.67it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.67it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.14it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.14it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.70it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.70it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.49it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.49it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.43it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.43it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.28it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.28it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.97it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.97it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.12it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.11it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.43it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.42it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.18it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.05it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.05it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.31it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.31it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.84it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.84it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.26it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.26it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.22it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.21it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.18it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.17it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.31it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.31it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  1.91it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  1.91it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.18it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.17it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.13it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.13it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.02it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.02it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.47it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.46it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.52it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.52it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.07it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.07it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.24it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.23it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.67it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.66it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.81it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.81it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.98it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.97it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.04it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.04it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.23it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.23it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.72it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.72it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.04it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.04it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.68it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.67it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.14it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.14it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.98it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.98it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.10it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.10it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.25it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.24it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.52it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.52it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.33it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.32it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.96it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.96it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.00it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.00it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.39it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.38it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.00it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.99it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.17it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.17it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.52it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.52it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.29it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.29it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.08it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.08it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.23it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.23it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.25it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.25it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.02it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.12it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.12it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.48it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.48it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.18it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.17it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.02it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.02it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.54it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.53it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.02it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.02it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  5.14it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  5.14it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.55it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.55it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.21it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.21it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.83it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.83it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.95it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.95it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.84it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.84it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.49it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.49it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.98it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.97it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.57it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.56it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.00it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.00it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.75it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.74it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.13it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.13it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.61it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.61it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.88it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.87it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.33it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.87it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.87it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.92it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.38it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.38it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.46it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.46it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.01it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.57it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.56it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.40it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.40it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.56it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.56it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.54it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.54it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.30it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.30it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.86it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.53it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.53it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.68it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.68it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.42it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.42it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.66it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.66it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.23it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.23it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.50it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.49it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.43it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.43it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.62it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.54it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.53it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.55it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.54it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.45it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.45it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.12it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.12it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.12it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.12it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.72it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.72it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.85it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.84it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.91it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.91it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.44it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.43it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.98it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.98it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.72it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.72it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.28it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.27it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.99it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.29it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.29it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.98it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.98it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.17it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.17it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.01it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.01it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.28it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.28it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.19it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.19it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.21it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.21it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.11it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.11it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.73it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.73it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.14it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.14it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.58it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.58it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.31it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.30it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.60it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.59it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.86it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.32it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.32it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.88it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.87it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.87it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.86it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.93it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.93it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.44it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.44it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.85it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.85it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.32it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.32it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.65it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.65it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.93it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.93it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.84it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.84it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.36it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.36it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.51it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.51it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.24it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.24it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.78it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.78it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.41it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.41it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.46it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.46it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.94it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.93it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.18it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.17it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.08it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.08it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.11it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.10it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.12it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.12it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.57it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.57it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.16it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.15it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.05it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.04it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.85it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.18it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.18it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.16it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.16it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.96it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.50it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.50it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.06it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.06it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.89it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.88it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.30it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.30it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.42it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.42it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.32it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.32it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.51it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.50it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.38it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.37it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.44it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.44it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.89it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.88it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.45it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.45it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.89it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.89it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.41it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.40it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.26it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.26it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.51it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.51it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.44it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.44it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.40it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.40it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.24it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.24it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.39it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.39it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.58it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.57it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.60it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  3.59it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.61it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.61it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.72it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.72it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.13it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.13it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.47it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.46it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.51it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.50it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.55it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.55it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.45it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.45it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.66it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.04it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.03it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.78it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.78it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.82it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.81it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.35it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.35it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.67it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.22it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.22it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.64it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.64it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.97it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.97it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.61it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.61it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.38it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.38it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.27it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.26it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.41it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.41it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.63it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.63it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.55it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.55it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.34it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.34it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.59it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.92it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.91it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.31it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.31it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.38it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.38it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.77it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.77it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.75it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.75it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.60it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.32it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.32it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.58it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.58it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.99it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  1.99it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.73it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.73it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.14it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.14it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.18it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.17it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.26it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.25it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.94it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.94it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.71it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.15it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.91it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.91it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.63it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.62it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.90it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.26it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.26it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.79it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.79it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  2.95it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.85it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.85it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.76it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.76it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.80it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.80it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.25it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.25it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.70it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.69it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.06it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.06it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.68it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.89it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  3.89it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.79it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.79it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.55it/s]Featurizing q: 100%|██████████| 1/1 [00:00<00:00,  4.55it/s]
-WARNING clustering 2 points to 2 centroids: please provide at least 78 training points
-Featurizing p:   0%|          | 0/1 [00:00<?, ?it/s]slurmstepd: error: *** JOB 10413961 ON jagupard36 CANCELLED AT 2025-06-10T16:20:32 DUE TO PREEMPTION ***
-Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]Featurizing p: 100%|██████████| 1/1 [00:00<00:00,  2.89it/s]
-Featurizing q:   0%|          | 0/1 [00:00<?, ?it/s]

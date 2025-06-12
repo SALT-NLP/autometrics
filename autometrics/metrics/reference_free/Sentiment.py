@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from typing import List, Union
+from typing import List, Union, ClassVar
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 
@@ -157,6 +157,11 @@ $$
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 484.86181640625  # in MB
+    cpu_mem: ClassVar[float] = 1393.8125  # in MB
+
     def __init__(
         self,
         name: str = "Sentiment",

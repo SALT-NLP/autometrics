@@ -1,6 +1,6 @@
 import torch
 from torchmetrics.functional.text.infolm import infolm
-from typing import List, Union
+from typing import List, Union, ClassVar
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
 class InfoLM(ReferenceBasedMetric):
@@ -138,6 +138,11 @@ These divergences are computed over distributions derived from MLM logits, optio
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 1142.15625  # in MB
+
     def __init__(
         self,
         name: str = "InfoLM",

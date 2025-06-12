@@ -1,5 +1,6 @@
 from __future__ import division
 from collections import Counter
+from typing import ClassVar
 
 from nltk import word_tokenize
 
@@ -333,6 +334,10 @@ SARI scales well across datasets with multiple references, leveraging n-gram mat
 Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu
 	"""
+	
+	# Resource usage statistics (in megabytes)
+	gpu_mem: ClassVar[float] = 0.0  # in MB
+	cpu_mem: ClassVar[float] = 727.91015625  # in MB
 	
 	# SARI is fast enough without caching
 	DEFAULT_USE_CACHE = False

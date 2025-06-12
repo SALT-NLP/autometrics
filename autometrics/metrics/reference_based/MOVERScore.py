@@ -12,7 +12,7 @@ from collections import defaultdict, Counter
 from multiprocessing import Pool
 from functools import partial
 
-from typing import List, Union, Iterable
+from typing import List, Union, Iterable, ClassVar
 from itertools import zip_longest
 
 
@@ -162,6 +162,10 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes) using distilbert-base-uncased
+    gpu_mem: ClassVar[float] = 262.36328125  # in MB
+    cpu_mem: ClassVar[float] = 1534.84375  # in MB
 
     def __init__(self, model_name='distilbert-base-uncased', device='cuda', persistent=True, **kwargs):
         """

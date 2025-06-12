@@ -1,6 +1,7 @@
 from Levenshtein import distance, ratio, hamming, jaro, jaro_winkler
 from nltk.metrics.distance import jaccard_distance
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
+from typing import ClassVar
 
 def _aggregate(values, method):
     """
@@ -156,6 +157,10 @@ where $1 \leq i \leq |s_1|$, $1 \leq j \leq |s_2|$, and typically $w_{ins} = w_{
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
 
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 728.78515625  # in MB
+
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
@@ -308,6 +313,11 @@ where $|s_1|$ and $|s_2|$ denote the lengths of the sequences $s_1$ and $s_2$, r
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 727.421875  # in MB
+
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
@@ -458,6 +468,11 @@ where $\mathbf{1}\{ s_i \neq t_i \}$ is an indicator function that equals 1 if $
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 728.60546875  # in MB
+
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
@@ -609,6 +624,11 @@ $$
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 727.2109375  # in MB
+
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
@@ -776,6 +796,11 @@ where:
 - **Acknowledgment of AI Assistance:**
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high). All content has been reviewed and curated by the author to ensure accuracy.
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 728.59765625  # in MB
+
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
@@ -937,6 +962,11 @@ Where:
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 727.87109375  # in MB
+
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     

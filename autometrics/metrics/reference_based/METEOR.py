@@ -1,6 +1,6 @@
 from nltk.translate.meteor_score import meteor_score
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
-from typing import List, Union
+from typing import List, Union, ClassVar
 import re
 from bs4 import BeautifulSoup
 
@@ -149,6 +149,11 @@ $$
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 1102.37109375  # in MB
+
     def __init__(self,
                  name: str = "METEOR",
                  description: str = "METEOR score for machine translation evaluation (NLTK)",

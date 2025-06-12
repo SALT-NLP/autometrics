@@ -1,5 +1,6 @@
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 from sacrebleu.metrics import TER as ter
+from typing import ClassVar
 
 class TER(ReferenceBasedMetric):
     """---
@@ -129,6 +130,10 @@ Where:
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 731.43359375  # in MB
 
     def __init__(self, name="TER", description="TER (Translation Edit Rate) is a metric that measures the number of edits needed to transform a system output into a reference translation. It quantifies translation quality by counting insertions, deletions, substitutions, and shifts, with lower scores indicating better translations.", **kwargs):
         super().__init__(name, description, **kwargs)

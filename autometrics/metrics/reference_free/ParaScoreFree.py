@@ -1,6 +1,7 @@
 from parascore import ParaScorer
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 import torch
+from typing import ClassVar
 
 class ParaScoreFree(ReferenceFreeMetric):
     """---
@@ -149,6 +150,11 @@ where:
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided documents and source materials. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 346.365234375  # in MB
+    cpu_mem: ClassVar[float] = 1718.91796875  # in MB
+
     def __init__(
         self,
         name: str = "ParaScoreFree",

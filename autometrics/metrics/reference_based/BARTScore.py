@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import traceback
 from transformers import BartTokenizerFast, BartForConditionalGeneration
-from typing import List
+from typing import List, ClassVar
 import numpy as np
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
@@ -288,6 +288,10 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 1558.19189453125  # in MB
+    cpu_mem: ClassVar[float] = 1370.58984375  # in MB
 
     def __init__(
         self, batch_size: int = 4, model: str = "facebook/bart-large-cnn", persistent: bool = True, **kwargs

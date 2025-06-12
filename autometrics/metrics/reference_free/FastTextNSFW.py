@@ -1,10 +1,11 @@
 from autometrics.metrics.reference_free.FastTextClassifier import FastTextClassifier
+from typing import ClassVar
 
 class FastTextNSFW(FastTextClassifier):
     """---
 # Metric Card for FastTextNSFW
 
-FastTextNSFW is a reference-free binary classification metric for evaluating the presence of not-safe-for-work (NSFW) content in generated text. It is based on a FastText linear classifier trained on the Jigsaw Toxic Comment Classification dataset, using the "obscene" label as a proxy for NSFW content. This metric was developed as part of the AI2 Dolma project to enable scalable filtering of large-scale web text data during corpus construction for language model pretraining. It outputs a signed scalar score indicating both the classification result and the model’s confidence.
+FastTextNSFW is a reference-free binary classification metric for evaluating the presence of not-safe-for-work (NSFW) content in generated text. It is based on a FastText linear classifier trained on the Jigsaw Toxic Comment Classification dataset, using the "obscene" label as a proxy for NSFW content. This metric was developed as part of the AI2 Dolma project to enable scalable filtering of large-scale web text data during corpus construction for language model pretraining. It outputs a signed scalar score indicating both the classification result and the model's confidence.
 
 ## Metric Details
 
@@ -12,7 +13,7 @@ FastTextNSFW is a reference-free binary classification metric for evaluating the
 
 FastTextNSFW uses a FastText classifier to assess whether generated text is NSFW. The classifier was trained using the Jigsaw Toxic Comment Classification dataset, where comments labeled "obscene" were treated as positive examples (NSFW), and comments with **no labels** were treated as negative examples (non-NSFW). Comments labeled only with other toxicity labels (e.g., "threat", "insult", "identity hate") were **excluded** from training.
 
-The model outputs a label (“nsfw” or “non-nsfw”) along with a confidence score. The final metric score is the model’s confidence, negated if the predicted label is “nsfw”. This design allows the score to capture both the label and its confidence in a single continuous value.
+The model outputs a label ("nsfw" or "non-nsfw") along with a confidence score. The final metric score is the model's confidence, negated if the predicted label is "nsfw". This design allows the score to capture both the label and its confidence in a single continuous value.
 
 - **Metric Type:** Fairness  
 - **Range:** $[-1.0, 1.0]$  
@@ -22,7 +23,7 @@ The model outputs a label (“nsfw” or “non-nsfw”) along with a confidence
 
 ### Formal Definition
 
-Let $\hat{y} \in \{\text{nsfw}, \text{non-nsfw}\}$ be the predicted label from the classifier for a generated output $\hat{x}$, and let $p(\hat{y}|\hat{x})$ be the classifier’s confidence in that label. Then the FastTextNSFW score is:
+Let $\hat{y} \in \{\text{nsfw}, \text{non-nsfw}\}$ be the predicted label from the classifier for a generated output $\hat{x}$, and let $p(\hat{y}|\hat{x})$ be the classifier's confidence in that label. Then the FastTextNSFW score is:
 
 $$
 s(\hat{x}) = 
@@ -86,7 +87,7 @@ $$
 
 - **Biases:**  
   - Reflects annotation biases in the Jigsaw dataset (e.g., cultural interpretations of obscenity)  
-  - May underrepresent some NSFW categories if not labeled as “obscene” in training  
+  - May underrepresent some NSFW categories if not labeled as "obscene" in training  
 
 - **Task Misalignment Risks:**  
   - Cannot distinguish harmful from benign NSFW (e.g., medical vs. explicit content)  
@@ -154,6 +155,11 @@ FastText
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and referenced documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 1709.95703125  # in MB
+
     def __init__(
         self,
         persistent: bool = True,

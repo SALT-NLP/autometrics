@@ -5,6 +5,7 @@ from autometrics.metrics.unieval.utils import convert_to_json
 # from autometrics.metrics.unieval.evaluator import get_evaluator
 
 import torch
+from typing import ClassVar
 
 class UniEvalDialogue(ReferenceBasedMultiMetric):
     """---
@@ -181,6 +182,10 @@ These prompts are tokenized and passed into the **UniEvalDialogue** model, which
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes
+    gpu_mem: ClassVar[float] = 3140.60546875  # in MB
+    cpu_mem: ClassVar[float] = 3169.94140625  # in MB
 
     def __init__(self, persistent=True, **kwargs):
         name = "UniEvalDialogue"

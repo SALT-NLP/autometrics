@@ -1,5 +1,6 @@
 from sacrebleu.metrics import BLEU as bleu
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
+from typing import ClassVar
 
 class IBLEU(ReferenceBasedMetric):
     """---
@@ -134,6 +135,10 @@ Where:
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 730.34765625  # in MB
 
     def __init__(self,
                  name: str = "iBLEU",

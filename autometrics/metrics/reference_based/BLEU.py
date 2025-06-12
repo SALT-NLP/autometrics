@@ -1,5 +1,6 @@
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 from sacrebleu.metrics import BLEU as bleu
+from typing import ClassVar
 
 class BLEU(ReferenceBasedMetric):
     """---
@@ -135,6 +136,10 @@ Portions of this metric card were drafted with assistance from OpenAI's ChatGPT,
 
     # BLEU is fast enough without caching
     DEFAULT_USE_CACHE = False
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 729.32514375  # in MB
 
     def __init__(self, name="BLEU", description="BLEU compares the n-grams of the candidate with the n-grams of the reference.", **kwargs):
         super().__init__(name, description, **kwargs)

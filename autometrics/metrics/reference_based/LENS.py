@@ -1,5 +1,5 @@
 import torch
-from typing import List, Union
+from typing import List, Union, ClassVar
 from lens import download_model, LENS
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
@@ -134,6 +134,12 @@ where $f_k$ is the $k$-th expert head's output.
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    # TODO: Check this, because gpu memory being zero for a model is suspicious
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 3330.29296875  # in MB
+
     def __init__(
         self,
         name: str = "LENS",

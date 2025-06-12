@@ -1,7 +1,7 @@
 # autometrics/metrics/reference_free/INFORMRewardModel.py
 
 import torch
-from typing import List, Optional, Union
+from typing import List, Optional, Union, ClassVar
 from transformers import LlamaPreTrainedModel, LlamaModel, PreTrainedTokenizerFast
 from transformers.modeling_outputs import SequenceClassifierOutputWithPast
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
@@ -194,6 +194,11 @@ where:
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and reference documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 132727.0478515625  # in MB
+    cpu_mem: ClassVar[float] = 2089.3359375  # in MB
+
     def __init__(
         self,
         name: str = "INFORMRewardModel",

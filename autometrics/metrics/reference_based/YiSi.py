@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from transformers import AutoTokenizer, AutoModel
 from sklearn.feature_extraction.text import TfidfVectorizer
-from typing import List, Dict, Union
+from typing import List, Dict, Union, ClassVar
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
 
@@ -218,6 +218,11 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 686.8544921875  # in MB
+    cpu_mem: ClassVar[float] = 1420.12890625  # in MB
+
     def __init__(
         self,
         name: str = 'YiSi',

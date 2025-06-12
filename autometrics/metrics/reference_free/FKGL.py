@@ -1,5 +1,6 @@
 import textstat
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
+from typing import ClassVar
 
 class FKGL(ReferenceFreeMetric):
     """---
@@ -117,6 +118,10 @@ FKGL scales well for texts of varying lengths and can handle large datasets with
 Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu
     """
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 894.08203125  # in MB
 
     def __init__(self, name="FKGL", description="Flesch-Kincaid Grade Level (FKGL) is a metric that estimates the readability of a text based on the average number of syllables per word and the average number of words per sentence. Lower scores indicate easier-to-read text.", **kwargs):
         super().__init__(name, description, **kwargs)

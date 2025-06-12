@@ -1,5 +1,5 @@
 import torch
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, ClassVar
 from lens import download_model, LENS_SALSA as _LENS_SALSA_Model
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 
@@ -141,6 +141,12 @@ The model is trained using human-annotated quality scores from simplification co
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    # TODO: Check this, because gpu memory being zero is suspicious
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 2909.66796875  # in MB
+
     def __init__(
         self,
         name: str = "LENS_SALSA",

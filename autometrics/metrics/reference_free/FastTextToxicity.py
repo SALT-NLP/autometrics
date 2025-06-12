@@ -4,6 +4,7 @@ import requests
 from platformdirs import user_data_dir
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 from autometrics.metrics.reference_free.FastTextClassifier import FastTextClassifier
+from typing import ClassVar
 
 class FastTextToxicity(FastTextClassifier):
     """---
@@ -15,12 +16,12 @@ FastTextToxicity is a reference-free classification metric based on a FastText b
 
 ### Metric Description
 
-FastTextToxicity assigns a score to generated text based on whether it is classified as toxic or non-toxic. The score is the classifier’s confidence in the predicted label, negated if the prediction is “toxic.” This allows for a continuous scalar signal indicating both toxicity and confidence. The model is a FastText linear classifier trained on the Jigsaw Toxic Comment Classification dataset, using a bag-of-words representation with optional n-gram features.
+FastTextToxicity assigns a score to generated text based on whether it is classified as toxic or non-toxic. The score is the classifier's confidence in the predicted label, negated if the prediction is "toxic." This allows for a continuous scalar signal indicating both toxicity and confidence. The model is a FastText linear classifier trained on the Jigsaw Toxic Comment Classification dataset, using a bag-of-words representation with optional n-gram features.
 
 The binary classification task was defined as follows:
-- **Positive class ("toxic")**: Examples from the Jigsaw dataset that contain at least one label excluding “obscene” (e.g., “toxic”, “severe toxic”, “threat”, “insult”, “identity hate”).
+- **Positive class ("toxic")**: Examples from the Jigsaw dataset that contain at least one label excluding "obscene" (e.g., "toxic", "severe toxic", "threat", "insult", "identity hate").
 - **Negative class ("non-toxic")**: Examples with no labels at all.
-- **Excluded from training**: Examples labeled *only* as “obscene” were not used in training for this classifier.
+- **Excluded from training**: Examples labeled *only* as "obscene" were not used in training for this classifier.
 
 - **Metric Type:** Fairness  
 - **Range:** $[-1.0, 1.0]$  
@@ -76,7 +77,7 @@ $$
 
 - **Libraries/Packages:**  
   - [Facebook fastText](https://github.com/facebookresearch/fastText)  
-  - AI2’s internal implementation (`FastTextClassifier` in `autometrics`)  
+  - AI2's internal implementation (`FastTextClassifier` in `autometrics`)  
   - Requires loading the FastText binary model trained on Jigsaw
 
 ### Computational Complexity
@@ -160,6 +161,11 @@ FastText
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and referenced documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 1711.45703125  # in MB
+
     def __init__(self,
                  persistent: bool = True,
                  data_dir: str = None,

@@ -1,4 +1,5 @@
 from autometrics.metrics.reference_free.HuggingFaceReferenceFreeMetric import HuggingFaceReferenceFreeMetric
+from typing import ClassVar
 
 class Toxicity(HuggingFaceReferenceFreeMetric):
     """---
@@ -172,6 +173,11 @@ $$
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 484.85888671875  # in MB
+    cpu_mem: ClassVar[float] = 1389.84765625  # in MB
+
     def __init__(
         self,
         name: str = "Toxicity",

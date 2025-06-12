@@ -2,7 +2,7 @@
 # Adapted from https://github.com/facebookresearch/EditEval/blob/main/src/metrics/update_rouge.py
 
 import re
-from typing import List, Tuple
+from typing import List, Tuple, ClassVar
 from rouge_score import rouge_scorer
 from autometrics.metrics.reference_based.ReferenceBasedMultiMetric import ReferenceBasedMultiMetric
 
@@ -16,7 +16,7 @@ UpdateROUGE is a variant of the ROUGE metric tailored for update-style generatio
 
 ### Metric Description
 
-UpdateROUGE evaluates the quality of additions made in a model’s output by comparing them to the additions in a human-authored reference, relative to a shared source input. This helps avoid artificially inflated scores in tasks where simply copying unchanged content from the source would otherwise result in high overlap. Additions are identified heuristically as complete sentences in the reference or output that do not appear in the source. ROUGE scores (ROUGE-1, ROUGE-2, and ROUGE-Lsum) are then computed using F1 over these addition segments.
+UpdateROUGE evaluates the quality of additions made in a model's output by comparing them to the additions in a human-authored reference, relative to a shared source input. This helps avoid artificially inflated scores in tasks where simply copying unchanged content from the source would otherwise result in high overlap. Additions are identified heuristically as complete sentences in the reference or output that do not appear in the source. ROUGE scores (ROUGE-1, ROUGE-2, and ROUGE-Lsum) are then computed using F1 over these addition segments.
 
 - **Metric Type:** Surface-Level Similarity  
 - **Range:** 0 to 1  
@@ -100,7 +100,7 @@ The additions $\Delta(R, S)$ and $\Delta(\hat{Y}, S)$ are computed via heuristic
 ## Further Reading
 
 - **Papers:**  
-  - Iv et al., 2022. “FRUIT: Faithfully Reflecting Updated Information in Text.” NAACL 2022.  
+  - Iv et al., 2022. "FRUIT: Faithfully Reflecting Updated Information in Text." NAACL 2022.  
     [https://aclanthology.org/2022.naacl-main.269/](https://aclanthology.org/2022.naacl-main.269/)
 
 - **Blogs/Tutorials:**  
@@ -135,6 +135,11 @@ The additions $\Delta(R, S)$ and $\Delta(\hat{Y}, S)$ are computed via heuristic
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 727.6953125  # in MB
+
     def __init__(self,
                  name: str = "UpdateROUGE",
                  description: str = "Update-aware ROUGE metrics on additions.",

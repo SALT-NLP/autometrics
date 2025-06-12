@@ -2,7 +2,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
 from autometrics.metrics.reference_free.ReferenceFreeMultiMetric import ReferenceFreeMultiMetric
-from typing import List, Tuple
+from typing import List, Tuple, ClassVar
 
 class DistinctNGram(ReferenceFreeMultiMetric):
     """---
@@ -137,6 +137,11 @@ $$
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 730.35546875  # in MB
+
     def __init__(
         self,
         n_values: List[int] = [1, 2, 3, 4],

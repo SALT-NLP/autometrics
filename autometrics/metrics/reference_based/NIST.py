@@ -1,5 +1,6 @@
 from nltk.translate.nist_score import sentence_nist
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
+from typing import ClassVar
 
 class NIST(ReferenceBasedMetric):
     """---
@@ -144,6 +145,10 @@ where $\beta$ is a constant (typically chosen so that penalty = 0.5 when $L_\tex
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 727.6015625  # in MB
 
     def __init__(self,
                  name: str = "NIST",

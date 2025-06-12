@@ -8,7 +8,7 @@ try:
 except ImportError:
     HF_HUB_CACHE = None
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
-from typing import List, Union
+from typing import List, Union, ClassVar
 
 class FastTextEducationalValue(ReferenceFreeMetric):
     """---
@@ -147,6 +147,11 @@ FastText
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and referenced documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 3819.453125  # in MB
+
     def __init__(
         self,
         name: str = "FastTextEducationalValue",

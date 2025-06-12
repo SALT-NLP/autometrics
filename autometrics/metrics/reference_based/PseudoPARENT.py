@@ -2,6 +2,7 @@ import collections
 import math
 import multiprocessing as mp
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
+from typing import ClassVar
 
 def _parent_helper(args):
     metric, inp, out, refs = args
@@ -168,6 +169,11 @@ The final score is the maximum $F$ across all references $R_i$.
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 725.58984375  # in MB
+
     def __init__(
         self,
         name="PseudoPARENT",

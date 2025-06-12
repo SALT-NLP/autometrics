@@ -15,6 +15,7 @@ from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBa
 from nltk import word_tokenize
 from nltk.stem.porter import PorterStemmer
 from collections import Counter
+from typing import ClassVar
 
 # ----------------------------
 # Internal Functions and Classes
@@ -359,6 +360,11 @@ with uniform weights $w_n = \frac{1}{N}$ (typically $N=4$).
 - **Authors:** Michael J. Ryan  
 - **Acknowledgment of AI Assistance:** Portions of this metric card were drafted with assistance from OpenAI's ChatGPT (o3-mini-high), based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 726.43359375  # in MB
+
     def __init__(self, n=4, sigma=6.0, name="CIDEr", description="CIDEr measures consensus between a candidate sentence and its references.", **kwargs):
         super().__init__(name + "_n" + str(n) + "_sig" + str(sigma), description, n=n, sigma=sigma, **kwargs)
         self._n = n

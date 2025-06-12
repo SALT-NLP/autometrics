@@ -1,5 +1,6 @@
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 from sacrebleu.metrics import CHRF as chrf
+from typing import ClassVar
 
 class CHRF(ReferenceBasedMetric):
     """---
@@ -141,6 +142,10 @@ Scales well for datasets of varying sizes due to its simple character and word n
 - **Acknowledgment of AI Assistance:**  
 Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 730.5  # in MB
 
     def __init__(self, name="CHRF", description="chrF++ is a metric for evaluating machine translation quality that uses character and word n-gram F-scores to assess similarity between translations and references. It captures both fine-grained character-level details and word-level structure, making it effective for languages with rich morphology.", **kwargs):
         # Pass ALL parameters to parent constructor

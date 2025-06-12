@@ -1,7 +1,7 @@
 import os
 import torch
 import numpy as np
-from typing import List, Optional, Union, Tuple, Dict, Any
+from typing import List, Optional, Union, Tuple, Dict, Any, ClassVar
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 from autometrics.metrics.utils.device_utils import get_model_device, ensure_tensor_on_device
@@ -137,6 +137,11 @@ For Llama 3:
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 6160.84033203125  # in MB
+    cpu_mem: ClassVar[float] = 2003.9375  # in MB
+
     def __init__(
         self,
         name: str = "GRMRewardModel",

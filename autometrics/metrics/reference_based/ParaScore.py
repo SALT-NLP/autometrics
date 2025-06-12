@@ -1,5 +1,6 @@
 from parascore import ParaScorer
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
+from typing import ClassVar
 
 class ParaScore(ReferenceBasedMetric):
     """---
@@ -142,6 +143,11 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided documents and source materials. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 338.13323437500003  # in MB
+    cpu_mem: ClassVar[float] = 1079.51953125  # in MB
+
     def __init__(
         self,
         name: str = "ParaScore",

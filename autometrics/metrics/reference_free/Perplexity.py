@@ -12,6 +12,7 @@ from collections import defaultdict
 from tqdm import tqdm
 from accelerate.test_utils.testing import get_backend
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
+from typing import ClassVar
 
 
 # -------------------------------
@@ -314,6 +315,11 @@ This method provides a **more realistic** evaluation of model fluency while effi
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu
     """
+
+    # Resource usage statistics (in megabytes) based on GPT-2-large
+    gpu_mem: ClassVar[float] = 3069.4375  # in MB
+    cpu_mem: ClassVar[float] = 1504.29296875  # in MB
+
     def __init__(self, model="gpt2-large", batch_size=8, stride=512, progress_bar=True, persistent=True, **kwargs):
         name = "Perplexity_" + model
         description = (

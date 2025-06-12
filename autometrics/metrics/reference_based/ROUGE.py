@@ -1,6 +1,7 @@
 from autometrics.metrics.reference_based.ReferenceBasedMultiMetric import ReferenceBasedMultiMetric
 import json
 from rouge_score import rouge_scorer
+from typing import ClassVar
 
 def parse_rouge_dict(rouge_dict):
     """
@@ -194,6 +195,10 @@ ROUGE-LSum extends ROUGE-L to the summary level by treating newlines as sentence
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu  """
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 726.48828125  # in MB
 
     def __init__(self, **kwargs):
         name = "ROUGE"

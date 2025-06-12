@@ -4,7 +4,7 @@ from transformers import BertTokenizer, BertForQuestionAnswering
 from collections import Counter
 import re, string
 from autometrics.metrics.reference_free.ReferenceFreeMultiMetric import ReferenceFreeMultiMetric
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, ClassVar
 
 
 def normalize_answer(s: str) -> str:
@@ -316,6 +316,11 @@ $$
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 1283.37548828125  # in MB
+    cpu_mem: ClassVar[float] = 1542.46484375  # in MB
+
     def __init__(
         self,
         name: str = 'SummaQA',

@@ -10,6 +10,7 @@
 """ GLEU score implementation. """
 from __future__ import division
 from collections import Counter
+from typing import ClassVar
 
 import nltk
 from nltk import word_tokenize
@@ -314,6 +315,10 @@ The final score is symmetrical with respect to hypothesis and reference, making 
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+	# Resource usage statistics (in megabytes)
+	gpu_mem: ClassVar[float] = 0.0  # in MB
+	cpu_mem: ClassVar[float] = 727.953125  # in MB
 
 	# GLEU is fast enough without caching
 	DEFAULT_USE_CACHE = False

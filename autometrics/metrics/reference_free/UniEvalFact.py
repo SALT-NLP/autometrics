@@ -5,6 +5,7 @@ from autometrics.metrics.unieval.utils import convert_to_json
 # from autometrics.metrics.unieval.evaluator import get_evaluator
 
 import torch
+from typing import ClassVar
 
 class UniEvalFact(ReferenceFreeMultiMetric):
     """---
@@ -150,6 +151,10 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu  """
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 3140.60546875  # in MB
+    cpu_mem: ClassVar[float] = 3167.10546875  # in MB
 
     def __init__(self, device: str = "cuda", persistent: bool = True, **kwargs):
         name = "UniEvalFact"

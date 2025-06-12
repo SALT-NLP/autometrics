@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from transformers import AutoModel, AutoTokenizer
 from autometrics.metrics.reference_free.ReferenceFreeMultiMetric import ReferenceFreeMultiMetric
 from autometrics.metrics.utils.device_utils import get_model_device, ensure_tensor_on_device
-from typing import Tuple, List
+from typing import Tuple, List, ClassVar
 
 class MathProcessRewardModel(ReferenceFreeMultiMetric):
     """---
@@ -125,6 +125,12 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    # TODO: Check this, because gpu memory being zero is suspicious
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 13970.72265625  # in MB
+
     def __init__(
         self,
         name: str = "PRMRewardModel",

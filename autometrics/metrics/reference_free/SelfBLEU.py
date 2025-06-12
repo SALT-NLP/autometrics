@@ -2,7 +2,7 @@ import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
-from typing import List, Any
+from typing import List, Any, ClassVar
 
 class SelfBLEU(ReferenceFreeMetric):
     """---
@@ -30,7 +30,7 @@ $$
 \text{Self-BLEU}(X) = \frac{1}{n} \sum_{i=1}^{n} \text{BLEU}(x_i, X \setminus \{x_i\})
 $$
 
-Each BLEU computation typically uses uniform $n$-gram weights (e.g., unigram to 5-gram), along with a smoothing function such as `method1` from NLTK’s `SmoothingFunction`.
+Each BLEU computation typically uses uniform $n$-gram weights (e.g., unigram to 5-gram), along with a smoothing function such as `method1` from NLTK's `SmoothingFunction`.
 
 ### Inputs and Outputs
 
@@ -118,6 +118,11 @@ Each BLEU computation typically uses uniform $n$-gram weights (e.g., unigram to 
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 0.0  # in MB
+    cpu_mem: ClassVar[float] = 728.73046875  # in MB
+
     def __init__(
         self,
         name: str = "SelfBLEU",

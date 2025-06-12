@@ -1,5 +1,5 @@
 import torch
-from typing import List, Union
+from typing import List, Union, ClassVar
 from bleurt_pytorch import BleurtConfig, BleurtForSequenceClassification, BleurtTokenizer
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
@@ -137,6 +137,10 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 2205.541015625  # in MB
+    cpu_mem: ClassVar[float] = 2811.62890625  # in MB
 
     def __init__(
         self,

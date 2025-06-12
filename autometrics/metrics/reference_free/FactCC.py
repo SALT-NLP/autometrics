@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
+from typing import ClassVar
 
 class FactCC(ReferenceFreeMetric):
     """---
@@ -130,6 +131,11 @@ where $f$ is the classification function learned by the model, trained on synthe
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from generative AI. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+    
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 426.86083984375  # in MB
+    cpu_mem: ClassVar[float] = 1317.58984375  # in MB
+
     def __init__(
         self,
         name: str = "FactCC",

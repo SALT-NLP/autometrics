@@ -365,7 +365,7 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
             self._unload_model()
         return score
 
-    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], references=None, **kwargs) -> List[float]:
         if self.model is None:
             self._load_model()
         all_scores: List[float] = []

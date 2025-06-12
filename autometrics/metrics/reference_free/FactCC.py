@@ -174,8 +174,8 @@ where $f$ is the classification function learned by the model, trained on synthe
             input_text,
             output,
             max_length=512,
-            padding="max_length",
-            truncation="only_first",
+            padding="longest",
+            truncation="longest_first",
             return_tensors="pt"
         ).to(self.device)
         with torch.no_grad():
@@ -202,8 +202,8 @@ where $f$ is the classification function learned by the model, trained on synthe
                 batch_src,
                 batch_out,
                 max_length=512,
-                padding="max_length",
-                truncation="only_first",
+                padding="longest",
+                truncation="longest_first",
                 return_tensors="pt"
             ).to(self.device)
             with torch.no_grad():

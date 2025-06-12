@@ -165,16 +165,27 @@ where $\beta$ is a constant (typically chosen so that penalty = 0.5 when $L_\tex
         Returns:
             A float NIST score.
         """
-        if references is None:
-            references = []
+        # Quick sanity checks
+        if output is None or (isinstance(output, str) and output.strip() == ""):
+            return 0.0
+        if references is None or len(references) == 0:
+            return 0.0
 
-        # Determine the n-gram order
-        max_n = n if n is not None else self.default_n
-
-        # Tokenize hypothesis and references
+        # Determine the n-gram order, but ensure it does not exceed hypothesis length
         hyp_tokens = output.split() if isinstance(output, str) else output
-        ref_tokens = []
-        for ref in references:
-            ref_tokens.append(ref.split() if isinstance(ref, str) else ref)
+        if len(hyp_tokens) == 0:
+            return 0.0
 
-        return sentence_nist(ref_tokens, hyp_tokens, n=max_n) 
+        max_n_requested = n if n is not None else self.default_n
+        max_n = min(max_n_requested, len(hyp_tokens))
+        if max_n == 0:
+            return 0.0
+
+        # Tokenize references
+        ref_tokens = [ref.split() if isinstance(ref, str) else ref for ref in references]
+
+        try:
+            return sentence_nist(ref_tokens, hyp_tokens, n=max_n)
+        except ZeroDivisionError:
+            # This happens when there is no n-gram overlap or denominator is zero
+            return 0.0 

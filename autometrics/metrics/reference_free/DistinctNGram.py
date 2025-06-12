@@ -103,7 +103,7 @@ $$
 ## Related Metrics
 
 - **Self-BLEU:** Measures how similar samples from the same system are to each other—lower is better for diversity.  
-- **Entropy (of n-grams):** Measures the unpredictability or richness of a model’s output vocabulary.  
+- **Entropy (of n-grams):** Measures the unpredictability or richness of a model's output vocabulary.  
 - **Distinct-N (un-normalized):** Variant that counts total number of distinct $n$-grams across the corpus, rather than normalizing per sentence.
 
 ## Further Reading
@@ -169,9 +169,14 @@ $$
                 token_pattern=None,
                 lowercase=False
             )
-            X = vect.fit_transform([output])  # shape (1, distinct_ngrams)
-            distinct = X.shape[1]
-            total = int(X.sum())
-            ratio = distinct / total if total > 0 else 0.0
+            try:
+                X = vect.fit_transform([output])  # shape (1, distinct_ngrams)
+                distinct = X.shape[1]
+                total = int(X.sum())
+                ratio = distinct / total if total > 0 else 0.0
+            except ValueError:
+                # This happens when the tokenizer returns only stop words or no tokens
+                # In that case, treat diversity as zero.
+                ratio = 0.0
             results.append(ratio)
         return tuple(results) 

@@ -99,9 +99,11 @@ class CorrelationExperiment(Experiment):
             return OrderedDict(corr_spec)
         raise ValueError("Unsupported correlation_funcs specification")
 
-    def _ensure_metric_columns(self, dataset):
+    def _ensure_metric_columns(self, dataset, verbose=False):
         """Run each metric's prediction method so that its columns exist."""
         for metric in self.metrics:
+            if verbose:
+                print(f"Predicting {metric.get_name()} on {dataset.get_name()}")
             metric.predict(dataset, update_dataset=True)
 
     def _gather_metric_columns(self, dataset) -> List[str]:
@@ -222,11 +224,11 @@ class CorrelationExperiment(Experiment):
         # ------------------------------------------------------------------
         # 1) Ensure metric predictions exist on splits we care about
         # ------------------------------------------------------------------
-        self._ensure_metric_columns(self.val_dataset)
+        self._ensure_metric_columns(self.val_dataset, verbose=True)
 
         # Decide which split is our *evaluation* set (test preferred, else train)
         evaluation_dataset = self.test_dataset if self.test_dataset is not None and self.test_dataset is not self.train_dataset else self.train_dataset
-        self._ensure_metric_columns(evaluation_dataset)
+        self._ensure_metric_columns(evaluation_dataset, verbose=True)
 
         # ------------------------------------------------------------------
         # 2) Compute correlations on validation & evaluation sets

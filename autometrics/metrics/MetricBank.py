@@ -1,3 +1,17 @@
+# NOTE: This file was refactored to delay heavy metric instantiation until
+# they are actually needed.  We provide factory helpers that build metrics on
+# demand, with optional common parameters such as cache_dir and seed.
+
+from __future__ import annotations
+
+from typing import List, Dict, Type, Any
+import inspect
+import os
+
+# ---------------------------------------------------------------------------
+# Import metric *classes* only (light-weight) – do NOT instantiate here.
+# ---------------------------------------------------------------------------
+
 from autometrics.metrics.reference_based.BLEU import BLEU
 from autometrics.metrics.reference_based.CHRF import CHRF
 from autometrics.metrics.reference_based.TER import TER
@@ -11,12 +25,14 @@ from autometrics.metrics.reference_based.UniEvalDialogue import UniEvalDialogue
 from autometrics.metrics.reference_based.UniEvalSum import UniEvalSum
 from autometrics.metrics.reference_based.CIDEr import CIDEr
 from autometrics.metrics.reference_based.METEOR import METEOR
-from autometrics.metrics.reference_based.StringSimilarity import LevenshteinDistance
-from autometrics.metrics.reference_based.StringSimilarity import LevenshteinRatio
-from autometrics.metrics.reference_based.StringSimilarity import HammingDistance
-from autometrics.metrics.reference_based.StringSimilarity import JaroSimilarity
-from autometrics.metrics.reference_based.StringSimilarity import JaroWinklerSimilarity
-from autometrics.metrics.reference_based.StringSimilarity import JaccardDistance
+from autometrics.metrics.reference_based.StringSimilarity import (
+    LevenshteinDistance,
+    LevenshteinRatio,
+    HammingDistance,
+    JaroSimilarity,
+    JaroWinklerSimilarity,
+    JaccardDistance,
+)
 from autometrics.metrics.reference_based.ParaScore import ParaScore
 from autometrics.metrics.reference_based.YiSi import YiSi
 from autometrics.metrics.reference_based.MAUVE import MAUVE
@@ -47,19 +63,100 @@ from autometrics.metrics.reference_free.GRMRewardModel import GRMRewardModel
 from autometrics.metrics.reference_free.Sentiment import Sentiment
 from autometrics.metrics.reference_free.LENS_SALSA import LENS_SALSA
 
-reference_based_metrics = [
-    BLEU(), CHRF(), TER(), GLEU(), SARI(), BERTScore(), ROUGE(), MOVERScore(), BARTScore(),
-    UniEvalDialogue(), UniEvalSum(), CIDEr(), METEOR(), BLEURT(), LevenshteinDistance(),
-    LevenshteinRatio(), HammingDistance(), JaroSimilarity(), JaroWinklerSimilarity(), 
-    JaccardDistance(), ParaScore(), YiSi(), MAUVE(), PseudoPARENT(), NIST(), IBLEU(),
-    UpdateROUGE(), LENSMetric(), CharCut(), InfoLM(),
+# ---------------------------------------------------------------------------
+# Metric class registries
+# ---------------------------------------------------------------------------
+
+reference_based_metric_classes: List[Type] = [
+    BLEU, CHRF, TER, GLEU, SARI, BERTScore, ROUGE, MOVERScore, BARTScore,
+    UniEvalDialogue, UniEvalSum, CIDEr, METEOR, BLEURT, LevenshteinDistance,
+    LevenshteinRatio, HammingDistance, JaroSimilarity, JaroWinklerSimilarity,
+    JaccardDistance, ParaScore, YiSi, MAUVE, PseudoPARENT, NIST, IBLEU,
+    UpdateROUGE, LENSMetric, CharCut, InfoLM,
 ]
 
-reference_free_metrics = [
-    FKGL(), UniEvalFact(), Perplexity(batch_size=2), ParaScoreFree(), INFORMRewardModel(),
-    MathProcessRewardModel(), SummaQA(), DistinctNGram(), FastTextToxicity(), FastTextNSFW(),
-    FastTextEducationalValue(), SelfBLEU(), FactCC(), Toxicity(), Sentiment(), GRMRewardModel(),
-    LENS_SALSA(),
+reference_free_metric_classes: List[Type] = [
+    FKGL, UniEvalFact, Perplexity, ParaScoreFree, INFORMRewardModel,
+    MathProcessRewardModel, SummaQA, DistinctNGram, FastTextToxicity,
+    FastTextNSFW, FastTextEducationalValue, SelfBLEU, FactCC, Toxicity,
+    Sentiment, GRMRewardModel, LENS_SALSA,
 ]
-                          
-all_metrics = reference_based_metrics + reference_free_metrics
+
+all_metric_classes: List[Type] = reference_based_metric_classes + reference_free_metric_classes
+
+# ---------------------------------------------------------------------------
+# Default per-metric kwargs (to replicate previous behaviour)
+# ---------------------------------------------------------------------------
+
+_DEFAULT_EXTRA_KWARGS: Dict[str, Dict[str, Any]] = {
+    "Perplexity": {"batch_size": 2},
+}
+
+# ---------------------------------------------------------------------------
+# Factory helpers
+# ---------------------------------------------------------------------------
+
+
+def _instantiate_metric(cls: Type, kwargs: Dict[str, Any]):
+    """Instantiate a metric class with the provided kwargs (already filtered)."""
+    try:
+        return cls(**kwargs)
+    except Exception as e:
+        print(f"[MetricBank] Failed to instantiate {cls.__name__} with kwargs {kwargs}: {e}. Trying default constructor …")
+        try:
+            return cls()
+        except Exception as e2:
+            print(f"[MetricBank] Giving up on {cls.__name__}: {e2}")
+            return None
+
+
+def build_metrics(
+    classes: List[Type],
+    cache_dir: str | None = None,
+    seed: int | None = None,
+    use_cache: bool = True,
+    overrides: Dict[str, Dict[str, Any]] | None = None,
+) -> List[Any]:
+    """Instantiate a list of metric classes with common kwargs and cache override."""
+    common_kwargs = {
+        "cache_dir": cache_dir or "./autometrics_cache",
+        "seed": seed,
+        "use_cache": use_cache,
+    }
+    overrides = overrides or {}
+    metrics = []
+    for cls in classes:
+        # Build merged kwargs
+        sig = inspect.signature(cls.__init__)
+        merged: Dict[str, Any] = {}
+        has_var_kw = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
+        # common first
+        for k, v in common_kwargs.items():
+            if k in sig.parameters or has_var_kw:
+                merged[k] = v
+        # per-metric overrides highest priority
+        for k, v in overrides.get(cls.__name__, {}).items():
+            if k in sig.parameters or has_var_kw:
+                merged[k] = v
+        # fill with metric defaults if still missing
+        for k, v in _DEFAULT_EXTRA_KWARGS.get(cls.__name__, {}).items():
+            if k in sig.parameters or has_var_kw:
+                merged.setdefault(k, v)
+
+        metric = _instantiate_metric(cls, merged)
+        if metric is None:
+            continue
+        metrics.append(metric)
+    return metrics
+
+
+def build_reference_based_metrics(**kwargs) -> List[Any]:
+    return build_metrics(reference_based_metric_classes, **kwargs)
+
+
+def build_reference_free_metrics(**kwargs) -> List[Any]:
+    return build_metrics(reference_free_metric_classes, **kwargs)
+
+
+def build_all_metrics(**kwargs) -> List[Any]:
+    return build_metrics(all_metric_classes, **kwargs)

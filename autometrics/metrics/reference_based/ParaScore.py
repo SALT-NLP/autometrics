@@ -156,6 +156,16 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
             scorer_kwargs["model_type"] = "bert-base-uncased"
 
         super().__init__(name=name, description=description, seed=seed, **scorer_kwargs)
+
+        # remove the following from scorer_kwargs:
+        scorer_kwargs.pop("cache_dir", None)
+        scorer_kwargs.pop("seed", None)
+        scorer_kwargs.pop("use_cache", None)
+        scorer_kwargs.pop("device", None)
+        scorer_kwargs.pop("cache_size_limit", None)
+        scorer_kwargs.pop("cache_ttl", None)
+        scorer_kwargs.pop("force_cache", None)
+
         self.scorer = ParaScorer(**scorer_kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):

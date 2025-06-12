@@ -1,5 +1,6 @@
 from parascore import ParaScorer
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
+import torch
 
 class ParaScoreFree(ReferenceFreeMetric):
     """---
@@ -155,14 +156,23 @@ where:
         seed: int = 42,
         **scorer_kwargs
     ):
-        super().__init__(name, description, **scorer_kwargs)
-
         if "lang" not in scorer_kwargs:
             scorer_kwargs["lang"] = "en"
 
         if "model_type" not in scorer_kwargs:
             scorer_kwargs["model_type"] = "bert-base-uncased"
-            
+
+        super().__init__(name, description, seed=seed, **scorer_kwargs)
+
+        # remove the following from scorer_kwargs:
+        scorer_kwargs.pop("cache_dir", None)
+        scorer_kwargs.pop("seed", None)
+        scorer_kwargs.pop("use_cache", None)
+        scorer_kwargs.pop("device", None)
+        scorer_kwargs.pop("cache_size_limit", None)
+        scorer_kwargs.pop("cache_ttl", None)
+        scorer_kwargs.pop("force_cache", None)
+
         self.scorer = ParaScorer(**scorer_kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):
@@ -170,9 +180,56 @@ where:
         srcs = [input]
         result = self.scorer.free_score(cands, srcs, **kwargs)
 
-        return float(result[0].cpu().item())
+        # ParaScorer.free_score might return a list of torch.Tensors or a list of
+        # python floats depending on the version.  Handle both gracefully.
+        first = result[0]
+        if hasattr(first, "cpu"):
+            # torch.Tensor -> if multi-element take mean, then convert to float
+            if first.numel() == 1:
+                return float(first.cpu().item())
+            else:
+                return float(first.mean().cpu().item())
+        # Assume it is already a python (float, int, np.float) value
+        return float(first)
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         results = self.scorer.free_score(outputs, inputs, **kwargs)
 
-        return results.cpu().tolist()
+        # Newer versions of parascore return a plain python list. Older versions
+        # may return a torch.Tensor.  Normalize to a list of floats.
+        if hasattr(results, "cpu"):
+            # torch tensor -> convert to cpu list
+            return results.cpu().tolist()
+        elif isinstance(results, list):
+            # Case: results is list where each element could be a tensor or numeric.
+            # If *all* elements are tensors of the same length, aggregate by taking
+            # the mean across the list (mirrors how ParaScorer.base_score picks the
+            # F1 component). This yields a length-N list matching the batch size.
+            if results and all(hasattr(r, "cpu") for r in results):
+                try:
+                    stacked = torch.stack([r.float() for r in results], dim=0)  # shape (k, N)
+                    mean_vals = stacked.mean(0).cpu().tolist()
+                    return [float(v) for v in mean_vals]
+                except Exception:
+                    # Fallback to element-wise processing if shapes mismatch
+                    pass
+            # Otherwise process each element individually
+            processed = []
+            for r in results:
+                if hasattr(r, "cpu"):
+                    # torch tensor: if multi-element, take mean
+                    r_val = r.mean() if r.numel() > 1 else r
+                    processed.append(float(r_val.cpu().item()))
+                else:
+                    # plain numeric
+                    processed.append(float(r))
+            return processed
+        else:
+            # Fallback: attempt to cast iterable to list of floats
+            try:
+                return [float(r) for r in results]
+            except Exception:
+                raise TypeError(
+                    "Unexpected return type from ParaScorer.free_score: "
+                    f"{type(results)}. Expected list or tensor."
+                )

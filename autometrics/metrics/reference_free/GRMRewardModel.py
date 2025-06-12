@@ -221,7 +221,7 @@ For Llama 3:
             self._unload_model()
         return score
 
-    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], references=None, **kwargs) -> List[float]:
         """
         Score batches of input-output pairs.
         """

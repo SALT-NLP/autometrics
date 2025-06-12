@@ -78,8 +78,28 @@ def load_dataset(identifier: str):
 
     # Helper to import module safely
     def _import_module(dir_name: str):
-        module_path = f"autometrics.dataset.datasets.{dir_name}.{dir_name}"
-        return importlib.import_module(module_path)
+        """Try to import both package-level and file-level dataset modules."""
+        tried = []
+        for suffix in (f".{dir_name}", ""):
+            module_path = f"autometrics.dataset.datasets.{dir_name}{suffix}"
+            tried.append(module_path)
+            try:
+                return importlib.import_module(module_path)
+            except ImportError:
+                continue
+        raise ImportError(f"Tried {tried} but failed to import any module")
+
+    def _file_contains_class(pyfile: str, cls_name: str) -> bool:
+        """Return True if given python file defines class `cls_name` (AST search)."""
+        try:
+            with open(pyfile, "r", encoding="utf-8") as f:
+                tree = ast.parse(f.read(), filename=pyfile)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef) and node.name == cls_name:
+                    return True
+        except Exception:
+            pass
+        return False
 
     # Case 1: explicit module and class via dot
     if "." in identifier:
@@ -115,14 +135,26 @@ def load_dataset(identifier: str):
     for dir_name in os.listdir(datasets_dir):
         if dir_name.startswith("__") or not os.path.isdir(os.path.join(datasets_dir, dir_name)):
             continue
+        pyfile = os.path.join(datasets_dir, dir_name, f"{dir_name}.py")
+        cls_found = _file_contains_class(pyfile, identifier) if os.path.isfile(pyfile) else False
+
+        if not cls_found:
+            # maybe class is in __init__.py
+            init_file = os.path.join(datasets_dir, dir_name, "__init__.py")
+            if os.path.isfile(init_file):
+                cls_found = _file_contains_class(init_file, identifier)
+
+        if not cls_found:
+            continue
+
+        # We located the class name in this package – now try to import and instantiate
         try:
             module = _import_module(dir_name)
-        except Exception:
-            continue
-        if hasattr(module, identifier):
             cls = getattr(module, identifier)
             if isinstance(cls, type) and issubclass(cls, Dataset):
                 return cls()
+        except Exception as e:
+            raise RuntimeError(f"Found dataset class '{identifier}' in package '{dir_name}' but failed to import/instantiate: {e}")
 
     raise RuntimeError(f"Could not resolve dataset identifier '{identifier}'.")
 
@@ -158,6 +190,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--metric", nargs="*", default=None, help="Specific metric names to include (overrides skip flags if provided).")
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging.")
+    parser.add_argument("--cache-dir", default=None, help="Custom diskcache directory for metric caching (overrides Metric default).")
     parser.add_argument("--list-datasets", action="store_true", help="List available dataset identifiers and exit.")
 
     return parser.parse_args()
@@ -183,7 +216,11 @@ def main() -> int:
     # to execute the benchmarking logic.
 
     from autometrics.experiments.correlation.correlation import CorrelationExperiment
-    from autometrics.metrics.MetricBank import reference_based_metrics, reference_free_metrics, all_metrics
+    from autometrics.metrics.MetricBank import (
+        build_reference_based_metrics,
+        build_reference_free_metrics,
+        build_all_metrics,
+    )
 
     # Prepare base output directory (dataset-specific)
     base_output_dir = args.output_dir or os.path.join("outputs", "correlation", args.dataset)
@@ -194,12 +231,15 @@ def main() -> int:
     logger.info(f"Loading dataset: {args.dataset}")
     dataset = load_dataset(args.dataset)
 
-    # Select metrics ------------------------------------------------------------------
+    if args.cache_dir:
+        os.makedirs(args.cache_dir, exist_ok=True)
+
+    # Metric selection using factory ---------------------------------------
     if args.metric:
-        # Filter all_metrics by supplied names (case-insensitive)
         selected = []
         requested = {m.lower() for m in args.metric}
-        for metric in all_metrics:
+        metrics_available = build_all_metrics(cache_dir=args.cache_dir, seed=args.seed)
+        for metric in metrics_available:
             if metric.get_name().lower() in requested:
                 selected.append(metric)
         missing = requested - {m.get_name().lower() for m in selected}
@@ -207,9 +247,7 @@ def main() -> int:
             logger.warning(f"Some requested metrics not found: {', '.join(missing)}")
         metrics = selected
     else:
-        metrics = []
-
-        # Auto-skip reference-based metrics if dataset lacks reference columns
+        # Auto-skip reference-based metrics if dataset lacks refs
         auto_skip_ref_based = False
         try:
             if hasattr(dataset, "get_reference_columns") and len(dataset.get_reference_columns()) == 0:
@@ -220,12 +258,18 @@ def main() -> int:
         skip_reference_based = args.skip_reference_based or auto_skip_ref_based
 
         if auto_skip_ref_based and not args.skip_reference_based:
-            logger.info("Dataset has no reference columns ‑ automatically skipping reference-based metrics.")
+            logger.info("Dataset has no reference columns – automatically skipping reference-based metrics.")
+
+        metrics = []
+        common_factory_kwargs = {
+            "cache_dir": args.cache_dir,
+            "seed": args.seed,
+        }
 
         if not skip_reference_based:
-            metrics += reference_based_metrics
+            metrics += build_reference_based_metrics(**common_factory_kwargs)
         if not args.skip_reference_free:
-            metrics += reference_free_metrics
+            metrics += build_reference_free_metrics(**common_factory_kwargs)
 
         if not metrics:
             logger.error("No metrics selected after applying skip flags / auto-skip policies.")
@@ -253,10 +297,13 @@ def main() -> int:
         description=f"Benchmarking correlations ({', '.join(corr_names)}) on {args.dataset}",
         metrics=metrics,
         output_dir=base_output_dir,
-        dataset=dataset,
+        train_dataset=dataset.get_validation_split(), # We will use the validation split for everything as we are just finding the best metrics for each task
+        val_dataset=dataset.get_validation_split(),
+        test_dataset=dataset.get_validation_split(),
         correlation_funcs=corr_funcs,
         top_k=(None if args.top_k == 0 else args.top_k),
         seed=args.seed,
+
     )
 
     experiment.run(print_results=True)

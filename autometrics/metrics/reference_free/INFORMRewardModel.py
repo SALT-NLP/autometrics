@@ -277,7 +277,7 @@ where:
 
         return score
 
-    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], **kwargs) -> List[float]:
+    def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], references=None, **kwargs) -> List[float]:
         if self.model is None:
             self._load_model()
 

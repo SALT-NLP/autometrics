@@ -1,9 +1,9 @@
 from autometrics.dataset.Dataset import Dataset
 import pandas as pd
-from enum import Enum
+from typing import Literal
 from autometrics.metrics.dummy import DummyMetric
 class CoGym(Dataset):
-    def __init__(self, path='./autometrics/dataset/datasets/cogym/cogym.csv', task_type: str = "travel_planning", eval_type: Enum['process', 'outcome'] = 'process'): # Path to the dataset: './autometrics/dataset/datasets/cogym/cogym.csv'
+    def __init__(self, path='./autometrics/dataset/datasets/cogym/cogym.csv', task_type: str = "travel_planning", eval_type: Literal['process', 'outcome'] = 'process'): # Path to the dataset: './autometrics/dataset/datasets/cogym/cogym.csv'
         # userId,sessionId,modelName,task,query,createdAt,finishedAt,agentRating,communicationRating,outcomeRating,agentFeedback,finished,bookmarked,agentType,conversation,formatted_conversation,outcome
         df = pd.read_csv(path)
 

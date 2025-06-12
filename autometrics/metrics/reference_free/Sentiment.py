@@ -8,13 +8,13 @@ class Sentiment(ReferenceFreeMetric):
     """---
 # Metric Card for Sentiment
 
-The Sentiment metric quantifies the sentiment polarity of generated text using a pretrained model fine-tuned on Twitter data: `cardiffnlp/twitter-roberta-base-sentiment-latest`. It converts the model’s categorical output (negative, neutral, positive) into a continuous regression score by computing the normalized difference between positive and negative class probabilities. This allows sentiment to be used as a reference-free, scalar evaluation metric for generation tasks.
+The Sentiment metric quantifies the sentiment polarity of generated text using a pretrained model fine-tuned on Twitter data: `cardiffnlp/twitter-roberta-base-sentiment-latest`. It converts the model's categorical output (negative, neutral, positive) into a continuous regression score by computing the normalized difference between positive and negative class probabilities. This allows sentiment to be used as a reference-free, scalar evaluation metric for generation tasks.
 
 ## Metric Details
 
 ### Metric Description
 
-This metric uses the Cardiff NLP Twitter RoBERTa-based model (`cardiffnlp/twitter-roberta-base-sentiment-latest`) to classify input text into three categories: negative, neutral, and positive. Instead of returning a discrete label, it converts the model’s output probabilities into a scalar sentiment score by computing:
+This metric uses the Cardiff NLP Twitter RoBERTa-based model (`cardiffnlp/twitter-roberta-base-sentiment-latest`) to classify input text into three categories: negative, neutral, and positive. Instead of returning a discrete label, it converts the model's output probabilities into a scalar sentiment score by computing:
 
 $$
 \text{Score} = \frac{p_{\text{positive}} - p_{\text{negative}}}{2}
@@ -185,6 +185,9 @@ $$
         """Load tokenizer, model, and config."""
         if self.model is None:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+            # Some HF models define model_max_length = int(1e30). We cap it at 512 so that
+            # truncation=True works as expected instead of silently skipping.
+            self.tokenizer.model_max_length = 512
             self.config = AutoConfig.from_pretrained(self.model_name)
             self.model = AutoModelForSequenceClassification.from_pretrained(
                 self.model_name,
@@ -221,7 +224,14 @@ $$
         if self.model is None:
             self._load_model()
         text = self._preprocess(output)
-        inputs = self.tokenizer(text, return_tensors='pt', truncation=True, padding='longest').to(self.device)
+        inputs = self.tokenizer(
+            text,
+            return_tensors='pt',
+            truncation=True,
+            padding='max_length',
+            max_length=512,
+            truncation_strategy="longest_first"
+        ).to(self.device)
         with torch.no_grad():
             logits = self.model(**inputs).logits.squeeze(0)
             probs = F.softmax(logits, dim=-1)
@@ -240,7 +250,14 @@ $$
         for i in range(0, len(outputs), self.batch_size):
             batch_texts = outputs[i:i+self.batch_size]
             batch_proc = [self._preprocess(text) for text in batch_texts]
-            inputs_tok = self.tokenizer(batch_proc, return_tensors='pt', truncation=True, padding='longest').to(self.device)
+            inputs_tok = self.tokenizer(
+                batch_proc,
+                return_tensors='pt',
+                truncation=True,
+                padding='max_length',
+                max_length=512,
+                truncation_strategy="longest_first"
+            ).to(self.device)
             with torch.no_grad():
                 logits = self.model(**inputs_tok).logits
                 probs = F.softmax(logits, dim=-1)

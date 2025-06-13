@@ -128,7 +128,7 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
     
     # Resource usage statistics (in megabytes)
     # TODO: Check this, because gpu memory being zero is suspicious
-    gpu_mem: ClassVar[float] = 0.0  # in MB
+    gpu_mem: ClassVar[float] = 13970.72265625 * 3  # in MB # THIS NUMBER IS AN ESTIMATE BASED ON HOW MUCH MEMORY THIS MODEL IS TAKING UP AS I RUN.  I SHOULD STILL RERUN THE BENCHMARKING SCRIPT
     cpu_mem: ClassVar[float] = 13970.72265625  # in MB
 
     def __init__(
@@ -140,7 +140,7 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
         persistent: bool = True,
         **kwargs
     ):
-        super().__init__(name, description, submetric_names=["min", "max", "mean"], model_name=model_name, device_map=device_map, persistent=persistent, **kwargs)
+        super().__init__(name, description, submetric_names=["PRM_min", "PRM_max", "PRM_mean"], model_name=model_name, device_map=device_map, persistent=persistent, **kwargs)
         self.model_name = model_name
         self.device_map = device_map
         self.persistent = persistent

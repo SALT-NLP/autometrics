@@ -211,6 +211,7 @@ class Dataset():
                 df = df[~df[split_column].isin(test_items)].copy()
                 train_df = df.copy()
         else:
+            train_df = df.copy()
             test_df = None
 
         if not split_column:

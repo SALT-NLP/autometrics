@@ -247,7 +247,11 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
     #    stop_words = set(f.read().strip().split(' '))
 
     def collate_idf(self, arr, tokenize, numericalize, idf_dict,
-                    pad="[PAD]",device='cuda:0'):
+                    pad="[PAD]", device=None):
+        
+        # Ensure tensors are always moved to the same device as the model
+        if device is None:
+            device = self.device
         
         tokens = [["[CLS]"]+self.truncate(tokenize(a))+["[SEP]"] for a in arr]  
         arr = [numericalize(a) for a in tokens]
@@ -265,7 +269,11 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         return padded, padded_idf, lens, mask, tokens
 
     def get_bert_embedding(self, all_sens, model, tokenizer, idf_dict,
-                        batch_size=-1,device='cuda:0'):
+                        batch_size=-1, device=None):
+
+        # Fall back to the model's device if none is specified
+        if device is None:
+            device = self.device
 
         padded_sens, padded_idf, lens, mask, tokens = self.collate_idf(all_sens,
                                                         tokenizer.tokenize, tokenizer.convert_tokens_to_ids,
@@ -299,7 +307,10 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         ).add_(x1_norm).clamp_min_(1e-30).sqrt_()
         return res
 
-    def word_mover_score(self, refs, hyps, idf_dict_ref, idf_dict_hyp, stop_words=[], n_gram=1, remove_subwords = True, batch_size=256,device='cuda:0'):
+    def word_mover_score(self, refs, hyps, idf_dict_ref, idf_dict_hyp, stop_words=[], n_gram=1, remove_subwords = True, batch_size=256, device=None):
+        # Default to the model's device if the caller does not specify one
+        if device is None:
+            device = self.device
         preds = []
         for batch_start in range(0, len(refs), batch_size):
             batch_refs = refs[batch_start:batch_start+batch_size]

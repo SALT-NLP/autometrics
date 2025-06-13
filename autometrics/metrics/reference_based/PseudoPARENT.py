@@ -181,14 +181,14 @@ The final score is the maximum $F$ across all references $R_i$.
         lambda_weight=0.5,
         smoothing=1e-5,
         max_order=4,
-        n_jobs=-1,
+        n_jobs=1,
         **kwargs
     ):
         super().__init__(name, description, lambda_weight=lambda_weight, smoothing=smoothing, max_order=max_order, **kwargs)
         self.lambda_weight = lambda_weight
         self.smoothing = smoothing
         self.max_order = max_order
-        self.n_jobs = mp.cpu_count() if n_jobs < 0 else n_jobs
+        self.n_jobs = mp.cpu_count() if n_jobs and n_jobs < 0 else n_jobs
         
         self.exclude_from_cache_key("n_jobs")
         
@@ -283,6 +283,11 @@ The final score is the maximum $F$ across all references $R_i$.
 
     def calculate_batched(self, inputs, outputs, references=None, **kwargs):
         refs = references or [[] for _ in inputs]
+
+        # Sequential fallback when multiprocessing is disabled (n_jobs<=1)
+        if not self.n_jobs or self.n_jobs <= 1:
+            return [self.parent(i, o, r) for i, o, r in zip(inputs, outputs, refs)]
+
         tasks = [(self, i, o, r) for i, o, r in zip(inputs, outputs, refs)]
         with mp.Pool(processes=self.n_jobs) as pool:
             return pool.map(_parent_helper, tasks)

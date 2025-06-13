@@ -96,6 +96,8 @@ _DEFAULT_EXTRA_KWARGS: Dict[str, Dict[str, Any]] = {
 # Factory helpers
 # ---------------------------------------------------------------------------
 
+# GPU allocation helper
+from autometrics.metrics.utils import allocate_gpus
 
 def _instantiate_metric(cls: Type, kwargs: Dict[str, Any]):
     """Instantiate a metric class with the provided kwargs (already filtered)."""
@@ -116,6 +118,7 @@ def build_metrics(
     seed: int | None = None,
     use_cache: bool = True,
     overrides: Dict[str, Dict[str, Any]] | None = None,
+    gpu_buffer_ratio: float = 0.10,
 ) -> List[Any]:
     """Instantiate a list of metric classes with common kwargs and cache override."""
     common_kwargs = {
@@ -124,6 +127,12 @@ def build_metrics(
         "use_cache": use_cache,
     }
     overrides = overrides or {}
+
+    # --------------------------------------------------------
+    # GPU allocation planning (performed once per batch)
+    # --------------------------------------------------------
+    allocation_map = allocate_gpus(classes, buffer_ratio=gpu_buffer_ratio)
+
     metrics = []
     for cls in classes:
         # Build merged kwargs
@@ -134,8 +143,15 @@ def build_metrics(
         for k, v in common_kwargs.items():
             if k in sig.parameters or has_var_kw:
                 merged[k] = v
-        # per-metric overrides highest priority
+        # per-metric overrides highest priority (call-supplied)
         for k, v in overrides.get(cls.__name__, {}).items():
+            if k in sig.parameters or has_var_kw:
+                merged[k] = v
+        # GPU allocation overrides (device/device_map) take precedence over
+        # defaults but *not* over explicit user-supplied overrides above.
+        for k, v in allocation_map.get(cls.__name__, {}).items():
+            if k in merged:
+                continue  # user already set explicitly via overrides
             if k in sig.parameters or has_var_kw:
                 merged[k] = v
         # fill with metric defaults if still missing

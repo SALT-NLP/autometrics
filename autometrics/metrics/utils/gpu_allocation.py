@@ -1,0 +1,248 @@
+from __future__ import annotations
+
+"""Utility helpers for GPU-aware metric allocation.
+
+This module lets `MetricBank` (or any caller) assign metrics to the
+available GPUs in a resource-conscious way.  The design keeps phase 1
+(light-weight planning) completely free of heavy model instantiation.
+Instead we rely on the static `gpu_mem` class attributes that now exist
+on every metric class.
+
+Main entry-points
+-----------------
+1. `get_gpu_info()` – returns total / free memory for each visible GPU.
+2. `collect_metric_requirements(metric_classes)` – inspects metrics and
+   records GPU memory + supported device kwargs.
+3. `allocate_gpus(metric_classes, buffer_ratio=0.10)` – best-effort
+   heuristic packing of metrics onto GPUs, returning the kwargs you
+   should pass when instantiating each metric.
+
+The packing is a greedy *best-fit decreasing* heuristic (simple and fast
+in practice) with a fallback to multi-GPU (`device_map="auto"`) when the
+required memory exceeds that of any single card *and* the metric class
+supports `device_map`.
+
+If a metric is GPU-compatible but neither a `device_map` nor `device`
+parameter is present in its constructor we fall back to **GPU 0**.  CPU-
+only metrics (those with `gpu_mem == 0`) are ignored by the allocator.
+"""
+
+from typing import List, Dict, Any, NamedTuple, Optional
+import inspect
+import warnings
+
+# ---------------------------------------------------------------------------
+# GPU discovery helpers
+# ---------------------------------------------------------------------------
+
+class GPUInfo(NamedTuple):
+    index: int
+    name: str
+    total_mb: float
+    free_mb: float
+
+
+def _query_gpu_info_pynvml() -> List[GPUInfo]:
+    """Return GPU stats using NVML (preferred – accurate free memory)."""
+    try:
+        import pynvml  # type: ignore
+    except ImportError:
+        return []
+
+    pynvml.nvmlInit()
+    try:
+        device_count = pynvml.nvmlDeviceGetCount()
+        infos: List[GPUInfo] = []
+        for idx in range(device_count):
+            handle = pynvml.nvmlDeviceGetHandleByIndex(idx)
+            mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            raw_name = pynvml.nvmlDeviceGetName(handle)
+            if isinstance(raw_name, bytes):
+                name = raw_name.decode("utf-8")
+            else:
+                name = str(raw_name)
+            infos.append(
+                GPUInfo(
+                    index=idx,
+                    name=name,
+                    total_mb=mem_info.total / 1024 ** 2,
+                    free_mb=mem_info.free / 1024 ** 2,
+                )
+            )
+        return infos
+    finally:
+        pynvml.nvmlShutdown()
+
+
+def _query_gpu_info_torch() -> List[GPUInfo]:
+    """Fallback GPU stats via torch (gives *total* memory only)."""
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        return []
+
+    import torch
+
+    if not torch.cuda.is_available():
+        return []
+
+    infos: List[GPUInfo] = []
+    for idx in range(torch.cuda.device_count()):
+        props = torch.cuda.get_device_properties(idx)
+        total_mb = props.total_memory / 1024 ** 2
+        # torch has no free-mem query that is CUDA-context-free; conservatively
+        # assume *all* memory is available.
+        infos.append(GPUInfo(index=idx, name=props.name, total_mb=total_mb, free_mb=total_mb))
+    return infos
+
+
+def get_gpu_info() -> List[GPUInfo]:
+    """Return a list of `GPUInfo` for all visible GPUs.
+
+    NVML is preferred for accurate free memory; fall back to torch when NVML
+    is unavailable.  If neither mechanism works we return an empty list.
+    """
+    infos = _query_gpu_info_pynvml()
+    if infos:
+        return infos
+    return _query_gpu_info_torch()
+
+# ---------------------------------------------------------------------------
+# Metric requirement introspection
+# ---------------------------------------------------------------------------
+
+class MetricRequirement(NamedTuple):
+    cls: type
+    name: str
+    gpu_mem_mb: float
+    has_device_arg: bool
+    has_device_map_arg: bool
+
+
+def _inspect_metric_class(cls: type) -> MetricRequirement:
+    """Extract GPU requirements and device argument capability for a metric class."""
+    gpu_mem_mb = getattr(cls, "gpu_mem", 0.0)
+
+    sig = inspect.signature(cls.__init__)
+    has_device_arg = "device" in sig.parameters
+    has_device_map_arg = "device_map" in sig.parameters
+
+    return MetricRequirement(
+        cls=cls,
+        name=cls.__name__,
+        gpu_mem_mb=float(gpu_mem_mb or 0.0),
+        has_device_arg=has_device_arg,
+        has_device_map_arg=has_device_map_arg,
+    )
+
+
+def collect_metric_requirements(metric_classes: List[type]) -> List[MetricRequirement]:
+    """Return a list of `MetricRequirement` for the given metric classes."""
+    return [_inspect_metric_class(cls) for cls in metric_classes]
+
+# ---------------------------------------------------------------------------
+# Greedy best-fit decreasing allocator
+# ---------------------------------------------------------------------------
+
+AllocationResult = Dict[str, Dict[str, Any]]  # metric name -> kwarg overrides
+
+
+def allocate_gpus(
+    metric_classes: List[type],
+    buffer_ratio: float = 0.10,
+    gpu_infos: Optional[List[GPUInfo]] = None,
+) -> AllocationResult:
+    """Heuristically allocate metrics to GPUs.
+
+    Parameters
+    ----------
+    metric_classes: list of metric *classes* (not instances)
+        The metrics the user intends to instantiate.
+    buffer_ratio: float, default 0.10 (10 %)
+        Fractional safety buffer subtracted from each GPU's free memory *and*
+        added to each metric's requirement.
+    gpu_infos: optional pre-queried GPU list (for tests/mocks)
+    Returns
+    -------
+    dict
+        Mapping from metric class name to a dict of kwarg overrides (e.g.
+        {"device": torch.device("cuda:2")} or {"device_map": "auto"}).  CPU-
+        only metrics are omitted.
+    """
+
+    gpu_infos = list(gpu_infos or get_gpu_info())
+    if not gpu_infos:
+        warnings.warn("No GPU detected – all metrics will run on CPU.")
+        return {}
+
+    # Working copy of available memory (apply buffer)
+    avail_mb = {
+        info.index: info.free_mb * (1.0 - buffer_ratio) for info in gpu_infos
+    }
+
+    requirements = collect_metric_requirements(metric_classes)
+    # Consider only GPU-using metrics (gpu_mem > 0)
+    gpu_metrics = [r for r in requirements if r.gpu_mem_mb > 0]
+
+    # Sort by descending memory requirement (best-fit decreasing)
+    gpu_metrics.sort(key=lambda r: r.gpu_mem_mb, reverse=True)
+
+    allocations: AllocationResult = {}
+
+    for req in gpu_metrics:
+        needed = req.gpu_mem_mb * (1.0 + buffer_ratio)
+
+        # Attempt to place on a single GPU
+        candidate_gpu = None
+        best_free_after = -1.0
+        for idx, free in avail_mb.items():
+            if free >= needed:
+                # prefer GPU that will remain most free *after* placement to keep load balanced
+                free_after = free - needed
+                if free_after > best_free_after:
+                    best_free_after = free_after
+                    candidate_gpu = idx
+        if candidate_gpu is not None:
+            # Single-GPU fit – update available memory and record allocation
+            avail_mb[candidate_gpu] -= needed
+            if req.has_device_arg:
+                allocations[req.name] = {"device": f"cuda:{candidate_gpu}"}
+            elif req.has_device_map_arg:
+                # Prefer an explicit single-GPU map understood by transformers/accelerate
+                # Empty string ("") is interpreted as the *root* module and routes all
+                # sub-modules to the same device.
+                allocations[req.name] = {"device_map": {"": candidate_gpu}}
+            else:
+                # No explicit arg – assume global torch.device context; advise user
+                allocations[req.name] = {"_hint_gpu_index": candidate_gpu}
+            continue
+
+        # Cannot fit on a single GPU
+        if req.has_device_map_arg and len(avail_mb) > 1:
+            # Let transformers/accelerate handle splitting across GPUs
+            allocations[req.name] = {"device_map": "auto"}
+
+            # Rough bookkeeping: assume balanced split across all GPUs so we
+            # reduce each GPU's available memory proportionally.  This is a
+            # heuristic – the actual allocation performed by `accelerate`
+            # may differ.
+            per_gpu_share = needed / max(1, len(avail_mb))
+            for idx in avail_mb:
+                avail_mb[idx] = max(0.0, avail_mb[idx] - per_gpu_share)
+        elif req.has_device_map_arg:
+            # Only one GPU present – splitting not possible, warn and assign GPU0
+            warnings.warn(
+                f"[gpu_allocation] Metric {req.name} too large for single GPU; assigning to cuda:0 with potential OOM."
+            )
+            allocations[req.name] = {"device": "cuda:0"}
+        else:
+            # No way to split ‑ assign to GPU 0 anyway and warn
+            warnings.warn(
+                f"[gpu_allocation] Metric {req.name} requires {req.gpu_mem_mb:.1f} MB but no single GPU has enough free memory; assigning to cuda:0 which may OOM."
+            )
+            if req.has_device_arg:
+                allocations[req.name] = {"device": "cuda:0"}
+            else:
+                allocations[req.name] = {"_hint_gpu_index": 0}
+
+    return allocations 

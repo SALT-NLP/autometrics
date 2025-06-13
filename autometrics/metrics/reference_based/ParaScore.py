@@ -171,6 +171,7 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
         scorer_kwargs.pop("cache_size_limit", None)
         scorer_kwargs.pop("cache_ttl", None)
         scorer_kwargs.pop("force_cache", None)
+        scorer_kwargs.pop("_hint_gpu_index", None)
 
         self.scorer = ParaScorer(**scorer_kwargs)
 

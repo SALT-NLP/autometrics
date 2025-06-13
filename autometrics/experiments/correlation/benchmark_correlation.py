@@ -292,18 +292,18 @@ def main() -> int:
 
     corr_funcs = {name: correlation_func_from_str(name) for name in corr_names}
 
+    splits, train, test = dataset.get_kfold_splits(seed=args.seed)
+
     experiment = CorrelationExperiment(
         name=f"Correlation Benchmark – {args.dataset}",
         description=f"Benchmarking correlations ({', '.join(corr_names)}) on {args.dataset}",
         metrics=metrics,
         output_dir=base_output_dir,
-        train_dataset=dataset.get_validation_split(), # We will use the validation split for everything as we are just finding the best metrics for each task
-        val_dataset=dataset.get_validation_split(),
-        test_dataset=dataset.get_validation_split(),
+        dataset=train, # We will use the kfold train split for everything as we are just finding the best metrics for each task
+        should_split=False,
         correlation_funcs=corr_funcs,
         top_k=(None if args.top_k == 0 else args.top_k),
         seed=args.seed,
-
     )
 
     experiment.run(print_results=True)

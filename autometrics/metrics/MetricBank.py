@@ -60,6 +60,7 @@ from autometrics.metrics.reference_free.SelfBLEU import SelfBLEU
 from autometrics.metrics.reference_free.FactCC import FactCC
 from autometrics.metrics.reference_free.Toxicity import Toxicity
 from autometrics.metrics.reference_free.GRMRewardModel import GRMRewardModel
+from autometrics.metrics.reference_free.LDLRewardModel import LDLRewardModel
 from autometrics.metrics.reference_free.Sentiment import Sentiment
 from autometrics.metrics.reference_free.LENS_SALSA import LENS_SALSA
 
@@ -79,7 +80,7 @@ reference_free_metric_classes: List[Type] = [
     FKGL, UniEvalFact, Perplexity, ParaScoreFree, INFORMRewardModel,
     MathProcessRewardModel, SummaQA, DistinctNGram, FastTextToxicity,
     FastTextNSFW, FastTextEducationalValue, SelfBLEU, FactCC, Toxicity,
-    Sentiment, GRMRewardModel, LENS_SALSA,
+    Sentiment, GRMRewardModel, LENS_SALSA, LDLRewardModel,
 ]
 
 all_metric_classes: List[Type] = reference_based_metric_classes + reference_free_metric_classes

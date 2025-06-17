@@ -3,7 +3,7 @@
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:4
-#SBATCH --mem=100GB
+#SBATCH --mem=200GB
 #SBATCH --open-mode=append
 #SBATCH --partition=jag-standard
 #SBATCH --time=7:00:00

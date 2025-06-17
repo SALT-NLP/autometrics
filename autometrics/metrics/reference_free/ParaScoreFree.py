@@ -183,8 +183,8 @@ where:
         self.scorer = ParaScorer(**scorer_kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):
-        cands = [output]
-        srcs = [input]
+        cands = [str(output)]
+        srcs = [str(input)]
         result = self.scorer.free_score(cands, srcs, **kwargs)
 
         # ParaScorer.free_score might return a list of torch.Tensors or a list of
@@ -200,6 +200,9 @@ where:
         return float(first)
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
+        # Ensure string casting for all elements before passing to scorer
+        outputs = [str(o) for o in outputs]
+        inputs = [str(i) for i in inputs]
         results = self.scorer.free_score(outputs, inputs, **kwargs)
 
         # Newer versions of parascore return a plain python list. Older versions

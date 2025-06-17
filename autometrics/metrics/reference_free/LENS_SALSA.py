@@ -2,6 +2,7 @@ import torch
 from typing import List, Union, Tuple, ClassVar
 from lens import download_model, LENS_SALSA as _LENS_SALSA_Model
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
+from types import MethodType
 
 class LENS_SALSA(ReferenceFreeMetric):
     """---
@@ -172,6 +173,10 @@ The model is trained using human-annotated quality scores from simplification co
         
         # Standard XLM-RoBERTa model has 512 token limit (LENS uses this model)
         self.model_token_limit = 512
+        # We conservatively use only a fraction of the limit so that when the
+        # model later concatenates special tokens / source / target sequences
+        # we stay well within bounds.
+        self.truncation_fraction = 0.85  # keep ≤85 % of limit as a safeguard
         
         self.exclude_from_cache_key('batch_size', 'devices', 'persistent', 'max_retries')
 
@@ -183,6 +188,52 @@ The model is trained using human-annotated quality scores from simplification co
             # Update column names to match what the model expects
             self.input_column = self.model.source_column
             self.output_column = self.model.target_column
+
+            # ------------------------------------------------------------------
+            # Monkey-patch LENS encoder utilities to avoid rare assertion errors
+            # caused by negative padding lengths when the span mask length is
+            # larger than the token sequence length (this can happen if the
+            # underlying model is forced to truncate the token sequence to the
+            # 512-token limit but the span mask is not truncated accordingly).
+            # Instead of raising an AssertionError, we now gracefully truncate
+            # the mask so that it always fits the requested length.
+            # ------------------------------------------------------------------
+
+            def _safe_pad_tensor(this, tensor, length, padding_index):
+                """Robust replacement for Encoder.pad_tensor.
+
+                If the incoming *tensor* is already longer than *length* we
+                simply truncate it; otherwise we fall back to the original
+                right-padding behaviour.  This mirrors what happens to the
+                token sequences themselves and prevents the negative-padding
+                assertion that crashes evaluation jobs on long inputs.
+                """
+                if tensor.shape[0] > length:
+                    # Truncate rather than assert – this keeps span masks and
+                    # token sequences aligned after the upstream truncation
+                    # performed inside `Encoder.concat_sequences`.
+                    return tensor[:length]
+
+                n_padding = length - tensor.shape[0]
+                if n_padding == 0:
+                    return tensor
+
+                padding = tensor.new_full((n_padding, *tensor.shape[1:]), padding_index)
+                return torch.cat((tensor, padding), dim=0)
+
+            # Replace the existing method if present (should be on every LENS
+            # encoder instance) so that all subsequent calls use the safe
+            # version defined above.  The encoder lives under
+            # `self.model.model.encoder` in LENS checkpoints.
+
+            enc = None
+            if hasattr(self.model, "encoder"):
+                enc = self.model.encoder  # some checkpoints expose it here
+            elif hasattr(self.model, "model") and hasattr(self.model.model, "encoder"):
+                enc = self.model.model.encoder
+
+            if enc is not None and hasattr(enc, "pad_tensor"):
+                enc.pad_tensor = MethodType(_safe_pad_tensor, enc)
 
     def _unload_model(self):
         """Unload SALSA model to free resources."""
@@ -207,18 +258,28 @@ The model is trained using human-annotated quality scores from simplification co
 
     def _truncate_text(self, text: str, max_tokens: int = None) -> str:
         """
-        Truncate text based on approximate token count to avoid model errors.
-        Uses max_tokens if specified, otherwise defaults to half the model limit
-        to account for both input and output texts being concatenated.
+        Truncate *individual* text segments (source or target) so that the
+        eventual concatenation performed inside the SALSA model will not exceed
+        its maximum token length.
+
+        We do this by allocating **half** of an *overall* budget that is
+        slightly smaller (``truncation_fraction``) than the true
+        ``model_token_limit``.  Concretely, if no ``max_tokens`` is supplied
+        we use:
+
+        ``int(model_token_limit * truncation_fraction / 2)``
+
+        This keeps the *combined* source-plus-target length within
+        ``model_token_limit * truncation_fraction`` while leaving additional
+        room for any special tokens the model may insert.
         """
         if not text:
             return text
         
         if max_tokens is None:
-            # Default to a conservative limit (half of model token limit)
-            # since input and output texts will be concatenated
-            max_tokens = self.model_token_limit // 2
-            
+            # Allocate half of the *reduced* budget to this single segment.
+            max_tokens = int(self.model_token_limit * self.truncation_fraction / 2)
+
         # Start with a rough character-based truncation for efficiency
         # (most multilingual tokenizers average ~4 chars per token)
         if len(text) > max_tokens * 6:
@@ -237,81 +298,62 @@ The model is trained using human-annotated quality scores from simplification co
             
         return " ".join(words)
 
-    def _calculate_with_fallback(self, input_text: str, output_text: str) -> float:
+    def _predict_score(self, input_text: str, output_text: str) -> float:
         """
-        Try to calculate score with progressively shorter inputs if needed.
-        Raises an exception if all attempts fail.
+        Compute the SALSA score for a single input/output pair **without** any
+        multi-step fallback logic.  Any exception raised by the underlying model
+        will be propagated to the caller so that failures are transparent.
         """
-        # Start with full text
+
+        input_text = str(input_text) if input_text is not None else ""
+        output_text = str(output_text) if output_text is not None else ""
+
+        # Treat empty or whitespace-only strings as a neutral failure score
+        if not input_text or not input_text.strip() or not output_text or not output_text.strip():
+            return 0.0
+
         truncated_input = self._truncate_text(input_text)
         truncated_output = self._truncate_text(output_text)
-        
-        # First attempt with standard truncation
-        try:
-            all_data = [{
-                self.input_column: truncated_input.lower(),
-                self.output_column: truncated_output.lower(),
-                "id": "0"
-            }]
-            
-            prediction = self.model.model.predict(
-                all_data,
-                batch_size=self.batch_size,
-                devices=self.devices
-            )
-            
-            return float(prediction.scores[0]) * 100
-        except Exception as e:
-            # If that fails, try more aggressive truncation
-            for attempt in range(1, self.max_retries):
-                try:
-                    # Reduce text length by half each attempt
-                    max_tokens = self.model_token_limit // (2 * (attempt + 1))
-                    truncated_input = self._truncate_text(input_text, max_tokens)
-                    truncated_output = self._truncate_text(output_text, max_tokens)
-                    
-                    all_data = [{
-                        self.input_column: truncated_input.lower(),
-                        self.output_column: truncated_output.lower(),
-                        "id": "0"
-                    }]
-                    
-                    prediction = self.model.model.predict(
-                        all_data,
-                        batch_size=self.batch_size,
-                        devices=self.devices
-                    )
-                    
-                    return float(prediction.scores[0]) * 100
-                except Exception as retry_e:
-                    if attempt == self.max_retries - 1:
-                        # All attempts failed, raise the last exception
-                        raise retry_e
-        
+
+        # If truncation results in empty strings, also treat as neutral failure
+        if not truncated_input.strip() or not truncated_output.strip():
+            return 0.0
+
+        all_data = [{
+            self.input_column: truncated_input.lower(),
+            self.output_column: truncated_output.lower(),
+            "id": "0"
+        }]
+
+        prediction = self.model.model.predict(
+            all_data,
+            batch_size=self.batch_size,
+            devices=self.devices,
+        )
+
+        return float(prediction.scores[0]) * 100
+
     def _calculate_impl(self,
-                  input: str,
-                  output: str,
-                  references: Union[List[str], None] = None,
-                  **kwargs) -> float:
+              input: str,
+              output: str,
+              references: Union[List[str], None] = None,
+              **kwargs) -> float:
         """
         Compute overall SALSA score for a single example.
         Returns a float score.
         """
         if self.model is None:
             self._load_model()
+
+        input = str(input) if input is not None else ""
+        output = str(output) if output is not None else ""
+
+        result = self._predict_score(input, output)
         
-        try:
-            result = self._calculate_with_fallback(input, output)
-            
-            if not self.persistent:
-                self._unload_model()
-                
-            return result
-        except Exception as e:
-            # Re-raise the exception to the caller
-            if not self.persistent:
-                self._unload_model()
-            raise RuntimeError(f"LENS_SALSA failed after {self.max_retries} attempts with progressively shorter inputs: {str(e)}")
+        if not self.persistent:
+            self._unload_model()
+
+        return result
 
     def _calculate_batched_impl(self,
                           inputs: List[str],
@@ -320,33 +362,33 @@ The model is trained using human-annotated quality scores from simplification co
                           **kwargs) -> List[float]:
         """
         Compute overall SALSA scores for a batch of examples.
-        
-        This implementation processes each input individually with fallback
-        to ensure maximum robustness, rather than using batch processing.
+
+        This version processes each input individually **once** — it does
+        not attempt any progressive truncation retries.  Any exception
+        raised while scoring will propagate so that the caller has full
+        visibility into the failure.
         """
         if self.model is None:
             self._load_model()
-        
-        results = []
-        errors = []
-        
-        for idx, (input_text, output_text) in enumerate(zip(inputs, outputs)):
-            try:
-                # Process each example with the fallback mechanism
-                score = self._calculate_with_fallback(input_text, output_text)
+
+        inputs = [str(input) if input is not None else "" for input in inputs]
+        outputs = [str(output) if output is not None else "" for output in outputs]
+
+        results: List[float] = []
+        try:
+            for input_text, output_text in zip(inputs, outputs):
+                # Handle empty input/output without hitting the model
+                if not input_text or not input_text.strip() or not output_text or not output_text.strip():
+                    results.append(0.0)
+                    continue
+
+                input_text = str(input_text) if input_text is not None else ""
+                output_text = str(output_text) if output_text is not None else ""
+
+                score = self._predict_score(input_text, output_text)
                 results.append(score)
-            except Exception as e:
-                # Record error and raise later
-                errors.append((idx, str(e)))
-                # Add None as placeholder
-                results.append(None)
-        
-        if not self.persistent:
-            self._unload_model()
-            
-        # If any errors occurred, raise an exception
-        if errors:
-            error_msg = "; ".join([f"Example {idx}: {err}" for idx, err in errors])
-            raise RuntimeError(f"LENS_SALSA failed on {len(errors)} examples: {error_msg}")
-            
+        finally:
+            if not self.persistent:
+                self._unload_model()
+
         return results 

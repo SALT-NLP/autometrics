@@ -25,7 +25,10 @@ from datetime import datetime
 # Add the project root to the path
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from autometrics.metrics.MetricBank import reference_based_metrics, reference_free_metrics
+from autometrics.metrics.MetricBank import (
+    build_reference_based_metrics,
+    build_reference_free_metrics,
+)
 from autometrics.experiments.utilization.utilization import UtilizationExperiment
 
 # Configure logging
@@ -164,6 +167,13 @@ def parse_args():
         "--clean-partial-results",
         action="store_true",
         help="Clean partial results before running metrics (removes incomplete metric folders)"
+    )
+    
+    # Cache directory for metric artifacts (mirrors benchmark_correlation.py)
+    parser.add_argument(
+        "--cache-dir",
+        default=None,
+        help="Custom diskcache directory for metric caching (overrides Metric default)"
     )
     
     return parser.parse_args()
@@ -620,21 +630,30 @@ def main():
     errors_dir = os.path.join(args.output_dir, "errors")
     os.makedirs(errors_dir, exist_ok=True)
     
-    # Collect metrics to benchmark
-    metrics_to_benchmark = []
-    
+    # ------------------------------------------------------------------
+    # Collect metrics to benchmark using the new builder helpers
+    # ------------------------------------------------------------------
+    metrics_to_benchmark: List[Any] = []
+
+    common_factory_kwargs = {
+        "cache_dir": args.cache_dir,
+        "seed": args.seed,
+    }
+
     if not args.skip_reference_based:
-        metrics_to_benchmark.extend(reference_based_metrics)
-        logger.info(f"Including {len(reference_based_metrics)} reference-based metrics")
-        print(f"Including {len(reference_based_metrics)} reference-based metrics:")
-        for m in reference_based_metrics:
+        ref_based_metrics = build_reference_based_metrics(**common_factory_kwargs)
+        metrics_to_benchmark.extend(ref_based_metrics)
+        logger.info(f"Including {len(ref_based_metrics)} reference-based metrics")
+        print(f"Including {len(ref_based_metrics)} reference-based metrics:")
+        for m in ref_based_metrics:
             print(f"  - {m.get_name()}")
-    
+
     if not args.skip_reference_free:
-        metrics_to_benchmark.extend(reference_free_metrics)
-        logger.info(f"Including {len(reference_free_metrics)} reference-free metrics")
-        print(f"Including {len(reference_free_metrics)} reference-free metrics:")
-        for m in reference_free_metrics:
+        ref_free_metrics = build_reference_free_metrics(**common_factory_kwargs)
+        metrics_to_benchmark.extend(ref_free_metrics)
+        logger.info(f"Including {len(ref_free_metrics)} reference-free metrics")
+        print(f"Including {len(ref_free_metrics)} reference-free metrics:")
+        for m in ref_free_metrics:
             print(f"  - {m.get_name()}")
     
     print(f"\nTotal metrics to process: {len(metrics_to_benchmark)}")

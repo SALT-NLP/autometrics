@@ -179,15 +179,15 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
         if not references:
             raise ValueError("ParaScore (reference-based) requires `references`.")
         
-        # singleton batch
-        cands = [output]
-        srcs = [input]
+        # Ensure inputs are strings to avoid parascore errors on numeric types
+        cands = [str(output)]
+        srcs = [str(input)]
         
         # ensure list-of-lists
         if isinstance(references[0], list):
-            refs_batch = references
+            refs_batch = [[str(r) for r in ref_list] for ref_list in references]
         else:
-            refs_batch = [references]
+            refs_batch = [[str(r) for r in references]]
             
         # use hybrid base_score
         result = self.scorer.base_score(cands, srcs, refs_batch, **kwargs)
@@ -204,8 +204,13 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
         Calculate scores for a batch of inputs/outputs.
         ParaScorer.base_score returns a list of scores [score1, score2, ...] for each input.
         """
-        # inputs: List[source], outputs: List[candidate]
+        # Cast to strings as well
+        inputs = [str(i) for i in inputs]
+        outputs = [str(o) for o in outputs]
         refs_batch = references if references is not None else [[] for _ in inputs]
+        
+        # Cast references to strings (handles nested list)
+        refs_batch = [[str(r) for r in ref_list] for ref_list in refs_batch]
         
         # Get scores
         scores_list = self.scorer.base_score(outputs, inputs, refs_batch, **kwargs)

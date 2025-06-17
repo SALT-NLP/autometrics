@@ -145,7 +145,7 @@ The additions $\Delta(R, S)$ and $\Delta(\hat{Y}, S)$ are computed via heuristic
                  description: str = "Update-aware ROUGE metrics on additions.",
                  scale: float = 1.0,
                  **kwargs):
-        submetrics = ["update_rouge1", "update_rouge2", "update_rougeLsum", "_target_diff_len", "_prediction_diff_len"]
+        submetrics = ["update_rouge1", "update_rouge2", "update_rougeLsum", "update_rouge_target_diff_len", "update_rouge_prediction_diff_len"]
         super().__init__(name, description, submetrics, scale=scale, **kwargs)
         self.scorer = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeLsum"], use_stemmer=False)
         self.scale = scale

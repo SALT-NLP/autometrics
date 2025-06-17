@@ -128,8 +128,8 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
     
     # Resource usage statistics (in megabytes)
     # TODO: Check this, because gpu memory being zero is suspicious
-    gpu_mem: ClassVar[float] = 13970.72265625 * 3  # in MB # THIS NUMBER IS AN ESTIMATE BASED ON HOW MUCH MEMORY THIS MODEL IS TAKING UP AS I RUN.  I SHOULD STILL RERUN THE BENCHMARKING SCRIPT
-    cpu_mem: ClassVar[float] = 13970.72265625  # in MB
+    gpu_mem: ClassVar[float] = 130000 # 13970.72265625 * 3  # in MB # THIS NUMBER IS AN ESTIMATE BASED ON HOW MUCH MEMORY THIS MODEL IS TAKING UP AS I RUN.  I SHOULD STILL RERUN THE BENCHMARKING SCRIPT
+    cpu_mem: ClassVar[float] = 13970.72265625  # in MB 
 
     def __init__(
         self,
@@ -192,6 +192,10 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
         return all_scores_res
 
     def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs) -> Tuple[float, float, float]:
+        # Safeguard: ensure both input_text and output are strings to avoid type errors (e.g., float inputs)
+        input_text = "" if input_text is None else str(input_text)
+        output = "" if output is None else str(output)
+
         # Lazy load model if needed
         if self.model is None:
             self._load_model()

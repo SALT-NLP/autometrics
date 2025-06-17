@@ -109,19 +109,24 @@ class CorrelationExperiment(Experiment):
     def _gather_metric_columns(self, dataset) -> List[str]:
         """Return all metric column names corresponding to `self.metrics`."""
         metric_cols: List[str] = []
+        metric_classes: List[str] = []
         for metric in self.metrics:
             if hasattr(metric, 'get_submetric_names'):
-                metric_cols += list(metric.get_submetric_names())
+                submetric_names = metric.get_submetric_names()
+                num_submetrics = len(submetric_names)
+                metric_cols += list(submetric_names)
+                metric_classes.extend([type(metric).__name__] * num_submetrics)
             else:
+                metric_classes.append(type(metric).__name__)
                 metric_cols.append(metric.get_name())
         # Keep only columns that actually exist in the DF (some metrics may have errored)
         existing_cols = [c for c in metric_cols if c in dataset.get_dataframe().columns]
-        return existing_cols
+        return existing_cols, metric_classes
 
     def _compute_correlations(self, dataset, corr_func) -> Dict[str, pd.DataFrame]:
         """Compute correlation & p-value for every metric vs each target column."""
         df = dataset.get_dataframe()
-        metric_cols = self._gather_metric_columns(dataset)
+        metric_cols, metric_classes = self._gather_metric_columns(dataset)
 
         # Attempt to fetch target columns attribute / fallback
         if hasattr(dataset, 'target_columns'):
@@ -135,7 +140,7 @@ class CorrelationExperiment(Experiment):
         for target_col in target_cols:
             rows = []
             y = df[target_col]
-            for metric_col in metric_cols:
+            for metric_col, metric_class in zip(metric_cols, metric_classes):
                 x = df[metric_col]
                 mask = x.notna() & y.notna()
                 if mask.sum() < 2:
@@ -157,6 +162,7 @@ class CorrelationExperiment(Experiment):
                         corr_val, p_val = np.nan, np.nan
                 rows.append({
                     'Metric': metric_col,
+                    'Metric_Class': metric_class,
                     'Correlation': corr_val,
                     'P-value': p_val,
                 })

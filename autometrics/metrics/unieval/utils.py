@@ -53,45 +53,45 @@ def add_question(dimension, output, src=None, ref=None, context=None, task=None)
         # For summarization
         if task == 'summarization':
             if dimension == 'fluency':
-                cur_input = 'question: Is this a fluent paragraph? </s> paragraph: ' + output[i]
+                cur_input = 'question: Is this a fluent paragraph? </s> paragraph: ' + str(output[i])
             elif dimension == 'coherence':
-                cur_input = 'question: Is this a coherent summary to the document? </s> summary: ' + output[i] + ' </s> document: ' + src[i]
+                cur_input = 'question: Is this a coherent summary to the document? </s> summary: ' + str(output[i]) + ' </s> document: ' + str(src[i])
             elif dimension == 'consistency':
-                cur_input = 'question: Is this claim consistent with the document? </s> claim: ' + output[i] + ' </s> document: ' + src[i]
+                cur_input = 'question: Is this claim consistent with the document? </s> claim: ' + str(output[i]) + ' </s> document: ' + str(src[i])
             elif dimension == 'relevance':
-                cur_input = 'question: Is this summary relevant to the reference? </s> summary: ' + output[i] + ' </s> reference: ' + ref[i]
+                cur_input = 'question: Is this summary relevant to the reference? </s> summary: ' + str(output[i]) + ' </s> reference: ' + str(ref[i])
             else:
                 raise NotImplementedError('The input format for this dimension is still undefined. Please customize it first.')
         # For dialogues
         elif task == 'dialogue':
             if dimension == 'naturalness':
-                cur_input = 'question: Is this a natural response in the dialogue? </s> response: ' + output[i]
+                cur_input = 'question: Is this a natural response in the dialogue? </s> response: ' + str(output[i])
             elif dimension == 'coherence':
                 cur_input = 'question: Is this a coherent response given the dialogue history? </s> response: '\
-                            + output[i] + ' </s> dialogue history: ' + src[i]
+                            + str(output[i]) + ' </s> dialogue history: ' + str(src[i])
             elif dimension == 'engagingness':
                 cur_input = 'question: Is this an engaging and informative response according to the dialogue history and fact? </s> response: '\
-                            + output[i] + ' </s> dialogue history: ' + src[i] + ' </s> fact: ' + context[i]
+                            + str(output[i]) + ' </s> dialogue history: ' + str(src[i]) + ' </s> fact: ' + str(context[i])
             elif dimension == 'groundedness':
                 cur_input = 'question: Is this response consistent with knowledge in the fact? </s> response: '\
-                            + output[i] + ' </s> fact: ' + context[i]
+                            + str(output[i]) + ' </s> fact: ' + str(context[i])
             elif dimension == 'understandability':
-                cur_input = 'question: Is this an understandable response in the dialogue? </s> response: ' + output[i]
+                cur_input = 'question: Is this an understandable response in the dialogue? </s> response: ' + str(output[i])
             else:
                 raise NotImplementedError('The input format for this dimension is still undefined. Please customize it first.')
         # For data-to-text
         elif task == 'data2text':
             if dimension == 'naturalness':
-                cur_input = 'question: Is this a fluent utterance? </s> utterance: ' + output[i]
+                cur_input = 'question: Is this a fluent utterance? </s> utterance: ' + str(output[i])
             elif dimension == 'informativeness':
                 cur_input = 'question: Is this sentence informative according to the reference? </s> sentence: '\
-                            + output[i] + ' </s> reference: ' + ref[i]
+                            + str(output[i]) + ' </s> reference: ' + str(ref[i])
             else:
                 raise NotImplementedError('The input format for this dimension is still undefined. Please customize it first.')
         # For factual consistency detection
         elif task == 'fact':
             if dimension == 'consistency':
-                cur_input = 'question: Is this claim consistent with the document? </s> claim: ' + output[i] + ' </s> document: ' + src[i]
+                cur_input = 'question: Is this claim consistent with the document? </s> claim: ' + str(output[i]) + ' </s> document: ' + str(src[i])
             else:
                 raise NotImplementedError('No other dimensions for the factual consistency detection task.')
         # For new customized tasks

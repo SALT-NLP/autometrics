@@ -175,6 +175,8 @@ where $f$ is the classification function learned by the model, trained on synthe
         # Lazy load
         if self.model is None:
             self._load_model()
+        input_text = str(input_text) if input_text is not None else ""
+        output = str(output) if output is not None else ""
         # Encode text-summary pair
         inputs = self.tokenizer(
             input_text,
@@ -199,6 +201,8 @@ where $f$ is the classification function learned by the model, trained on synthe
         # Lazy load
         if self.model is None:
             self._load_model()
+        inputs = [str(inp) if inp is not None else "" for inp in inputs]
+        outputs = [str(out) if out is not None else "" for out in outputs]
         all_scores = []
         # Process in batches
         for i in range(0, len(inputs), self.batch_size):

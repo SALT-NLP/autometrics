@@ -1281,3 +1281,1409 @@ Aggregated results saved to outputs/utilization/aggregated_results.csv
 Benchmark summary saved to outputs/utilization/benchmark_summary.csv
 
 Total runtime: 98.37 minutes (1.64 hours)
+Successfully patched isolated_runner.py for better JSON serialization
+
+Detecting hardware information...
+
+HARDWARE INFORMATION:
+System: Linux
+Processor: x86_64
+CPU Count: 96
+GPU Count: 4
+  GPU 0: NVIDIA RTX A6000 (47.54 GB)
+  GPU 1: NVIDIA RTX A6000 (47.54 GB)
+  GPU 2: NVIDIA RTX A6000 (47.54 GB)
+  GPU 3: NVIDIA RTX A6000 (47.54 GB)
+Hardware information saved to outputs/utilization/hardware_info.json
+2025-06-15 23:42:04,039 - INFO - Starting metric utilization benchmarking
+
+STARTING METRIC UTILIZATION BENCHMARKING
+Output directory: outputs/utilization
+Number of examples: 50
+Burn-in samples: 5
+Length categories: short,medium,long
+[MetricBank] Failed to instantiate LDLRewardModel with kwargs {'cache_dir': './autometrics_cache', 'seed': 42, 'use_cache': True}: Can't instantiate abstract class LDLRewardModel without an implementation for abstract method 'predict'. Trying default constructor …
+[MetricBank] Giving up on LDLRewardModel: Can't instantiate abstract class LDLRewardModel without an implementation for abstract method 'predict'
+2025-06-15 23:43:03,080 - INFO - Including 17 reference-free metrics
+Including 17 reference-free metrics:
+  - FKGL
+  - UniEvalFact
+  - Perplexity_gpt2-large
+  - ParaScoreFree
+  - INFORMRewardModel
+  - PRMRewardModel
+  - SummaQA
+  - DistinctNGram
+  - FastTextToxicity
+  - FastTextNSFW
+  - FastTextEducationalValue
+  - SelfBLEU
+  - FactCC
+  - Toxicity
+  - Sentiment
+  - GRMRewardModel
+  - LENS_SALSA
+
+Total metrics to process: 17
+2025-06-15 23:43:03,080 - INFO - Total metrics to process: 17
+
+Processing metric 1/17: FKGL
+2025-06-15 23:43:03,081 - INFO - Processing metric 1/17: FKGL
+Skipping FKGL - results already exist
+2025-06-15 23:43:03,192 - INFO - Skipping FKGL - results already exist
+
+Processing metric 2/17: UniEvalFact
+2025-06-15 23:43:03,193 - INFO - Processing metric 2/17: UniEvalFact
+Skipping UniEvalFact - results already exist
+2025-06-15 23:43:03,248 - INFO - Skipping UniEvalFact - results already exist
+
+Processing metric 3/17: Perplexity_gpt2-large
+2025-06-15 23:43:03,248 - INFO - Processing metric 3/17: Perplexity_gpt2-large
+Skipping Perplexity_gpt2-large - results already exist
+2025-06-15 23:43:03,321 - INFO - Skipping Perplexity_gpt2-large - results already exist
+
+Processing metric 4/17: ParaScoreFree
+2025-06-15 23:43:03,321 - INFO - Processing metric 4/17: ParaScoreFree
+Skipping ParaScoreFree - results already exist
+2025-06-15 23:43:03,389 - INFO - Skipping ParaScoreFree - results already exist
+
+Processing metric 5/17: INFORMRewardModel
+2025-06-15 23:43:03,389 - INFO - Processing metric 5/17: INFORMRewardModel
+Skipping INFORMRewardModel - results already exist
+2025-06-15 23:43:03,475 - INFO - Skipping INFORMRewardModel - results already exist
+
+Processing metric 6/17: PRMRewardModel
+2025-06-15 23:43:03,475 - INFO - Processing metric 6/17: PRMRewardModel
+Skipping PRMRewardModel - results already exist
+2025-06-15 23:43:03,553 - INFO - Skipping PRMRewardModel - results already exist
+
+Processing metric 7/17: SummaQA
+2025-06-15 23:43:03,553 - INFO - Processing metric 7/17: SummaQA
+Skipping SummaQA - results already exist
+2025-06-15 23:43:03,603 - INFO - Skipping SummaQA - results already exist
+
+Processing metric 8/17: DistinctNGram
+2025-06-15 23:43:03,603 - INFO - Processing metric 8/17: DistinctNGram
+Skipping DistinctNGram - results already exist
+2025-06-15 23:43:03,659 - INFO - Skipping DistinctNGram - results already exist
+
+Processing metric 9/17: FastTextToxicity
+2025-06-15 23:43:03,659 - INFO - Processing metric 9/17: FastTextToxicity
+Skipping FastTextToxicity - results already exist
+2025-06-15 23:43:03,729 - INFO - Skipping FastTextToxicity - results already exist
+
+Processing metric 10/17: FastTextNSFW
+2025-06-15 23:43:03,729 - INFO - Processing metric 10/17: FastTextNSFW
+Skipping FastTextNSFW - results already exist
+2025-06-15 23:43:03,769 - INFO - Skipping FastTextNSFW - results already exist
+
+Processing metric 11/17: FastTextEducationalValue
+2025-06-15 23:43:03,769 - INFO - Processing metric 11/17: FastTextEducationalValue
+Skipping FastTextEducationalValue - results already exist
+2025-06-15 23:43:03,866 - INFO - Skipping FastTextEducationalValue - results already exist
+
+Processing metric 12/17: SelfBLEU
+2025-06-15 23:43:03,866 - INFO - Processing metric 12/17: SelfBLEU
+Skipping SelfBLEU - results already exist
+2025-06-15 23:43:03,899 - INFO - Skipping SelfBLEU - results already exist
+
+Processing metric 13/17: FactCC
+2025-06-15 23:43:03,899 - INFO - Processing metric 13/17: FactCC
+Skipping FactCC - results already exist
+2025-06-15 23:43:03,945 - INFO - Skipping FactCC - results already exist
+
+Processing metric 14/17: Toxicity
+2025-06-15 23:43:03,945 - INFO - Processing metric 14/17: Toxicity
+Skipping Toxicity - results already exist
+2025-06-15 23:43:03,998 - INFO - Skipping Toxicity - results already exist
+
+Processing metric 15/17: Sentiment
+2025-06-15 23:43:03,999 - INFO - Processing metric 15/17: Sentiment
+Skipping Sentiment - results already exist
+2025-06-15 23:43:04,049 - INFO - Skipping Sentiment - results already exist
+
+Processing metric 16/17: GRMRewardModel
+2025-06-15 23:43:04,049 - INFO - Processing metric 16/17: GRMRewardModel
+Skipping GRMRewardModel - results already exist
+2025-06-15 23:43:04,109 - INFO - Skipping GRMRewardModel - results already exist
+
+Processing metric 17/17: LENS_SALSA
+2025-06-15 23:43:04,109 - INFO - Processing metric 17/17: LENS_SALSA
+Skipping LENS_SALSA - results already exist
+2025-06-15 23:43:04,228 - INFO - Skipping LENS_SALSA - results already exist
+
+Aggregating results from all metrics...
+2025-06-15 23:43:04,228 - INFO - Aggregating results from all metrics
+Found 141 summary files to aggregate
+Processing summary for iBLEU (long)
+Processing summary for iBLEU (short)
+Processing summary for iBLEU (medium)
+Processing summary for ROUGE (long)
+Processing summary for ROUGE (medium)
+Processing summary for ROUGE (short)
+Processing summary for Toxicity (short)
+Processing summary for Toxicity (medium)
+Processing summary for Toxicity (long)
+Processing summary for CHRF (long)
+Processing summary for CHRF (medium)
+Processing summary for CHRF (short)
+Processing summary for ParaScore (short)
+Processing summary for ParaScore (medium)
+Processing summary for ParaScore (long)
+Processing summary for HammingDistance_min (long)
+Processing summary for HammingDistance_min (medium)
+Processing summary for HammingDistance_min (short)
+Processing summary for TER (long)
+Processing summary for TER (medium)
+Processing summary for TER (short)
+Processing summary for DistinctNGram (long)
+Processing summary for DistinctNGram (short)
+Processing summary for DistinctNGram (medium)
+Processing summary for PseudoPARENT (medium)
+Processing summary for PseudoPARENT (long)
+Processing summary for PseudoPARENT (short)
+Processing summary for Perplexity_gpt2-large (short)
+Processing summary for Perplexity_gpt2-large (medium)
+Processing summary for Perplexity_gpt2-large (long)
+Processing summary for LENS (medium)
+Processing summary for LENS (short)
+Processing summary for LENS (long)
+Processing summary for MOVERScore_distilbert-base-uncased (short)
+Processing summary for MOVERScore_distilbert-base-uncased (long)
+Processing summary for MOVERScore_distilbert-base-uncased (medium)
+Processing summary for Sentiment (short)
+Processing summary for Sentiment (long)
+Processing summary for Sentiment (medium)
+Processing summary for SelfBLEU (short)
+Processing summary for SelfBLEU (long)
+Processing summary for SelfBLEU (medium)
+Processing summary for FastTextEducationalValue (medium)
+Processing summary for FastTextEducationalValue (short)
+Processing summary for FastTextEducationalValue (long)
+Processing summary for JaroWinklerSimilarity_max (short)
+Processing summary for JaroWinklerSimilarity_max (medium)
+Processing summary for JaroWinklerSimilarity_max (long)
+Processing summary for BLEURT (medium)
+Processing summary for BLEURT (long)
+Processing summary for BLEURT (short)
+Processing summary for JaroSimilarity_max (long)
+Processing summary for JaroSimilarity_max (medium)
+Processing summary for JaroSimilarity_max (short)
+Processing summary for UniEvalSum (short)
+Processing summary for UniEvalSum (long)
+Processing summary for UniEvalSum (medium)
+Processing summary for METEOR (medium)
+Processing summary for METEOR (short)
+Processing summary for METEOR (long)
+Processing summary for PRMRewardModel (medium)
+Processing summary for PRMRewardModel (long)
+Processing summary for PRMRewardModel (short)
+Processing summary for UniEvalFact (long)
+Processing summary for UniEvalFact (short)
+Processing summary for UniEvalFact (medium)
+Processing summary for INFORMRewardModel (long)
+Processing summary for INFORMRewardModel (short)
+Processing summary for INFORMRewardModel (medium)
+Processing summary for NIST (long)
+Processing summary for NIST (medium)
+Processing summary for NIST (short)
+Processing summary for InfoLM (medium)
+Processing summary for InfoLM (short)
+Processing summary for InfoLM (long)
+Processing summary for ParaScoreFree (long)
+Processing summary for ParaScoreFree (medium)
+Processing summary for ParaScoreFree (short)
+Processing summary for FactCC (medium)
+Processing summary for FactCC (short)
+Processing summary for FactCC (long)
+Processing summary for FKGL (short)
+Processing summary for FKGL (long)
+Processing summary for FKGL (medium)
+Processing summary for LevenshteinRatio_max (long)
+Processing summary for LevenshteinRatio_max (medium)
+Processing summary for LevenshteinRatio_max (short)
+Processing summary for JaccardDistance_min (medium)
+Processing summary for JaccardDistance_min (short)
+Processing summary for JaccardDistance_min (long)
+Processing summary for GRMRewardModel (medium)
+Processing summary for GRMRewardModel (long)
+Processing summary for GRMRewardModel (short)
+Processing summary for UniEvalDialogue (long)
+Processing summary for UniEvalDialogue (short)
+Processing summary for UniEvalDialogue (medium)
+Processing summary for CIDEr_n4_sig6.0 (long)
+Processing summary for CIDEr_n4_sig6.0 (medium)
+Processing summary for CIDEr_n4_sig6.0 (short)
+Processing summary for LENS_SALSA (medium)
+Processing summary for LENS_SALSA (long)
+Processing summary for LENS_SALSA (short)
+Processing summary for SummaQA (medium)
+Processing summary for SummaQA (long)
+Processing summary for SummaQA (short)
+Processing summary for BARTScore_bart-large-cnn (long)
+Processing summary for BARTScore_bart-large-cnn (short)
+Processing summary for BARTScore_bart-large-cnn (medium)
+Processing summary for GLEU (long)
+Processing summary for GLEU (medium)
+Processing summary for GLEU (short)
+Processing summary for LevenshteinDistance_min (medium)
+Processing summary for LevenshteinDistance_min (short)
+Processing summary for LevenshteinDistance_min (long)
+Processing summary for SARI (medium)
+Processing summary for SARI (long)
+Processing summary for SARI (short)
+Processing summary for BLEU (medium)
+Processing summary for BLEU (short)
+Processing summary for BLEU (long)
+Processing summary for FastTextNSFW (long)
+Processing summary for FastTextNSFW (medium)
+Processing summary for FastTextNSFW (short)
+Processing summary for UpdateROUGE (long)
+Processing summary for UpdateROUGE (medium)
+Processing summary for UpdateROUGE (short)
+Processing summary for YiSi (medium)
+Processing summary for YiSi (long)
+Processing summary for YiSi (short)
+Processing summary for MAUVE_max (medium)
+Processing summary for MAUVE_max (short)
+Processing summary for MAUVE_max (long)
+Processing summary for FastTextToxicity (short)
+Processing summary for FastTextToxicity (long)
+Processing summary for FastTextToxicity (medium)
+Processing summary for BERTScore_roberta-large (long)
+Processing summary for BERTScore_roberta-large (medium)
+Processing summary for BERTScore_roberta-large (short)
+Processing summary for CharCut (short)
+Processing summary for CharCut (long)
+Processing summary for CharCut (medium)
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+2025-06-15 23:43:07,370 - INFO - Aggregated results saved to outputs/utilization/aggregated_results.csv
+
+================================================================================
+BENCHMARK COMPLETE
+================================================================================
+Total metrics: 17
+Completed metrics: 0
+Skipped metrics (already had results): 17
+Failed metrics: 0
+
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+Benchmark summary saved to outputs/utilization/benchmark_summary.csv
+2025-06-15 23:43:07,372 - INFO - 
+BENCHMARK COMPLETE
+2025-06-15 23:43:07,372 - INFO - Total metrics: 17
+2025-06-15 23:43:07,372 - INFO - Completed metrics: 0
+2025-06-15 23:43:07,372 - INFO - Skipped metrics: 17
+2025-06-15 23:43:07,372 - INFO - Failed metrics: 0
+
+Total runtime: 1.06 minutes (0.02 hours)
+2025-06-15 23:43:07,381 - INFO - Total runtime: 1.06 minutes (0.02 hours)
+Successfully patched isolated_runner.py for better JSON serialization
+
+Detecting hardware information...
+
+HARDWARE INFORMATION:
+System: Linux
+Processor: x86_64
+CPU Count: 96
+GPU Count: 4
+  GPU 0: NVIDIA RTX A6000 (47.54 GB)
+  GPU 1: NVIDIA RTX A6000 (47.54 GB)
+  GPU 2: NVIDIA RTX A6000 (47.54 GB)
+  GPU 3: NVIDIA RTX A6000 (47.54 GB)
+Hardware information saved to outputs/utilization/hardware_info.json
+2025-06-16 10:59:34,574 - INFO - Starting metric utilization benchmarking
+
+STARTING METRIC UTILIZATION BENCHMARKING
+Output directory: outputs/utilization
+Number of examples: 50
+Burn-in samples: 5
+Length categories: short,medium,long
+2025-06-16 11:01:26,435 - INFO - Including 18 reference-free metrics
+Including 18 reference-free metrics:
+  - FKGL
+  - UniEvalFact
+  - Perplexity_gpt2-large
+  - ParaScoreFree
+  - INFORMRewardModel
+  - PRMRewardModel
+  - SummaQA
+  - DistinctNGram
+  - FastTextToxicity
+  - FastTextNSFW
+  - FastTextEducationalValue
+  - SelfBLEU
+  - FactCC
+  - Toxicity
+  - Sentiment
+  - GRMRewardModel
+  - LENS_SALSA
+  - LDLReward27B
+
+Total metrics to process: 18
+2025-06-16 11:01:26,435 - INFO - Total metrics to process: 18
+
+Processing metric 1/18: FKGL
+2025-06-16 11:01:26,436 - INFO - Processing metric 1/18: FKGL
+Skipping FKGL - results already exist
+2025-06-16 11:01:26,439 - INFO - Skipping FKGL - results already exist
+
+Processing metric 2/18: UniEvalFact
+2025-06-16 11:01:26,439 - INFO - Processing metric 2/18: UniEvalFact
+Skipping UniEvalFact - results already exist
+2025-06-16 11:01:26,441 - INFO - Skipping UniEvalFact - results already exist
+
+Processing metric 3/18: Perplexity_gpt2-large
+2025-06-16 11:01:26,441 - INFO - Processing metric 3/18: Perplexity_gpt2-large
+Skipping Perplexity_gpt2-large - results already exist
+2025-06-16 11:01:26,443 - INFO - Skipping Perplexity_gpt2-large - results already exist
+
+Processing metric 4/18: ParaScoreFree
+2025-06-16 11:01:26,443 - INFO - Processing metric 4/18: ParaScoreFree
+Skipping ParaScoreFree - results already exist
+2025-06-16 11:01:26,445 - INFO - Skipping ParaScoreFree - results already exist
+
+Processing metric 5/18: INFORMRewardModel
+2025-06-16 11:01:26,445 - INFO - Processing metric 5/18: INFORMRewardModel
+Skipping INFORMRewardModel - results already exist
+2025-06-16 11:01:26,447 - INFO - Skipping INFORMRewardModel - results already exist
+
+Processing metric 6/18: PRMRewardModel
+2025-06-16 11:01:26,447 - INFO - Processing metric 6/18: PRMRewardModel
+Skipping PRMRewardModel - results already exist
+2025-06-16 11:01:26,448 - INFO - Skipping PRMRewardModel - results already exist
+
+Processing metric 7/18: SummaQA
+2025-06-16 11:01:26,449 - INFO - Processing metric 7/18: SummaQA
+Skipping SummaQA - results already exist
+2025-06-16 11:01:26,450 - INFO - Skipping SummaQA - results already exist
+
+Processing metric 8/18: DistinctNGram
+2025-06-16 11:01:26,450 - INFO - Processing metric 8/18: DistinctNGram
+Skipping DistinctNGram - results already exist
+2025-06-16 11:01:26,452 - INFO - Skipping DistinctNGram - results already exist
+
+Processing metric 9/18: FastTextToxicity
+2025-06-16 11:01:26,452 - INFO - Processing metric 9/18: FastTextToxicity
+Skipping FastTextToxicity - results already exist
+2025-06-16 11:01:26,454 - INFO - Skipping FastTextToxicity - results already exist
+
+Processing metric 10/18: FastTextNSFW
+2025-06-16 11:01:26,454 - INFO - Processing metric 10/18: FastTextNSFW
+Skipping FastTextNSFW - results already exist
+2025-06-16 11:01:26,456 - INFO - Skipping FastTextNSFW - results already exist
+
+Processing metric 11/18: FastTextEducationalValue
+2025-06-16 11:01:26,456 - INFO - Processing metric 11/18: FastTextEducationalValue
+Skipping FastTextEducationalValue - results already exist
+2025-06-16 11:01:26,458 - INFO - Skipping FastTextEducationalValue - results already exist
+
+Processing metric 12/18: SelfBLEU
+2025-06-16 11:01:26,458 - INFO - Processing metric 12/18: SelfBLEU
+Skipping SelfBLEU - results already exist
+2025-06-16 11:01:26,460 - INFO - Skipping SelfBLEU - results already exist
+
+Processing metric 13/18: FactCC
+2025-06-16 11:01:26,460 - INFO - Processing metric 13/18: FactCC
+Skipping FactCC - results already exist
+2025-06-16 11:01:26,462 - INFO - Skipping FactCC - results already exist
+
+Processing metric 14/18: Toxicity
+2025-06-16 11:01:26,462 - INFO - Processing metric 14/18: Toxicity
+Skipping Toxicity - results already exist
+2025-06-16 11:01:26,464 - INFO - Skipping Toxicity - results already exist
+
+Processing metric 15/18: Sentiment
+2025-06-16 11:01:26,464 - INFO - Processing metric 15/18: Sentiment
+Skipping Sentiment - results already exist
+2025-06-16 11:01:26,466 - INFO - Skipping Sentiment - results already exist
+
+Processing metric 16/18: GRMRewardModel
+2025-06-16 11:01:26,466 - INFO - Processing metric 16/18: GRMRewardModel
+Skipping GRMRewardModel - results already exist
+2025-06-16 11:01:26,467 - INFO - Skipping GRMRewardModel - results already exist
+
+Processing metric 17/18: LENS_SALSA
+2025-06-16 11:01:26,468 - INFO - Processing metric 17/18: LENS_SALSA
+Skipping LENS_SALSA - results already exist
+2025-06-16 11:01:26,469 - INFO - Skipping LENS_SALSA - results already exist
+
+Processing metric 18/18: LDLReward27B
+2025-06-16 11:01:26,469 - INFO - Processing metric 18/18: LDLReward27B
+
+================================================================================
+STARTING BENCHMARK FOR: LDLReward27B
+================================================================================
+2025-06-16 11:01:26,470 - INFO - Starting benchmark for LDLReward27B
+Filtered constructor params for LDLReward27B: {'model_name': 'ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1', 'device_map': 'auto', 'batch_size': 2, 'persistent': True, 'name': 'LDLReward27B', 'description': 'LDL-Reward-Gemma-2-27B reward model (reference-free).'}
+Configuring experiment for LDLReward27B...
+Running benchmark for LDLReward27B...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 1070.57 MB
+  GPU RAM: 3399.68 MB
+Testing metric: LDLReward27B
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+  ⚠️ Warning: No checkpoints returned from metric profiler
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  ⚠️ Error: Failed to run isolated trials for short
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  ⚠️ Error: Failed to run isolated trials for medium
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  ⚠️ Error: Failed to run isolated trials for long
+
+Utilization Experiment Results Summary:
+
+=== RUNTIME COSTS ===
+Saving results for LDLReward27B...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: LDLReward27B
+================================================================================
+
+2025-06-16 11:17:58,410 - INFO - Benchmark completed for LDLReward27B
+
+--------------------------------------------------
+Progress: 18/18 metrics processed
+Status: 1 completed, 17 skipped, 0 failed
+--------------------------------------------------
+
+2025-06-16 11:17:58,411 - INFO - Progress: 18/18 metrics processed
+2025-06-16 11:17:58,411 - INFO - Status: 1 completed, 17 skipped, 0 failed
+
+Aggregating results from all metrics...
+2025-06-16 11:17:58,411 - INFO - Aggregating results from all metrics
+Found 141 summary files to aggregate
+Processing summary for iBLEU (long)
+Processing summary for iBLEU (short)
+Processing summary for iBLEU (medium)
+Processing summary for ROUGE (long)
+Processing summary for ROUGE (medium)
+Processing summary for ROUGE (short)
+Processing summary for Toxicity (short)
+Processing summary for Toxicity (medium)
+Processing summary for Toxicity (long)
+Processing summary for CHRF (long)
+Processing summary for CHRF (medium)
+Processing summary for CHRF (short)
+Processing summary for ParaScore (short)
+Processing summary for ParaScore (medium)
+Processing summary for ParaScore (long)
+Processing summary for HammingDistance_min (long)
+Processing summary for HammingDistance_min (medium)
+Processing summary for HammingDistance_min (short)
+Processing summary for TER (long)
+Processing summary for TER (medium)
+Processing summary for TER (short)
+Processing summary for DistinctNGram (long)
+Processing summary for DistinctNGram (short)
+Processing summary for DistinctNGram (medium)
+Processing summary for PseudoPARENT (medium)
+Processing summary for PseudoPARENT (long)
+Processing summary for PseudoPARENT (short)
+Processing summary for Perplexity_gpt2-large (short)
+Processing summary for Perplexity_gpt2-large (medium)
+Processing summary for Perplexity_gpt2-large (long)
+Processing summary for LENS (medium)
+Processing summary for LENS (short)
+Processing summary for LENS (long)
+Processing summary for MOVERScore_distilbert-base-uncased (short)
+Processing summary for MOVERScore_distilbert-base-uncased (long)
+Processing summary for MOVERScore_distilbert-base-uncased (medium)
+Processing summary for Sentiment (short)
+Processing summary for Sentiment (long)
+Processing summary for Sentiment (medium)
+Processing summary for SelfBLEU (short)
+Processing summary for SelfBLEU (long)
+Processing summary for SelfBLEU (medium)
+Processing summary for FastTextEducationalValue (medium)
+Processing summary for FastTextEducationalValue (short)
+Processing summary for FastTextEducationalValue (long)
+Processing summary for JaroWinklerSimilarity_max (short)
+Processing summary for JaroWinklerSimilarity_max (medium)
+Processing summary for JaroWinklerSimilarity_max (long)
+Processing summary for BLEURT (medium)
+Processing summary for BLEURT (long)
+Processing summary for BLEURT (short)
+Processing summary for JaroSimilarity_max (long)
+Processing summary for JaroSimilarity_max (medium)
+Processing summary for JaroSimilarity_max (short)
+Processing summary for UniEvalSum (short)
+Processing summary for UniEvalSum (long)
+Processing summary for UniEvalSum (medium)
+Processing summary for METEOR (medium)
+Processing summary for METEOR (short)
+Processing summary for METEOR (long)
+Processing summary for PRMRewardModel (medium)
+Processing summary for PRMRewardModel (long)
+Processing summary for PRMRewardModel (short)
+Processing summary for UniEvalFact (long)
+Processing summary for UniEvalFact (short)
+Processing summary for UniEvalFact (medium)
+Processing summary for INFORMRewardModel (long)
+Processing summary for INFORMRewardModel (short)
+Processing summary for INFORMRewardModel (medium)
+Processing summary for NIST (long)
+Processing summary for NIST (medium)
+Processing summary for NIST (short)
+Processing summary for InfoLM (medium)
+Processing summary for InfoLM (short)
+Processing summary for InfoLM (long)
+Processing summary for ParaScoreFree (long)
+Processing summary for ParaScoreFree (medium)
+Processing summary for ParaScoreFree (short)
+Processing summary for FactCC (medium)
+Processing summary for FactCC (short)
+Processing summary for FactCC (long)
+Processing summary for FKGL (short)
+Processing summary for FKGL (long)
+Processing summary for FKGL (medium)
+Processing summary for LevenshteinRatio_max (long)
+Processing summary for LevenshteinRatio_max (medium)
+Processing summary for LevenshteinRatio_max (short)
+Processing summary for JaccardDistance_min (medium)
+Processing summary for JaccardDistance_min (short)
+Processing summary for JaccardDistance_min (long)
+Processing summary for GRMRewardModel (medium)
+Processing summary for GRMRewardModel (long)
+Processing summary for GRMRewardModel (short)
+Processing summary for UniEvalDialogue (long)
+Processing summary for UniEvalDialogue (short)
+Processing summary for UniEvalDialogue (medium)
+Processing summary for CIDEr_n4_sig6.0 (long)
+Processing summary for CIDEr_n4_sig6.0 (medium)
+Processing summary for CIDEr_n4_sig6.0 (short)
+Processing summary for LENS_SALSA (medium)
+Processing summary for LENS_SALSA (long)
+Processing summary for LENS_SALSA (short)
+Processing summary for SummaQA (medium)
+Processing summary for SummaQA (long)
+Processing summary for SummaQA (short)
+Processing summary for BARTScore_bart-large-cnn (long)
+Processing summary for BARTScore_bart-large-cnn (short)
+Processing summary for BARTScore_bart-large-cnn (medium)
+Processing summary for GLEU (long)
+Processing summary for GLEU (medium)
+Processing summary for GLEU (short)
+Processing summary for LevenshteinDistance_min (medium)
+Processing summary for LevenshteinDistance_min (short)
+Processing summary for LevenshteinDistance_min (long)
+Processing summary for SARI (medium)
+Processing summary for SARI (long)
+Processing summary for SARI (short)
+Processing summary for BLEU (medium)
+Processing summary for BLEU (short)
+Processing summary for BLEU (long)
+Processing summary for FastTextNSFW (long)
+Processing summary for FastTextNSFW (medium)
+Processing summary for FastTextNSFW (short)
+Processing summary for UpdateROUGE (long)
+Processing summary for UpdateROUGE (medium)
+Processing summary for UpdateROUGE (short)
+Processing summary for YiSi (medium)
+Processing summary for YiSi (long)
+Processing summary for YiSi (short)
+Processing summary for MAUVE_max (medium)
+Processing summary for MAUVE_max (short)
+Processing summary for MAUVE_max (long)
+Processing summary for FastTextToxicity (short)
+Processing summary for FastTextToxicity (long)
+Processing summary for FastTextToxicity (medium)
+Processing summary for BERTScore_roberta-large (long)
+Processing summary for BERTScore_roberta-large (medium)
+Processing summary for BERTScore_roberta-large (short)
+Processing summary for CharCut (short)
+Processing summary for CharCut (long)
+Processing summary for CharCut (medium)
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+2025-06-16 11:18:01,111 - INFO - Aggregated results saved to outputs/utilization/aggregated_results.csv
+
+================================================================================
+BENCHMARK COMPLETE
+================================================================================
+Total metrics: 18
+Completed metrics: 1
+Skipped metrics (already had results): 17
+Failed metrics: 0
+
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+Benchmark summary saved to outputs/utilization/benchmark_summary.csv
+2025-06-16 11:18:01,115 - INFO - 
+BENCHMARK COMPLETE
+2025-06-16 11:18:01,115 - INFO - Total metrics: 18
+2025-06-16 11:18:01,115 - INFO - Completed metrics: 1
+2025-06-16 11:18:01,115 - INFO - Skipped metrics: 17
+2025-06-16 11:18:01,115 - INFO - Failed metrics: 0
+
+Total runtime: 18.44 minutes (0.31 hours)
+2025-06-16 11:18:01,127 - INFO - Total runtime: 18.44 minutes (0.31 hours)
+Successfully patched isolated_runner.py for better JSON serialization
+
+Detecting hardware information...
+
+HARDWARE INFORMATION:
+System: Linux
+Processor: x86_64
+CPU Count: 96
+GPU Count: 4
+  GPU 0: NVIDIA RTX A6000 (47.54 GB)
+  GPU 1: NVIDIA RTX A6000 (47.54 GB)
+  GPU 2: NVIDIA RTX A6000 (47.54 GB)
+  GPU 3: NVIDIA RTX A6000 (47.54 GB)
+Hardware information saved to outputs/utilization/hardware_info.json
+2025-06-16 11:44:30,675 - INFO - Starting metric utilization benchmarking
+
+STARTING METRIC UTILIZATION BENCHMARKING
+Output directory: outputs/utilization
+Number of examples: 50
+Burn-in samples: 5
+Length categories: short,medium,long
+2025-06-16 11:45:24,819 - INFO - Including 18 reference-free metrics
+Including 18 reference-free metrics:
+  - FKGL
+  - UniEvalFact
+  - Perplexity_gpt2-large
+  - ParaScoreFree
+  - INFORMRewardModel
+  - PRMRewardModel
+  - SummaQA
+  - DistinctNGram
+  - FastTextToxicity
+  - FastTextNSFW
+  - FastTextEducationalValue
+  - SelfBLEU
+  - FactCC
+  - Toxicity
+  - Sentiment
+  - GRMRewardModel
+  - LENS_SALSA
+  - LDLReward27B
+
+Total metrics to process: 18
+2025-06-16 11:45:24,819 - INFO - Total metrics to process: 18
+
+Processing metric 1/18: FKGL
+2025-06-16 11:45:24,819 - INFO - Processing metric 1/18: FKGL
+Skipping FKGL - results already exist
+2025-06-16 11:45:24,822 - INFO - Skipping FKGL - results already exist
+
+Processing metric 2/18: UniEvalFact
+2025-06-16 11:45:24,822 - INFO - Processing metric 2/18: UniEvalFact
+Skipping UniEvalFact - results already exist
+2025-06-16 11:45:24,824 - INFO - Skipping UniEvalFact - results already exist
+
+Processing metric 3/18: Perplexity_gpt2-large
+2025-06-16 11:45:24,824 - INFO - Processing metric 3/18: Perplexity_gpt2-large
+Skipping Perplexity_gpt2-large - results already exist
+2025-06-16 11:45:24,826 - INFO - Skipping Perplexity_gpt2-large - results already exist
+
+Processing metric 4/18: ParaScoreFree
+2025-06-16 11:45:24,826 - INFO - Processing metric 4/18: ParaScoreFree
+Skipping ParaScoreFree - results already exist
+2025-06-16 11:45:24,829 - INFO - Skipping ParaScoreFree - results already exist
+
+Processing metric 5/18: INFORMRewardModel
+2025-06-16 11:45:24,829 - INFO - Processing metric 5/18: INFORMRewardModel
+Skipping INFORMRewardModel - results already exist
+2025-06-16 11:45:24,831 - INFO - Skipping INFORMRewardModel - results already exist
+
+Processing metric 6/18: PRMRewardModel
+2025-06-16 11:45:24,831 - INFO - Processing metric 6/18: PRMRewardModel
+Skipping PRMRewardModel - results already exist
+2025-06-16 11:45:24,833 - INFO - Skipping PRMRewardModel - results already exist
+
+Processing metric 7/18: SummaQA
+2025-06-16 11:45:24,833 - INFO - Processing metric 7/18: SummaQA
+Skipping SummaQA - results already exist
+2025-06-16 11:45:24,835 - INFO - Skipping SummaQA - results already exist
+
+Processing metric 8/18: DistinctNGram
+2025-06-16 11:45:24,835 - INFO - Processing metric 8/18: DistinctNGram
+Skipping DistinctNGram - results already exist
+2025-06-16 11:45:24,837 - INFO - Skipping DistinctNGram - results already exist
+
+Processing metric 9/18: FastTextToxicity
+2025-06-16 11:45:24,837 - INFO - Processing metric 9/18: FastTextToxicity
+Skipping FastTextToxicity - results already exist
+2025-06-16 11:45:24,839 - INFO - Skipping FastTextToxicity - results already exist
+
+Processing metric 10/18: FastTextNSFW
+2025-06-16 11:45:24,839 - INFO - Processing metric 10/18: FastTextNSFW
+Skipping FastTextNSFW - results already exist
+2025-06-16 11:45:24,841 - INFO - Skipping FastTextNSFW - results already exist
+
+Processing metric 11/18: FastTextEducationalValue
+2025-06-16 11:45:24,841 - INFO - Processing metric 11/18: FastTextEducationalValue
+Skipping FastTextEducationalValue - results already exist
+2025-06-16 11:45:24,843 - INFO - Skipping FastTextEducationalValue - results already exist
+
+Processing metric 12/18: SelfBLEU
+2025-06-16 11:45:24,843 - INFO - Processing metric 12/18: SelfBLEU
+Skipping SelfBLEU - results already exist
+2025-06-16 11:45:24,845 - INFO - Skipping SelfBLEU - results already exist
+
+Processing metric 13/18: FactCC
+2025-06-16 11:45:24,845 - INFO - Processing metric 13/18: FactCC
+Skipping FactCC - results already exist
+2025-06-16 11:45:24,847 - INFO - Skipping FactCC - results already exist
+
+Processing metric 14/18: Toxicity
+2025-06-16 11:45:24,847 - INFO - Processing metric 14/18: Toxicity
+Skipping Toxicity - results already exist
+2025-06-16 11:45:24,849 - INFO - Skipping Toxicity - results already exist
+
+Processing metric 15/18: Sentiment
+2025-06-16 11:45:24,849 - INFO - Processing metric 15/18: Sentiment
+Skipping Sentiment - results already exist
+2025-06-16 11:45:24,851 - INFO - Skipping Sentiment - results already exist
+
+Processing metric 16/18: GRMRewardModel
+2025-06-16 11:45:24,851 - INFO - Processing metric 16/18: GRMRewardModel
+Skipping GRMRewardModel - results already exist
+2025-06-16 11:45:24,853 - INFO - Skipping GRMRewardModel - results already exist
+
+Processing metric 17/18: LENS_SALSA
+2025-06-16 11:45:24,853 - INFO - Processing metric 17/18: LENS_SALSA
+Skipping LENS_SALSA - results already exist
+2025-06-16 11:45:24,855 - INFO - Skipping LENS_SALSA - results already exist
+
+Processing metric 18/18: LDLReward27B
+2025-06-16 11:45:24,855 - INFO - Processing metric 18/18: LDLReward27B
+
+================================================================================
+STARTING BENCHMARK FOR: LDLReward27B
+================================================================================
+2025-06-16 11:45:24,856 - INFO - Starting benchmark for LDLReward27B
+Filtered constructor params for LDLReward27B: {'model_name': 'ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1', 'device_map': 'auto', 'batch_size': 2, 'persistent': True, 'name': 'LDLReward27B', 'description': 'LDL-Reward-Gemma-2-27B reward model (reference-free).'}
+Configuring experiment for LDLReward27B...
+Running benchmark for LDLReward27B...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 1093.51 MB
+  GPU RAM: 3399.68 MB
+Testing metric: LDLReward27B
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+  ⚠️ Warning: No checkpoints returned from metric profiler
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  ⚠️ Error: Failed to run isolated trials for short
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  ⚠️ Error: Failed to run isolated trials for medium
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  ⚠️ Error: Failed to run isolated trials for long
+
+Utilization Experiment Results Summary:
+
+=== RUNTIME COSTS ===
+Saving results for LDLReward27B...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: LDLReward27B
+================================================================================
+
+2025-06-16 12:22:58,990 - INFO - Benchmark completed for LDLReward27B
+
+--------------------------------------------------
+Progress: 18/18 metrics processed
+Status: 1 completed, 17 skipped, 0 failed
+--------------------------------------------------
+
+2025-06-16 12:22:58,993 - INFO - Progress: 18/18 metrics processed
+2025-06-16 12:22:58,993 - INFO - Status: 1 completed, 17 skipped, 0 failed
+
+Aggregating results from all metrics...
+2025-06-16 12:22:58,993 - INFO - Aggregating results from all metrics
+Found 141 summary files to aggregate
+Processing summary for iBLEU (long)
+Processing summary for iBLEU (short)
+Processing summary for iBLEU (medium)
+Processing summary for ROUGE (long)
+Processing summary for ROUGE (medium)
+Processing summary for ROUGE (short)
+Processing summary for Toxicity (short)
+Processing summary for Toxicity (medium)
+Processing summary for Toxicity (long)
+Processing summary for CHRF (long)
+Processing summary for CHRF (medium)
+Processing summary for CHRF (short)
+Processing summary for ParaScore (short)
+Processing summary for ParaScore (medium)
+Processing summary for ParaScore (long)
+Processing summary for HammingDistance_min (long)
+Processing summary for HammingDistance_min (medium)
+Processing summary for HammingDistance_min (short)
+Processing summary for TER (long)
+Processing summary for TER (medium)
+Processing summary for TER (short)
+Processing summary for DistinctNGram (long)
+Processing summary for DistinctNGram (short)
+Processing summary for DistinctNGram (medium)
+Processing summary for PseudoPARENT (medium)
+Processing summary for PseudoPARENT (long)
+Processing summary for PseudoPARENT (short)
+Processing summary for Perplexity_gpt2-large (short)
+Processing summary for Perplexity_gpt2-large (medium)
+Processing summary for Perplexity_gpt2-large (long)
+Processing summary for LENS (medium)
+Processing summary for LENS (short)
+Processing summary for LENS (long)
+Processing summary for MOVERScore_distilbert-base-uncased (short)
+Processing summary for MOVERScore_distilbert-base-uncased (long)
+Processing summary for MOVERScore_distilbert-base-uncased (medium)
+Processing summary for Sentiment (short)
+Processing summary for Sentiment (long)
+Processing summary for Sentiment (medium)
+Processing summary for SelfBLEU (short)
+Processing summary for SelfBLEU (long)
+Processing summary for SelfBLEU (medium)
+Processing summary for FastTextEducationalValue (medium)
+Processing summary for FastTextEducationalValue (short)
+Processing summary for FastTextEducationalValue (long)
+Processing summary for JaroWinklerSimilarity_max (short)
+Processing summary for JaroWinklerSimilarity_max (medium)
+Processing summary for JaroWinklerSimilarity_max (long)
+Processing summary for BLEURT (medium)
+Processing summary for BLEURT (long)
+Processing summary for BLEURT (short)
+Processing summary for JaroSimilarity_max (long)
+Processing summary for JaroSimilarity_max (medium)
+Processing summary for JaroSimilarity_max (short)
+Processing summary for UniEvalSum (short)
+Processing summary for UniEvalSum (long)
+Processing summary for UniEvalSum (medium)
+Processing summary for METEOR (medium)
+Processing summary for METEOR (short)
+Processing summary for METEOR (long)
+Processing summary for PRMRewardModel (medium)
+Processing summary for PRMRewardModel (long)
+Processing summary for PRMRewardModel (short)
+Processing summary for UniEvalFact (long)
+Processing summary for UniEvalFact (short)
+Processing summary for UniEvalFact (medium)
+Processing summary for INFORMRewardModel (long)
+Processing summary for INFORMRewardModel (short)
+Processing summary for INFORMRewardModel (medium)
+Processing summary for NIST (long)
+Processing summary for NIST (medium)
+Processing summary for NIST (short)
+Processing summary for InfoLM (medium)
+Processing summary for InfoLM (short)
+Processing summary for InfoLM (long)
+Processing summary for ParaScoreFree (long)
+Processing summary for ParaScoreFree (medium)
+Processing summary for ParaScoreFree (short)
+Processing summary for FactCC (medium)
+Processing summary for FactCC (short)
+Processing summary for FactCC (long)
+Processing summary for FKGL (short)
+Processing summary for FKGL (long)
+Processing summary for FKGL (medium)
+Processing summary for LevenshteinRatio_max (long)
+Processing summary for LevenshteinRatio_max (medium)
+Processing summary for LevenshteinRatio_max (short)
+Processing summary for JaccardDistance_min (medium)
+Processing summary for JaccardDistance_min (short)
+Processing summary for JaccardDistance_min (long)
+Processing summary for GRMRewardModel (medium)
+Processing summary for GRMRewardModel (long)
+Processing summary for GRMRewardModel (short)
+Processing summary for UniEvalDialogue (long)
+Processing summary for UniEvalDialogue (short)
+Processing summary for UniEvalDialogue (medium)
+Processing summary for CIDEr_n4_sig6.0 (long)
+Processing summary for CIDEr_n4_sig6.0 (medium)
+Processing summary for CIDEr_n4_sig6.0 (short)
+Processing summary for LENS_SALSA (medium)
+Processing summary for LENS_SALSA (long)
+Processing summary for LENS_SALSA (short)
+Processing summary for SummaQA (medium)
+Processing summary for SummaQA (long)
+Processing summary for SummaQA (short)
+Processing summary for BARTScore_bart-large-cnn (long)
+Processing summary for BARTScore_bart-large-cnn (short)
+Processing summary for BARTScore_bart-large-cnn (medium)
+Processing summary for GLEU (long)
+Processing summary for GLEU (medium)
+Processing summary for GLEU (short)
+Processing summary for LevenshteinDistance_min (medium)
+Processing summary for LevenshteinDistance_min (short)
+Processing summary for LevenshteinDistance_min (long)
+Processing summary for SARI (medium)
+Processing summary for SARI (long)
+Processing summary for SARI (short)
+Processing summary for BLEU (medium)
+Processing summary for BLEU (short)
+Processing summary for BLEU (long)
+Processing summary for FastTextNSFW (long)
+Processing summary for FastTextNSFW (medium)
+Processing summary for FastTextNSFW (short)
+Processing summary for UpdateROUGE (long)
+Processing summary for UpdateROUGE (medium)
+Processing summary for UpdateROUGE (short)
+Processing summary for YiSi (medium)
+Processing summary for YiSi (long)
+Processing summary for YiSi (short)
+Processing summary for MAUVE_max (medium)
+Processing summary for MAUVE_max (short)
+Processing summary for MAUVE_max (long)
+Processing summary for FastTextToxicity (short)
+Processing summary for FastTextToxicity (long)
+Processing summary for FastTextToxicity (medium)
+Processing summary for BERTScore_roberta-large (long)
+Processing summary for BERTScore_roberta-large (medium)
+Processing summary for BERTScore_roberta-large (short)
+Processing summary for CharCut (short)
+Processing summary for CharCut (long)
+Processing summary for CharCut (medium)
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+2025-06-16 12:23:01,632 - INFO - Aggregated results saved to outputs/utilization/aggregated_results.csv
+
+================================================================================
+BENCHMARK COMPLETE
+================================================================================
+Total metrics: 18
+Completed metrics: 1
+Skipped metrics (already had results): 17
+Failed metrics: 0
+
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+Benchmark summary saved to outputs/utilization/benchmark_summary.csv
+2025-06-16 12:23:01,638 - INFO - 
+BENCHMARK COMPLETE
+2025-06-16 12:23:01,638 - INFO - Total metrics: 18
+2025-06-16 12:23:01,638 - INFO - Completed metrics: 1
+2025-06-16 12:23:01,638 - INFO - Skipped metrics: 17
+2025-06-16 12:23:01,638 - INFO - Failed metrics: 0
+
+Total runtime: 38.52 minutes (0.64 hours)
+2025-06-16 12:23:01,685 - INFO - Total runtime: 38.52 minutes (0.64 hours)
+Successfully patched isolated_runner.py for better JSON serialization
+
+Detecting hardware information...
+
+HARDWARE INFORMATION:
+System: Linux
+Processor: x86_64
+CPU Count: 96
+GPU Count: 4
+  GPU 0: NVIDIA RTX A6000 (47.54 GB)
+  GPU 1: NVIDIA RTX A6000 (47.54 GB)
+  GPU 2: NVIDIA RTX A6000 (47.54 GB)
+  GPU 3: NVIDIA RTX A6000 (47.54 GB)
+Hardware information saved to outputs/utilization/hardware_info.json
+2025-06-16 13:30:37,208 - INFO - Starting metric utilization benchmarking
+
+STARTING METRIC UTILIZATION BENCHMARKING
+Output directory: outputs/utilization
+Number of examples: 50
+Burn-in samples: 5
+Length categories: short,medium,long
+2025-06-16 13:31:37,713 - INFO - Including 18 reference-free metrics
+Including 18 reference-free metrics:
+  - FKGL
+  - UniEvalFact
+  - Perplexity_gpt2-large
+  - ParaScoreFree
+  - INFORMRewardModel
+  - PRMRewardModel
+  - SummaQA
+  - DistinctNGram
+  - FastTextToxicity
+  - FastTextNSFW
+  - FastTextEducationalValue
+  - SelfBLEU
+  - FactCC
+  - Toxicity
+  - Sentiment
+  - GRMRewardModel
+  - LENS_SALSA
+  - LDLReward27B
+
+Total metrics to process: 18
+2025-06-16 13:31:37,713 - INFO - Total metrics to process: 18
+
+Processing metric 1/18: FKGL
+2025-06-16 13:31:37,713 - INFO - Processing metric 1/18: FKGL
+Skipping FKGL - results already exist
+2025-06-16 13:31:37,778 - INFO - Skipping FKGL - results already exist
+
+Processing metric 2/18: UniEvalFact
+2025-06-16 13:31:37,778 - INFO - Processing metric 2/18: UniEvalFact
+Skipping UniEvalFact - results already exist
+2025-06-16 13:31:37,814 - INFO - Skipping UniEvalFact - results already exist
+
+Processing metric 3/18: Perplexity_gpt2-large
+2025-06-16 13:31:37,814 - INFO - Processing metric 3/18: Perplexity_gpt2-large
+Skipping Perplexity_gpt2-large - results already exist
+2025-06-16 13:31:37,835 - INFO - Skipping Perplexity_gpt2-large - results already exist
+
+Processing metric 4/18: ParaScoreFree
+2025-06-16 13:31:37,835 - INFO - Processing metric 4/18: ParaScoreFree
+Skipping ParaScoreFree - results already exist
+2025-06-16 13:31:37,881 - INFO - Skipping ParaScoreFree - results already exist
+
+Processing metric 5/18: INFORMRewardModel
+2025-06-16 13:31:37,881 - INFO - Processing metric 5/18: INFORMRewardModel
+Skipping INFORMRewardModel - results already exist
+2025-06-16 13:31:37,932 - INFO - Skipping INFORMRewardModel - results already exist
+
+Processing metric 6/18: PRMRewardModel
+2025-06-16 13:31:37,932 - INFO - Processing metric 6/18: PRMRewardModel
+Skipping PRMRewardModel - results already exist
+2025-06-16 13:31:37,970 - INFO - Skipping PRMRewardModel - results already exist
+
+Processing metric 7/18: SummaQA
+2025-06-16 13:31:37,970 - INFO - Processing metric 7/18: SummaQA
+Skipping SummaQA - results already exist
+2025-06-16 13:31:38,012 - INFO - Skipping SummaQA - results already exist
+
+Processing metric 8/18: DistinctNGram
+2025-06-16 13:31:38,012 - INFO - Processing metric 8/18: DistinctNGram
+Skipping DistinctNGram - results already exist
+2025-06-16 13:31:38,046 - INFO - Skipping DistinctNGram - results already exist
+
+Processing metric 9/18: FastTextToxicity
+2025-06-16 13:31:38,046 - INFO - Processing metric 9/18: FastTextToxicity
+Skipping FastTextToxicity - results already exist
+2025-06-16 13:31:38,093 - INFO - Skipping FastTextToxicity - results already exist
+
+Processing metric 10/18: FastTextNSFW
+2025-06-16 13:31:38,094 - INFO - Processing metric 10/18: FastTextNSFW
+Skipping FastTextNSFW - results already exist
+2025-06-16 13:31:38,125 - INFO - Skipping FastTextNSFW - results already exist
+
+Processing metric 11/18: FastTextEducationalValue
+2025-06-16 13:31:38,125 - INFO - Processing metric 11/18: FastTextEducationalValue
+Skipping FastTextEducationalValue - results already exist
+2025-06-16 13:31:38,179 - INFO - Skipping FastTextEducationalValue - results already exist
+
+Processing metric 12/18: SelfBLEU
+2025-06-16 13:31:38,179 - INFO - Processing metric 12/18: SelfBLEU
+Skipping SelfBLEU - results already exist
+2025-06-16 13:31:38,230 - INFO - Skipping SelfBLEU - results already exist
+
+Processing metric 13/18: FactCC
+2025-06-16 13:31:38,230 - INFO - Processing metric 13/18: FactCC
+Skipping FactCC - results already exist
+2025-06-16 13:31:38,283 - INFO - Skipping FactCC - results already exist
+
+Processing metric 14/18: Toxicity
+2025-06-16 13:31:38,284 - INFO - Processing metric 14/18: Toxicity
+Skipping Toxicity - results already exist
+2025-06-16 13:31:38,356 - INFO - Skipping Toxicity - results already exist
+
+Processing metric 15/18: Sentiment
+2025-06-16 13:31:38,356 - INFO - Processing metric 15/18: Sentiment
+Skipping Sentiment - results already exist
+2025-06-16 13:31:38,378 - INFO - Skipping Sentiment - results already exist
+
+Processing metric 16/18: GRMRewardModel
+2025-06-16 13:31:38,378 - INFO - Processing metric 16/18: GRMRewardModel
+Skipping GRMRewardModel - results already exist
+2025-06-16 13:31:38,443 - INFO - Skipping GRMRewardModel - results already exist
+
+Processing metric 17/18: LENS_SALSA
+2025-06-16 13:31:38,443 - INFO - Processing metric 17/18: LENS_SALSA
+Skipping LENS_SALSA - results already exist
+2025-06-16 13:31:38,513 - INFO - Skipping LENS_SALSA - results already exist
+
+Processing metric 18/18: LDLReward27B
+2025-06-16 13:31:38,513 - INFO - Processing metric 18/18: LDLReward27B
+
+================================================================================
+STARTING BENCHMARK FOR: LDLReward27B
+================================================================================
+2025-06-16 13:31:38,513 - INFO - Starting benchmark for LDLReward27B
+Filtered constructor params for LDLReward27B: {'model_name': 'ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1', 'device_map': 'auto', 'batch_size': 2, 'persistent': True, 'name': 'LDLReward27B', 'description': 'LDL-Reward-Gemma-2-27B reward model (reference-free).'}
+Configuring experiment for LDLReward27B...
+Running benchmark for LDLReward27B...
+Testing with 50 examples per length category: short,medium,long
+Using 5 burn-in samples
+Running utilization experiment with 1 metrics
+Testing 50 synthetic examples per length category: short, medium, long
+Initial memory footprint (before experiment):
+  CPU RAM: 1077.62 MB
+  GPU RAM: 3399.68 MB
+Testing metric: LDLReward27B
+  Measuring import and construction costs in clean process...
+    Constructor kwargs: {}
+    start→after_import:
+      CPU RAM: 150.00 MB
+      GPU RAM: 0.00 MB
+      Duration: 3515.34 ms
+    after_import→after_construct:
+      CPU RAM: 0.91 MB
+      GPU RAM: 0.00 MB
+      Duration: 162.97 ms
+    after_construct→after_first_call:
+      CPU RAM: 1070.03 MB
+      GPU RAM: 104171.60 MB
+      Duration: 577586.21 ms
+    after_first_call→after_unload:
+      CPU RAM: 0.02 MB
+      GPU RAM: 0.00 MB
+      Duration: 55.16 ms
+  Testing with short inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with medium inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+  Testing with long inputs/outputs
+  Running in isolated subprocess for clean memory measurements...
+
+Utilization Experiment Results Summary:
+
+=== IMPORT AND CONSTRUCTION COSTS ===
+
+LDLReward27B import and construction:
+  start→after_import:
+    CPU RAM: 150.00 MB
+    GPU RAM: 0.00 MB
+    Duration: 3515.34 ms
+  after_import→after_construct:
+    CPU RAM: 0.91 MB
+    GPU RAM: 0.00 MB
+    Duration: 162.97 ms
+  after_construct→after_first_call:
+    CPU RAM: 1070.03 MB
+    GPU RAM: 104171.60 MB
+    Duration: 577586.21 ms
+  after_first_call→after_unload:
+    CPU RAM: 0.02 MB
+    GPU RAM: 0.00 MB
+    Duration: 55.16 ms
+  TOTAL IMPORT COSTS:
+    CPU RAM: 1220.96 MB
+    GPU RAM: 104171.60 MB
+
+=== RUNTIME COSTS ===
+
+LDLReward27B - short:
+  Duration (ms): 316.83 ±0.36
+  CPU RAM - Baseline: 2018.42 MB
+  CPU RAM - Used by metric: 0.01 MB ±0.00
+  CPU RAM - Total: 2018.43 MB
+  GPU RAM - Baseline: 104171.60 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 104171.60 MB
+  CPU RAM - With Import: 150.92 MB (import: 150.91 MB + runtime: 0.01 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+LDLReward27B - medium:
+  Duration (ms): 714.33 ±0.98
+  CPU RAM - Baseline: 2057.19 MB
+  CPU RAM - Used by metric: 0.00 MB ±0.00
+  CPU RAM - Total: 2057.20 MB
+  GPU RAM - Baseline: 104171.60 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 104171.60 MB
+  CPU RAM - With Import: 150.92 MB (import: 150.91 MB + runtime: 0.00 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+
+LDLReward27B - long:
+  Duration (ms): 1919.58 ±1.65
+  CPU RAM - Baseline: 2020.87 MB
+  CPU RAM - Used by metric: 0.01 MB ±0.00
+  CPU RAM - Total: 2020.87 MB
+  GPU RAM - Baseline: 104171.60 MB
+  GPU RAM - Used by metric: 0.00 MB ±0.00
+  GPU RAM - Total: 104171.60 MB
+  CPU RAM - With Import: 150.92 MB (import: 150.91 MB + runtime: 0.01 MB)
+  GPU RAM - With Import: 0.00 MB (import: 0.00 MB + runtime: 0.00 MB)
+Saving results for LDLReward27B...
+
+================================================================================
+BENCHMARK COMPLETED SUCCESSFULLY FOR: LDLReward27B
+================================================================================
+
+2025-06-16 13:47:49,215 - INFO - Benchmark completed for LDLReward27B
+
+--------------------------------------------------
+Progress: 18/18 metrics processed
+Status: 1 completed, 17 skipped, 0 failed
+--------------------------------------------------
+
+2025-06-16 13:47:49,215 - INFO - Progress: 18/18 metrics processed
+2025-06-16 13:47:49,215 - INFO - Status: 1 completed, 17 skipped, 0 failed
+
+Aggregating results from all metrics...
+2025-06-16 13:47:49,215 - INFO - Aggregating results from all metrics
+Found 144 summary files to aggregate
+Processing summary for iBLEU (long)
+Processing summary for iBLEU (short)
+Processing summary for iBLEU (medium)
+Processing summary for ROUGE (long)
+Processing summary for ROUGE (medium)
+Processing summary for ROUGE (short)
+Processing summary for Toxicity (short)
+Processing summary for Toxicity (medium)
+Processing summary for Toxicity (long)
+Processing summary for CHRF (long)
+Processing summary for CHRF (medium)
+Processing summary for CHRF (short)
+Processing summary for ParaScore (short)
+Processing summary for ParaScore (medium)
+Processing summary for ParaScore (long)
+Processing summary for HammingDistance_min (long)
+Processing summary for HammingDistance_min (medium)
+Processing summary for HammingDistance_min (short)
+Processing summary for TER (long)
+Processing summary for TER (medium)
+Processing summary for TER (short)
+Processing summary for DistinctNGram (long)
+Processing summary for DistinctNGram (short)
+Processing summary for DistinctNGram (medium)
+Processing summary for PseudoPARENT (medium)
+Processing summary for PseudoPARENT (long)
+Processing summary for PseudoPARENT (short)
+Processing summary for Perplexity_gpt2-large (short)
+Processing summary for Perplexity_gpt2-large (medium)
+Processing summary for Perplexity_gpt2-large (long)
+Processing summary for LENS (medium)
+Processing summary for LENS (short)
+Processing summary for LENS (long)
+Processing summary for MOVERScore_distilbert-base-uncased (short)
+Processing summary for MOVERScore_distilbert-base-uncased (long)
+Processing summary for MOVERScore_distilbert-base-uncased (medium)
+Processing summary for Sentiment (short)
+Processing summary for Sentiment (long)
+Processing summary for Sentiment (medium)
+Processing summary for SelfBLEU (short)
+Processing summary for SelfBLEU (long)
+Processing summary for SelfBLEU (medium)
+Processing summary for FastTextEducationalValue (medium)
+Processing summary for FastTextEducationalValue (short)
+Processing summary for FastTextEducationalValue (long)
+Processing summary for JaroWinklerSimilarity_max (short)
+Processing summary for JaroWinklerSimilarity_max (medium)
+Processing summary for JaroWinklerSimilarity_max (long)
+Processing summary for BLEURT (medium)
+Processing summary for BLEURT (long)
+Processing summary for BLEURT (short)
+Processing summary for JaroSimilarity_max (long)
+Processing summary for JaroSimilarity_max (medium)
+Processing summary for JaroSimilarity_max (short)
+Processing summary for UniEvalSum (short)
+Processing summary for UniEvalSum (long)
+Processing summary for UniEvalSum (medium)
+Processing summary for METEOR (medium)
+Processing summary for METEOR (short)
+Processing summary for METEOR (long)
+Processing summary for PRMRewardModel (medium)
+Processing summary for PRMRewardModel (long)
+Processing summary for PRMRewardModel (short)
+Processing summary for UniEvalFact (long)
+Processing summary for UniEvalFact (short)
+Processing summary for UniEvalFact (medium)
+Processing summary for INFORMRewardModel (long)
+Processing summary for INFORMRewardModel (short)
+Processing summary for INFORMRewardModel (medium)
+Processing summary for NIST (long)
+Processing summary for NIST (medium)
+Processing summary for NIST (short)
+Processing summary for InfoLM (medium)
+Processing summary for InfoLM (short)
+Processing summary for InfoLM (long)
+Processing summary for ParaScoreFree (long)
+Processing summary for ParaScoreFree (medium)
+Processing summary for ParaScoreFree (short)
+Processing summary for FactCC (medium)
+Processing summary for FactCC (short)
+Processing summary for FactCC (long)
+Processing summary for FKGL (short)
+Processing summary for FKGL (long)
+Processing summary for FKGL (medium)
+Processing summary for LevenshteinRatio_max (long)
+Processing summary for LevenshteinRatio_max (medium)
+Processing summary for LevenshteinRatio_max (short)
+Processing summary for JaccardDistance_min (medium)
+Processing summary for JaccardDistance_min (short)
+Processing summary for JaccardDistance_min (long)
+Processing summary for GRMRewardModel (medium)
+Processing summary for GRMRewardModel (long)
+Processing summary for GRMRewardModel (short)
+Processing summary for UniEvalDialogue (long)
+Processing summary for UniEvalDialogue (short)
+Processing summary for UniEvalDialogue (medium)
+Processing summary for CIDEr_n4_sig6.0 (long)
+Processing summary for CIDEr_n4_sig6.0 (medium)
+Processing summary for CIDEr_n4_sig6.0 (short)
+Processing summary for LENS_SALSA (medium)
+Processing summary for LENS_SALSA (long)
+Processing summary for LENS_SALSA (short)
+Processing summary for LDLReward27B (medium)
+Processing summary for LDLReward27B (short)
+Processing summary for LDLReward27B (long)
+Processing summary for SummaQA (medium)
+Processing summary for SummaQA (long)
+Processing summary for SummaQA (short)
+Processing summary for BARTScore_bart-large-cnn (long)
+Processing summary for BARTScore_bart-large-cnn (short)
+Processing summary for BARTScore_bart-large-cnn (medium)
+Processing summary for GLEU (long)
+Processing summary for GLEU (medium)
+Processing summary for GLEU (short)
+Processing summary for LevenshteinDistance_min (medium)
+Processing summary for LevenshteinDistance_min (short)
+Processing summary for LevenshteinDistance_min (long)
+Processing summary for SARI (medium)
+Processing summary for SARI (long)
+Processing summary for SARI (short)
+Processing summary for BLEU (medium)
+Processing summary for BLEU (short)
+Processing summary for BLEU (long)
+Processing summary for FastTextNSFW (long)
+Processing summary for FastTextNSFW (medium)
+Processing summary for FastTextNSFW (short)
+Processing summary for UpdateROUGE (long)
+Processing summary for UpdateROUGE (medium)
+Processing summary for UpdateROUGE (short)
+Processing summary for YiSi (medium)
+Processing summary for YiSi (long)
+Processing summary for YiSi (short)
+Processing summary for MAUVE_max (medium)
+Processing summary for MAUVE_max (short)
+Processing summary for MAUVE_max (long)
+Processing summary for FastTextToxicity (short)
+Processing summary for FastTextToxicity (long)
+Processing summary for FastTextToxicity (medium)
+Processing summary for BERTScore_roberta-large (long)
+Processing summary for BERTScore_roberta-large (medium)
+Processing summary for BERTScore_roberta-large (short)
+Processing summary for CharCut (short)
+Processing summary for CharCut (long)
+Processing summary for CharCut (medium)
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+2025-06-16 13:47:54,551 - INFO - Aggregated results saved to outputs/utilization/aggregated_results.csv
+
+================================================================================
+BENCHMARK COMPLETE
+================================================================================
+Total metrics: 18
+Completed metrics: 1
+Skipped metrics (already had results): 17
+Failed metrics: 0
+
+Aggregated results saved to outputs/utilization/aggregated_results.csv
+Benchmark summary saved to outputs/utilization/benchmark_summary.csv
+2025-06-16 13:47:54,553 - INFO - 
+BENCHMARK COMPLETE
+2025-06-16 13:47:54,553 - INFO - Total metrics: 18
+2025-06-16 13:47:54,553 - INFO - Completed metrics: 1
+2025-06-16 13:47:54,553 - INFO - Skipped metrics: 17
+2025-06-16 13:47:54,553 - INFO - Failed metrics: 0
+
+Total runtime: 17.29 minutes (0.29 hours)
+2025-06-16 13:47:54,565 - INFO - Total runtime: 17.29 minutes (0.29 hours)

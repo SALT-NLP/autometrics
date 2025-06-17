@@ -2,7 +2,7 @@
 
 import os
 from dataclasses import dataclass
-from typing import Optional, List, Union, Tuple
+from typing import Optional, List, Union, Tuple, Dict, Any, ClassVar
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,7 +14,8 @@ from transformers.utils import ModelOutput
 from accelerate import infer_auto_device_map, dispatch_model
 from accelerate.utils import get_balanced_memory
 from huggingface_hub import snapshot_download
-from autometrics.metrics.Metric import Metric
+from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
+from autometrics.metrics.utils.device_utils import get_model_device, ensure_tensor_on_device
 
 
 class MultiOutputNN(nn.Module):
@@ -178,7 +179,7 @@ class LDLRewardModel27B(Gemma2PreTrainedModel):
         return model
 
 
-class LDLReward27B(Metric):
+class LDLRewardModel(ReferenceFreeMetric):
     """---
 # Metric Card for LDL Reward Model 27B
 
@@ -305,7 +306,7 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
   author       = {Shikai Chen and Jin Yuan and Yang Zhang and Zhongchao Shi and Jianping Fan and Xin Geng and Yong Rui},
   title        = {LDL-Reward-Gemma-2-27B-v0.1},
   year         = {2025},
-  howpublished = {\url{https://huggingface.co/ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1}},
+  howpublished = {https://huggingface.co/ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1},
   note         = {Hugging Face Model Repository},
 }
 ```
@@ -316,6 +317,11 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
 - **Acknowledgment of AI Assistance:**  
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
+
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 104171.59765625 # in MB
+    cpu_mem: ClassVar[float] = 2057.19140625 # in MB
+
     def __init__(
         self,
         name: str = "LDLReward27B",
@@ -340,11 +346,18 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
     def _load_model(self):
         if self.model is None:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+            # Ensure a pad token is set for consistent batching
+            if self.tokenizer.pad_token is None:
+                # Fall back to EOS token as pad if the tokenizer has no explicit pad token
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+                self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
             self.model = LDLRewardModel27B.from_pretrained(
                 self.model_name,
                 device_map=self.device_map
             )
             self.model.eval()
+            # Ensure the loaded model shares the same pad token ID as the tokenizer
+            self.model.config.pad_token_id = self.tokenizer.pad_token_id
 
     def _unload_model(self):
         if self.model is not None:
@@ -354,29 +367,79 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
             self.model = None
             self.tokenizer = None
 
+    # Helper to handle both tensor and dict inputs
+    def _call_model(self, tok: Union[torch.Tensor, Dict[str, Any]]) -> torch.Tensor:
+        """Forward `tok` through the model regardless of its exact structure."""
+        with torch.no_grad():
+            if isinstance(tok, torch.Tensor):
+                outputs = self.model(input_ids=tok)
+            else:
+                outputs = self.model(**tok)
+
+            logits = outputs.logits if hasattr(outputs, "logits") else outputs[0]
+            return logits
+
     def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
+        """Score a single input–output pair."""
         if self.model is None:
             self._load_model()
+
+        # Prepare conversation
         conv = [{"role": "user", "content": input}, {"role": "assistant", "content": output}]
-        tok = self.tokenizer.apply_chat_template(conv, tokenize=True, return_tensors="pt").to(self.device)
-        with torch.no_grad():
-            score = self.model(**tok).logits.squeeze().cpu().item()
+
+        # Ensure tensors are placed on the same device as the model
+        model_device = get_model_device(self.model, fallback_device=self.device)
+        # Tokenize with automatic padding/truncation to avoid tensor shape mismatches
+        tok = self.tokenizer.apply_chat_template(
+            conv,
+            tokenize=True,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=self.tokenizer.model_max_length,
+        )
+        tok = ensure_tensor_on_device(tok, model_device)
+
+        logits = self._call_model(tok)
+        score = logits.squeeze().cpu().item()
+
         if not self.persistent:
             self._unload_model()
         return score
 
     def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], references=None, **kwargs) -> List[float]:
+        """Score batches of input–output pairs."""
         if self.model is None:
             self._load_model()
+
+        model_device = get_model_device(self.model, fallback_device=self.device)
         all_scores: List[float] = []
+
         for i in range(0, len(inputs), self.batch_size):
-            chunk_in = inputs[i:i+self.batch_size]
-            chunk_out = outputs[i:i+self.batch_size]
-            convs = [[{"role":"user","content":inp}, {"role":"assistant","content":out}] for inp,out in zip(chunk_in,chunk_out)]
-            tok = self.tokenizer.apply_chat_template(convs, tokenize=True, return_tensors="pt").to(self.device)
-            with torch.no_grad():
-                logits = self.model(**tok).logits.squeeze(-1).cpu().tolist()
-                all_scores.extend(logits)
+            chunk_in = inputs[i : i + self.batch_size]
+            chunk_out = outputs[i : i + self.batch_size]
+
+            # Prepare batch conversations
+            convs = [[{"role": "user", "content": inp}, {"role": "assistant", "content": out}] for inp, out in zip(chunk_in, chunk_out)]
+
+            # Tokenize with automatic padding/truncation to ensure consistent tensor shapes across the batch
+            tok = self.tokenizer.apply_chat_template(
+                convs,
+                tokenize=True,
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=self.tokenizer.model_max_length,
+            )
+            tok = ensure_tensor_on_device(tok, model_device)
+
+            logits = self._call_model(tok)
+            vals = logits.squeeze(-1).cpu().tolist()
+            if isinstance(vals, float):
+                all_scores.append(vals)
+            else:
+                all_scores.extend(vals)
+
         if not self.persistent:
             self._unload_model()
         return all_scores

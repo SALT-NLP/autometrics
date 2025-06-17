@@ -63,16 +63,21 @@ class QA_Bert:
             # Build input: [CLS] question [SEP] text [SEP]
             input_text = f"[CLS] {question} [SEP] {text} [SEP]"
             
-            # Tokenize with truncation
-            encoded_dict = self.tokenizer.encode_plus(
-                question, 
+            # Tokenize and enforce hard truncation so the combined sequence never exceeds BERT's
+            # maximum. ``truncation=True`` lets the tokenizer shorten whichever sequence is
+            # necessary (preferring to keep the *question* intact but falling back to longest-first
+            # once the context is exhausted).  This guarantees that the produced ``input_ids`` and
+            # ``token_type_ids`` are always of length ``self.max_seq_length`` (512 for BERT),
+            # preventing downstream size-mismatch errors.
+            encoded_dict = self.tokenizer(
+                question,
                 text,
                 add_special_tokens=True,
                 max_length=self.max_seq_length,
-                padding='max_length',
-                truncation='only_second',  # Truncate the text, preserve the question
+                padding='max_length',  # Pad up to max length after truncation
+                truncation=True,        # Hard truncate to ``max_length`` (longest_first strategy)
                 return_tensors='pt',
-                return_token_type_ids=True
+                return_token_type_ids=True,
             )
             
             # Get input IDs and token type IDs
@@ -91,13 +96,16 @@ class QA_Bert:
                 start_scores = outputs.start_logits
                 end_scores = outputs.end_logits
                 
-                # Get token type IDs for masking (only consider answer in context)
-                token_type_tensor = token_type_ids.float()
-                
-                # Apply softmax to get probabilities and mask with token_type_ids
-                # Only consider answers from the context (token_type_id = 1)
-                start_probs = torch.softmax(start_scores, dim=-1) * token_type_tensor
-                end_probs = torch.softmax(end_scores, dim=-1) * token_type_tensor
+                # Build a mask that is 1 only for *real* context tokens (token_type_id == 1
+                # AND attention_mask == 1).  This prevents padded positions from being
+                # selected as valid answer spans.
+                attention_mask = encoded_dict['attention_mask'].to(self.device).float()
+                context_mask = (token_type_ids == 1).float() * attention_mask
+
+                # Apply softmax to get probabilities then zero-out everything outside the
+                # context (including question tokens and padding).
+                start_probs = torch.softmax(start_scores, dim=-1) * context_mask
+                end_probs = torch.softmax(end_scores, dim=-1) * context_mask
             
             # Get best start and end indices
             start_index = torch.argmax(start_probs).item()
@@ -330,7 +338,7 @@ $$
         device=None,
         **kwargs
     ):
-        super().__init__(name, description, submetric_names=['avg_prob', 'avg_fscore'], **kwargs)
+        super().__init__(name, description, submetric_names=['summaqa_avg_prob', 'summaqa_avg_fscore'], **kwargs)
         self.spacy_model = spacy_model
         self.persistent = persistent
         self.device = device
@@ -353,6 +361,10 @@ $$
         # Lazy init
         if self.qg is None or self.qa is None:
             self._init_models()
+
+        input_text = str(input_text) if input_text is not None else ""
+        output = str(output) if output is not None else ""
+
         # Generate questions from original document
         questions, answers = self.qg.get_questions(input_text)
         # Compute QA scores on the summary
@@ -380,6 +392,8 @@ $$
         probs: List[float] = []
         fscores: List[float] = []
         for inp, out in zip(inputs, outputs):
+            inp = str(inp) if inp is not None else ""
+            out = str(out) if out is not None else ""
             # Generate QA pairs on source document
             questions, answers = self.qg.get_questions(inp)
             # Score against summary

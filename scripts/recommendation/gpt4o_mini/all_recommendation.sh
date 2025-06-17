@@ -2,7 +2,7 @@
 
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=100GB
+#SBATCH --mem=32GB
 #SBATCH --open-mode=append
 #SBATCH --partition=john-lo
 #SBATCH --time=16:00:00

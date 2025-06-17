@@ -28,6 +28,41 @@ The parts of the repo are organized as follows:
 
 Make sure to install the necessary packages listed in `requirements.txt`.  Notably there could be some requirements missing so it would be amazing to collaborate on updating `requirements.txt` if anything is found to be lacking!
 
+## Java Requirements
+
+This package requires Java Development Kit (JDK) 21 for some of its search functionality. You can install it using one of these methods:
+
+### Ubuntu/Debian
+```bash
+sudo apt update
+sudo apt install openjdk-21-jdk
+```
+
+### macOS (using Homebrew)
+```bash
+brew install openjdk@21
+```
+
+### Windows
+Download and install from [Oracle's website](https://www.oracle.com/java/technologies/downloads/#java21) or use [Chocolatey](https://chocolatey.org/):
+```bash
+choco install openjdk21
+```
+
+After installation, verify your Java version:
+```bash
+java -version
+```
+
+You should see something like:
+```
+openjdk version "21.0.x"
+OpenJDK Runtime Environment ...
+OpenJDK 64-Bit Server VM ...
+```
+
+Note: Java 17 or lower versions will not work as Pyserini requires Java 21.
+
 A nice simple starting point to working with this library would be to checkout the notebook `simpda.ipynb`.  This notebook shows computing metric correlations without introducing any LLM as a Judge complexity.  Just computing all metrics and aggregating (so skipping step 2)
 
 For a more in depth introduction it would be useful to check out `simpda_dspy.ipynb` which will serve as an introduction to the LLM as a Judge components of the repo.

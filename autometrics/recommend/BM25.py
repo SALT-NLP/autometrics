@@ -20,6 +20,10 @@ class BM25(MetricRecommender):
 
             if not os.path.exists(index_path):
                 os.makedirs(index_path)
+            elif force_reindex:
+                import shutil
+                shutil.rmtree(index_path)
+                os.makedirs(index_path)
 
             metric_names = [metric.__name__ for metric in metric_classes]
             metric_docs = [metric.__doc__ for metric in metric_classes]
@@ -33,7 +37,7 @@ class BM25(MetricRecommender):
                 "python", "-m", "pyserini.index.lucene",
                 "--collection", "JsonCollection",
                 "--input", index_path,
-                "--index", "bm25",
+                "--index", index_path,
                 "--generator", "DefaultLuceneDocumentGenerator", 
                 "--threads", "1",
                 "--storePositions", "--storeDocvectors", "--storeRaw"

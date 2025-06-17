@@ -28,7 +28,7 @@ python -m sglang.launch_server --model-path ${model} --port ${port} --host 0.0.0
 TIMEOUT=90
 START_TIME=$(date +%s)
 
-while ! curl -s http://localhost:${PORT}/v1/get_model_info > /dev/null; do
+while ! curl -s http://localhost:${port}/v1/get_model_info > /dev/null; do
     echo "Waiting for server to start..."
     sleep 20
     CURRENT_TIME=$(date +%s)

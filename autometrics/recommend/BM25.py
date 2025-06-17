@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
 from typing import List, Type
-from autometrics.metrics.base import Metric
-from autometrics.datasets.base import Dataset
+from autometrics.metrics.Metric import Metric
+from autometrics.dataset.Dataset import Dataset
 from autometrics.recommend.MetricRecommender import MetricRecommender
 import os
 from platformdirs import user_data_dir
@@ -48,6 +48,6 @@ class BM25(MetricRecommender):
         self.searcher.set_language('en')
 
     def recommend(self, dataset: Dataset, target_measurement: str, k: int = 20) -> List[Type[Metric]]:
-        query = f'I am looking for a metric to evaluate the following task: "{dataset.description}"  In particular I care about "{target_measurement}".'
+        query = f'I am looking for a metric to evaluate the following task: "{dataset.get_task_description()}"  In particular I care about "{target_measurement}".'
         hits = self.searcher.search(query, k=k)
         return [metric_name_to_class(hit.docid) for hit in hits]

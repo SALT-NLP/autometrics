@@ -4,7 +4,8 @@ import json
 import subprocess
 
 from platformdirs import user_data_dir
-from pyserini.search import FaissSearcher
+from pyserini.search.faiss import FaissSearcher
+from pyserini.encode import DocumentEncoder, QueryEncoder
 
 from autometrics.metrics.Metric import Metric
 from autometrics.dataset.Dataset import Dataset
@@ -40,7 +41,8 @@ class Faiss(MetricRecommender):
         # ------------------------------------------------------------------
         # Initialise the Pyserini Faiss searcher.
         # ------------------------------------------------------------------
-        self.searcher = FaissSearcher(self.index_path, self.encoder_name)
+        self.searcher = FaissSearcher(self.index_path)
+        self.query_encoder = QueryEncoder(encoder_name=self.encoder_name)
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -113,5 +115,9 @@ class Faiss(MetricRecommender):
             f' In particular I care about "{target_measurement}".'
         )
 
-        hits = self.searcher.search(query, k=k)
+        # Encode the query
+        query_vector = self.query_encoder.encode(query)
+        
+        # Search using the encoded query
+        hits = self.searcher.search(query_vector, k=k)
         return [metric_name_to_class(hit.docid) for hit in hits]

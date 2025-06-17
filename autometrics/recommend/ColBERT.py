@@ -6,11 +6,11 @@ from autometrics.recommend.utils import metric_name_to_class
 
 import os
 from platformdirs import user_data_dir
-from ragatouille import RAGPretrainedModel
+from pylate import indexes, models, retrieve
 
 
 class ColBERT(MetricRecommender):
-    """Metric recommender that leverages ColBERT-v2 via the *ragatouille* package.
+    """Metric recommender that leverages Modern ColBERT via the PyLate package.
 
     The first time the class is instantiated (or when *force_reindex* is ``True``)
     we create a ColBERT index over the provided ``metric_classes``.  Subsequent
@@ -31,15 +31,25 @@ class ColBERT(MetricRecommender):
         self.force_reindex: bool = force_reindex
         self.index_name: str = index_name
 
+        # Initialize the ColBERT model
+        self.model = models.ColBERT(
+            model_name_or_path="lightonai/GTE-ModernColBERT-v1",
+        )
+
         # If the index is missing (or the user explicitly asked for a rebuild)
         # we need to construct it from scratch.
         if force_reindex or not os.path.exists(self.index_path):
             self._build_index()
-        elif not self.index_name in self.index_path:
-            self.index_path = os.path.join(self.index_path, "colbert", "indexes", self.index_name)
-
-        # Finally, load the search object
-        self.rag = RAGPretrainedModel.from_index(self.index_path)
+        
+        # Initialize the PLAID index
+        self.index = indexes.PLAID(
+            index_folder=self.index_path,
+            index_name=self.index_name,
+            override=False,
+        )
+        
+        # Initialize the retriever
+        self.retriever = retrieve.ColBERT(index=self.index)
 
     # ---------------------------------------------------------------------
     # Internal helpers
@@ -59,15 +69,26 @@ class ColBERT(MetricRecommender):
             f"Building ColBERT index at {self.index_path} for {len(metric_ids)} metrics..."
         )
 
-        rag_builder = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0", index_path=self.index_path)
-        built_path: str = rag_builder.index(
-            index_name=self.index_name,
-            collection=metric_docs,
-            document_ids=metric_ids,
+        # Encode the documents
+        documents_embeddings = self.model.encode(
+            metric_docs,
+            batch_size=32,
+            is_query=False,
+            show_progress_bar=True,
         )
 
-        # Update instance path to the freshly built location
-        self.index_path = built_path
+        # Create and initialize the PLAID index
+        index = indexes.PLAID(
+            index_folder=self.index_path,
+            index_name=self.index_name,
+            override=True,
+        )
+
+        # Add the documents to the index
+        index.add_documents(
+            documents_ids=metric_ids,
+            documents_embeddings=documents_embeddings,
+        )
 
     # ------------------------------------------------------------------
     # Public API
@@ -89,5 +110,20 @@ class ColBERT(MetricRecommender):
             f'I am looking for a metric to evaluate the following task: "{task_desc}" '
             f' In particular I care about "{target_measurement}".'
         )
-        results = self.rag.search(query, k=k)
-        return [metric_name_to_class(hit["document_id"]) for hit in results]
+
+        # Encode the query
+        query_embeddings = self.model.encode(
+            [query],
+            batch_size=1,
+            is_query=True,
+            show_progress_bar=False,
+        )
+
+        # Retrieve results
+        scores = self.retriever.retrieve(
+            queries_embeddings=query_embeddings,
+            k=k,
+        )
+
+        # Extract document IDs from the first query's results
+        return [metric_name_to_class(hit["id"]) for hit in scores[0]]

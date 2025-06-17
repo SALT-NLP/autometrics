@@ -31,3 +31,4 @@ nvidia-ml-py
 pynvml
 protobuf
 pyserini
+pylate

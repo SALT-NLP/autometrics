@@ -1,7 +1,7 @@
 from typing import List, Type
 
-from autometrics.metrics.base import Metric
-from autometrics.datasets.base import Dataset
+from autometrics.metrics.Metric import Metric
+from autometrics.dataset.Dataset import Dataset
 from autometrics.recommend.MetricRecommender import MetricRecommender
 import dspy
 from autometrics.recommend.LLMRec import LLMRec

@@ -1,5 +1,3 @@
-from abc import ABC, abstractmethod
-
 from typing import List, Type
 from autometrics.metrics.Metric import Metric
 from autometrics.dataset.Dataset import Dataset

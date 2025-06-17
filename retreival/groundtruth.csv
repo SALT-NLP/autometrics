@@ -1,8 +1,0 @@
-task_name,target,best_metrics
-SimpDA,fluency,"['UniEvalDialogue-understandability','UniEvalDialogue-naturalness','UniEvalSum-fluency','BERTScoreP_roberta-large','BERTScoreF_roberta-large','UniEvalSum-relevance','UniEvalSum-consistency','BLEU','UniEvalSum-coherence','BERTScoreR_roberta-large']"
-SimpDA,meaning,"['BERTScoreF_roberta-large','BERTScoreP_roberta-large','BERTScoreR_roberta-large','BARTScore_bart-large-cnn','MOVERScore_distilbert-base-uncased','CHRF','LevenshteinRatio_max','UniEvalSum-coherence','ROUGE-L-p','UniEvalSum-consistency']"
-SimpDA,simplicity,"['BERTScoreP_roberta-large','UniEvalDialogue-understandability','UniEvalDialogue-naturalness','UniEvalSum-fluency','UniEvalSum-relevance','BERTScoreF_roberta-large','BLEU','UniEvalSum-consistency','UniEvalSum-coherence','ROUGE-1-r']"
-SummEval,coherence,"['UniEvalSum-coherence','UniEvalSum-relevance','BERTScoreR_roberta-large','BERTScoreF_roberta-large','FKGL','UniEvalSum-consistency','ROUGE-L-p','UniEvalSum-fluency','BLEU','CHRF']"
-SummEval,consistency,"['UniEvalSum-consistency','UniEvalSum-coherence','UniEvalSum-relevance','UniEvalFact-consistency','ROUGE-L-p','CHRF','JaroSimilarity_max','FKGL','HammingDistance_min','BERTScoreR_roberta-large']"
-SummEval,fluency,"['UniEvalSum-coherence','UniEvalSum-fluency','BERTScoreR_roberta-large','UniEvalSum-relevance','UniEvalSum-consistency','BERTScoreF_roberta-large','LevenshteinRatio_max','ROUGE-L-r','ROUGE-2-f1','BERTScoreP_roberta-large']"
-SummEval,relevance,"['UniEvalSum-relevance','UniEvalSum-coherence','ROUGE-L-p','BERTScoreR_roberta-large','MOVERScore_distilbert-base-uncased','BERTScoreF_roberta-large','CHRF','BLEU','UniEvalSum-consistency','LevenshteinRatio_max']"

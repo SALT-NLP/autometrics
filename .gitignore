@@ -179,3 +179,5 @@ test_autometrics_cache/
 
 *.err
 *.out
+
+/bm25/

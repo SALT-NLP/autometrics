@@ -93,3 +93,18 @@ To implement caching in your own metrics, you only need to:
 2. Exclude any additional parameters that don't affect results with `self.exclude_from_cache_key('param1', 'param2', ...)`
 
 See examples in `autometrics/test/custom_metric_caching_example.py`.
+
+## Citation
+
+If you use this software, please cite it as below.
+
+```
+@software{Ryan_Autometrics_2025,
+  author = {Ryan, Michael J. and Zhang, Yanzhe and Salunkhe, Amol and Chu, Yi and Rahman, Emily and Xu, Di and Yang, Diyi},
+  license = {MIT},
+  title = {{Autometrics}},
+  url = {https://github.com/XenonMolecule/autometrics},
+  version = {1.0.0},
+  year = {2025}
+}
+```

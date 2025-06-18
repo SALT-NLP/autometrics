@@ -181,3 +181,4 @@ test_autometrics_cache/
 *.out
 
 /bm25/
+core

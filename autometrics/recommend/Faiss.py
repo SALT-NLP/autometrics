@@ -30,19 +30,21 @@ class Faiss(MetricRecommender):
         force_reindex: bool = False,
     ) -> None:
         self.metric_classes = metric_classes
-        self.index_path = index_path
+        self.root_path = index_path
         self.encoder_name = encoder_name
         self.force_reindex = force_reindex
 
-        # Build index if missing or forced.
-        if force_reindex or not os.path.exists(self.index_path):
+        # Paths
+        self.collection_path = os.path.join(self.root_path, "collection")
+        self.faiss_index_path = os.path.join(self.root_path, "index")
+
+        if force_reindex or not os.path.exists(self.faiss_index_path):
             self._build_index()
 
         # ------------------------------------------------------------------
         # Initialise the Pyserini Faiss searcher.
         # ------------------------------------------------------------------
-        self.searcher = FaissSearcher(self.index_path)
-        self.query_encoder = QueryEncoder(encoder_name=self.encoder_name)
+        self.searcher = FaissSearcher(self.faiss_index_path, query_encoder=self.encoder_name)
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -50,20 +52,19 @@ class Faiss(MetricRecommender):
     def _build_index(self) -> None:
         """Create a Faiss flat IP index for the metric docstrings."""
         print(
-            f"[Faiss] Building dense index for {len(self.metric_classes)} metrics at {self.index_path} …"
+            f"[Faiss] Building dense index for {len(self.metric_classes)} metrics at {self.faiss_index_path} …"
         )
 
-        # Ensure target directory exists (and is empty if we re-index).
-        if os.path.exists(self.index_path):
-            import shutil
-
-            shutil.rmtree(self.index_path)
-        os.makedirs(self.index_path, exist_ok=True)
+        # Clean slate
+        import shutil
+        if os.path.exists(self.root_path):
+            shutil.rmtree(self.root_path)
+        os.makedirs(self.collection_path, exist_ok=True)
 
         # ---------------------------------------------
         # 1) Write collection to JSONL (docs.jsonl)
         # ---------------------------------------------
-        docs_file = os.path.join(self.index_path, "docs.jsonl")
+        docs_file = os.path.join(self.collection_path, "docs.jsonl")
         with open(docs_file, "w", encoding="utf-8") as f:
             for cls in self.metric_classes:
                 doc = {
@@ -89,7 +90,7 @@ class Faiss(MetricRecommender):
             "contents",
             "output",
             "--embeddings",
-            self.index_path,
+            self.faiss_index_path,
             "--to-faiss",
             "encoder",
             "--encoder",
@@ -114,10 +115,7 @@ class Faiss(MetricRecommender):
             f'I am looking for a metric to evaluate the following task: "{task_desc}" '
             f' In particular I care about "{target_measurement}".'
         )
-
-        # Encode the query
-        query_vector = self.query_encoder.encode(query)
         
-        # Search using the encoded query
-        hits = self.searcher.search(query_vector, k=k)
+        # Directly search with raw query string; FaissSearcher will encode internally
+        hits = self.searcher.search(query, k=k)
         return [metric_name_to_class(hit.docid) for hit in hits]

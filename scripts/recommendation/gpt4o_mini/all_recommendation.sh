@@ -19,6 +19,7 @@ cd /nlp/scr2/nlp/personal-rm/autometrics
 conda activate autometrics
 
 API_KEY=$OPENAI_API_KEY
+export DSPY_CACHEDIR=/nlp/scr3/nlp/20questions/dspy_cache/autometrics
 
 python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset SimpDA --top-k 20 --llm openai/gpt-4o-mini --llm-api-key $API_KEY
 python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymLessonOutcome --top-k 20 --llm openai/gpt-4o-mini --llm-api-key $API_KEY

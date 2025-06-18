@@ -42,6 +42,9 @@ done
 echo "Server is up and running!"
 
 conda activate autometrics
+export DSPY_CACHEDIR=/nlp/scr3/nlp/20questions/dspy_cache/autometrics
+
+API_BASE=http://localhost:${port}/v1
 
 python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset SimpDA --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
 python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymLessonOutcome --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat

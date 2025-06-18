@@ -12,41 +12,58 @@ from autometrics.recommend.utils import metric_name_to_class
 class BM25(MetricRecommender):
     def __init__(self, metric_classes: List[Type[Metric]], index_path: str = user_data_dir("autometrics", "bm25"), force_reindex: bool = False):
         self.metric_classes = metric_classes
-        self.index_path = index_path
+        # Root directory that will hold both collection and index
+        self.root_path = index_path
         self.force_reindex = force_reindex
 
-        if not os.path.exists(index_path) or force_reindex:
-            print(f"Index not found at {index_path} (or force_reindex is True). Reindexing {len(metric_classes)} metrics.")
+        # ------------------------------------------------------------------
+        # Directory layout
+        #   <root_path>/collection/docs.jsonl   → input to indexer
+        #   <root_path>/index/                 → Lucene index written here
+        # ------------------------------------------------------------------
+        self.collection_path = os.path.join(self.root_path, "collection")
+        self.lucene_index_path = os.path.join(self.root_path, "index")
 
-            if not os.path.exists(index_path):
-                os.makedirs(index_path)
-            elif force_reindex:
-                import shutil
-                shutil.rmtree(index_path)
-                os.makedirs(index_path)
+        # (Re-)build index if needed
+        if force_reindex or not os.path.exists(self.lucene_index_path):
+            print(
+                f"Building BM25 index in {self.lucene_index_path} for {len(metric_classes)} metrics …"
+            )
 
-            metric_names = [metric.__name__ for metric in metric_classes]
-            metric_docs = [metric.__doc__ for metric in metric_classes]
+            # Clean slate
+            import shutil
+            if os.path.exists(self.root_path):
+                shutil.rmtree(self.root_path)
+            os.makedirs(self.collection_path, exist_ok=True)
 
-            with open(os.path.join(index_path, "docs.jsonl"), "w") as f:
-                for metric_name, metric_doc in zip(metric_names, metric_docs):
-                    json.dump({"id": metric_name, "contents": metric_doc}, f)
+            # Write docs.jsonl
+            metric_names = [m.__name__ for m in metric_classes]
+            metric_docs = [m.__doc__ or "" for m in metric_classes]
+
+            docs_file = os.path.join(self.collection_path, "docs.jsonl")
+            with open(docs_file, "w", encoding="utf-8") as f:
+                for name, doc in zip(metric_names, metric_docs):
+                    json.dump({"id": name, "contents": doc}, f)
                     f.write("\n")
 
+            # Invoke Pyserini indexer
             result = subprocess.run([
                 "python", "-m", "pyserini.index.lucene",
                 "--collection", "JsonCollection",
-                "--input", index_path,
-                "--index", index_path,
-                "--generator", "DefaultLuceneDocumentGenerator", 
+                "--input", self.collection_path,
+                "--index", self.lucene_index_path,
+                "--generator", "DefaultLuceneDocumentGenerator",
                 "--threads", "1",
-                "--storePositions", "--storeDocvectors", "--storeRaw"
-            ], check=True)
+                "--storePositions", "--storeDocvectors", "--storeRaw",
+            ])
 
             if result.returncode != 0:
                 raise RuntimeError("Failed to build BM25 index")
 
-        self.searcher = LuceneSearcher(index_path)
+        # ------------------------------------------------------------------
+        # Initialise Lucene searcher on the freshly built (or cached) index.
+        # ------------------------------------------------------------------
+        self.searcher = LuceneSearcher(self.lucene_index_path)
         self.searcher.set_language('en')
 
     def recommend(self, dataset: Dataset, target_measurement: str, k: int = 20) -> List[Type[Metric]]:

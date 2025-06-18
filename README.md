@@ -100,11 +100,11 @@ If you use this software, please cite it as below.
 
 ```
 @software{Ryan_Autometrics_2025,
-  author = {Ryan, Michael J. and Zhang, Yanzhe and Salunkhe, Amol and Chu, Yi and Rahman, Emily and Xu, Di and Yang, Diyi},
-  license = {MIT},
-  title = {{Autometrics}},
-  url = {https://github.com/XenonMolecule/autometrics},
-  version = {1.0.0},
-  year = {2025}
+author = {Ryan, Michael J. and Zhang, Yanzhe and Salunkhe, Amol and Chu, Yi and Rahman, Emily and Xu, Di and Yang, Diyi},
+license = {MIT},
+title = {{Autometrics}},
+url = {https://github.com/XenonMolecule/autometrics},
+version = {1.0.0},
+year = {2025}
 }
 ```

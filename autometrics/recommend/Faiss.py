@@ -25,26 +25,42 @@ class Faiss(MetricRecommender):
     def __init__(
         self,
         metric_classes: List[Type[Metric]],
-        index_path: str = user_data_dir("autometrics", "faiss"),
+        index_path: str | None = None,
         encoder_name: str = "facebook/dpr-question_encoder-multiset-base",
         force_reindex: bool = False,
     ) -> None:
         self.metric_classes = metric_classes
+        # ------------------------------------------------------------------
+        # Determine root path for index storage. If the caller did not provide
+        # an explicit *index_path*, place it under the platform-specific user
+        # data dir: ~/.local/share/autometrics/faiss
+        # ------------------------------------------------------------------
+        if index_path is None:
+            index_path = os.path.join(user_data_dir("autometrics"), "faiss")
+
         self.root_path = index_path
         self.encoder_name = encoder_name
         self.force_reindex = force_reindex
 
         # Paths
+        # Root directory that will hold both the collection JSON and the Faiss
+        # index files.  Pyserini expects **the directory** that contains the
+        # index file named "index". Therefore we keep this directory path
+        # separate and *do not* append another "/index" when instantiating the
+        # searcher (to avoid the previously observed '/index/index' look-up
+        # error).
         self.collection_path = os.path.join(self.root_path, "collection")
-        self.faiss_index_path = os.path.join(self.root_path, "index")
+        self.index_dir = self.root_path  # Directory passed to FaissSearcher
+        self.index_file = os.path.join(self.index_dir, "index")  # Actual index file created by Pyserini
 
-        if force_reindex or not os.path.exists(self.faiss_index_path):
+        # Build the index if requested or if it does not yet exist.
+        if force_reindex or not os.path.exists(self.index_file):
             self._build_index()
 
         # ------------------------------------------------------------------
         # Initialise the Pyserini Faiss searcher.
         # ------------------------------------------------------------------
-        self.searcher = FaissSearcher(self.faiss_index_path, query_encoder=self.encoder_name)
+        self.searcher = FaissSearcher(self.index_dir, query_encoder=self.encoder_name)
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -52,7 +68,7 @@ class Faiss(MetricRecommender):
     def _build_index(self) -> None:
         """Create a Faiss flat IP index for the metric docstrings."""
         print(
-            f"[Faiss] Building dense index for {len(self.metric_classes)} metrics at {self.faiss_index_path} …"
+            f"[Faiss] Building dense index for {len(self.metric_classes)} metrics at {self.index_dir} …"
         )
 
         # Clean slate
@@ -69,7 +85,7 @@ class Faiss(MetricRecommender):
             for cls in self.metric_classes:
                 doc = {
                     "id": cls.__name__,
-                    "contents": cls.__doc__ or "",
+                    "text": cls.__doc__ or "",
                 }
                 json.dump(doc, f, ensure_ascii=False)
                 f.write("\n")
@@ -87,23 +103,37 @@ class Faiss(MetricRecommender):
             "--corpus",
             docs_file,
             "--fields",
-            "contents",
+            "text",
             "output",
             "--embeddings",
-            self.faiss_index_path,
+            self.index_dir,
             "--to-faiss",
             "encoder",
             "--encoder",
             self.encoder_name,
-            "--fields",
-            "contents",
-            "--batch",
+            "--batch-size",
             "32",
-            "--fp16",
         ]
+
+        # ------------------------------------------------------------------
+        # Device handling: default to CPU if GPU not available.  Using FP16 on
+        # CPU is not supported.
+        # ------------------------------------------------------------------
+        try:
+            import torch
+            gpu_available = torch.cuda.is_available()
+        except (ImportError, RuntimeError):
+            gpu_available = False
+
+        if gpu_available:
+            encode_cmd.extend(["--device", "cuda:0", "--fp16"])
+        else:
+            encode_cmd.extend(["--device", "cpu"])
 
         result = subprocess.run(encode_cmd)
         if result.returncode != 0:
+            # delete the index directory
+            shutil.rmtree(self.root_path)
             raise RuntimeError("[Faiss] Failed to encode documents and build Faiss index.")
 
     # ------------------------------------------------------------------

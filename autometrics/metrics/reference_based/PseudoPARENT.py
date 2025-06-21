@@ -173,11 +173,12 @@ The final score is the maximum $F$ across all references $R_i$.
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 725.58984375  # in MB
+    description: ClassVar[str] = "**PseudoPARENT** is a *custom adaptation* of the PARENT metric for evaluating text generation from structured inputs. Unlike the original PARENT metric, which operates on explicit tables of (attribute, value) or (head, relation, tail) triples, **PseudoPARENT treats the input text as a flat sequence of tokens, using these tokens as \"pseudo-table values\"**. This allows PseudoPARENT to simulate input-aware evaluation without requiring a structured table format. It effectively acts as a hybrid between BLEU-style surface matching and PARENT-style factual grounding."
 
     def __init__(
         self,
         name="PseudoPARENT",
-        description="Treats input tokens as pseudo-table values for an input-aware PARENT metric",
+        description="**PseudoPARENT** is a *custom adaptation* of the PARENT metric for evaluating text generation from structured inputs. Unlike the original PARENT metric, which operates on explicit tables of (attribute, value) or (head, relation, tail) triples, **PseudoPARENT treats the input text as a flat sequence of tokens, using these tokens as \"pseudo-table values\"**. This allows PseudoPARENT to simulate input-aware evaluation without requiring a structured table format. It effectively acts as a hybrid between BLEU-style surface matching and PARENT-style factual grounding.",
         lambda_weight=0.5,
         smoothing=1e-5,
         max_order=4,

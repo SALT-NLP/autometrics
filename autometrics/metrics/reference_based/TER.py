@@ -134,8 +134,9 @@ Where:
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 731.43359375  # in MB
+    description: ClassVar[str] = "TER (Translation Edit Rate) is an automatic evaluation metric designed to measure the effort required to edit a machine translation output to match a reference translation. It computes the minimum number of edits (insertions, deletions, substitutions, and shifts of words or phrases) needed to make a hypothesis identical to a reference. TER provides a straightforward, intuitive measure of translation quality and correlates well with human judgments."
 
-    def __init__(self, name="TER", description="TER (Translation Edit Rate) is a metric that measures the number of edits needed to transform a system output into a reference translation. It quantifies translation quality by counting insertions, deletions, substitutions, and shifts, with lower scores indicating better translations.", **kwargs):
+    def __init__(self, name="TER", description="TER (Translation Edit Rate) is an automatic evaluation metric designed to measure the effort required to edit a machine translation output to match a reference translation. It computes the minimum number of edits (insertions, deletions, substitutions, and shifts of words or phrases) needed to make a hypothesis identical to a reference. TER provides a straightforward, intuitive measure of translation quality and correlates well with human judgments.", **kwargs):
         super().__init__(name, description, **kwargs)
         self.metric = ter()
 

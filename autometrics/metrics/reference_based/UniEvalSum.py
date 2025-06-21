@@ -178,10 +178,11 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 3140.60546875  # in MB
     cpu_mem: ClassVar[float] = 3169.28515625  # in MB
+    description: ClassVar[str] = "UniEvalSum is a multi-dimensional evaluation metric designed specifically for text summarization. It assesses summaries across four key dimensions: coherence, consistency, fluency, and relevance. The metric formulates evaluation as a Boolean Question Answering (QA) task, where a pre-trained language model predicts scores based on Yes/No answers to predefined evaluation questions."
 
     def __init__(self, persistent=True, **kwargs):
         name = "UniEvalSum"
-        description = "UniEvalSum is a metric for evaluating the quality of generated summaries. It uses a pre-trained model to assess various dimensions of the summary, such as fluency, coherence, and relevance. The metric provides a score based on the model's predictions, allowing for a quantitative evaluation of the summary's quality."
+        description = "UniEvalSum is a multi-dimensional evaluation metric designed specifically for text summarization. It assesses summaries across four key dimensions: coherence, consistency, fluency, and relevance. The metric formulates evaluation as a Boolean Question Answering (QA) task, where a pre-trained language model predicts scores based on Yes/No answers to predefined evaluation questions."
         self.submetrics = ["fluency", "coherence", "consistency", "relevance"]
 
         self.task = 'summarization'

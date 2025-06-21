@@ -1,127 +1,144 @@
 from autometrics.generator.Generator import Generator
-from autometrics.metrics.llm_judge.LLMJudge import LLMJudge
+from autometrics.metrics.generated.GeneratedLLMJudgeMetric import (
+    GeneratedRefFreeLLMJudgeMetric,
+    GeneratedRefBasedLLMJudgeMetric
+)
 import dspy
-import re
+from typing import Optional, Callable
+
+# Utilities to avoid duplication and enable reuse across generators
+from autometrics.generator.utils import (
+    get_good_bad_examples,
+    generate_axes_of_variation,
+)
+
 from autometrics.util.format import get_default_formatter
-from prometheus_eval.litellm import LiteLLM
 
-def get_good_bad_examples(df, target_column, num_examples=5, flip=False):
-    '''
-        Get the good and bad examples (if flip is True, then the good examples are the ones with the lowest values)
-    '''
-    good_examples = df.sort_values(by=target_column, ascending=False).head(num_examples)
-    bad_examples = df.sort_values(by=target_column, ascending=True).head(num_examples)
+class BasicLLMJudgeProposer(Generator):
+    """Generate *LLM-as-a-judge* metrics by proposing axes of variation.
 
-    if flip:
-        return bad_examples, good_examples
+    The class conforms to the new *Generator* interface which includes an
+    optional *generator_llm* (used here to generate axes) as well as the
+    ability to specify a custom executor class. The executor class is automatically
+    determined based on whether the dataset has reference columns.
+    """
 
-    return good_examples, bad_examples
+    def __init__(
+        self,
+        name: str = "BasicLLMJudgeProposer",
+        description: str = "Propose simple LLM-as-a-Judge measures based on the dataset and task description",
+        generator_llm: Optional[dspy.LM] = None,
+        executor_class: type | None = None,
+        executor_kwargs: dict | None = None,
+    ):
 
-class GenerateAxisOfVariationSignature(dspy.Signature):
-    """Given some good examples of outputs for a model and some bad examples, generate axes of variation that can explain some of the important differences related to the quality of the outputs.  Return a list of axes of variation from most important to least important alongside few word descriptions (part of the same list).  An additional description of the task is provided for context."""
-    task_description = dspy.InputField(desc="A description of the task that the model is trying to solve.")
-    target_name = dspy.InputField(desc="If provided, a brief suggestion of the overall target value we are trying to predict.  Can sometimes be useful for generating axes of variation, and other times be ignored (when 'None' or not useful).")
-    good_examples = dspy.InputField(desc="A list of good examples of outputs for a model.")
-    bad_examples = dspy.InputField(desc="A list of bad examples of outputs for a model.")
-    axes_of_variation = dspy.OutputField(desc="A numbered list of five axes of variation from most important to least important including a few word description of each axis.")
+        super().__init__(
+            name=name,
+            description=description,
+            generator_llm=generator_llm,
+            executor_class=executor_class,
+            executor_kwargs=executor_kwargs or {},
+        )
 
-class GenerateAxisOfVariation(dspy.Module):
-    def __init__(self):
-        super(GenerateAxisOfVariation, self).__init__()
-        self.generate_axes = dspy.ChainOfThought(GenerateAxisOfVariationSignature)
+        # Guarantee attribute is a dictionary for ** expansion later
+        if self.executor_kwargs is None:
+            self.executor_kwargs = {}
 
-    def forward(self, task_description, good_examples, bad_examples, target_name=None):
-        if not target_name:
-            target_name = "None"
-        axes_of_variation = self.generate_axes(task_description=task_description, target_name=target_name, good_examples=good_examples, bad_examples=bad_examples).axes_of_variation
-
-        # Split the axes of variation based on the newline, number, (optional period) pattern
-        axes = re.split(r"\n\d+\.", axes_of_variation)
-
-        # Remove any empty strings from the list and strip any leading or trailing whitespace
-        axes = [axis.strip() for axis in axes if axis.strip()]
-
-        # If axes[0] starts with 1. then strip it
-        if axes[0].startswith("1."):
-            axes[0] = axes[0][2:].strip()
-
-        return dspy.Prediction(task_description=task_description, target_name=target_name, good_examples=good_examples, bad_examples=bad_examples, axes_of_variation=axes)
-
-class LLMJudgeProposer(Generator):
-    def __init__(self, name="LLMJudgeProposer", description= "Propose new llm as a judge metrics based on the dataset and task description", train_dataset=None, task_description=None, formatter=None, proposer_model=None, judge_model=None):
-        self.task_description = task_description
-        self.dataset = train_dataset
-        self.proposer_model = proposer_model
-        self.judge_model = judge_model
-        self.formatter = formatter
-        if judge_model and hasattr(judge_model, 'name'):
-            self.judge_model_name = judge_model.name
-        elif judge_model and isinstance(judge_model.model, LiteLLM):
-            self.judge_model_name = judge_model.model.name
+        if executor_kwargs and 'model' in executor_kwargs:
+            judge_model = executor_kwargs['model']
+            if judge_model and hasattr(judge_model, 'name'):
+                self.judge_model_name = judge_model.name
+            elif judge_model and hasattr(judge_model, 'model'):
+                if hasattr(judge_model.model, 'name'):
+                    self.judge_model_name = judge_model.model.name
+                else:
+                    self.judge_model_name = judge_model.model.split('/')[-1]
         else:
-            self.judge_model_name = judge_model.model.split('/')[-1] if judge_model else "None"
+            self.judge_model_name = "UnknownLLM"
 
-
-        if formatter is None:
-            self.formatter = self._get_formatter(train_dataset)
-
-        super().__init__(name, description)
+        # Keep a reference to judge_model for executor_kwargs convenience
+        self.judge_model = executor_kwargs.get('model') if executor_kwargs else None
 
     def _get_formatter(self, dataset):
-        if self.formatter:
-            return self.formatter
         if not dataset:
             return lambda x: str(x)
         return get_default_formatter(dataset)
+
+    def _determine_executor_class(self, dataset):
+        """Determine whether to use reference-based or reference-free metrics based on dataset."""
+        reference_columns = dataset.get_reference_columns()
+        has_references = reference_columns is not None and len(reference_columns) > 0
+        
+        if has_references:
+            return GeneratedRefBasedLLMJudgeMetric
+        else:
+            return GeneratedRefFreeLLMJudgeMetric
     
     # Get Good and Bad Examples formatted properly
-    def _preprocess_dataset(self, dataset, target_column):
-        dataset = dataset
-        if dataset:
-            self.dataset = dataset
-            self.formatter = self._get_formatter(dataset)
-        elif not self.dataset:
-            raise ValueError("No dataset provided")
-
-        if self.formatter is None:
-            self.formatter = self._get_formatter(dataset)
+    def _preprocess_dataset(self, dataset, target_measure, formatter: Optional[Callable] = None):  # type: ignore[override]
+        if not formatter:
+            formatter = self._get_formatter(dataset)
 
         df = dataset.get_dataframe()
-        if not target_column:
-            target_column = dataset.get_target_columns()[0]
+        if not target_measure:
+            target_measure = dataset.get_target_columns()[0]
 
-        good_examples, bad_examples = get_good_bad_examples(df, target_column)
+        good_examples, bad_examples = get_good_bad_examples(df, target_measure)
 
-        good_examples_formatted = [self.formatter(row) for row in good_examples.iterrows()]
-        bad_examples_formatted = [self.formatter(row) for row in bad_examples.iterrows()]
+        good_examples_formatted = [formatter(row) for row in good_examples.iterrows()]
+        bad_examples_formatted = [formatter(row) for row in bad_examples.iterrows()]
 
         return good_examples_formatted, bad_examples_formatted
     
-    def _get_axes_of_variation(self, good_examples, bad_examples):
-        response = None
-        with dspy.settings.context(lm=self.proposer_model):
-            response = GenerateAxisOfVariation()(task_description=self.task_description, good_examples=good_examples, bad_examples=bad_examples)
-
-        return response.axes_of_variation
-
-
-    def generate(self, train_dataset=None, target_column=None, **kwargs):
+    def generate(self, dataset, target_measure: Optional[str] = None, n_metrics: int = 5, formatter: Optional[Callable] = None, **kwargs):
         """
-        Generate new metrics based on the dataset and task description
+        Generate new metrics based on the dataset and task description.
+        Automatically detects if the dataset has references and uses the appropriate metric class.
         """
+
+        task_description = dataset.get_task_description()
+
+        if not formatter:
+            formatter = self._get_formatter(dataset)
         
-        good_examples_formatted, bad_examples_formatted = self._preprocess_dataset(train_dataset, target_column)
+        # Step-1: Determine the appropriate executor class based on dataset
+        if self.executor_class is None:
+            dynamic_executor_class = self._determine_executor_class(dataset)
+        else:
+            dynamic_executor_class = self.executor_class
+        
+        # Step-2: Prepare / cache dataset & formatter ---------------------------------
+        good_examples_formatted, bad_examples_formatted = self._preprocess_dataset(dataset, target_measure, formatter)
 
-        axis_of_variation = self._get_axes_of_variation(good_examples_formatted, bad_examples_formatted)
+        # Step-3: Ask the language model to propose axes -----------------------------
+        axes = generate_axes_of_variation(
+            task_description=task_description,
+            good_examples=good_examples_formatted,
+            bad_examples=bad_examples_formatted,
+            generator_llm=self.generator_llm,
+            target_name=target_measure,
+            num_axes_to_generate=n_metrics,
+        )
 
+        axes = axes[:n_metrics] if n_metrics else axes
+
+        # Step-4: Wrap each axis in the appropriate LLMJudge metric ------------------
         new_metrics = []
-        for i, axis in enumerate(axis_of_variation):
-            metric_name = axis.split(":")[0].replace("*", "") + "_" + self.judge_model_name
+        for axis in axes:
+            metric_name = axis.split(":")[0].split("**")[1].replace("*", "") + "_" + self.judge_model_name 
 
-            new_metrics.append(LLMJudge(metric_name, f"{axis}", self.judge_model, self.dataset, axis, self.formatter, self.task_description))
+            new_metrics.append(
+                dynamic_executor_class(
+                    name=metric_name,
+                    description=axis,
+                    axis=axis,
+                    task_description=task_description,
+                    metric_card_author_model=self.generator_llm,
+                    **self.executor_kwargs,
+                )
+            )
 
         return new_metrics
-
 
     def get_name(self):
         return self.name
@@ -133,4 +150,4 @@ class LLMJudgeProposer(Generator):
         return f"{self.name}: {self.description}"
     
     def __repr__(self):
-        return
+        return self.__str__()

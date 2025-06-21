@@ -155,10 +155,11 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 3140.60546875  # in MB
     cpu_mem: ClassVar[float] = 3167.10546875  # in MB
+    description: ClassVar[str] = "UniEvalFact is a multi-dimensional evaluation metric designed specifically for **factual consistency detection** in generated text. It assesses whether claims made in a generated text align with facts provided in a **source document**. The metric formulates evaluation as a **Boolean Question Answering (QA) task**, where a pre-trained language model predicts scores based on Yes/No answers to predefined evaluation questions."
 
     def __init__(self, device: str = "cuda", persistent: bool = True, **kwargs):
         name = "UniEvalFact"
-        description = "UniEvalFact is a metric for evaluating the factual consistency of generated text. It uses a pre-trained model to assess the factuality of the content, providing a score that indicates how well the generated text aligns with factual information. This metric is useful for tasks where factual accuracy is crucial, such as summarization and dialogue generation."
+        description = "UniEvalFact is a multi-dimensional evaluation metric designed specifically for **factual consistency detection** in generated text. It assesses whether claims made in a generated text align with facts provided in a **source document**. The metric formulates evaluation as a **Boolean Question Answering (QA) task**, where a pre-trained language model predicts scores based on Yes/No answers to predefined evaluation questions."
         self.submetrics = ["consistency"]
 
         self.task = 'fact'

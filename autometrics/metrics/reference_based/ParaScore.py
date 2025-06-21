@@ -147,11 +147,12 @@ Each output (P, R, F1) reflects standard precision, recall, and F1 scoring over 
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 338.13323437500003  # in MB
     cpu_mem: ClassVar[float] = 1079.51953125  # in MB
+    description: ClassVar[str] = "ParaScore is a reference-based evaluation metric designed for paraphrase generation. It combines advantages of both reference-free and reference-based approaches by explicitly modeling semantic similarity and lexical divergence between generated and reference texts. ParaScore outputs three scores — Precision (P), Recall (R), and F1 — reflecting quality from different perspectives. It was introduced to address weaknesses found in traditional metrics when evaluating paraphrasing tasks."
 
     def __init__(
         self,
         name: str = "ParaScore",
-        description: str = "ParaScore: reference-based paraphrase evaluation.",
+        description: str = "ParaScore is a reference-based evaluation metric designed for paraphrase generation. It combines advantages of both reference-free and reference-based approaches by explicitly modeling semantic similarity and lexical divergence between generated and reference texts. ParaScore outputs three scores — Precision (P), Recall (R), and F1 — reflecting quality from different perspectives. It was introduced to address weaknesses found in traditional metrics when evaluating paraphrasing tasks.",
         seed: int = 42,
         **scorer_kwargs
     ):

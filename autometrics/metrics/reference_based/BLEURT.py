@@ -141,11 +141,12 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 2205.541015625  # in MB
     cpu_mem: ClassVar[float] = 2811.62890625  # in MB
+    description: ClassVar[str] = "BLEURT is a learned evaluation metric for natural language generation. It combines BERT-based contextual embeddings with a regression model fine-tuned on human-annotated data. BLEURT produces scalar scores that aim to reflect fluency, grammaticality, and semantic adequacy by measuring the similarity between generated and reference texts."
 
     def __init__(
         self,
         name: str = "BLEURT",
-        description: str = "BLEURT-20 metric from lucadiliello/BLEURT-20",
+        description: str = "BLEURT is a learned evaluation metric for natural language generation. It combines BERT-based contextual embeddings with a regression model fine-tuned on human-annotated data. BLEURT produces scalar scores that aim to reflect fluency, grammaticality, and semantic adequacy by measuring the similarity between generated and reference texts.",
         model_name: str = "lucadiliello/BLEURT-20",
         torch_dtype = "float32",
         batch_size: int = 2,

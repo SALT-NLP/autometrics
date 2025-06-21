@@ -321,11 +321,12 @@ where $\sigma$ is the sigmoid function, and $r_1$, $r_2$ are the final reward sc
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 104171.59765625 # in MB
     cpu_mem: ClassVar[float] = 2057.19140625 # in MB
+    description: ClassVar[str] = "LDL Reward Model 27B is a large-scale, reference-free reward model designed for evaluating generative model outputs across multiple sub-dimensions such as helpfulness, correctness, coherence, and others. It is built on top of the **Gemma 2-27B** transformer model, with additional modules for reward prediction using **Label Distribution Learning (LDL)**. LDL models human rating uncertainty as probability distributions rather than single point estimates, improving robustness to subjective human annotations. The model outputs a final scalar reward score that can be used for ranking or fine-tuning generative models."
 
     def __init__(
         self,
         name: str = "LDLReward27B",
-        description: str = "LDL-Reward-Gemma-2-27B reward model (reference-free).",
+        description: str = "LDL Reward Model 27B is a large-scale, reference-free reward model designed for evaluating generative model outputs across multiple sub-dimensions such as helpfulness, correctness, coherence, and others. It is built on top of the **Gemma 2-27B** transformer model, with additional modules for reward prediction using **Label Distribution Learning (LDL)**. LDL models human rating uncertainty as probability distributions rather than single point estimates, improving robustness to subjective human annotations. The model outputs a final scalar reward score that can be used for ranking or fine-tuning generative models.",
         model_name: str = "ShikaiChen/LDL-Reward-Gemma-2-27B-v0.1",
         device_map: Union[str, dict] = "auto",
         batch_size: int = 2,

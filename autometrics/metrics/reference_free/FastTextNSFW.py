@@ -159,6 +159,7 @@ FastText
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 1709.95703125  # in MB
+    description: ClassVar[str] = "FastTextNSFW is a reference-free binary classification metric for evaluating the presence of not-safe-for-work (NSFW) content in generated text. It is based on a FastText linear classifier trained on the Jigsaw Toxic Comment Classification dataset, using the \"obscene\" label as a proxy for NSFW content. This metric was developed as part of the AI2 Dolma project to enable scalable filtering of large-scale web text data during corpus construction for language model pretraining. It outputs a signed scalar score indicating both the classification result and the model's confidence."
 
     def __init__(
         self,
@@ -170,7 +171,7 @@ FastText
     ):
         super().__init__(
             name="FastTextNSFW",
-            description="fastText classifier for NSFW vs non-NSFW content",
+            description="FastTextNSFW is a reference-free binary classification metric for evaluating the presence of not-safe-for-work (NSFW) content in generated text. It is based on a FastText linear classifier trained on the Jigsaw Toxic Comment Classification dataset, using the \"obscene\" label as a proxy for NSFW content. This metric was developed as part of the AI2 Dolma project to enable scalable filtering of large-scale web text data during corpus construction for language model pretraining. It outputs a signed scalar score indicating both the classification result and the model's confidence.",
             model_url=model_url,
             negative_label=negative_label,
             persistent=persistent,

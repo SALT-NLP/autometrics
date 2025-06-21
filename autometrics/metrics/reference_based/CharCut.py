@@ -146,11 +146,12 @@ A score of 0 indicates perfect match; 1 indicates maximal divergence.
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 727.6953125  # in MB
+    description: ClassVar[str] = "CharCut is a character-based evaluation metric for machine translation that measures the similarity between candidate and reference translations using a human-targeted string difference algorithm. It identifies and scores 'loose differences' through an iterative process of extracting long common substrings (LCSubstrs), designed to reduce noise and better align with human perception of meaningful edits. Unlike traditional edit distances, CharCut emphasizes user-aligned visualization and scoring of string differences, offering both evaluation and diagnostic utility."
 
     def __init__(
         self,
         name: str = "CharCut",
-        description: str = "CharCut metric computing character-level cuts for MT.",
+        description: str = "CharCut is a character-based evaluation metric for machine translation that measures the similarity between candidate and reference translations using a human-targeted string difference algorithm. It identifies and scores 'loose differences' through an iterative process of extracting long common substrings (LCSubstrs), designed to reduce noise and better align with human perception of meaningful edits. Unlike traditional edit distances, CharCut emphasizes user-aligned visualization and scoring of string differences, offering both evaluation and diagnostic utility.",
         match_size: int = 3,
         alt_norm: bool = False,
         **kwargs

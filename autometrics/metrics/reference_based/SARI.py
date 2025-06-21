@@ -338,11 +338,12 @@ Portions of this metric card were drafted with assistance from OpenAI's ChatGPT,
 	# Resource usage statistics (in megabytes)
 	gpu_mem: ClassVar[float] = 0.0  # in MB
 	cpu_mem: ClassVar[float] = 727.91015625  # in MB
+	description: ClassVar[str] = "SARI is a metric designed specifically for evaluating text simplification systems. It measures the quality of a simplification by comparing it to both the original complex text and reference simplifications. The metric considers three operations: keeping important words, deleting unnecessary words, and adding new words."
 	
 	# SARI is fast enough without caching
 	DEFAULT_USE_CACHE = False
 	
-	def __init__(self, name="SARI", description="SARI evaluates the quality of text simplification by comparing the system output against both the original and simplified reference texts. It measures how well words are added, deleted, and kept appropriately, rewarding edits that improve readability while preserving meaning.", **kwargs):
+	def __init__(self, name="SARI", description="SARI is a metric designed specifically for evaluating text simplification systems. It measures the quality of a simplification by comparing it to both the original complex text and reference simplifications. The metric considers three operations: keeping important words, deleting unnecessary words, and adding new words.", **kwargs):
 		super().__init__(name, description, submetric_names=["SARI_P", "SARI_F"], **kwargs)
 		
 	def _calculate_impl(self, input, output, references=None, **kwargs):

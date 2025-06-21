@@ -141,12 +141,13 @@ $$
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 730.35546875  # in MB
+    description: ClassVar[str] = "DistinctNGrams is a simple, reference-free metric that quantifies the lexical diversity of generated text by measuring the proportion of distinct n-grams within a sentence or a corpus. It is often used to evaluate the diversity of outputs in generative tasks such as dialogue and storytelling, particularly to counteract issues with generic or repetitive responses."
 
     def __init__(
         self,
         n_values: List[int] = [1, 2, 3, 4],
         name: str = "DistinctNGram",
-        description: str = "Proportion of distinct n-grams (default n=1..4) as a measure of text diversity",
+        description: str = "DistinctNGrams is a simple, reference-free metric that quantifies the lexical diversity of generated text by measuring the proportion of distinct n-grams within a sentence or a corpus. It is often used to evaluate the diversity of outputs in generative tasks such as dialogue and storytelling, particularly to counteract issues with generic or repetitive responses.",
         **kwargs
     ):
         submetric_names = [f"distinct_{n}" for n in n_values]

@@ -50,7 +50,7 @@ class LLMRec(MetricRecommender):
         metric_documentation = [f"«METRIC NAME: {metric.__name__}\nMETRIC DOCUMENTATION: {metric.__doc__}»" for metric in self.metric_classes]
 
         if self.model is not None:
-            with dspy.config.lm(self.model):
+            with dspy.settings.context(lm = self.model):
                 ranking = self.recommender(task_description, target_measurement, k, metric_documentation)
         else:
             ranking = self.recommender(task_description, target_measurement, k, metric_documentation)

@@ -319,14 +319,11 @@ This method provides a **more realistic** evaluation of model fluency while effi
     # Resource usage statistics (in megabytes) based on GPT-2-large
     gpu_mem: ClassVar[float] = 3069.4375  # in MB
     cpu_mem: ClassVar[float] = 1504.29296875  # in MB
+    description: ClassVar[str] = "Perplexity (PPL) is a widely used metric for evaluating the fluency of language models. It measures how well a probabilistic model predicts a sequence of tokens, with lower values indicating better predictions. Specifically, it computes the exponentiated average negative log-likelihood of a sequence. Perplexity is only applicable to autoregressive language models (e.g., GPT-2) and **cannot** be used with masked language models like BERT."
 
     def __init__(self, model="gpt2-large", batch_size=8, stride=512, progress_bar=True, persistent=True, **kwargs):
         name = "Perplexity_" + model
-        description = (
-            "Perplexity is a measure of how well a probability distribution predicts a sample. "
-            "In the context of language models, it quantifies how well the model predicts a sequence of words. "
-            "Lower perplexity indicates better performance."
-        )
+        description = "Perplexity (PPL) is a widely used metric for evaluating the fluency of language models. It measures how well a probabilistic model predicts a sequence of tokens, with lower values indicating better predictions. Specifically, it computes the exponentiated average negative log-likelihood of a sequence. Perplexity is only applicable to autoregressive language models (e.g., GPT-2) and **cannot** be used with masked language models like BERT."
         super().__init__(name, description, model=model, batch_size=batch_size, stride=stride, 
                          progress_bar=progress_bar, persistent=persistent, **kwargs)
         

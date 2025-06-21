@@ -155,7 +155,7 @@ FastText
     def __init__(
         self,
         name: str = "FastTextEducationalValue",
-        description: str = "fastText classifier for educational value scoring (Low/Mid/High)",
+        description: str = "FastTextEducationalValue is a reference-free classification-based metric that evaluates the educational quality of generated text. It uses a FastText classifier trained to predict three levels of educational value—Low, Mid, and High—and outputs an expected value score by taking a weighted sum over the classifier's label probabilities. This metric is particularly useful for content filtering, ranking, or prioritizing educational materials in generative settings, especially when no reference output is available.",
         repo_id: str = "kenhktsui/llm-data-textbook-quality-fasttext-classifier-v2",
         filename: str = "model_quantized.bin",
         persistent: bool = True,

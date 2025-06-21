@@ -198,11 +198,12 @@ where:
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 132727.0478515625  # in MB
     cpu_mem: ClassVar[float] = 2089.3359375  # in MB
+    description: ClassVar[str] = "The INFORM Reward Model 70B (INF-ORM-Llama3.1-70B) is a large-scale outcome reward model designed to evaluate the quality of generated conversational responses. It predicts scalar reward scores for response texts, supporting preference-based fine-grained evaluations without requiring a reference response. The model is finetuned from the Llama-3.1-70B-Instruct backbone using preference-labeled datasets, employing scaled Bradley-Terry loss to incorporate preference magnitudes."
 
     def __init__(
         self,
         name: str = "INFORMRewardModel",
-        description: str = "INF-ORM-Llama3.1-70B outcome reward model (reference-free).",
+        description: str = "The INFORM Reward Model 70B (INF-ORM-Llama3.1-70B) is a large-scale outcome reward model designed to evaluate the quality of generated conversational responses. It predicts scalar reward scores for response texts, supporting preference-based fine-grained evaluations without requiring a reference response. The model is finetuned from the Llama-3.1-70B-Instruct backbone using preference-labeled datasets, employing scaled Bradley-Terry loss to incorporate preference magnitudes.",
         model_name: str = "infly/INF-ORM-Llama3.1-70B",
         torch_dtype = "bfloat16",
         device_map: Union[str, dict] = "auto",

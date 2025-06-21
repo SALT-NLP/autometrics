@@ -187,11 +187,12 @@ where $c$ is a scaling factor (default: 5), and AUC is the area under the curve 
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 4322.96484375  # in MB
+    description: ClassVar[str] = "MAUVE (Measuring the Alignment of Unconditional VErsions) quantifies the similarity between two text distributions (e.g., generated vs. human-written) by computing divergence frontiers based on KL divergences between their quantized representations in the embedding space of a large language model. MAUVE can capture nuanced differences due to model size, decoding strategy, or topic shift, and is especially useful in evaluating open-ended text generation tasks."  
 
     def __init__(
         self,
         name: str = "MAUVE",
-        description: str = "MAUVE reference-based metric (GAN diversity assessment)",
+        description: str = "MAUVE (Measuring the Alignment of Unconditional VErsions) quantifies the similarity between two text distributions (e.g., generated vs. human-written) by computing divergence frontiers based on KL divergences between their quantized representations in the embedding space of a large language model. MAUVE can capture nuanced differences due to model size, decoding strategy, or topic shift, and is especially useful in evaluating open-ended text generation tasks.",
         persistent: bool = True,
         aggregation: str = "max",
         metric_id: str = "mauve",

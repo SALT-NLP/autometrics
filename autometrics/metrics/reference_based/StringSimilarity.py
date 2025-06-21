@@ -160,13 +160,14 @@ where $1 \leq i \leq |s_1|$, $1 \leq j \leq |s_2|$, and typically $w_{ins} = w_{
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 728.78515625  # in MB
+    description: ClassVar[str] = "Levenshtein Distance measures the minimum number of single-character edits—insertions, deletions, or substitutions—required to transform one sequence into another. It is a fundamental metric in text processing, error correction, and approximate string matching."
 
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
     def __init__(self, weights=(1, 1, 1), processor=None, score_cutoff=None, aggregation="min", **kwargs):
         metric_name = f"LevenshteinDistance_{aggregation}"
-        description = "Computes the Levenshtein distance between the candidate and reference strings."
+        description = "Levenshtein Distance measures the minimum number of single-character edits—insertions, deletions, or substitutions—required to transform one sequence into another. It is a fundamental metric in text processing, error correction, and approximate string matching."
 
         super().__init__(
             name=metric_name,
@@ -317,13 +318,14 @@ where $|s_1|$ and $|s_2|$ denote the lengths of the sequences $s_1$ and $s_2$, r
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 727.421875  # in MB
+    description: ClassVar[str] = "Levenshtein Ratio is a normalized similarity metric that computes the relative similarity between two sequences by evaluating the minimum number of insertions and deletions required to transform one sequence into the other. The result is expressed as a value between 0 and 1, where 1 indicates identical sequences."
 
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
     def __init__(self, processor=None, score_cutoff=None, aggregation="max", **kwargs):
         metric_name = f"LevenshteinRatio_{aggregation}"
-        description = "Computes the normalized Levenshtein ratio between the candidate and reference strings."
+        description = "Levenshtein Ratio is a normalized similarity metric that computes the relative similarity between two sequences by evaluating the minimum number of insertions and deletions required to transform one sequence into the other. The result is expressed as a value between 0 and 1, where 1 indicates identical sequences."
         super().__init__(
             name=metric_name,
             description=description,
@@ -472,13 +474,14 @@ where $\mathbf{1}\{ s_i \neq t_i \}$ is an indicator function that equals 1 if $
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 728.60546875  # in MB
+    description: ClassVar[str] = "Hamming Distance measures the number of positions at which two equal-length sequences differ. It is a fundamental metric in coding theory and information theory, commonly used for error detection and correction in digital communications."
 
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
     def __init__(self, pad=True, processor=None, score_cutoff=None, aggregation="min", **kwargs):
         metric_name = f"HammingDistance_{aggregation}"
-        description = "Computes the Hamming distance between the candidate and reference strings."
+        description = "Hamming Distance measures the number of positions at which two equal-length sequences differ. It is a fundamental metric in coding theory and information theory, commonly used for error detection and correction in digital communications."
         super().__init__(
             name=metric_name,
             description=description,
@@ -628,13 +631,14 @@ $$
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 727.2109375  # in MB
+    description: ClassVar[str] = "Jaro Similarity is a string metric used to measure the similarity between two strings based on the number of matching characters and the number of transpositions. It produces a score between 0 and 1, where 1 indicates an exact match and 0 indicates no similarity."
 
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
     def __init__(self, processor=None, score_cutoff=None, aggregation="max", **kwargs):
         metric_name = f"JaroSimilarity_{aggregation}"
-        description = "Computes the Jaro similarity between the candidate and reference strings."
+        description = "Jaro Similarity is a string metric used to measure the similarity between two strings based on the number of matching characters and the number of transpositions. It produces a score between 0 and 1, where 1 indicates an exact match and 0 indicates no similarity."
         super().__init__(
             name=metric_name,
             description=description,
@@ -806,7 +810,7 @@ where:
     
     def __init__(self, prefix_weight=0.1, processor=None, score_cutoff=None, aggregation="max", **kwargs):
         metric_name = f"JaroWinklerSimilarity_{aggregation}"
-        description = "Computes the Jaro-Winkler similarity between the candidate and reference strings."
+        description = "Jaro-Winkler Similarity is a string metric that builds upon the Jaro Similarity by incorporating a prefix scale to give extra weight to common prefixes. It is widely used in record linkage, data deduplication, and other applications where matching similar strings (such as names) is critical."
         super().__init__(
             name=metric_name,
             description=description,
@@ -966,13 +970,14 @@ Where:
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 727.87109375  # in MB
-
+    description: ClassVar[str] = "Jaccard Distance is a classic set-based dissimilarity metric that quantifies the difference between two sets. Derived from the Jaccard Index (or Jaccard Similarity), it is defined as one minus the ratio of the size of the intersection to the size of the union of the sets. It is widely used in information retrieval, text analysis, clustering, and various classification tasks where the inputs can be represented as sets, such as sets of tokens, labels, or features."
+    
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False
     
     def __init__(self, aggregation: str = "min", **kwargs):
         metric_name = f"JaccardDistance_{aggregation}"
-        description = "Computes the Jaccard distance between the candidate and reference strings."
+        description = "Jaccard Distance is a classic set-based dissimilarity metric that quantifies the difference between two sets. Derived from the Jaccard Index (or Jaccard Similarity), it is defined as one minus the ratio of the size of the intersection to the size of the union of the sets. It is widely used in information retrieval, text analysis, clustering, and various classification tasks where the inputs can be represented as sets, such as sets of tokens, labels, or features."
         super().__init__(
             name=metric_name,
             description=description,

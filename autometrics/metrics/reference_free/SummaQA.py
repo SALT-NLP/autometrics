@@ -328,11 +328,12 @@ $$
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 1283.37548828125  # in MB
     cpu_mem: ClassVar[float] = 1542.46484375  # in MB
+    description: ClassVar[str] = 'SummaQA is a reference-free evaluation metric for summarization based on question answering (QA). It evaluates a generated summary by measuring its ability to correctly answer cloze-style questions derived from named entities in the source document. The metric leverages a BERT-based QA model to estimate both the probability of predicted answers and their F1 score against ground-truth answers masked from the original text.'
 
     def __init__(
         self,
         name: str = 'SummaQA',
-        description: str = 'QA-based summary evaluation via entity cloze and BERT QA',
+        description: str = 'SummaQA is a reference-free evaluation metric for summarization based on question answering (QA). It evaluates a generated summary by measuring its ability to correctly answer cloze-style questions derived from named entities in the source document. The metric leverages a BERT-based QA model to estimate both the probability of predicted answers and their F1 score against ground-truth answers masked from the original text.',
         spacy_model: str = 'en_core_web_sm',
         persistent: bool = True,
         device=None,

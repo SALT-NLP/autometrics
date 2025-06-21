@@ -146,8 +146,9 @@ Portions of this metric card were drafted with assistance from OpenAI's ChatGPT,
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 730.5  # in MB
+    description: ClassVar[str] = "CHRF++ (Character n-gram F-score with word n-grams) is a metric for evaluating the quality of machine translation or other text generation tasks. It calculates the precision and recall of character-level n-grams and augments this by incorporating word n-grams, making it a versatile metric that balances lexical similarity and fluency. CHRF++ can handle languages with diverse morphological structures and is tokenization-independent."
 
-    def __init__(self, name="CHRF", description="chrF++ is a metric for evaluating machine translation quality that uses character and word n-gram F-scores to assess similarity between translations and references. It captures both fine-grained character-level details and word-level structure, making it effective for languages with rich morphology.", **kwargs):
+    def __init__(self, name="CHRF", description="CHRF++ (Character n-gram F-score with word n-grams) is a metric for evaluating the quality of machine translation or other text generation tasks. It calculates the precision and recall of character-level n-grams and augments this by incorporating word n-grams, making it a versatile metric that balances lexical similarity and fluency. CHRF++ can handle languages with diverse morphological structures and is tokenization-independent.", **kwargs):
         # Pass ALL parameters to parent constructor
         super().__init__(
             name=name,

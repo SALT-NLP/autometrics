@@ -161,11 +161,12 @@ $$
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 484.86181640625  # in MB
     cpu_mem: ClassVar[float] = 1393.8125  # in MB
+    description: ClassVar[str] = "The Sentiment metric quantifies the sentiment polarity of generated text using a pretrained model fine-tuned on Twitter data: `cardiffnlp/twitter-roberta-base-sentiment-latest`. It converts the model's categorical output (negative, neutral, positive) into a continuous regression score by computing the normalized difference between positive and negative class probabilities. This allows sentiment to be used as a reference-free, scalar evaluation metric for generation tasks."
 
     def __init__(
         self,
         name: str = "Sentiment",
-        description: str = "Twitter sentiment score (positive vs negative) regression.",
+        description: str = "The Sentiment metric quantifies the sentiment polarity of generated text using a pretrained model fine-tuned on Twitter data: `cardiffnlp/twitter-roberta-base-sentiment-latest`. It converts the model's categorical output (negative, neutral, positive) into a continuous regression score by computing the normalized difference between positive and negative class probabilities. This allows sentiment to be used as a reference-free, scalar evaluation metric for generation tasks.",
         model_name: str = "cardiffnlp/twitter-roberta-base-sentiment-latest",
         torch_dtype = "float32",
         device_map: Union[str, dict] = None,

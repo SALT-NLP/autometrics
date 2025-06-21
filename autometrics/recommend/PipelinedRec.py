@@ -36,6 +36,7 @@ class PipelinedRec(MetricRecommender):
 
     def recommend(self, dataset: Dataset, target_measurement: str, k: int = 20) -> List[Type[Metric]]:
         results = self.metric_classes
+        top_ks = self.top_ks
         if len(self.top_ks) < len(self.recommenders):
             if len(self.top_ks) == 1:
                 top_ks = [self.top_ks[0]] * len(self.recommenders)

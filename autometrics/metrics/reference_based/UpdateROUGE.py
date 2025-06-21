@@ -139,10 +139,11 @@ The additions $\Delta(R, S)$ and $\Delta(\hat{Y}, S)$ are computed via heuristic
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 727.6953125  # in MB
+    description: ClassVar[str] = "UpdateROUGE is a variant of the ROUGE metric tailored for update-style generation tasks, where the goal is to revise or augment an existing source text. Rather than computing n-gram overlap over the entire generated and reference texts, UpdateROUGE isolates and evaluates only the newly added content—i.e., the parts of the text that differ from the shared source. This makes the metric especially suitable for tasks like information updating or document revision, where most of the source is preserved and only a subset is meaningfully changed."
 
     def __init__(self,
                  name: str = "UpdateROUGE",
-                 description: str = "Update-aware ROUGE metrics on additions.",
+                 description: str = "UpdateROUGE is a variant of the ROUGE metric tailored for update-style generation tasks, where the goal is to revise or augment an existing source text. Rather than computing n-gram overlap over the entire generated and reference texts, UpdateROUGE isolates and evaluates only the newly added content—i.e., the parts of the text that differ from the shared source. This makes the metric especially suitable for tasks like information updating or document revision, where most of the source is preserved and only a subset is meaningfully changed.",
                  scale: float = 1.0,
                  **kwargs):
         submetrics = ["update_rouge1", "update_rouge2", "update_rougeLsum", "update_rouge_target_diff_len", "update_rouge_prediction_diff_len"]

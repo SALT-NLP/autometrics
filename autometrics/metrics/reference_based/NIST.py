@@ -149,10 +149,11 @@ where $\beta$ is a constant (typically chosen so that penalty = 0.5 when $L_\tex
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 727.6015625  # in MB
+    description: ClassVar[str] = "NIST is an automatic evaluation metric for machine translation that measures n-gram overlap between a system hypothesis and one or more reference translations. It extends BLEU by weighting n-grams based on their informativeness, giving greater importance to rare n-grams. Additionally, it employs a smoother brevity penalty to minimize penalization for small variations in output length."
 
     def __init__(self,
                  name: str = "NIST",
-                 description: str = "NIST score for machine translation (NLTK implementation).",
+                 description: str = "NIST is an automatic evaluation metric for machine translation that measures n-gram overlap between a system hypothesis and one or more reference translations. It extends BLEU by weighting n-grams based on their informativeness, giving greater importance to rare n-grams. Additionally, it employs a smoother brevity penalty to minimize penalization for small variations in output length.",
                  n: int = 5,
                  **kwargs):
         super().__init__(name, description, n=n, **kwargs)

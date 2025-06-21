@@ -319,11 +319,12 @@ The final score is symmetrical with respect to hypothesis and reference, making 
 	# Resource usage statistics (in megabytes)
 	gpu_mem: ClassVar[float] = 0.0  # in MB
 	cpu_mem: ClassVar[float] = 727.953125  # in MB
+	description: ClassVar[str] = "GLEU (Google-BLEU) is a metric introduced to address limitations of BLEU for sentence-level evaluation. It is designed to compute recall and precision over n-grams for hypotheses and references, taking the minimum of these two values as the final score. The metric is symmetrical and ranges from 0 (no match) to 1 (perfect match). It was initially proposed in Google's Neural Machine Translation (GNMT) system for reinforcement learning experiments."
 
 	# GLEU is fast enough without caching
 	DEFAULT_USE_CACHE = False
 
-	def __init__(self, name="GLEU", description="GLEU is a sentence-level metric that computes the minimum of precision and recall of n-grams.  It is meant to resolve some of the issues with BLEU when used at the sentence level.", **kwargs):
+	def __init__(self, name="GLEU", description="GLEU (Google-BLEU) is a metric introduced to address limitations of BLEU for sentence-level evaluation. It is designed to compute recall and precision over n-grams for hypotheses and references, taking the minimum of these two values as the final score. The metric is symmetrical and ranges from 0 (no match) to 1 (perfect match). It was initially proposed in Google's Neural Machine Translation (GNMT) system for reinforcement learning experiments.", **kwargs):
 		super().__init__(name, description, **kwargs)
 		
 	def _calculate_impl(self, input, output, references=None, **kwargs):

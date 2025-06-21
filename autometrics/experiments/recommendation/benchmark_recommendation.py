@@ -139,7 +139,19 @@ def build_recommenders(metric_classes: List[type], variant: str, top_k: int, for
     recs: Dict[str, "MetricRecommender"] = {}
 
     def idx(prefix: str) -> str:
-        return user_data_dir("autometrics", f"{prefix}_{variant}")
+        """Return a stable directory under the user data dir.
+
+        We want paths like:
+            ~/.local/share/autometrics/<prefix>_<variant>
+
+        The *platformdirs* API expects the first positional argument to be
+        *appname* – this becomes the leaf directory on Unix – while the second
+        argument (``appauthor``) introduces an intermediate directory that we
+        do not want.  Therefore we only pass *appname* and join the remainder
+        manually.
+        """
+        base = user_data_dir("autometrics")  # ~/.local/share/autometrics
+        return os.path.join(base, f"{prefix}_{variant}")
 
     wanted = set(s.lower() for s in selected)
 
@@ -168,7 +180,7 @@ def build_recommenders(metric_classes: List[type], variant: str, top_k: int, for
             metric_classes=metric_classes,
             index_path=idx("colbert"),
             force_reindex=force_reindex,
-            index_name=f"{variant}_metrics",
+            index_name=variant,
         )
     if "faiss" in wanted:
         recs["Faiss"] = Faiss(

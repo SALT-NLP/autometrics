@@ -153,10 +153,11 @@ $$
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 1102.37109375  # in MB
+    description: ClassVar[str] = "METEOR (Metric for Evaluation of Translation with Explicit ORdering) is a reference-based metric for evaluating machine translation and related tasks. It calculates a weighted harmonic mean of unigram precision and recall, with higher weight on recall, and includes a fragmentation penalty to assess fluency. METEOR supports exact, stemmed, and synonym-based word matching to improve correlation with human judgment compared to earlier metrics like BLEU."
 
     def __init__(self,
                  name: str = "METEOR",
-                 description: str = "METEOR score for machine translation evaluation (NLTK)",
+                 description: str = "METEOR (Metric for Evaluation of Translation with Explicit ORdering) is a reference-based metric for evaluating machine translation and related tasks. It calculates a weighted harmonic mean of unigram precision and recall, with higher weight on recall, and includes a fragmentation penalty to assess fluency. METEOR supports exact, stemmed, and synonym-based word matching to improve correlation with human judgment compared to earlier metrics like BLEU.",
                  **kwargs):
         super().__init__(name, description, **kwargs)
 

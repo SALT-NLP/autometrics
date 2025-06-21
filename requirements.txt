@@ -32,3 +32,4 @@ pynvml
 protobuf
 pyserini
 pylate
+litellm>=1.64

@@ -154,11 +154,12 @@ where:
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 346.365234375  # in MB
     cpu_mem: ClassVar[float] = 1718.91796875  # in MB
-
+    description: ClassVar[str] = "ParaScoreFree is a reference-free evaluation metric designed for paraphrase generation. It evaluates candidate paraphrases based on semantic similarity to the input source while encouraging lexical diversity. ParaScoreFree outputs a scalar quality score that combines BERT-based semantic similarity and normalized edit distance, offering a balance between meaning preservation and surface-level rewriting. It enables paraphrase evaluation without the need for gold reference texts, making it suitable for low-resource or open-domain settings."
+    
     def __init__(
         self,
         name: str = "ParaScoreFree",
-        description: str = "ParaScore: reference-free paraphrase evaluation.",
+        description: str = "ParaScoreFree is a reference-free evaluation metric designed for paraphrase generation. It evaluates candidate paraphrases based on semantic similarity to the input source while encouraging lexical diversity. ParaScoreFree outputs a scalar quality score that combines BERT-based semantic similarity and normalized edit distance, offering a balance between meaning preservation and surface-level rewriting. It enables paraphrase evaluation without the need for gold reference texts, making it suitable for low-resource or open-domain settings.",
         seed: int = 42,
         **scorer_kwargs
     ):

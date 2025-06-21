@@ -122,8 +122,9 @@ Portions of this metric card were drafted with assistance from OpenAI's ChatGPT,
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 894.08203125  # in MB
+    description: ClassVar[str] = "The Flesch-Kincaid Grade Level (FKGL) is a readability metric designed to evaluate the complexity of English-language texts. FKGL scores correspond to U.S. school grade levels, making it easy for educators, writers, and practitioners to understand the level of education required to comprehend a given text."
 
-    def __init__(self, name="FKGL", description="Flesch-Kincaid Grade Level (FKGL) is a metric that estimates the readability of a text based on the average number of syllables per word and the average number of words per sentence. Lower scores indicate easier-to-read text.", **kwargs):
+    def __init__(self, name="FKGL", description="The Flesch-Kincaid Grade Level (FKGL) is a readability metric designed to evaluate the complexity of English-language texts. FKGL scores correspond to U.S. school grade levels, making it easy for educators, writers, and practitioners to understand the level of education required to comprehend a given text.", **kwargs):
         super().__init__(name, description, **kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):

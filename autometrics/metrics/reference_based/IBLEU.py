@@ -139,10 +139,11 @@ Where:
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 730.34765625  # in MB
+    description: ClassVar[str] = "iBLEU (input-aware BLEU) is a reference-based metric introduced to evaluate paraphrase generation quality by simultaneously measuring semantic adequacy and surface dissimilarity. It modifies the traditional BLEU score by penalizing outputs that are too similar to the input (source) sentence, thus encouraging more diverse and non-trivial paraphrases."
 
     def __init__(self,
                  name: str = "iBLEU",
-                 description: str = "iBLEU metric combining BLEU score to references and a self-BLEU penalty for diversity.",
+                 description: str = "iBLEU (input-aware BLEU) is a reference-based metric introduced to evaluate paraphrase generation quality by simultaneously measuring semantic adequacy and surface dissimilarity. It modifies the traditional BLEU score by penalizing outputs that are too similar to the input (source) sentence, thus encouraging more diverse and non-trivial paraphrases.",
                  alpha: float = 0.9,
                  **kwargs):
         super().__init__(name, description, alpha=alpha, **kwargs)

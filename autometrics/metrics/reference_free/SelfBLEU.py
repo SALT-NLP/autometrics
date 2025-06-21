@@ -122,11 +122,12 @@ Each BLEU computation typically uses uniform $n$-gram weights (e.g., unigram to 
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 728.73046875  # in MB
+    description: ClassVar[str] = "Self-BLEU is a reference-free diversity metric used in text generation tasks. It quantifies the similarity of each generated sentence to the rest of the generated outputs using the BLEU score, treating each sentence in turn as the hypothesis and the others as the reference. Lower Self-BLEU scores indicate higher diversity, making it useful for detecting mode collapse in generative models."
 
     def __init__(
         self,
         name: str = "SelfBLEU",
-        description: str = "Self-BLEU diversity metric: avg BLEU each sentence vs rest",
+        description: str = "Self-BLEU is a reference-free diversity metric used in text generation tasks. It quantifies the similarity of each generated sentence to the rest of the generated outputs using the BLEU score, treating each sentence in turn as the hypothesis and the others as the reference. Lower Self-BLEU scores indicate higher diversity, making it useful for detecting mode collapse in generative models.",
         gram: int = 3,
         sample_size: int = 500,
         **kwargs

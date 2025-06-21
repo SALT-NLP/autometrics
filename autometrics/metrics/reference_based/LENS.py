@@ -139,11 +139,12 @@ where $f_k$ is the $k$-th expert head's output.
     # TODO: Check this, because gpu memory being zero for a model is suspicious
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 3330.29296875  # in MB
+    description: ClassVar[str] = "LENS (Learnable Evaluation Metric for Text Simplification) is a reference-based metric designed specifically to evaluate system outputs in the task of text simplification. It aligns with human judgments more closely than prior metrics by learning from human ratings using a mixture-of-experts (MoE) model, which captures multiple aspects of simplification quality, such as grammaticality, meaning preservation, and simplicity. LENS can be rescaled between 0 and 100 for interpretability."
 
     def __init__(
         self,
         name: str = "LENS",
-        description: str = "Learnable text simplification metric (LENS) from davidheineman/lens",
+        description: str = "LENS (Learnable Evaluation Metric for Text Simplification) is a reference-based metric designed specifically to evaluate system outputs in the task of text simplification. It aligns with human judgments more closely than prior metrics by learning from human ratings using a mixture-of-experts (MoE) model, which captures multiple aspects of simplification quality, such as grammaticality, meaning preservation, and simplicity. LENS can be rescaled between 0 and 100 for interpretability.",
         model_id: str = "davidheineman/lens",
         rescale: bool = True,
         batch_size: int = 16,

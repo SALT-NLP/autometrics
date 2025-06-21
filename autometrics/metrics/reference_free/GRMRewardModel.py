@@ -141,11 +141,12 @@ For Llama 3:
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 6160.84033203125  # in MB
     cpu_mem: ClassVar[float] = 2003.9375  # in MB
+    description: ClassVar[str] = "The GRMRewardModel is a general-purpose reward model designed to evaluate the quality and safety of LLM-generated outputs. It achieves high generalization performance by applying a novel regularization method on hidden states during supervised fine-tuning. GRMRewardModel is fine-tuned on the decontaminated Skywork/Skywork-Reward-Preference-80K-v0.2 dataset and achieves state-of-the-art results among models of comparable size (3B), even outperforming some 8B reward models and proprietary LLM judges on RewardBench."
 
     def __init__(
         self,
         name: str = "GRMRewardModel",
-        description: str = "Ray2333/GRM-Llama3.2-3B reward model (reference-free).",
+        description: str = "The GRMRewardModel is a general-purpose reward model designed to evaluate the quality and safety of LLM-generated outputs. It achieves high generalization performance by applying a novel regularization method on hidden states during supervised fine-tuning. GRMRewardModel is fine-tuned on the decontaminated Skywork/Skywork-Reward-Preference-80K-v0.2 dataset and achieves state-of-the-art results among models of comparable size (3B), even outperforming some 8B reward models and proprietary LLM judges on RewardBench.",
         model_name: str = "Ray2333/GRM-Llama3.2-3B-rewardmodel-ft",
         torch_dtype = "float16",
         device_map: Union[str, dict] = "auto",

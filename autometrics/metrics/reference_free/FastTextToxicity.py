@@ -165,6 +165,7 @@ FastText
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 1711.45703125  # in MB
+    description: ClassVar[str] = "FastTextToxicity is a reference-free classification metric based on a FastText binary classifier trained to detect toxic content in text. It was developed as part of the AI2 Dolma project to filter large-scale web data for pretraining language models. The classifier outputs a scalar toxicity score for a given model-generated output, without requiring gold-standard references. This makes it efficient and suitable for real-time or large-scale generative evaluations."
 
     def __init__(self,
                  persistent: bool = True,
@@ -174,7 +175,7 @@ FastText
                  **kwargs):
         super().__init__(
             name="FastTextToxicity",
-            description="fastText classifier for toxic vs non-toxic text using Jigsaw hate-speech model",
+            description="FastTextToxicity is a reference-free classification metric based on a FastText binary classifier trained to detect toxic content in text. It was developed as part of the AI2 Dolma project to filter large-scale web data for pretraining language models. The classifier outputs a scalar toxicity score for a given model-generated output, without requiring gold-standard references. This makes it efficient and suitable for real-time or large-scale generative evaluations.",
             model_url=model_url,
             negative_label=negative_label,
             persistent=persistent,

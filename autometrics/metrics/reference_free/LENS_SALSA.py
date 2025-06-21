@@ -147,11 +147,12 @@ The model is trained using human-annotated quality scores from simplification co
     # TODO: Check this, because gpu memory being zero is suspicious
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 2909.66796875  # in MB
+    description: ClassVar[str] = "LENS_SALSA is a reference-free metric designed to evaluate the overall quality of text simplification outputs. It leverages the SALSA (Simplification Analysis via Lexical and Structural Alignment) framework introduced by Heineman et al. (2023), which analyzes edits at the word level to assess whether a simplification succeeds or fails. The LENS_SALSA model uses these insights to produce a scalar simplification quality score based on input-output pairs, with no need for reference texts. This makes it particularly useful in settings where reference simplifications are unavailable or unreliable."
 
     def __init__(
         self,
         name: str = "LENS_SALSA",
-        description: str = "LENS-SALSA reference-free simplification metric (overall score).",
+        description: str = "LENS_SALSA is a reference-free metric designed to evaluate the overall quality of text simplification outputs. It leverages the SALSA (Simplification Analysis via Lexical and Structural Alignment) framework introduced by Heineman et al. (2023), which analyzes edits at the word level to assess whether a simplification succeeds or fails. The LENS_SALSA model uses these insights to produce a scalar simplification quality score based on input-output pairs, with no need for reference texts. This makes it particularly useful in settings where reference simplifications are unavailable or unreliable.",
         model_id: str = "davidheineman/lens-salsa",
         batch_size: int = 16,
         devices: List[int] = None,

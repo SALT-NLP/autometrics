@@ -140,8 +140,12 @@ Portions of this metric card were drafted with assistance from OpenAI's ChatGPT,
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 729.32514375  # in MB
+    description: ClassVar[str] = "BLEU (Bilingual Evaluation Understudy) is a widely used metric for evaluating the quality of text generated in tasks like machine translation and summarization. It measures the overlap of n-grams between a generated text and one or more reference texts, with a brevity penalty to penalize overly short translations. SacreBLEU, a modern implementation, ensures reproducibility and standardization of BLEU scores across research."
 
-    def __init__(self, name="BLEU", description="BLEU compares the n-grams of the candidate with the n-grams of the reference.", **kwargs):
+    def __init__(self,
+                 name: str = "BLEU",
+                 description: str = "BLEU (Bilingual Evaluation Understudy) is a widely used metric for evaluating the quality of text generated in tasks like machine translation and summarization. It measures the overlap of n-grams between a generated text and one or more reference texts, with a brevity penalty to penalize overly short translations. SacreBLEU, a modern implementation, ensures reproducibility and standardization of BLEU scores across research.",
+                 **kwargs):
         super().__init__(name, description, **kwargs)
         self.metric = bleu()
 

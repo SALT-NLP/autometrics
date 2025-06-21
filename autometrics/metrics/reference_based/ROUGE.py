@@ -199,10 +199,11 @@ ROUGE-LSum extends ROUGE-L to the summary level by treating newlines as sentence
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 726.48828125  # in MB
+    description: ClassVar[str] = "ROUGE (Recall-Oriented Understudy for Gisting Evaluation) is a widely used evaluation metric for text summarization, machine translation, and text generation tasks. It measures the overlap between an automatically generated text and reference texts using various methods such as **n-gram overlap (ROUGE-1, ROUGE-2), longest common subsequence (ROUGE-L), and summary-level longest common subsequence (ROUGE-LSum)**."
 
     def __init__(self, **kwargs):
         name = "ROUGE"
-        description = "ROUGE is a set of metrics for evaluating automatic summarization and machine translation. It compares the overlap of n-grams between the generated text and reference text, providing precision, recall, and F1 scores. ROUGE is widely used in NLP tasks to assess the quality of generated content."
+        description = "ROUGE (Recall-Oriented Understudy for Gisting Evaluation) is a widely used evaluation metric for text summarization, machine translation, and text generation tasks. It measures the overlap between an automatically generated text and reference texts using various methods such as **n-gram overlap (ROUGE-1, ROUGE-2), longest common subsequence (ROUGE-L), and summary-level longest common subsequence (ROUGE-LSum)**."
 
         submetrics = ["1", "2", "L", "Lsum"]
         measures = ['p', 'r', 'f1']

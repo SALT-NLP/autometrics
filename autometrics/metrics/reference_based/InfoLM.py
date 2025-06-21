@@ -142,11 +142,12 @@ These divergences are computed over distributions derived from MLM logits, optio
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 1142.15625  # in MB
+    description: ClassVar[str] = "InfoLM is a reference-based metric for evaluating the similarity between a generated and a reference text by computing a divergence between their distributions in embedding space, as derived from a pre-trained masked language model (MLM). Unlike surface-level metrics, InfoLM supports a family of information-theoretic distances (e.g., KL divergence, Rényi divergence, L1/L2 distances) and aims to better capture semantic equivalence while also offering configurability to adjust sensitivity and robustness. It was introduced to address limitations of standard string-based metrics, particularly in summarization and data-to-text generation tasks."
 
     def __init__(
         self,
         name: str = "InfoLM",
-        description: str = "InfoLM metric (KL divergence) via torchmetrics functional API.",
+        description: str = "InfoLM is a reference-based metric for evaluating the similarity between a generated and a reference text by computing a divergence between their distributions in embedding space, as derived from a pre-trained masked language model (MLM). Unlike surface-level metrics, InfoLM supports a family of information-theoretic distances (e.g., KL divergence, Rényi divergence, L1/L2 distances) and aims to better capture semantic equivalence while also offering configurability to adjust sensitivity and robustness. It was introduced to address limitations of standard string-based metrics, particularly in summarization and data-to-text generation tasks.",
         model_name_or_path: str = "bert-base-uncased",
         temperature: float = 0.25,
         information_measure: str = "kl_divergence",

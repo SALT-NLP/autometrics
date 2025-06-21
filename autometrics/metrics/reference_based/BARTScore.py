@@ -292,6 +292,7 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 1558.19189453125  # in MB
     cpu_mem: ClassVar[float] = 1370.58984375  # in MB
+    description: ClassVar[str] = "BARTScore is a reference-based evaluation metric for text generation that formulates evaluation as a text generation task. It leverages the pre-trained BART model to compute the conditional likelihood of one text given another, enabling flexible evaluation of different aspects such as informativeness, fluency, factuality, and coherence. BARTScore outperforms existing metrics across multiple tasks and evaluation settings."
 
     def __init__(
         self, batch_size: int = 4, model: str = "facebook/bart-large-cnn", persistent: bool = True, **kwargs
@@ -304,10 +305,7 @@ The choice of $x$ and $y$ varies depending on the evaluation perspective (e.g., 
         # Pass all parameters explicitly to parent constructor for caching
         super().__init__(
             name=f"BARTScore_{model.split('/')[-1]}",
-            description=(
-                "BARTScore is a reference-based metric for evaluating text quality "
-                "using a pre-trained BART model to compute likelihoods."
-            ),
+            description="BARTScore is a reference-based evaluation metric for text generation that formulates evaluation as a text generation task. It leverages the pre-trained BART model to compute the conditional likelihood of one text given another, enabling flexible evaluation of different aspects such as informativeness, fluency, factuality, and coherence. BARTScore outperforms existing metrics across multiple tasks and evaluation settings.",
             batch_size=batch_size,
             model=model,
             device=str(self.device),  # Include device as string

@@ -1,4 +1,5 @@
 import bert_score
+from typing import ClassVar
 from autometrics.metrics.reference_based.ReferenceBasedMultiMetric import ReferenceBasedMultiMetric
 
 def compute_bertscore(original, output, references, model="roberta-large", type="all", compare_to_original=False):
@@ -183,9 +184,14 @@ Baseline rescaling adjusts scores to lie within [0, 1].
   Portions of this metric card were drafted with assistance from OpenAI's ChatGPT, based on user-provided inputs and relevant documentation. All content has been reviewed and curated by the author to ensure accuracy.  
 - **Contact:** mryan0@stanford.edu"""
 
+    # Resource usage statistics (in megabytes)
+    gpu_mem: ClassVar[float] = 8.125 # in MB
+    cpu_mem: ClassVar[float] = 1512.303487270343 # in MB
+    description: ClassVar[str] = "BERTScore is a semantic similarity metric for evaluating generated text against reference text. It leverages pre-trained contextual embeddings (e.g., BERT, RoBERTa) to compute token-level cosine similarity, measuring precision, recall, and F1 scores. BERTScore is particularly effective in capturing semantic equivalence and correlates well with human judgments, making it a versatile metric for various text generation tasks."
+
     def __init__(self, model="roberta-large", **kwargs):
         name = "BERTScore_" + model
-        description = "BERTScore is a metric that computes the similarity between two sentences using a pre-trained BERT model. It is based on the cosine similarity between the embeddings of the two sentences."
+        description = "BERTScore is a semantic similarity metric for evaluating generated text against reference text. It leverages pre-trained contextual embeddings (e.g., BERT, RoBERTa) to compute token-level cosine similarity, measuring precision, recall, and F1 scores. BERTScore is particularly effective in capturing semantic equivalence and correlates well with human judgments, making it a versatile metric for various text generation tasks."
         self.model = model
 
         submetrics = ["P", "R", "F"]

@@ -166,6 +166,7 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
     # Resource usage statistics (in megabytes) using distilbert-base-uncased
     gpu_mem: ClassVar[float] = 262.36328125  # in MB
     cpu_mem: ClassVar[float] = 1534.84375  # in MB
+    description: ClassVar[str] = "MoverScore is a semantic similarity metric for evaluating generated text, leveraging contextualized embeddings (such as BERT) and Earth Mover's Distance (EMD) to measure the alignment between system outputs and reference texts. It is designed to capture semantic similarity beyond lexical overlap and has been shown to achieve a high correlation with human judgments across tasks like machine translation, summarization, image captioning, and data-to-text generation."
 
     def __init__(self, model_name='distilbert-base-uncased', device='cuda', persistent=True, **kwargs):
         """
@@ -178,7 +179,7 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         self.tokenizer = None
 
         name = "MOVERScore_" + model_name
-        description = "MOVERScore is a metric that computes the similarity between two sentences using a pre-trained BERT model. It is based on the cosine similarity between the embeddings of the two sentences, and it uses the Earth Mover's Distance (EMD) to compute the distance between the two sets of embeddings."
+        description = "MoverScore is a semantic similarity metric for evaluating generated text, leveraging contextualized embeddings (such as BERT) and Earth Mover's Distance (EMD) to measure the alignment between system outputs and reference texts. It is designed to capture semantic similarity beyond lexical overlap and has been shown to achieve a high correlation with human judgments across tasks like machine translation, summarization, image captioning, and data-to-text generation."
         
         super().__init__(name, description, model_name=model_name, device=device, **kwargs)
         self.exclude_from_cache_key("device", "persistent")

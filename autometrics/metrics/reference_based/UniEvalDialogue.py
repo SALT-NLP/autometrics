@@ -186,10 +186,11 @@ These prompts are tokenized and passed into the **UniEvalDialogue** model, which
     # Resource usage statistics (in megabytes
     gpu_mem: ClassVar[float] = 3140.60546875  # in MB
     cpu_mem: ClassVar[float] = 3169.94140625  # in MB
+    description: ClassVar[str] = "UniEvalDialogue is a multi-dimensional evaluation metric designed specifically for **dialogue response generation**. It assesses responses across five key dimensions: **naturalness, coherence, engagingness, groundedness, and understandability**. The metric formulates evaluation as a **Boolean Question Answering (QA) task**, where a pre-trained language model predicts scores based on Yes/No answers to predefined evaluation questions."
 
     def __init__(self, persistent=True, **kwargs):
         name = "UniEvalDialogue"
-        description = "UniEvalDialogue is a metric for evaluating the quality of generated dialogues. It uses a pre-trained model to assess various dimensions of the dialogue, such as naturalness, coherence, engagingness, groundedness, and understandability. The metric provides a score based on the model's predictions, allowing for a quantitative evaluation of the dialogue's quality."
+        description = "UniEvalDialogue is a multi-dimensional evaluation metric designed specifically for **dialogue response generation**. It assesses responses across five key dimensions: **naturalness, coherence, engagingness, groundedness, and understandability**. The metric formulates evaluation as a **Boolean Question Answering (QA) task**, where a pre-trained language model predicts scores based on Yes/No answers to predefined evaluation questions."
         self.submetrics = ["naturalness", "coherence", "engagingness", "groundedness", "understandability"]
 
         self.task = 'dialogue'

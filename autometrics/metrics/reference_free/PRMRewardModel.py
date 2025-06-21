@@ -130,11 +130,12 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
     # TODO: Check this, because gpu memory being zero is suspicious
     gpu_mem: ClassVar[float] = 130000 # 13970.72265625 * 3  # in MB # THIS NUMBER IS AN ESTIMATE BASED ON HOW MUCH MEMORY THIS MODEL IS TAKING UP AS I RUN.  I SHOULD STILL RERUN THE BENCHMARKING SCRIPT
     cpu_mem: ClassVar[float] = 13970.72265625  # in MB 
+    description: ClassVar[str] = "MathProcessRewardModel is a process-level reward model that evaluates each intermediate step in a multi-step mathematical reasoning problem. Rather than scoring the final answer alone, it provides token-level feedback across a reasoning chain, identifying helpful versus unhelpful steps using a learned binary classifier. This allows for granular supervision of multi-hop reasoning in LLMs and is particularly effective in domains where correctness must be verified incrementally."
 
     def __init__(
         self,
         name: str = "PRMRewardModel",
-        description: str = "Process Reward Model Qwen2.5-Math-PRM-7B sentence-based min/max/mean",
+        description: str = "MathProcessRewardModel is a process-level reward model that evaluates each intermediate step in a multi-step mathematical reasoning problem. Rather than scoring the final answer alone, it provides token-level feedback across a reasoning chain, identifying helpful versus unhelpful steps using a learned binary classifier. This allows for granular supervision of multi-hop reasoning in LLMs and is particularly effective in domains where correctness must be verified incrementally.",
         model_name: str = "Qwen/Qwen2.5-Math-PRM-7B",
         device_map=None,
         persistent: bool = True,

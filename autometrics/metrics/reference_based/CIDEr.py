@@ -364,8 +364,9 @@ with uniform weights $w_n = \frac{1}{N}$ (typically $N=4$).
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 726.43359375  # in MB
+    description: ClassVar[str] = "CIDEr (Consensus-based Image Description Evaluation) measures the similarity between a candidate image caption and a set of human-generated reference captions. It leverages TF-IDF weighted n-gram matching to capture consensus in both content and linguistic style, making it especially useful for benchmarking image captioning systems."
 
-    def __init__(self, n=4, sigma=6.0, name="CIDEr", description="CIDEr measures consensus between a candidate sentence and its references.", **kwargs):
+    def __init__(self, n=4, sigma=6.0, name="CIDEr", description="CIDEr (Consensus-based Image Description Evaluation) measures the similarity between a candidate image caption and a set of human-generated reference captions. It leverages TF-IDF weighted n-gram matching to capture consensus in both content and linguistic style, making it especially useful for benchmarking image captioning systems.", **kwargs):
         super().__init__(name + "_n" + str(n) + "_sig" + str(sigma), description, n=n, sigma=sigma, **kwargs)
         self._n = n
         self._sigma = sigma

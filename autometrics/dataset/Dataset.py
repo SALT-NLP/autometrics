@@ -375,3 +375,10 @@ class Dataset():
     
     def get_task_description(self) -> Optional[str]:
         return self.task_description
+
+class DummyDataset(Dataset):
+    """
+    A dummy dataset for simple purposes.  Not to be used for actual metric generation/recommendation.
+    """
+    def __init__(self, task_description: str):
+        super().__init__(dataframe=pd.DataFrame(), target_columns=[], ignore_columns=[], metric_columns=[], name="DummyDataset", data_id_column=None, model_id_column=None, input_column=None, output_column=None, reference_columns=None, metrics=[], task_description=task_description)

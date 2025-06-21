@@ -177,11 +177,12 @@ $$
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 484.85888671875  # in MB
     cpu_mem: ClassVar[float] = 1389.84765625  # in MB
+    description: ClassVar[str] = "The Toxicity metric estimates how toxic a given piece of generated text is, based on a hate speech classification model. It returns a score between 0 and 1 indicating the likelihood that the text is toxic, where higher scores suggest a greater probability of toxicity. This metric is especially relevant for safety and content moderation evaluations in generative language models."
 
     def __init__(
         self,
         name: str = "Toxicity",
-        description: str = "Toxicity score via HF Evaluate measurement",
+        description: str = "The Toxicity metric estimates how toxic a given piece of generated text is, based on a hate speech classification model. It returns a score between 0 and 1 indicating the likelihood that the text is toxic, where higher scores suggest a greater probability of toxicity. This metric is especially relevant for safety and content moderation evaluations in generative language models.",
         metric_id: str = "toxicity",
         score_key: str = "toxicity",
         load_kwargs: dict = None,

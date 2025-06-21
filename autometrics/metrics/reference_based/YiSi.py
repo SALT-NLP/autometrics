@@ -226,7 +226,7 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
     def __init__(
         self,
         name: str = 'YiSi',
-        description: str = 'YiSi-2 MT evaluation metric (contextual semantic similarity with IDF)',
+        description: str = 'YiSi-2 is a semantic machine translation evaluation and quality estimation metric designed for cross-lingual assessment. It measures the semantic similarity between the source sentence and the machine-translated output using bilingual word embeddings, optionally incorporating shallow semantic structures through semantic role labeling.',
         model_name: str = 'bert-base-multilingual-cased',
         alpha: float = 0.8,
         batch_size: int = 64,

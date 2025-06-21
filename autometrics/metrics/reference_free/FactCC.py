@@ -135,11 +135,12 @@ where $f$ is the classification function learned by the model, trained on synthe
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 426.86083984375  # in MB
     cpu_mem: ClassVar[float] = 1317.58984375  # in MB
+    description: ClassVar[str] = "FactCC is a reference-free metric designed to evaluate the factual consistency of summaries with respect to source documents. It uses a fine-tuned BERT-based sequence classification model trained on weakly supervised data to determine whether a summary sentence is factually supported by its source. The model was specifically developed to overcome the limitations of traditional summarization metrics that fail to capture factual inconsistencies."
 
     def __init__(
         self,
         name: str = "FactCC",
-        description: str = "Factual consistency probability from FactCC model",
+        description: str = "FactCC is a reference-free metric designed to evaluate the factual consistency of summaries with respect to source documents. It uses a fine-tuned BERT-based sequence classification model trained on weakly supervised data to determine whether a summary sentence is factually supported by its source. The model was specifically developed to overcome the limitations of traditional summarization metrics that fail to capture factual inconsistencies.",
         model_name: str = "manueldeprada/FactCC",
         device: str = None,
         batch_size: int = 8,

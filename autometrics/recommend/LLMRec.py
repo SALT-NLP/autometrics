@@ -23,9 +23,9 @@ The final ranking should just be a list of metric names, in order from most rele
 The list should be exactly `num_metrics_to_recommend` items long."""
     task_description: str = dspy.InputField(desc="A description of the task that an LLM performed and that I now want to evaluate.")
     target: str = dspy.InputField(desc="The specific target measurement that I want to evaluate about the task.")
-    num_metrics_to_recommend: int = dspy.InputField(desc="The number of metrics to recommend.")
     metric_documentation: List[str] = dspy.InputField(desc="A list of metric names and their documentation.  The documentation will contain the metric name, as well as many details about the metric.")
-    ranking: List[str] = dspy.OutputField(desc="A numbered list of EXACT metric class names (no hyphens, no spaces, no extra words), in order from most relevant to least relevant. The list should be of length `num_metrics_to_recommend`.  You should write the number in front of the metric name (e.g \"1. METRIC1_NAME\", \"2. METRIC2_NAME\", etc.)")
+    num_metrics_to_recommend: int = dspy.InputField(desc="The number of metrics to recommend.  It is imperative to target this number or very very close to it.  We will do more extensive filtering later.")
+    ranking: List[str] = dspy.OutputField(desc="A numbered list of EXACT metric class names (no hyphens, no spaces, no extra words), in order from most relevant to least relevant. The list should be of length `num_metrics_to_recommend`.  You should write the number in front of the metric name (e.g \"1. METRIC1_NAME\", \"2. METRIC2_NAME\", etc.).  IMPORTANT: Refer to «METRIC NAME: ...» for the exact name of the metric or it won't be a match.")
 
 class LLMMetricRecommendation(dspy.Module):
     """
@@ -126,7 +126,7 @@ class LLMRec(MetricRecommender):
             batches = self._split_metrics_into_batches(metric_classes, 2)
             
             # Calculate target k for each batch (aim for ~2/3 of final k to allow for overlap)
-            batch_k = max(1, int(k * 0.67))  # Ensure at least 1
+            batch_k = min(max(1, int(k * 0.6)), len(metric_classes)-3)  # Ensure at least 1 and at most len(metric_classes)-3
             
             # Recursively get recommendations from each batch
             all_batch_results = []

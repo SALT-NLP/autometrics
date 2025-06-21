@@ -74,7 +74,7 @@ class RecommendationExperiment(Experiment):
                         target_measurement=tgt,
                         k=self.top_k,
                     )
-                    metric_names = [m.__name__ for m in metrics]
+                    metric_names = [m.__name__ if m else "ERR" for m in metrics]
                     # Ensure fixed width by padding with empty strings
                     if len(metric_names) < self.top_k:
                         metric_names += [""] * (self.top_k - len(metric_names))

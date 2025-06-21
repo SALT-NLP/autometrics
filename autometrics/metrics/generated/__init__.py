@@ -1,10 +1,10 @@
-from .GeneratedCodeMetric import GeneratedCodeReferenceBasedMetric, GeneratedCodeReferenceFreeMetric
+from .GeneratedCodeMetric import GeneratedRefBasedCodeMetric, GeneratedRefFreeCodeMetric
 from .GeneratedLLMJudgeMetric import GeneratedRefFreeLLMJudgeMetric, GeneratedRefBasedLLMJudgeMetric
 from .GeneratedGEvalMetric import GeneratedRefFreeGEvalMetric, GeneratedRefBasedGEvalMetric
 
 __all__ = [
-    'GeneratedCodeReferenceBasedMetric', 
-    'GeneratedCodeReferenceFreeMetric', 
+    'GeneratedRefBasedCodeMetric', 
+    'GeneratedRefFreeCodeMetric', 
     'GeneratedRefFreeLLMJudgeMetric', 
     'GeneratedRefBasedLLMJudgeMetric',
     'GeneratedRefFreeGEvalMetric',

@@ -12,6 +12,7 @@ from autometrics.dataset.datasets.cogym.cogym import CoGymTravelOutcome
 # Generators ---------------------------------------------------------------
 from autometrics.generator.LLMJudgeProposer import BasicLLMJudgeProposer
 from autometrics.generator.GEvalJudgeProposer import GEvalJudgeProposer
+from autometrics.generator.CodeGenerator import CodeGenerator
 
 
 # ----------------------------------------------------------------------------
@@ -48,18 +49,23 @@ def configure_qwen():
 # 2.  Run the full pipeline for a dataset
 # ----------------------------------------------------------------------------
 
-def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, use_geval: bool = False):
+def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_type: str = "llm_judge"):
     banner(f"DATASET: {dataset.get_name()}")
     print("Task description:\n", dataset.get_task_description())
 
     # Instantiate the proposer ------------------------------------------------
-    if use_geval:
+    if metric_type == "geval":
         proposer = GEvalJudgeProposer(
             generator_llm=generator_lm,
             executor_kwargs={"model": judge_lm},
         )
         print("Using G-Eval metrics...")
-    else:
+    elif metric_type == "codegen":
+        proposer = CodeGenerator(
+            generator_llm=generator_lm,
+        )
+        print("Using Code Generation metrics...")
+    else:  # llm_judge
         proposer = BasicLLMJudgeProposer(
             generator_llm=generator_lm,
             executor_kwargs={"model": judge_lm},
@@ -73,16 +79,25 @@ def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, use_geval:
         print("➤", m.name, "-", m.description)
 
     # Evaluate the first metric on a tiny subset ------------------------------
-    metric_type = "G-Eval" if use_geval else "LLM Judge"
-    banner(f"Scoring first 5 examples with first generated {metric_type} metric …")
+    metric_type_display = {"geval": "G-Eval", "codegen": "Code Generation", "llm_judge": "LLM Judge"}[metric_type]
+    banner(f"Scoring first 5 examples with first generated {metric_type_display} metric …")
     first_metric = metrics[0] if len(metrics) > 0 else None
     
     if first_metric:
         df = dataset.get_dataframe().head(5)
 
+        # Prepare references if the dataset has them
+        references = None
+        if dataset.get_reference_columns():
+            references = []
+            for _, row in df.iterrows():
+                row_refs = [row[col] for col in dataset.get_reference_columns() if row[col] is not None]
+                references.append(row_refs)
+
         scores = first_metric.calculate_batched(
             inputs=df[dataset.get_input_column()].tolist(),
             outputs=df[dataset.get_output_column()].tolist(),
+            references=references,
         )
         pprint.pprint(list(zip(range(len(scores)), scores)))
 
@@ -109,8 +124,9 @@ def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, use_geval:
 
 if __name__ == "__main__":
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description="Demo metric generation with Basic LLM Judge or G-Eval")
-    parser.add_argument("--geval", action="store_true", help="Use G-Eval metrics instead of Basic LLM Judge")
+    parser = argparse.ArgumentParser(description="Demo metric generation with Basic LLM Judge, G-Eval, or Code Generation")
+    parser.add_argument("--metric-type", choices=["llm_judge", "geval", "codegen"], default="llm_judge", 
+                       help="Choose the metric type to use (default: llm_judge)")
     parser.add_argument("--model", choices=["gpt4o_mini", "qwen"], default="gpt4o_mini", 
                        help="Choose the model to use (default: gpt4o_mini)")
     parser.add_argument("--n-metrics", type=int, default=3, help="Number of metrics to generate (default: 3)")
@@ -125,11 +141,12 @@ if __name__ == "__main__":
         print("Using GPT-4o-mini models...")
 
     # Display configuration
-    print(f"Metric type: {'G-Eval' if args.geval else 'Basic LLM Judge'}")
+    metric_type_display = {"llm_judge": "Basic LLM Judge", "geval": "G-Eval", "codegen": "Code Generation"}
+    print(f"Metric type: {metric_type_display[args.metric_type]}")
     print(f"Number of metrics: {args.n_metrics}")
     print()
 
     for ds in [CoGymTravelOutcome(), SimpDA()]:
-        run_pipeline(ds, generator_lm, judge_lm, n_metrics=args.n_metrics, use_geval=args.geval)
+        run_pipeline(ds, generator_lm, judge_lm, n_metrics=args.n_metrics, metric_type=args.metric_type)
 
     # print(generator_lm.inspect_history(n=2))

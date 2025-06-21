@@ -68,23 +68,17 @@ class RecommendationExperiment(Experiment):
             for rec_name, recommender in self.recommenders.items():
                 if print_results:
                     print(f"  • {rec_name} …", end="", flush=True)
-                try:
-                    metrics = recommender.recommend(
-                        dataset=self.train_dataset,
-                        target_measurement=tgt,
-                        k=self.top_k,
-                    )
-                    metric_names = [m.__name__ if m else "ERR" for m in metrics]
-                    # Ensure fixed width by padding with empty strings
-                    if len(metric_names) < self.top_k:
-                        metric_names += [""] * (self.top_k - len(metric_names))
-                    if print_results:
-                        print("done")
-                except Exception as e:
-                    # Capture failures gracefully
-                    metric_names = [f"ERROR: {e}"] + [""] * (self.top_k - 1)
-                    if print_results:
-                        print("failed")
+                metrics = recommender.recommend(
+                    dataset=self.train_dataset,
+                    target_measurement=tgt,
+                    k=self.top_k,
+                )
+                metric_names = [m.__name__ if m else "ERR" for m in metrics]
+                # Ensure fixed width by padding with empty strings
+                if len(metric_names) < self.top_k:
+                    metric_names += [""] * (self.top_k - len(metric_names))
+                if print_results:
+                    print("done")
                 rows[rec_name] = metric_names
 
             df = pd.DataFrame.from_dict(

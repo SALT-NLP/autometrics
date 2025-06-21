@@ -33,7 +33,7 @@ class LLMMetricRecommendation(dspy.Module):
     """
     def __init__(self):
         super().__init__()
-        self.recommender = dspy.ChainOfThought(LLMMetricRecommendationSignature)
+        self.recommender = dspy.ChainOfThought(LLMMetricRecommendationSignature, max_tokens=2048)
 
     def forward(self, task_description: str, target: str, num_metrics_to_recommend: int, metric_documentation: List[str]) -> List[str]:
         results = self.recommender(task_description=task_description, target=target, num_metrics_to_recommend=num_metrics_to_recommend, metric_documentation=metric_documentation)
@@ -95,6 +95,9 @@ class LLMRec(MetricRecommender):
         if max_depth <= 0:
             raise RuntimeError("Maximum recursion depth reached in metric recommendation. Cannot handle context window with current metric set.")
         
+        # Drop metric_classes that are None
+        metric_classes = [metric for metric in metric_classes if metric is not None]
+        
         # If we have very few metrics, try direct recommendation
         if len(metric_classes) <= 3:
             try:
@@ -112,10 +115,15 @@ class LLMRec(MetricRecommender):
             # Try to recommend directly from all metrics
             ranking = self._recommend_batch(metric_classes, dataset, target_measurement, k)
             results = [metric_name_to_class(metric_name) for metric_name in ranking]
+            results = [r for r in results if r is not None]
+            
+            # Remove the second instance of any duplicates (keep the first because order is important)
+            results = list(dict.fromkeys(results))
+
             return results[:k] if len(results) > k else results
             
         except Exception as e:
-            if "ContextWindowExceededError" not in str(e):
+            if not ("ContextWindowExceededError" in str(e) or 'BadRequestError' in str(e) or 'context length' in str(e)):
                 # If it's not a context window error, re-raise
                 raise e
             

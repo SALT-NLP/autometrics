@@ -66,4 +66,6 @@ class PipelinedRec(MetricRecommender):
                 else:
                     recommender = recommender_cls(metric_classes=results, index_path=index_path, force_reindex=self.force_reindex)
             results = recommender.recommend(dataset, target_measurement, top_k)
+            # drop any "None"s from results
+            results = [r for r in results if r is not None]
         return results

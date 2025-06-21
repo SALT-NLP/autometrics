@@ -87,6 +87,10 @@ def mock_llm_calls(monkeypatch):
             biases = ["Bias 1", "Bias 2"]
             task_misalignment_risks = ["Risk 1", "Risk 2"]
             failure_cases = ["Failure 1", "Failure 2"]
+            axes_of_variation = [
+                "*Clarity*: Quality of clarity",
+                "*Relevance*: Quality of relevance",
+            ]
         return MockOutput()
     
     # Patch the DSPy ChainOfThought constructor to return a mock
@@ -99,12 +103,30 @@ def mock_llm_calls(monkeypatch):
     import dspy
     monkeypatch.setattr(dspy, "ChainOfThought", mock_chain_of_thought)
     
+    # Mock dspy.settings.context to avoid actual model calls
+    class MockContext:
+        def __init__(self, lm=None):
+            pass
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            pass
+    
+    if hasattr(dspy, 'settings'):
+        monkeypatch.setattr(dspy.settings, "context", MockContext)
+    
     # Mock the metric card builder
     def mock_generate_further_reading(metric):
         return "- Mock further reading"
     
     from autometrics.metrics.generated.utils import metric_card
     monkeypatch.setattr(metric_card, "generate_further_reading", mock_generate_further_reading)
+    
+    # Mock the MetricCardBuilder.build method to avoid LLM calls
+    from autometrics.metrics.generated.utils.metric_card import MetricCardBuilder
+    def mock_build(self):
+        return f"# Mock Metric Card for {self.metric.name}\n\nThis is a mock metric card."
+    monkeypatch.setattr(MetricCardBuilder, "build", mock_build)
 
 
 def test_llm_judge_proposer_returns_expected_metrics_ref_free(mock_llm_calls, small_dataset):

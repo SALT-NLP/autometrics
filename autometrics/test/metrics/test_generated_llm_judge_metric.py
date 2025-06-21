@@ -1,6 +1,9 @@
 import pytest
 
-from autometrics.metrics.generated.GeneratedLLMJudgeMetric import GeneratedRefFreeLLMJudgeMetric
+from autometrics.metrics.generated.GeneratedLLMJudgeMetric import (
+    GeneratedRefFreeLLMJudgeMetric,
+    GeneratedRefBasedLLMJudgeMetric
+)
 
 
 class DummyLM:
@@ -49,7 +52,7 @@ def mock_llm_calls(monkeypatch):
 
 
 @pytest.fixture()
-def dummy_metric(mock_llm_calls):
+def dummy_ref_free_metric(mock_llm_calls):
     dummy_lm = DummyLM(3.0)
 
     metric = GeneratedRefFreeLLMJudgeMetric(
@@ -63,58 +66,113 @@ def dummy_metric(mock_llm_calls):
     return metric
 
 
-def test_metric_creation(dummy_metric):
-    """Test that the metric is created correctly."""
-    assert dummy_metric.name == "clarity_dummy"
-    assert dummy_metric.description == "Clarity axis"
-    assert dummy_metric.axis == "*Clarity*: How clear is the response?"
-    assert dummy_metric.task_description == "dummy task"
-    assert not dummy_metric.is_reference_based
+@pytest.fixture()
+def dummy_ref_based_metric(mock_llm_calls):
+    dummy_lm = DummyLM(3.0)
+
+    metric = GeneratedRefBasedLLMJudgeMetric(
+        name="clarity_dummy_ref",
+        description="Clarity axis with reference",
+        axis="*Clarity*: How clear is the response compared to the reference?",
+        model=dummy_lm,
+        task_description="dummy task",
+        max_workers=1,
+    )
+    return metric
 
 
-def test_calculate_impl(dummy_metric):
-    """Test that _calculate_impl works correctly."""
-    result = dummy_metric._calculate_impl("input text", "output text")
+def test_ref_free_metric_creation(dummy_ref_free_metric):
+    """Test that the reference-free metric is created correctly."""
+    assert dummy_ref_free_metric.name == "clarity_dummy"
+    assert dummy_ref_free_metric.description == "Clarity axis"
+    assert dummy_ref_free_metric.axis == "*Clarity*: How clear is the response?"
+    assert dummy_ref_free_metric.task_description == "dummy task"
+    assert not dummy_ref_free_metric.is_reference_based
+
+
+def test_ref_based_metric_creation(dummy_ref_based_metric):
+    """Test that the reference-based metric is created correctly."""
+    assert dummy_ref_based_metric.name == "clarity_dummy_ref"
+    assert dummy_ref_based_metric.description == "Clarity axis with reference"
+    assert dummy_ref_based_metric.axis == "*Clarity*: How clear is the response compared to the reference?"
+    assert dummy_ref_based_metric.task_description == "dummy task"
+    assert dummy_ref_based_metric.is_reference_based
+
+
+def test_ref_free_calculate_impl(dummy_ref_free_metric):
+    """Test that _calculate_impl works correctly for reference-free."""
+    result = dummy_ref_free_metric._calculate_impl("input text", "output text")
     assert isinstance(result, float)
     assert result == 4.0  # from the mocked LLM
 
 
-def test_calculate_batched_impl(dummy_metric):
-    """Test that _calculate_batched_impl works correctly."""
+def test_ref_based_calculate_impl(dummy_ref_based_metric):
+    """Test that _calculate_impl works correctly for reference-based."""
+    result = dummy_ref_based_metric._calculate_impl("input text", "output text", references=["reference text"])
+    assert isinstance(result, float)
+    assert result == 4.0  # from the mocked LLM
+
+
+def test_ref_free_calculate_batched_impl(dummy_ref_free_metric):
+    """Test that _calculate_batched_impl works correctly for reference-free."""
     inputs = ["input1", "input2"]
     outputs = ["output1", "output2"]
     
-    results = dummy_metric._calculate_batched_impl(inputs, outputs)
+    results = dummy_ref_free_metric._calculate_batched_impl(inputs, outputs)
     assert len(results) == 2
     assert all(isinstance(r, float) for r in results)
     assert all(r == 4.0 for r in results)  # from the mocked LLM
 
 
-def test_metric_card_generation(dummy_metric):
+def test_ref_based_calculate_batched_impl(dummy_ref_based_metric):
+    """Test that _calculate_batched_impl works correctly for reference-based."""
+    inputs = ["input1", "input2"]
+    outputs = ["output1", "output2"]
+    references = [["ref1"], ["ref2"]]
+    
+    results = dummy_ref_based_metric._calculate_batched_impl(inputs, outputs, references)
+    assert len(results) == 2
+    assert all(isinstance(r, float) for r in results)
+    assert all(r == 4.0 for r in results)  # from the mocked LLM
+
+
+def test_metric_card_generation(dummy_ref_free_metric, dummy_ref_based_metric):
     """Test that metric card generation works without LLM calls."""
-    assert hasattr(dummy_metric, 'metric_card')
-    assert dummy_metric.metric_card is not None
+    assert hasattr(dummy_ref_free_metric, 'metric_card')
+    assert dummy_ref_free_metric.metric_card is not None
+    
+    assert hasattr(dummy_ref_based_metric, 'metric_card')
+    assert dummy_ref_based_metric.metric_card is not None
 
 
-def test_metric_details_generation(dummy_metric):
+def test_metric_details_generation(dummy_ref_free_metric, dummy_ref_based_metric):
     """Test that metric details can be generated without LLM calls."""
-    details = dummy_metric.generate_metric_details_ref_free()
-    assert "reference-free" in details
-    assert dummy_metric.name in details
-    assert dummy_metric.axis in details
+    details_free = dummy_ref_free_metric.generate_metric_details_ref_free()
+    assert "reference-free" in details_free
+    assert dummy_ref_free_metric.name in details_free
+    assert dummy_ref_free_metric.axis in details_free
+    
+    details_based = dummy_ref_based_metric.generate_metric_details_ref_based()
+    assert "reference-based" in details_based
+    assert dummy_ref_based_metric.name in details_based
+    assert dummy_ref_based_metric.axis in details_based
 
 
-def test_python_code_generation(dummy_metric):
+def test_python_code_generation(dummy_ref_free_metric, dummy_ref_based_metric):
     """Test that Python code can be generated."""
-    code = dummy_metric._generate_python_code()
-    assert "GeneratedRefFreeLLMJudgeMetric" in code
-    assert dummy_metric.name.replace(" ", "_").replace("-", "_") in code
+    code_free = dummy_ref_free_metric._generate_python_code()
+    assert "GeneratedRefFreeLLMJudgeMetric" in code_free
+    assert dummy_ref_free_metric.name.replace(" ", "_").replace("-", "_") in code_free
+    
+    code_based = dummy_ref_based_metric._generate_python_code()
+    assert "GeneratedRefBasedLLMJudgeMetric" in code_based
+    assert dummy_ref_based_metric.name.replace(" ", "_").replace("-", "_") in code_based
 
 
-def test_save_and_load(dummy_metric, tmp_path):
+def test_save_and_load(dummy_ref_free_metric, tmp_path):
     """Test that save and load work correctly."""
     save_path = tmp_path / "test_metric.json"
-    dummy_metric.save(str(save_path))
+    dummy_ref_free_metric.save(str(save_path))
     
     # Check that file was created
     assert save_path.exists()
@@ -125,7 +183,8 @@ def test_save_and_load(dummy_metric, tmp_path):
     with open(save_path) as f:
         data = json.load(f)
     
-    assert data["name"] == dummy_metric.name
-    assert data["description"] == dummy_metric.description
-    assert data["axis"] == dummy_metric.axis
-    assert data["task_description"] == dummy_metric.task_description 
+    assert data["name"] == dummy_ref_free_metric.name
+    assert data["description"] == dummy_ref_free_metric.description
+    assert data["axis"] == dummy_ref_free_metric.axis
+    assert data["task_description"] == dummy_ref_free_metric.task_description
+    assert data["is_reference_based"] == dummy_ref_free_metric.is_reference_based 

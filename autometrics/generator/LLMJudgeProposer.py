@@ -125,7 +125,14 @@ class BasicLLMJudgeProposer(Generator):
         # Step-4: Wrap each axis in the appropriate LLMJudge metric ------------------
         new_metrics = []
         for axis in axes:
-            metric_name = axis.split(":")[0].split("**")[1].replace("*", "") + "_" + self.judge_model_name 
+            # Extract metric name from axis - handle both *Name* and **Name** formats
+            name_part = axis.split(":")[0].strip()
+            if "**" in name_part:
+                metric_name = name_part.split("**")[1].replace("*", "") + "_" + self.judge_model_name
+            elif "*" in name_part:
+                metric_name = name_part.split("*")[1].replace("*", "") + "_" + self.judge_model_name 
+            else:
+                metric_name = name_part + "_" + self.judge_model_name 
 
             new_metrics.append(
                 dynamic_executor_class(

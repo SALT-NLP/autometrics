@@ -58,6 +58,7 @@ class _LLMJudgeMetricMixin:
         self.axis = axis
         self.task_description = task_description or "None"
         self.model = model
+        self.model_str = str(getattr(model, "model", model))
         self.max_workers = max_workers
         self.is_reference_based = kwargs.get("is_reference_based", is_reference_based)
 
@@ -155,7 +156,7 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
         )
 
     def __repr__(self):
-        return "{self.name.replace(" ", "_").replace("-", "_")}_LLMJudge(model={generate_llm_constructor_code(self.model).replace("\"", "\\\"")})"
+        return f"{self.name.replace(' ', '_').replace('-', '_')}_LLMJudge(model={generate_llm_constructor_code(self.model)})"
 
 """
         return code
@@ -402,7 +403,6 @@ class GeneratedRefFreeLLMJudgeMetric(_LLMJudgeMetricMixin, GeneratedRefFreeMetri
 
     def __init__(self, *args, **kwargs):
         kwargs['is_reference_based'] = False
-        print(f"GeneratedRefFreeLLMJudgeMetric: {kwargs}")
         super().__init__(*args, **kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
@@ -425,7 +425,6 @@ class GeneratedRefBasedLLMJudgeMetric(_LLMJudgeMetricMixin, GeneratedRefBasedMet
 
     def __init__(self, *args, **kwargs):
         kwargs['is_reference_based'] = True
-        print(f"GeneratedRefBasedLLMJudgeMetric: {kwargs}")
         super().__init__(*args, **kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401

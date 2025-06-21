@@ -75,7 +75,7 @@ def generate_author(metric: GeneratedRefFreeMetric | GeneratedRefBasedMetric):
     if author is not None:
         author = getattr(author, "model", author)
     else:
-        author = metric.model_str
+        author = getattr(metric, "model_str", None)
 
     author = str(author)
     author = author.split("/")[-1]

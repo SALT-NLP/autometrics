@@ -13,8 +13,12 @@ def get_default_formatter(dataset):
 
     def default_formatter(row_tuple):
         _, row = row_tuple  # Unpack the tuple from iterrows()
+        
+        # Handle case where reference_columns is None (reference-free datasets)
+        if reference_columns is None or len(reference_columns) == 0:
+            return f"«Input ({input_column}): «{row[input_column]}»\nOutput ({output_column}): «{row[output_column]}»»"
+        
         references = [row[col] for col in reference_columns]
-
         references = [ref for ref in references if ref is not None]
 
         if not references or len(references) == 0:

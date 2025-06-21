@@ -180,7 +180,6 @@ def build_recommenders(metric_classes: List[type], variant: str, top_k: int, for
             metric_classes=metric_classes,
             index_path=idx("colbert"),
             force_reindex=force_reindex,
-            index_name=variant,
         )
     if "faiss" in wanted:
         recs["Faiss"] = Faiss(

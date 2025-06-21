@@ -42,23 +42,23 @@ done
 echo "Server is up and running!"
 
 conda activate autometrics
-export DSPY_CACHEDIR=/nlp/scr3/nlp/20questions/dspy_cache/autometrics
+export DSPY_CACHEDIR=/nlp/scr3/nlp/20questions/dspy_cache/autometrics_qwen3_32b
 
 API_BASE=http://localhost:${port}/v1
 
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset SimpDA --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymLessonOutcome --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymLessonProcess --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymTabularOutcome --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymTabularProcess --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymTravelOutcome --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymTravelProcess --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset Design2Code --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset EvalGenMedical --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset EvalGenProduct --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset HelpSteer --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset HelpSteer2 --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset Primock57 --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset RealHumanEval --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset SimpEval --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
-python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset SummEval --top-k 20 --llm $model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset SimpDA --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymLessonOutcome --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymLessonProcess --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymTabularOutcome --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymTabularProcess --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymTravelOutcome --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset CoGymTravelProcess --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset Design2Code --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset EvalGenMedical --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset EvalGenProduct --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset HelpSteer --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset HelpSteer2 --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset Primock57 --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset RealHumanEval --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset SimpEval --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat
+python autometrics/experiments/recommendation/benchmark_recommendation.py --dataset SummEval --top-k 20 --llm litellm_proxy/$model --llm-api-base $API_BASE --llm-model-type chat

@@ -177,6 +177,13 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
     @classmethod
     def _deserialize(cls, data: dict):
         """Deserialize a dictionary to create a metric instance."""
+        # Convert model constructor code string back to model instance
+        model_code = data.pop("model")
+        # This assumes the model code string can be safely evaluated to create a model
+        # You may want additional validation here
+        model = eval(model_code)
+        data["model"] = model
+        
         return cls(**data)
     
     # ------------------------------------------------------------------

@@ -22,14 +22,13 @@ class ColBERT(MetricRecommender):
         metric_classes: List[Type[Metric]],
         index_path: Optional[str] = user_data_dir("autometrics", "colbert"),
         force_reindex: bool = False,
-        index_name: str = "all_metrics",
     ) -> None:
         # Store the metric classes that will be indexed/searched
         self.metric_classes: List[Type[Metric]] = metric_classes
 
         self.index_path: str = index_path
         self.force_reindex: bool = force_reindex
-        self.index_name: str = index_name
+        self.index_name: str = "colbert_index" # Causes too many issues when this is a parameter.  Just use the index path to determine the index name.
 
         # Initialize the ColBERT model
         self.model = models.ColBERT(

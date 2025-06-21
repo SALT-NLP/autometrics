@@ -22,5 +22,5 @@ def generate_llm_constructor_code(model: dspy.LM) -> str:
     else:
         kwargs["api_key"] = "None"
         
-    kwargs_str = ", ".join(f"{k}={v}" if type(v) != str else f"{k}='{v}'" for k, v in kwargs.items())
+    kwargs_str = ", ".join(f"{k}={v}" if type(v) != str or k == "api_key" else f"{k}='{v}'" for k, v in kwargs.items())
     return f"dspy.LM(model=\'{model_name}\', {kwargs_str})"

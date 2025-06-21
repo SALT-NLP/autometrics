@@ -187,4 +187,38 @@ def test_save_and_load(dummy_ref_free_metric, tmp_path):
     assert data["description"] == dummy_ref_free_metric.description
     assert data["axis"] == dummy_ref_free_metric.axis
     assert data["task_description"] == dummy_ref_free_metric.task_description
-    assert data["is_reference_based"] == dummy_ref_free_metric.is_reference_based 
+    assert data["is_reference_based"] == dummy_ref_free_metric.is_reference_based
+
+
+def test_serialize_and_deserialize(dummy_ref_free_metric, dummy_ref_based_metric):
+    """Test that GeneratedLLMJudgeMetric can be serialized and deserialized in memory."""
+    
+    # Test reference-free metric serialization
+    serialized_data = dummy_ref_free_metric._serialize()
+    
+    # Check serialized data structure
+    assert isinstance(serialized_data, dict)
+    assert serialized_data["name"] == dummy_ref_free_metric.name
+    assert serialized_data["description"] == dummy_ref_free_metric.description
+    assert serialized_data["axis"] == dummy_ref_free_metric.axis
+    assert serialized_data["task_description"] == dummy_ref_free_metric.task_description
+    assert serialized_data["max_workers"] == dummy_ref_free_metric.max_workers
+    assert serialized_data["is_reference_based"] == False
+    
+    # Deserialize from dictionary
+    deserialized_metric = GeneratedRefFreeLLMJudgeMetric._deserialize(serialized_data)
+    
+    # Check that deserialized metric has same properties
+    assert deserialized_metric.name == dummy_ref_free_metric.name
+    assert deserialized_metric.description == dummy_ref_free_metric.description
+    assert deserialized_metric.axis == dummy_ref_free_metric.axis
+    assert deserialized_metric.task_description == dummy_ref_free_metric.task_description
+    assert deserialized_metric.max_workers == dummy_ref_free_metric.max_workers
+    assert deserialized_metric.is_reference_based == dummy_ref_free_metric.is_reference_based
+    
+    # Test reference-based metric serialization
+    ref_based_data = dummy_ref_based_metric._serialize()
+    deserialized_ref_based = GeneratedRefBasedLLMJudgeMetric._deserialize(ref_based_data)
+    
+    assert deserialized_ref_based.name == dummy_ref_based_metric.name
+    assert deserialized_ref_based.is_reference_based == True 

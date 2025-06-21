@@ -52,26 +52,37 @@ class GeneratedRefBasedMetric(ReferenceBasedMetric):
 
         return safe_path
 
-    def save(self, path: str):
-        output = {
+    def _serialize(self) -> dict:
+        """Serialize the metric to a dictionary for in-memory operations."""
+        return {
             "name": self.name, 
             "description": self.description, 
             "metric_card": self.metric_card, 
-            **self.kwargs
+            "kwargs": self.kwargs
         }
+
+    @classmethod 
+    def _deserialize(cls, data: dict):
+        """Deserialize a dictionary to create a metric instance."""
+        return cls(
+            name=data["name"],
+            description=data["description"],
+            metric_card=data["metric_card"],
+            **data.get("kwargs", {})
+        )
+
+    def save(self, path: str):
+        """Save the metric to a JSON file."""
+        serialized_data = self._serialize()
         with open(path, "w") as f:
-            json.dump(output, f, indent=4)
+            json.dump(serialized_data, f, indent=4)
 
     @classmethod
     def load(cls, path: str):
+        """Load a metric from a JSON file."""
         with open(path, "r") as f:
-            output = json.load(f)
-        return cls(
-            name=output["name"],
-            description=output["description"],
-            metric_card=output["metric_card"],
-            **output["kwargs"]
-        )
+            data = json.load(f)
+        return cls._deserialize(data)
 
     def __repr__(self):
         return f"GeneratedRefBasedMetric(name={self.name}, description={self.description})\n{self.metric_card}"

@@ -161,8 +161,9 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
 """
         return code
     
-    def save(self, path: str):
-        dump_kwargs = {
+    def _serialize(self) -> dict:
+        """Serialize the metric to a dictionary for in-memory operations."""
+        return {
             "name": self.name,
             "description": self.description,
             "axis": self.axis,
@@ -172,14 +173,11 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
             "max_workers": self.max_workers,
             "is_reference_based": self.is_reference_based,
         }
-        with open(path, "w") as f:
-            json.dump(dump_kwargs, f, indent=4)
 
     @classmethod
-    def load(cls, path: str):
-        with open(path, "r") as f:
-            dump_kwargs = json.load(f)
-        return cls(**dump_kwargs)
+    def _deserialize(cls, data: dict):
+        """Deserialize a dictionary to create a metric instance."""
+        return cls(**data)
     
     # ------------------------------------------------------------------
     # Metric-card helpers

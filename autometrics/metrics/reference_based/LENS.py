@@ -1,6 +1,7 @@
 import torch
 from typing import List, Union, ClassVar
-from lens import download_model, LENS
+from lens import download_model
+from lens import LENS as LENS_original
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
 class LENS(ReferenceBasedMetric):
@@ -166,7 +167,7 @@ where $f_k$ is the $k$-th expert head's output.
         """Download checkpoint and load the LENS model."""
         if self.model is None:
             ckpt_path = download_model(self.model_id)
-            self.model = LENS(ckpt_path, rescale=self.rescale)
+            self.model = LENS_original(ckpt_path, rescale=self.rescale)
 
     def _unload_model(self):
         """Unload model to free resources."""

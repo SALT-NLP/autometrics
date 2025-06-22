@@ -16,6 +16,7 @@ Main entry-points
 3. `allocate_gpus(metric_classes, buffer_ratio=0.10)` – best-effort
    heuristic packing of metrics onto GPUs, returning the kwargs you
    should pass when instantiating each metric.
+4. `safe_torch_load(path, **kwargs)` – torch.load with automatic CPU fallback
 
 The packing is a greedy *best-fit decreasing* heuristic (simple and fast
 in practice) with a fallback to multi-GPU (`device_map="auto"`) when the
@@ -25,11 +26,59 @@ supports `device_map`.
 If a metric is GPU-compatible but neither a `device_map` nor `device`
 parameter is present in its constructor we fall back to **GPU 0**.  CPU-
 only metrics (those with `gpu_mem == 0`) are ignored by the allocator.
+
+When CUDA is unavailable, all GPU allocations automatically fall back to CPU.
 """
 
 from typing import List, Dict, Any, NamedTuple, Optional
 import inspect
 import warnings
+
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    torch = None
+    TORCH_AVAILABLE = False
+
+# ---------------------------------------------------------------------------
+# CUDA availability detection
+# ---------------------------------------------------------------------------
+
+def is_cuda_available() -> bool:
+    """Check if CUDA is available, with proper error handling."""
+    if not TORCH_AVAILABLE:
+        return False
+    try:
+        return torch.cuda.is_available()
+    except Exception:
+        # Handle any CUDA initialization errors
+        return False
+
+def safe_torch_load(file_path: str, **kwargs):
+    """
+    Load a torch model with automatic CPU fallback when CUDA is unavailable.
+    
+    This function automatically adds map_location=torch.device('cpu') when
+    CUDA is not available, preventing the common error:
+    "Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False"
+    
+    Args:
+        file_path: Path to the torch model file
+        **kwargs: Additional arguments to pass to torch.load
+        
+    Returns:
+        Loaded model/state_dict
+    """
+    if not TORCH_AVAILABLE:
+        raise ImportError("PyTorch is required for safe_torch_load")
+    
+    # If CUDA is not available, force CPU mapping
+    if not is_cuda_available():
+        if 'map_location' not in kwargs:
+            kwargs['map_location'] = torch.device('cpu')
+    
+    return torch.load(file_path, **kwargs)
 
 # ---------------------------------------------------------------------------
 # GPU discovery helpers
@@ -76,14 +125,7 @@ def _query_gpu_info_pynvml() -> List[GPUInfo]:
 
 def _query_gpu_info_torch() -> List[GPUInfo]:
     """Fallback GPU stats via torch (gives *total* memory only)."""
-    try:
-        import torch  # noqa: F401
-    except ImportError:
-        return []
-
-    import torch
-
-    if not torch.cuda.is_available():
+    if not TORCH_AVAILABLE:
         return []
 
     infos: List[GPUInfo] = []
@@ -167,13 +209,38 @@ def allocate_gpus(
     dict
         Mapping from metric class name to a dict of kwarg overrides (e.g.
         {"device": torch.device("cuda:2")} or {"device_map": "auto"}).  CPU-
-        only metrics are omitted.
+        only metrics are omitted. When CUDA is unavailable, GPU metrics
+        get CPU fallback allocations.
     """
+
+    # Check if CUDA is available first
+    if not is_cuda_available():
+        warnings.warn("CUDA is not available – forcing all metrics to run on CPU.")
+        # Return CPU allocations for all GPU-requiring metrics
+        requirements = collect_metric_requirements(metric_classes)
+        cpu_allocations: AllocationResult = {}
+        for req in requirements:
+            if req.gpu_mem_mb > 0:  # This was a GPU metric
+                if req.has_device_arg:
+                    cpu_allocations[req.name] = {"device": torch.device("cpu") if TORCH_AVAILABLE else "cpu"}
+                elif req.has_device_map_arg:
+                    cpu_allocations[req.name] = {"device_map": {"": "cpu"}}
+                # For metrics without device args, they'll default to CPU anyway
+        return cpu_allocations
 
     gpu_infos = list(gpu_infos or get_gpu_info())
     if not gpu_infos:
         warnings.warn("No GPU detected – all metrics will run on CPU.")
-        return {}
+        # Return CPU allocations for GPU-requiring metrics
+        requirements = collect_metric_requirements(metric_classes)
+        cpu_allocations: AllocationResult = {}
+        for req in requirements:
+            if req.gpu_mem_mb > 0:  # This was a GPU metric
+                if req.has_device_arg:
+                    cpu_allocations[req.name] = {"device": torch.device("cpu") if TORCH_AVAILABLE else "cpu"}
+                elif req.has_device_map_arg:
+                    cpu_allocations[req.name] = {"device_map": {"": "cpu"}}
+        return cpu_allocations
 
     # Working copy of available memory (apply buffer)
     avail_mb = {

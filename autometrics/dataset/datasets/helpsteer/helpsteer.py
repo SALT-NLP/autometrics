@@ -30,7 +30,8 @@ class HelpSteer(Dataset):
         ignore_columns = ["id","prompt","response"]
         metric_columns = [col for col in df.columns if col not in target_columns and col not in ignore_columns]
 
-        name = "HelpSteer"
+        # Derive name from the dataset path
+        name = "HelpSteer" if hf_path == 'nvidia/HelpSteer' else "HelpSteer2"
 
         data_id_column = "id"
         model_id_column = None

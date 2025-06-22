@@ -131,8 +131,22 @@ def build_metrics(
 
     # --------------------------------------------------------
     # GPU allocation planning (performed once per batch)
+    # Check if any metrics actually need GPUs before attempting allocation
     # --------------------------------------------------------
-    allocation_map = allocate_gpus(classes, buffer_ratio=gpu_buffer_ratio)
+    allocation_map = {}
+    try:
+        # Check if any metrics actually need GPUs
+        needs_gpu = any(getattr(cls, "gpu_mem", 0) > 0 for cls in classes)
+        
+        if needs_gpu:
+            allocation_map = allocate_gpus(classes, buffer_ratio=gpu_buffer_ratio)
+        else:
+            # No metrics need GPUs, skip allocation entirely
+            pass
+    except Exception as e:
+        # If GPU allocation fails (e.g., NVML not available), warn and continue with CPU
+        print(f"[MetricBank] GPU allocation failed: {e}. Falling back to CPU-only execution.")
+        allocation_map = {}
 
     metrics = []
     for cls in classes:

@@ -161,13 +161,38 @@ class LDLRewardModel27B(Gemma2PreTrainedModel):
             cached_dir = snapshot_download(repo_id=load_directory)
         else:
             cached_dir = load_directory
+        
+        # Pass device_map to parent's from_pretrained if provided
+        if device_map is not None:
+            kwargs['device_map'] = device_map
+            
         model = super().from_pretrained(cached_dir, *model_args, **kwargs)
-        # load layers
+        
+        # Determine target device for additional layers based on device_map
+        target_device = "cpu"  # default
+        if device_map is not None:
+            if isinstance(device_map, dict):
+                # Handle dict device maps like {'': 0}
+                if '' in device_map:
+                    target_device = f"cuda:{device_map['']}" if isinstance(device_map[''], int) else device_map['']
+                else:
+                    # Use first available device from device map
+                    first_device = next(iter(device_map.values()))
+                    target_device = f"cuda:{first_device}" if isinstance(first_device, int) else first_device
+            elif device_map in ("auto", "balanced"):
+                # For auto/balanced, let accelerate handle it below
+                target_device = "cuda" if torch.cuda.is_available() else "cpu"
+            else:
+                # Handle string device specifications like "cuda:0"
+                target_device = device_map
+        
+        # Load additional layers to the same device as the main model
         reg_path = os.path.join(cached_dir, "regression_layer.pt")
         gate_path = os.path.join(cached_dir, "gating_layer.pt")
-        model.regression_layer.load_state_dict(torch.load(reg_path, map_location="cpu"))
-        model.gating_layer.load_state_dict(torch.load(gate_path, map_location="cpu"))
-        # optional device_map
+        model.regression_layer.load_state_dict(torch.load(reg_path, map_location=target_device))
+        model.gating_layer.load_state_dict(torch.load(gate_path, map_location=target_device))
+        
+        # Handle auto/balanced device mapping after loading additional layers
         if device_map in ("auto", "balanced"):
             max_mem = get_balanced_memory(model, no_split_module_classes=["Gemma2DecoderLayer", "Gemma2RMSNorm"])
             dm = infer_auto_device_map(
@@ -176,6 +201,7 @@ class LDLRewardModel27B(Gemma2PreTrainedModel):
                 max_memory=max_mem
             )
             model = dispatch_model(model, device_map=dm)
+        
         return model
 
 

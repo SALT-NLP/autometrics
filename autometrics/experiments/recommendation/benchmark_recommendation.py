@@ -108,6 +108,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--llm-api-base", dest="llm_api_base", default=None, help="Custom API base URL for self-hosted models (optional).")
     parser.add_argument("--llm-api-key", dest="llm_api_key", default=None, help="API key for the LLM provider (optional – can also come from env vars).")
     parser.add_argument("--llm-model-type", dest="llm_model_type", default=None, help="Model type for the LLM (e.g. 'chat') if required by dspy.")
+    parser.add_argument(
+        "--llmrec-only",
+        action="store_true",
+        help="Run only LLMRec (skip other recommenders) for focused debugging.",
+    )
     return parser.parse_args()
 
 # ---------------------------------------------------------------------------
@@ -251,6 +256,11 @@ def main() -> int:
     logger.info(f"Using {len(metric_classes)} metric classes ({variant.replace('_', ' ')})")
 
     methods_list = [m.strip() for m in args.methods.split(",") if m.strip()] if args.methods else ["all"]
+    
+    # Override methods if --llmrec-only is specified
+    if args.llmrec_only:
+        methods_list = ["llmrec"]
+        logger.info("🎯 Running ONLY LLMRec for focused debugging")
 
     # ---------------------------------------------------------------
     # LLM configuration (if requested)

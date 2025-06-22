@@ -31,75 +31,140 @@ class EvalGen(Dataset):
 
         super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
 
-    def get_splits(self, split_column: Optional[str] = None, train_ratio: float = 0.5, val_ratio: float = 0.2, seed: Optional[int] = None, max_size: Optional[int] = None, preserve_splits=True):
+    def get_splits(self, split_column: Optional[str] = None, train_ratio: float = 0.5, val_ratio: float = 0.2, seed: Optional[int] = None, max_size: Optional[int] = None, *, preserve_splits=True):
         """
         Get the train, validation, and test splits of the dataset.  We will use the predefined splits in the dataset which include "train" and "test".  We need to add validation.
         """
 
         if preserve_splits:
-            if not split_column:
-                split_column = "Metavar: split"
+            # When preserving splits, always use the predefined split column regardless of input
+            actual_split_column = "Metavar: split"
 
             # Get the train and test splits
-            train_df = self.dataframe[self.dataframe[split_column] == "train"]
-            test_df = self.dataframe[self.dataframe[split_column] == "test"]
+            train_df = self.dataframe[self.dataframe[actual_split_column] == "train"].copy()
+            test_df = self.dataframe[self.dataframe[actual_split_column] == "test"].copy()
 
+            # Check if we have any data
+            if len(train_df) == 0 and len(test_df) == 0:
+                raise ValueError("No train or test data found in the dataset")
+            
             # If max_size is provided, we will sample the dataframe to that size
             if max_size is not None:
-                train_df = train_df.sample(n=min(max_size, len(train_df)), random_state=seed)
-                test_df = test_df.sample(n=min(max_size, len(test_df)), random_state=seed)
+                if len(train_df) > 0:
+                    train_df = train_df.sample(n=min(max_size, len(train_df)), random_state=seed)
+                if len(test_df) > 0:
+                    test_df = test_df.sample(n=min(max_size, len(test_df)), random_state=seed)
 
-            # Update the validation ratio since we are sampling directly from the trainset which is already a fraction of the original dataset
-            true_train_ratio = len(train_df) / (len(train_df) + len(test_df))
-            val_ratio = val_ratio * true_train_ratio
+            # Create test dataset
+            if len(test_df) > 0:
+                test_dataset = Dataset(
+                    test_df, self.target_columns, self.ignore_columns, self.metric_columns, 
+                    self.name, self.data_id_column, self.model_id_column, self.input_column, 
+                    self.output_column, self.reference_columns, self.metrics, 
+                    task_description=self.task_description
+                )
+            else:
+                test_dataset = None
 
-            # Get the validation split
-            val_df = train_df.sample(frac=val_ratio, random_state=seed)
-            train_df = train_df.drop(val_df.index)
+            # Split the training data into train and validation
+            if len(train_df) > 0:
+                # Calculate adjusted ratios for splitting the training data only
+                total_train_val_ratio = train_ratio + val_ratio
+                adjusted_train_ratio = train_ratio / total_train_val_ratio
+                adjusted_val_ratio = val_ratio / total_train_val_ratio
+                
+                # Get the validation split from training data
+                val_df = train_df.sample(frac=adjusted_val_ratio, random_state=seed)
+                train_df = train_df.drop(val_df.index)
 
-            train_dataset = Dataset(train_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-            val_dataset = Dataset(val_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-            test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+                train_dataset = Dataset(
+                    train_df, self.target_columns, self.ignore_columns, self.metric_columns, 
+                    self.name, self.data_id_column, self.model_id_column, self.input_column, 
+                    self.output_column, self.reference_columns, self.metrics,
+                    task_description=self.task_description
+                )
+                val_dataset = Dataset(
+                    val_df, self.target_columns, self.ignore_columns, self.metric_columns, 
+                    self.name, self.data_id_column, self.model_id_column, self.input_column, 
+                    self.output_column, self.reference_columns, self.metrics,
+                    task_description=self.task_description
+                )
+            else:
+                # No training data - create empty datasets
+                empty_df = self.dataframe.iloc[0:0].copy()
+                train_dataset = Dataset(
+                    empty_df, self.target_columns, self.ignore_columns, self.metric_columns, 
+                    self.name, self.data_id_column, self.model_id_column, self.input_column, 
+                    self.output_column, self.reference_columns, self.metrics,
+                    task_description=self.task_description
+                )
+                val_dataset = Dataset(
+                    empty_df, self.target_columns, self.ignore_columns, self.metric_columns, 
+                    self.name, self.data_id_column, self.model_id_column, self.input_column, 
+                    self.output_column, self.reference_columns, self.metrics,
+                    task_description=self.task_description
+                )
 
             return train_dataset, val_dataset, test_dataset
         else:
             return super().get_splits(split_column, train_ratio, val_ratio, seed, max_size=max_size)
     
-    def get_kfold_splits(self, k: int = 5, split_column: Optional[str] = None, seed: Optional[int] = None, preserve_splits=True):
+    def get_kfold_splits(self, k: int = 5, split_column: Optional[str] = None, seed: Optional[int] = None, test_ratio: float = 0.3, max_size: Optional[int] = None, *, preserve_splits=True):
         """
         Get the k-fold splits of the dataset.  We will use the predefined splits in the dataset which include "train" and "test".  We need to add validation.
         """
 
         if preserve_splits:
-            if not split_column:
-                split_column = "Metavar: split"
+            # When preserving splits, always use the predefined split column regardless of input
+            actual_split_column = "Metavar: split"
 
             # Get the train and test splits
-            train_df = self.dataframe[self.dataframe[split_column] == "train"]
-            test_df = self.dataframe[self.dataframe[split_column] == "test"]
+            train_df = self.dataframe[self.dataframe[actual_split_column] == "train"].copy()
+            test_df = self.dataframe[self.dataframe[actual_split_column] == "test"].copy()
 
-            # Get the k-fold splits
-            kfold = KFold(n_splits=k, shuffle=True, random_state=seed)
-            splits = list(kfold.split(train_df))
+            # Apply max_size to test set FIRST to ensure consistency with regular splits
+            if max_size is not None and len(test_df) > 0:
+                test_df = test_df.sample(n=min(max_size, len(test_df)), random_state=seed)
 
-            # Create the datasets
-            datasets = []
-            for train_index, val_index in splits:
-                train_split = train_df.iloc[train_index]
-                val_split = train_df.iloc[val_index]
+            # Create test dataset (using the predefined test set)
+            if len(test_df) > 0:
+                test_dataset = Dataset(
+                    test_df, self.target_columns, self.ignore_columns, self.metric_columns, 
+                    self.name, self.data_id_column, self.model_id_column, self.input_column, 
+                    self.output_column, self.reference_columns, self.metrics,
+                    task_description=self.task_description
+                )
+            else:
+                test_dataset = None
 
-                train_dataset = Dataset(train_split, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-                val_dataset = Dataset(val_split, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
+            # Create k-fold splits from the training data only (no separate test extraction)
+            if len(train_df) > 0:
+                # Use the parent class k-fold method on the training data
+                train_dataset_temp = Dataset(
+                    train_df, self.target_columns, self.ignore_columns, self.metric_columns, 
+                    self.name, self.data_id_column, self.model_id_column, self.input_column, 
+                    self.output_column, self.reference_columns, self.metrics,
+                    task_description=self.task_description
+                )
+                
+                splits, full_train_dataset, _ = train_dataset_temp.get_kfold_splits(
+                    k=k, split_column=self.data_id_column, seed=seed, test_ratio=0.0, max_size=max_size
+                )
+            else:
+                # No training data - create empty datasets
+                empty_df = self.dataframe.iloc[0:0].copy()
+                full_train_dataset = Dataset(
+                    empty_df, self.target_columns, self.ignore_columns, self.metric_columns, 
+                    self.name, self.data_id_column, self.model_id_column, self.input_column, 
+                    self.output_column, self.reference_columns, self.metrics,
+                    task_description=self.task_description
+                )
+                splits = []
 
-                datasets.append((train_dataset, val_dataset))
-
-            full_train_dataset = Dataset(train_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-            test_dataset = Dataset(test_df, self.target_columns, self.ignore_columns, self.metric_columns, self.name, self.data_id_column, self.model_id_column, self.input_column, self.output_column, self.reference_columns, self.metrics)
-
-            return datasets, full_train_dataset, test_dataset
+            return splits, full_train_dataset, test_dataset
         
         else:
-            return super().get_kfold_splits(k, split_column, seed)
+            return super().get_kfold_splits(k, split_column, seed, test_ratio, max_size)
 
 class EvalGenProduct(EvalGen):
     def __init__(self, path='./autometrics/dataset/datasets/evalgen/product.csv'):

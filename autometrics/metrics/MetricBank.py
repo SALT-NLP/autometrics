@@ -41,7 +41,7 @@ from autometrics.metrics.reference_based.NIST import NIST
 from autometrics.metrics.reference_based.IBLEU import IBLEU
 from autometrics.metrics.reference_based.UpdateROUGE import UpdateROUGE
 from autometrics.metrics.reference_based.BLEURT import BLEURT
-from autometrics.metrics.reference_based.LENS import LENSMetric
+from autometrics.metrics.reference_based.LENS import LENS
 from autometrics.metrics.reference_based.CharCut import CharCut
 from autometrics.metrics.reference_based.InfoLM import InfoLM
 
@@ -73,7 +73,7 @@ reference_based_metric_classes: List[Type] = [
     UniEvalDialogue, UniEvalSum, CIDEr, METEOR, BLEURT, LevenshteinDistance,
     LevenshteinRatio, HammingDistance, JaroSimilarity, JaroWinklerSimilarity,
     JaccardDistance, ParaScore, YiSi, MAUVE, PseudoPARENT, NIST, IBLEU,
-    UpdateROUGE, LENSMetric, CharCut, InfoLM,
+    UpdateROUGE, LENS, CharCut, InfoLM,
 ]
 
 reference_free_metric_classes: List[Type] = [

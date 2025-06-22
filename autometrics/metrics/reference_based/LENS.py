@@ -3,7 +3,7 @@ from typing import List, Union, ClassVar
 from lens import download_model, LENS
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
-class LENSMetric(ReferenceBasedMetric):
+class LENS(ReferenceBasedMetric):
     """---
 # Metric Card for LENS
 

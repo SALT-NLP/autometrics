@@ -1549,14 +1549,14 @@ def main():
     """Example usage of the UtilizationExperiment."""
     from autometrics.metrics.reference_based.BLEU import BLEU
     from autometrics.metrics.reference_based.ROUGE import ROUGE
-    from autometrics.metrics.reference_based.LENS import LENSMetric
+    from autometrics.metrics.reference_based.LENS import LENS
     
     # Example metrics - including one that supports model loading/unloading
     metrics = [BLEU(), ROUGE()]
     
     # Optionally add a LENS metric if available
     try:
-        lens = LENSMetric()
+        lens = LENS()
         # LENS has _load_model and _unload_model methods which will be used
         # by the experiment to properly measure GPU memory usage
         metrics.append(lens)

@@ -32,8 +32,8 @@ def load_metric(metric_name: str):
         from autometrics.metrics.reference_based.SARI import SARI
         return SARI()
     elif metric_name == "LENS":
-        from autometrics.metrics.reference_based.LENS import LENSMetric
-        return LENSMetric()
+        from autometrics.metrics.reference_based.LENS import LENS
+        return LENS()
     else:
         raise ValueError(f"Unknown metric: {metric_name}")
 

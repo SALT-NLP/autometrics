@@ -53,6 +53,7 @@ class _LLMJudgeMetricMixin:
         metric_card_author_model: Optional[dspy.LM] = None,
         max_workers: int = DEFAULT_MAX_WORKERS,
         is_reference_based: bool = False,
+        rubric: Optional[dict] = None,
         **kwargs,
     ):
         self.axis = axis
@@ -61,6 +62,7 @@ class _LLMJudgeMetricMixin:
         self.model_str = str(getattr(model, "model", model))
         self.max_workers = max_workers
         self.is_reference_based = kwargs.get("is_reference_based", is_reference_based)
+        self.rubric = rubric  # Store the rubric if provided
 
         if metric_card_author_model is None:
             metric_card_author_model = model if isinstance(model, dspy.LM) else None
@@ -87,6 +89,38 @@ class _LLMJudgeMetricMixin:
         # Prepare the DSPy module based on reference type
         signature = _LLMJudgeSignatureRefBased if is_reference_based else _LLMJudgeSignatureRefFree
         self._judge_module = dspy.ChainOfThought(signature)
+
+    def _has_structured_rubric(self) -> bool:
+        """Check if this metric has a structured rubric vs. just an axis."""
+        return (hasattr(self, 'rubric') and 
+                isinstance(getattr(self, 'rubric'), dict) and 
+                'score1_description' in getattr(self, 'rubric', {}))
+
+    def _format_rubric_as_markdown(self) -> List[str]:
+        """Format the rubric as a markdown table."""
+        lines = [
+            "| Score | Description |",
+            "|-------|-------------|"
+        ]
+        
+        # Add score descriptions
+        for i in range(1, 6):
+            score_key = f"score{i}_description"
+            if score_key in self.rubric:
+                description = self.rubric[score_key]
+                # Format bullet points properly for markdown
+                # Replace bullet points with proper markdown and add line breaks
+                if description.startswith("- "):
+                    # Split by bullet points and rejoin with proper markdown formatting
+                    bullets = [bullet.strip() for bullet in description.split("- ") if bullet.strip()]
+                    formatted_description = "• " + "<br/>• ".join(bullets)
+                else:
+                    formatted_description = description
+                lines.append(f"| {i} | {formatted_description} |")
+            else:
+                lines.append(f"| {i} | N/A |")
+        
+        return lines
 
     def _call_llm(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
         with dspy.settings.context(lm=self.model):
@@ -156,7 +190,7 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
         )
 
     def __repr__(self):
-        return f"{self.name.replace(' ', '_').replace('-', '_')}_LLMJudge(model={generate_llm_constructor_code(self.model)})"
+        return f"{self.name.replace(' ', '_').replace('-', '_')}_LLMJudge(model={generate_llm_constructor_code(self.model).replace("\"", "\\\"")})"
 
 """
         return code
@@ -206,12 +240,12 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
         # --- Header & description ----------------------------------------
         lines = [
             f"**{self.name}** is a **{kind}** LLM-as-a-Judge metric that prompts an LLM to rate a system output along a single, run-time-specified evaluation axis.",
-            f"In this case the axis is `{self.axis}`.",
+            f"In this case the axis is `{self.description}`.",
             "",
             "The prompt supplies:",
             "",
             "1. **Task description** *d*",
-            f"2. **Axis rubric** `{self.axis}`",
+            f"2. **{'Rubric' if self._has_structured_rubric() else 'Axis rubric'}** `{self.description}`",
             "3. **Input text** *x*",
         ]
         if reference_based:
@@ -274,13 +308,30 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
                     r"(d,x,y)=\hat{s}$."
                 ),
                 "",
+            ]
+        )
+
+        # Add rubric details section if we have a structured rubric
+        if self._has_structured_rubric():
+            rubric = getattr(self, 'rubric', {})
+            lines.extend([
+                "### Rubric Details",
+                "",
+                f"**Criteria:** {rubric.get('criteria', 'N/A')}",
+                "",
+                "#### Scoring Rubric",
+                "",
+            ])
+            lines.extend(self._format_rubric_as_markdown())
+            lines.append("")
+
+        lines.extend([
                 "### Inputs and Outputs",
                 "- **Inputs:**",
                 "  - **Task description** *d*",
-                f"  - **Axis rubric** `{self.axis}`",
+                f"  - **{'Rubric' if self._has_structured_rubric() else 'Axis rubric'}** `{self.description}`",
                 "  - **Input text** *x*",
-            ]
-        )
+            ])
         if reference_based:
             lines.append("  - **Reference text** *r*")
         lines.append("  - **Output text** *y*")

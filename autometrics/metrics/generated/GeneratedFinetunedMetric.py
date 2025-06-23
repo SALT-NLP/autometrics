@@ -1,0 +1,486 @@
+import json
+import os
+import numpy as np
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Optional, Dict, Any
+from pathlib import Path
+import torch
+from tqdm import tqdm
+import pandas as pd
+
+import dspy
+
+from autometrics.metrics.generated.utils.utils import generate_llm_constructor_code
+from autometrics.metrics.generated.utils.metric_card import generate_further_reading
+from autometrics.metrics.generated.utils.metric_card import MetricCardBuilder
+from autometrics.metrics.generated.GeneratedRefFreeMetric import GeneratedRefFreeMetric
+from autometrics.metrics.generated.GeneratedRefBasedMetric import GeneratedRefBasedMetric
+
+__all__ = ["GeneratedRefFreeFinetunedMetric", "GeneratedRefBasedFinetunedMetric"]
+
+
+# Base mixin for shared finetuned functionality
+class _FinetunedMetricMixin:
+    """Shared functionality for both reference-free and reference-based fine-tuned metrics."""
+
+    DEFAULT_MAX_WORKERS = 16  # Lower default due to model loading overhead
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        model_path: str,
+        task_description: Optional[str] = None,
+        target_measure: Optional[str] = None,
+        dataset_name: Optional[str] = None,
+        training_stats: Optional[Dict[str, Any]] = None,
+        metric_card: Optional[str] = None,
+        metric_card_author_model: Optional[dspy.LM] = None,
+        max_workers: int = DEFAULT_MAX_WORKERS,
+        max_seq_length: int = 2048,
+        is_reference_based: bool = False,
+        **kwargs,
+    ):
+        self.model_path = model_path
+        self.task_description = task_description or "No task description provided"
+        self.target_measure = target_measure or "quality"
+        self.dataset_name = dataset_name or "unknown"
+        self.training_stats = training_stats or {}
+        self.max_workers = max_workers
+        self.max_seq_length = max_seq_length
+        self.is_reference_based = is_reference_based
+
+        # Model and tokenizer (loaded lazily)
+        self._model = None
+        self._tokenizer = None
+
+        if metric_card_author_model is None:
+            # For fine-tuned metrics, we don't have an LLM model to use as author
+            # We'll generate the card programmatically or use a provided one
+            metric_card_author_model = None
+
+        if metric_card == "provided":
+            self.metric_card = self.__doc__
+            metric_card = self.metric_card
+
+        # Initialize parent with shared parameters
+        super().__init__(
+            name,
+            description,
+            metric_card=metric_card,
+            metric_card_author_model=metric_card_author_model,
+            model_path=model_path,
+            task_description=self.task_description,
+            target_measure=self.target_measure,
+            dataset_name=self.dataset_name,
+            training_stats=self.training_stats,
+            max_seq_length=self.max_seq_length,
+            **kwargs,
+        )
+
+        # Exclude heavy objects from cache key
+        self.exclude_from_cache_key("_model", "_tokenizer")
+
+    def _load_model_and_tokenizer(self):
+        """Lazily load the fine-tuned model and tokenizer."""
+        if self._model is None or self._tokenizer is None:
+            try:
+                from unsloth import FastModel
+                from transformers import AutoModelForSequenceClassification, AutoTokenizer
+            except ImportError as e:
+                raise ImportError(f"Required libraries not installed: {e}. Please install unsloth and transformers.")
+
+            print(f"Loading fine-tuned model from {self.model_path}")
+            
+            # Load the model and tokenizer
+            self._model, self._tokenizer = FastModel.from_pretrained(
+                model_name=self.model_path,
+                load_in_4bit=False,
+                max_seq_length=self.max_seq_length,
+                dtype=None,
+                auto_model=AutoModelForSequenceClassification,
+                num_labels=1,  # Regression
+            )
+            
+            # Set to evaluation mode
+            self._model.eval()
+            if torch.cuda.is_available():
+                self._model = self._model.cuda()
+
+        return self._model, self._tokenizer
+
+    def _predict_single(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
+        """Make a prediction using the fine-tuned model."""
+        model, tokenizer = self._load_model_and_tokenizer()
+        
+        # Format text for prediction (consistent with training format)
+        if self.is_reference_based and references is not None:
+            if isinstance(references, list):
+                refs = " ".join([str(ref) for ref in references if ref is not None])
+            else:
+                refs = str(references)
+            text = f"Input: {input_text} Output: {output_text} Reference: {refs}"
+        else:
+            text = f"Input: {input_text} Output: {output_text}"
+
+        # Tokenize and predict
+        with torch.no_grad():
+            inputs = tokenizer(
+                text,
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=self.max_seq_length
+            )
+            
+            # Move to GPU if available
+            if torch.cuda.is_available():
+                inputs = {k: v.cuda() for k, v in inputs.items()}
+            
+            # Get prediction
+            outputs = model(**inputs)
+            prediction = outputs.logits.cpu().numpy().flatten()[0]
+            
+        return float(prediction)
+
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
+        del kwargs  # pragma: no cover
+        results: List[float] = [0.0] * len(outputs)
+
+        # Fail-fast if workers=1
+        if self.max_workers == 1:
+            return [self._predict_single(i, o, r) for i, o, r in zip(inputs, outputs, references or [None] * len(outputs))]
+
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = {
+                executor.submit(self._predict_single, i, o, r): idx 
+                for idx, (i, o, r) in enumerate(zip(inputs, outputs, references or [None] * len(outputs)))
+            }
+            
+            # Collect results with progress bar
+            with tqdm(total=len(futures), desc="Processing Fine-tuned Predictions") as pbar:
+                for future in as_completed(futures):
+                    index = futures[future]
+                    try:
+                        results[index] = future.result()
+                    except Exception as e:
+                        print(f"Error processing item {index}: {e}")
+                        results[index] = 0.0
+                    pbar.update(1)
+        
+        return results
+
+    # ------------------------------------------------------------------
+    # Export helpers
+    # ------------------------------------------------------------------
+
+    def _generate_python_code(self, include_metric_card: bool = True) -> str:
+        """Export a standalone python file that re-creates this metric."""
+        class_name = "GeneratedRefBasedFinetunedMetric" if self.is_reference_based else "GeneratedRefFreeFinetunedMetric"
+        code = f"""# Auto-generated fine-tuned metric file for {self.name}
+import os
+from pathlib import Path
+from autometrics.metrics.generated.GeneratedFinetunedMetric import {class_name}
+
+# Note: This metric requires the fine-tuned model to be available at the specified path
+MODEL_PATH = r"{self.model_path}"
+
+class {self.name.replace(" ", "_").replace("-", "_")}_Finetuned({class_name}):
+    \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
+    def __init__(self, model_path: str = MODEL_PATH):
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Fine-tuned model not found at {{model_path}}. Please ensure the model is available.")
+        
+        super().__init__(
+            name={json.dumps(self.name)},
+            description={json.dumps(self.description)},
+            model_path=model_path,
+            task_description={json.dumps(self.task_description)},
+            target_measure={json.dumps(self.target_measure)},
+            dataset_name={json.dumps(self.dataset_name)},
+            training_stats={json.dumps(self.training_stats)},
+            metric_card={json.dumps("provided" if include_metric_card else "None")},
+            max_workers={self.max_workers},
+            max_seq_length={self.max_seq_length},
+        )
+
+    def __repr__(self):
+        return f"{self.name.replace(' ', '_').replace('-', '_')}_Finetuned(model_path='{self.model_path}')"
+
+"""
+        return code
+
+    def _serialize(self) -> dict:
+        """Serialize the metric to a dictionary for in-memory operations."""
+        return {
+            "name": self.name,
+            "description": self.description,
+            "model_path": self.model_path,
+            "task_description": self.task_description,
+            "target_measure": self.target_measure,
+            "dataset_name": self.dataset_name,
+            "training_stats": self.training_stats,
+            "metric_card": self.metric_card,
+            "max_workers": self.max_workers,
+            "max_seq_length": self.max_seq_length,
+            "is_reference_based": self.is_reference_based,
+        }
+
+    @classmethod
+    def _deserialize(cls, data: dict):
+        """Deserialize a dictionary to create a metric instance."""
+        return cls(**data)
+    
+    # ------------------------------------------------------------------
+    # Metric-card helpers
+    # ------------------------------------------------------------------
+
+    def _metric_details_template(self, *, reference_based: bool) -> str:
+        """Return the *Metric Details* section for ref-free / ref-based fine-tuned metrics."""
+        kind = "reference-based" if reference_based else "reference-free"
+        ref_flag = "Yes" if reference_based else "No"
+        input_req = "Yes (plus reference)" if reference_based else "Yes"
+
+        # Get training statistics
+        train_size = self.training_stats.get("train_size", "Unknown")
+        val_size = self.training_stats.get("val_size", "Unknown")
+        target_mean = self.training_stats.get("target_mean", "Unknown")
+        target_std = self.training_stats.get("target_std", "Unknown")
+        epochs = self.training_stats.get("epochs", "Unknown")
+        learning_rate = self.training_stats.get("learning_rate", "Unknown")
+
+        lines = [
+            f"**{self.name}** is a **{kind}** fine-tuned metric that uses a regression-trained ModernBERT model to predict quality scores.",
+            f"The model was fine-tuned on the `{self.dataset_name}` dataset to predict `{self.target_measure}` values.",
+            "",
+            "The model was trained using supervised learning on input-output pairs with quality scores,",
+            "learning to predict numerical quality ratings directly from text patterns.",
+            "",
+            "### Training Details",
+            "",
+            f"- **Base Model:** ModernBERT-Large (answerdotai/ModernBERT-large)",
+            f"- **Training Dataset:** {self.dataset_name}",
+            f"- **Target Measure:** {self.target_measure}",
+            f"- **Training Examples:** {train_size}",
+            f"- **Validation Examples:** {val_size}",
+            f"- **Training Epochs:** {epochs}",
+            f"- **Learning Rate:** {learning_rate}",
+            f"- **Target Statistics:** Mean={target_mean:.3f}, Std={target_std:.3f}" if isinstance(target_mean, (int, float)) else f"- **Target Statistics:** {target_mean}",
+            "",
+            "### Input Format",
+            "",
+            "The model expects input in the format used during training:",
+        ]
+        
+        if reference_based:
+            lines.append("- `Input: [input_text] Output: [output_text] Reference: [reference_text]`")
+        else:
+            lines.append("- `Input: [input_text] Output: [output_text]`")
+
+        lines.extend([
+            "",
+            "### Formal Definition",
+            "",
+            r"Let $f_{\theta}$ be the fine-tuned ModernBERT model with parameters $\theta$",
+            r"learned through supervised regression training.",
+        ])
+
+        if reference_based:
+            lines.append(
+                r"The metric computes $\hat{s} = f_{\theta}(\text{Input: } x \text{ Output: } y \text{ Reference: } r)$"
+            )
+        else:
+            lines.append(
+                r"The metric computes $\hat{s} = f_{\theta}(\text{Input: } x \text{ Output: } y)$"
+            )
+
+        lines.extend([
+            "",
+            r"where $\hat{s}$ is the predicted quality score in the same range as the training targets.",
+            "",
+            "- **Metric Type:** Fine-tuned Neural Regression",
+            f"- **Range:** Continuous (similar to training target range)",
+            "- **Higher is Better?:** Depends on training target",
+            f"- **Reference-Based?:** {ref_flag}",
+            f"- **Input-Required?:** {input_req}",
+            "",
+            "### Inputs and Outputs",
+            "- **Inputs:**",
+            "  - **Input text** *x*",
+            "  - **Output text** *y*",
+        ])
+        
+        if reference_based:
+            lines.append("  - **Reference text** *r*")
+        
+        lines.extend([
+            "- **Outputs:**",
+            "  - Predicted quality score "
+            r"$\hat{s} \in \mathbb{R}$ (continuous)",
+        ])
+
+        return "\n".join(lines)
+    
+    def generate_metric_details_ref_free(self) -> str:
+        """Metric-details section for the **reference-free** variant."""
+        return self._metric_details_template(reference_based=False)
+
+    def generate_metric_details_ref_based(self) -> str:
+        """Metric-details section for the **reference-based** variant."""
+        return self._metric_details_template(reference_based=True)
+
+    def generate_intended_use(self):
+        """Generate intended use section for fine-tuned metrics."""
+        return f"""- **Domain:** {self.dataset_name} Domain
+- **Tasks:** Quality prediction tasks similar to the training domain
+- **Best Suited For:** 
+  - Datasets with similar characteristics to {self.dataset_name}
+  - Tasks requiring {self.target_measure} assessment
+  - Scenarios where training data is available for the specific domain
+  - High-throughput evaluation scenarios
+- **Not Recommended For:**
+  - Datasets from significantly different domains
+  - Tasks requiring different quality aspects than {self.target_measure}
+  - Scenarios where model interpretability is critical
+  - Very small datasets (model may overfit)"""
+
+    def generate_metric_implementation(self):
+        """Generate implementation details section."""
+        ref_type = "reference-based" if self.is_reference_based else "reference-free"
+        return f"""### Reference Implementations
+
+- **Libraries/Packages:**
+  - [AutoMetrics Fine-tuned Metric ({ref_type})](https://github.com/XenonMolecule/autometrics/blob/main/autometrics/metrics/generated/GeneratedFinetunedMetric.py)
+  - [Unsloth Fine-tuning](https://github.com/unslothai/unsloth)
+  - [ModernBERT](https://huggingface.co/answerdotai/ModernBERT-large)
+
+### Computational Complexity
+
+- **Model Loading:**
+  - One-time model loading overhead (a few seconds depending on hardware)
+  - Model cached in memory after first load
+
+- **Inference Efficiency:**
+  - Single forward pass per input-output pair
+  - Batch processing supported for efficiency
+  - GPU acceleration available
+
+- **Scalability:**
+  - Linear scaling with number of examples
+  - Efficient batching reduces per-example overhead
+  - Memory requirements scale with batch size and sequence length
+
+### Model Requirements
+
+- **Model Path:** `{self.model_path}`
+- **Dependencies:** unsloth, transformers, torch
+- **Hardware:** GPU recommended for faster inference
+- **Memory:** ~16-24GB GPU memory for model loading"""
+
+    def generate_known_limitations(self):
+        """Generate known limitations section."""
+        return f"""- **Domain Specificity:**
+  - Model is specifically trained on {self.dataset_name} and may not generalize to other domains
+  - Performance may degrade on inputs significantly different from training data
+  
+- **Target Measure Alignment:**
+  - Model is optimized for {self.target_measure} and may not capture other quality aspects
+  - Predictions may be biased toward patterns seen in the training data
+  
+- **Training Data Dependencies:**
+  - Model quality depends heavily on the quality and representativeness of training data
+  - May perpetuate biases present in the original dataset
+  
+- **Interpretability:**
+  - Neural model predictions are not easily interpretable
+  - Difficult to understand why specific scores were assigned
+  
+- **Computational Requirements:**
+  - Requires model loading and GPU resources for optimal performance
+  - Larger memory footprint compared to simpler metrics"""
+
+    def generate_further_reading(self):
+        """Generate further reading section."""
+        return """- [ModernBERT: Modernizing BERT with Better Pre-training](https://arxiv.org/abs/2412.13663)
+- [Unsloth: Fast and Memory-Efficient Fine-tuning](https://github.com/unslothai/unsloth)
+- [Fine-tuning Language Models for Text Classification](https://huggingface.co/docs/transformers/tasks/sequence_classification)
+- [BERT for Regression Tasks](https://arxiv.org/abs/1810.04805)"""
+
+    def _generate_metric_card(self, author_model: Optional[dspy.LM] = None):
+        """Produce a metric card via a custom builder."""
+        
+        class FinetunedMetricCardBuilder(MetricCardBuilder):
+            def metric_details(self) -> str:
+                if self.metric.is_reference_based:
+                    return self.metric.generate_metric_details_ref_based()
+                else:
+                    return self.metric.generate_metric_details_ref_free()
+            
+            def intended_use(self) -> str:
+                return self.metric.generate_intended_use()
+            
+            def metric_implementation(self) -> str:
+                return self.metric.generate_metric_implementation()
+            
+            def known_limitations(self) -> str:
+                return self.metric.generate_known_limitations()
+            
+            def further_reading(self) -> str:
+                return self.metric.generate_further_reading()
+
+        # For fine-tuned metrics, we build the card programmatically
+        # since we don't have an LLM to generate it
+        builder = FinetunedMetricCardBuilder(self)
+        return builder.build()
+
+
+class GeneratedRefFreeFinetunedMetric(_FinetunedMetricMixin, GeneratedRefFreeMetric):
+    """Reference-free metric that uses a fine-tuned ModernBERT model for quality prediction.
+
+    Parameters
+    ----------
+    name            Human-readable metric identifier
+    description     Short description
+    model_path      Path to the fine-tuned model directory
+    task_description Optional task context
+    target_measure  The target measure this model was trained to predict
+    dataset_name    Name of the dataset used for training
+    training_stats  Dictionary of training statistics
+    metric_card_author_model  LLM used to generate the metric-card (optional)
+    max_workers     Number of worker threads for batch processing
+    max_seq_length  Maximum sequence length for model input
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs['is_reference_based'] = False
+        super().__init__(*args, **kwargs)
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
+        del references, kwargs  # pragma: no cover
+        return self._predict_single(input, output)
+
+
+class GeneratedRefBasedFinetunedMetric(_FinetunedMetricMixin, GeneratedRefBasedMetric):
+    """Reference-based metric that uses a fine-tuned ModernBERT model for quality prediction using reference text.
+
+    Parameters
+    ----------
+    name            Human-readable metric identifier
+    description     Short description
+    model_path      Path to the fine-tuned model directory
+    task_description Optional task context
+    target_measure  The target measure this model was trained to predict
+    dataset_name    Name of the dataset used for training
+    training_stats  Dictionary of training statistics
+    metric_card_author_model  LLM used to generate the metric-card (optional)
+    max_workers     Number of worker threads for batch processing
+    max_seq_length  Maximum sequence length for model input
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs['is_reference_based'] = True
+        super().__init__(*args, **kwargs)
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
+        del kwargs  # pragma: no cover
+        return self._predict_single(input, output, references) 

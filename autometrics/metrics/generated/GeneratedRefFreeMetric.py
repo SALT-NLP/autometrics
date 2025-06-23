@@ -44,7 +44,7 @@ class GeneratedRefFreeMetric(ReferenceFreeMetric):
         # Only sanitize the filename portion, not the full path
         base_path = str(path)
         filename = base_path.replace('\\', '/').split('/')[-1]
-        safe_filename = re.sub(r'[^\w\-_\.]', '_', filename)
+        safe_filename = re.sub(r'[^\w\-_\.]', '_', filename).replace(" ", "_").replace("/", "_") .replace(":", "_").replace("-", "_")
         safe_path = base_path[:-len(filename)] + safe_filename
 
         with open(safe_path, "w", encoding="utf-8") as f:

@@ -1,0 +1,690 @@
+import json
+import random
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Optional, Dict, Any
+import math
+from tqdm import tqdm
+
+import dspy
+from dspy.evaluate import Evaluate
+
+from autometrics.metrics.generated.utils.utils import generate_llm_constructor_code
+from autometrics.metrics.generated.utils.metric_card import generate_further_reading
+from autometrics.metrics.generated.utils.metric_card import MetricCardBuilder
+from autometrics.metrics.generated.GeneratedRefFreeMetric import GeneratedRefFreeMetric
+from autometrics.metrics.generated.GeneratedRefBasedMetric import GeneratedRefBasedMetric
+
+__all__ = ["GeneratedRefFreeExampleRubricMetric", "GeneratedRefBasedExampleRubricMetric"]
+
+
+# Evaluation functions
+def exact_match_rounded(x, y):
+    return int(round(x) == round(y))
+
+def inverse_distance(x, y):
+    if x == y:
+        return 1
+    return 1 / (abs(x - y) + 1)
+
+def get_wrapped_metric(metric_func):
+    def wrapped_metric(example, pred, trace=None):
+        return metric_func(example.score, pred.score)
+    return wrapped_metric
+
+
+# DSPy signature for example-based scoring
+class LLMAsAJudgeSignature(dspy.Signature):
+    """Given an input text, the task description that the model was trying to follow, and a measure to rate the text on, return a score on this measure."""
+    text = dspy.InputField(desc="The input text that we want to rate.")
+    task_description = dspy.InputField(desc="A description of the task that the model was trying to solve when it generated the text. Could be left blank if not available.")
+    measure = dspy.InputField(desc="The measure that we want to rate the text on.")
+    suggested_range = dspy.InputField(desc="The suggested range of possible values for the measure.")
+    score = dspy.OutputField(desc="The score that the text should receive on this measure.")
+
+class LLMAsAJudge(dspy.Module):
+    def __init__(self):
+        super(LLMAsAJudge, self).__init__()
+        self.generate_score = dspy.ChainOfThought(LLMAsAJudgeSignature)
+
+    def forward(self, text, measure, suggested_range=(1,5), task_description=None):
+        if task_description is None:
+            task_description = "None"
+        suggested_range_str = f"{suggested_range[0]} to {suggested_range[1]}"
+        score = self.generate_score(
+            task_description=task_description,
+            text=text,
+            measure=measure,
+            suggested_range=suggested_range_str
+        ).score
+        
+        # Convert the string score to a float by stripping any additional text and converting to a float
+        if '\n' in score:
+            score = score.split('\n')[0]
+        try:
+            score = float(score.strip())
+        except:
+            score = 0.0
+
+        return dspy.Prediction(text=text, measure=measure, score=score)
+
+
+def grade_row(row, axis, llm, formatter, task_description, program, suggested_range=(1,5)):
+    """Helper function to grade a single row"""
+    with dspy.settings.context(lm=llm):
+        return program(formatter(row), axis, suggested_range=suggested_range, task_description=task_description).score
+
+
+# Base mixin for shared Example Rubric functionality
+class _ExampleRubricMetricMixin:
+    """Shared functionality for both reference-free and reference-based example rubric metrics."""
+
+    DEFAULT_MAX_WORKERS = 32
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        axis: str,
+        model: dspy.LM,
+        task_description: Optional[str] = None,
+        train_dataset: Optional[Any] = None,
+        target_column: Optional[str] = None,
+        suggested_range: tuple = (1, 5),
+        seed: int = 42,
+        optimized_examples: Optional[List] = None,  # Pre-optimized examples from Generator
+        load_prompt: Optional[str] = None,
+        output_prompt_path: Optional[str] = None,
+        metric_card: Optional[str] = None,
+        metric_card_author_model: Optional[dspy.LM] = None,
+        max_workers: int = DEFAULT_MAX_WORKERS,
+        is_reference_based: bool = False,
+        # Metadata about optimization (for metric cards) - passed from Generator
+        attempts: int = 5,
+        examples_per_range: int = 2,
+        eval_function_name: str = 'inverse_distance',
+        custom_eval_function: Optional[Any] = None,
+        **kwargs,
+    ):
+        # Store core attributes
+        self.axis = axis
+        self.model = model
+        self.model_str = str(getattr(model, "model", model))
+        self.task_description = task_description or "No task description provided"
+        self.train_dataset = train_dataset
+        self.target_column = target_column
+        self.suggested_range = suggested_range
+        self.seed = seed
+        self.max_workers = max_workers
+        self.is_reference_based = kwargs.get("is_reference_based", is_reference_based)
+        
+        # Store optimization metadata for metric card generation (even though optimization was done in Generator)
+        self.attempts = attempts
+        self.examples_per_range = examples_per_range
+        self.eval_function_name = eval_function_name
+        self.optimize = False  # Should always be False for Executor
+        self.optimized_examples = optimized_examples or []  # Store the original examples
+        
+        # Add eval_function for backward compatibility with tests
+        if custom_eval_function is not None:
+            self.eval_function = custom_eval_function
+        elif eval_function_name == 'exact_match_rounded':
+            self.eval_function = exact_match_rounded
+        elif eval_function_name == 'inverse_distance':
+            self.eval_function = inverse_distance
+        else:
+            self.eval_function = inverse_distance  # Default fallback
+
+        if metric_card_author_model is None:
+            metric_card_author_model = model if isinstance(model, dspy.LM) else None
+
+        if metric_card == "provided":
+            self.metric_card = self.__doc__
+            metric_card = self.metric_card
+
+        # Initialize the DSPy program
+        self.program = LLMAsAJudge()
+
+        # Load pre-optimized examples or load from prompt
+        if load_prompt is not None:
+            self.program.load(load_prompt)
+            print(f"Loaded program from {load_prompt}")
+        elif optimized_examples:
+            # Load optimized examples if provided (from Generator)
+            self._load_optimized_examples(optimized_examples)
+            print(f"Loaded {len(optimized_examples)} pre-optimized examples from Generator")
+
+        # Remove optimization-related parameters from kwargs before passing to parent
+        parent_kwargs = {k: v for k, v in kwargs.items() if k not in ['attempts', 'examples_per_range', 'eval_function_name']}
+        
+        # Initialize parent with shared parameters
+        super().__init__(
+            name=name,
+            description=description,
+            model=model,
+            task_description=task_description,
+            train_dataset=train_dataset,
+            target_column=target_column,
+            suggested_range=suggested_range,
+            seed=seed,
+            load_prompt=load_prompt,
+            output_prompt_path=output_prompt_path,
+            metric_card=metric_card,
+            metric_card_author_model=metric_card_author_model,
+            max_workers=max_workers,
+            is_reference_based=is_reference_based,
+            **parent_kwargs,
+        )
+
+        # Exclude heavy objects from cache key
+        self.exclude_from_cache_key("model", "train_dataset", "program")
+
+    def _load_optimized_examples(self, optimized_examples):
+        """Load pre-optimized examples into the DSPy program."""
+        if not optimized_examples:
+            return
+            
+        try:
+            # Use the correct DSPy path we discovered through testing
+            self.program.generate_score.predict.demos = optimized_examples
+            print(f"Loaded {len(optimized_examples)} optimized examples into DSPy program")
+        except Exception as e:
+            print(f"Warning: Could not load optimized examples: {e}")
+            print("Continuing without examples...")
+
+    def _format_examples_as_markdown(self, max_examples: int = 3) -> List[str]:
+        """Format the first few examples as a markdown table."""
+        lines = []
+        
+        try:
+            # Get examples from the DSPy program
+            if hasattr(self.program, 'generate_score') and hasattr(self.program.generate_score, 'predict'):
+                examples = self.program.generate_score.predict.demos
+                if not examples:
+                    return ["*No examples available.*"]
+                
+                # Take the first few examples
+                sample_examples = examples[:max_examples]
+                
+                # Create markdown table header (removed Notes column)
+                lines.extend([
+                    "| Input Text | Score |",
+                    "|------------|-------|"
+                ])
+                
+                # Add each example as a table row
+                for i, example in enumerate(sample_examples):
+                    # Extract fields from the example
+                    text = example.get('text', 'N/A')
+                    score = example.get('score', 'N/A')
+                    
+                    # Allow longer text now that we have more room (no Notes column)
+                    if len(str(text)) > 150:
+                        text = str(text)[:147] + "..."
+                    
+                    # Escape pipe characters in text for markdown table
+                    text = str(text).replace("|", "\\|").replace("\n", " ")
+                    
+                    lines.append(f"| {text} | {score} |")
+                
+                # Add note if there are more examples
+                if len(examples) > max_examples:
+                    lines.append("")
+                    lines.append(f"*Showing {max_examples} of {len(examples)} total examples.*")
+                
+                return lines
+                
+        except Exception as e:
+            return [f"*Could not extract examples: {e}*"]
+        
+        return ["*No examples available.*"]
+
+    def _call_llm_judge(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
+        """Call the LLM judge with the given inputs."""
+        # For example-based metrics, we format the full text using the dataset's formatter
+        if self.train_dataset:
+            # Reconstruct a row-like object for formatting
+            row = {
+                self.train_dataset.get_input_column(): input_text,
+                self.train_dataset.get_output_column(): output_text,
+            }
+            
+            # Add references if this is a reference-based metric
+            if self.is_reference_based and references is not None:
+                reference_columns = self.train_dataset.get_reference_columns()
+                if reference_columns:
+                    if isinstance(references, list):
+                        for i, ref in enumerate(references):
+                            if i < len(reference_columns):
+                                row[reference_columns[i]] = ref
+                    else:
+                        row[reference_columns[0]] = references
+            
+            from autometrics.util.format import get_default_formatter
+            formatter = get_default_formatter(self.train_dataset)
+            formatted_text = formatter((0, row))
+        else:
+            # Fallback formatting
+            if self.is_reference_based and references:
+                formatted_text = f"Input: {input_text}\nReference: {references}\nOutput: {output_text}"
+            else:
+                formatted_text = f"Input: {input_text}\nOutput: {output_text}"
+
+        # Set temperature based on seed for cache busting
+        temperature = 0.0001 * self.seed
+        
+        with dspy.settings.context(lm=self.model, temperature=temperature):
+            result = self.program(
+                text=formatted_text,
+                measure=self.axis,
+                suggested_range=self.suggested_range,
+                task_description=self.task_description
+            )
+            return float(result.score)
+
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
+        del kwargs  # pragma: no cover
+        results: List[float] = [0.0] * len(outputs)
+
+        # Fail-fast if workers=1
+        if self.max_workers == 1:
+            for i, (inp, out, ref) in enumerate(zip(inputs, outputs, references or [None] * len(outputs))):
+                try:
+                    results[i] = self._call_llm_judge(inp, out, ref)
+                except Exception as e:
+                    print(f"Error processing item {i}: {e}")
+                    results[i] = 0.0
+            return results
+
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = {
+                executor.submit(self._call_llm_judge, i, o, r): idx 
+                for idx, (i, o, r) in enumerate(zip(inputs, outputs, references or [None] * len(outputs)))
+            }
+            
+            # Collect results with progress bar
+            with tqdm(total=len(futures), desc="Processing Example Rubric Evaluation") as pbar:
+                for future in as_completed(futures):
+                    index = futures[future]
+                    try:
+                        results[index] = future.result()
+                    except Exception as e:
+                        print(f"Error processing item {index}: {e}")
+                        results[index] = 0.0
+                    pbar.update(1)
+        
+        return results
+
+    # ------------------------------------------------------------------
+    # Export helpers
+    # ------------------------------------------------------------------
+
+    def _generate_python_code(self, include_metric_card: bool = True) -> str:
+        """Export a standalone python file that re-creates this metric."""
+        class_name = "GeneratedRefBasedExampleRubricMetric" if self.is_reference_based else "GeneratedRefFreeExampleRubricMetric"
+        
+        # For standalone export, we need to include the optimized examples if available
+        examples_data = []
+        try:
+            # Use the correct DSPy path we discovered through testing
+            if hasattr(self.program, 'generate_score') and hasattr(self.program.generate_score, 'predict'):
+                examples_data = self.program.generate_score.predict.demos
+        except Exception as e:
+            print(f"Warning: Could not extract examples for code generation: {e}")
+        
+        code = f"""# Auto-generated Example Rubric metric file for {self.name}
+import dspy
+import os
+from autometrics.metrics.generated.GeneratedExampleRubric import {class_name}
+
+DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
+
+class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}):
+    \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
+    def __init__(self, model: dspy.LM = DEFAULT_MODEL):
+        super().__init__(
+            name={json.dumps(self.name)},
+            description={json.dumps(self.description)},
+            axis={json.dumps(self.axis)},
+            model=model,
+            task_description={json.dumps(self.task_description)},
+            suggested_range={self.suggested_range},
+            seed={self.seed},
+            optimized_examples={json.dumps(examples_data) if examples_data else 'None'},
+            metric_card={json.dumps("provided" if include_metric_card else "None")},
+            max_workers={self.max_workers},
+        )
+
+    def __repr__(self):
+        return f"{self.name.replace(' ', '_').replace('-', '_')}_ExampleRubric(model={generate_llm_constructor_code(self.model).replace('\"', '\\\\')})"
+
+"""
+        return code
+
+    def _serialize(self) -> dict:
+        """Serialize the metric to a dictionary for in-memory operations."""
+        # Extract examples if available
+        examples_data = []
+        try:
+            # Use the correct DSPy path we discovered through testing
+            if hasattr(self.program, 'generate_score') and hasattr(self.program.generate_score, 'predict'):
+                examples_data = self.program.generate_score.predict.demos
+        except Exception as e:
+            print(f"Warning: Could not extract examples during serialization: {e}")
+        
+        return {
+            "name": self.name,
+            "description": self.description,
+            "axis": self.axis,
+            "model": generate_llm_constructor_code(self.model),
+            "task_description": self.task_description,
+            "target_column": self.target_column,
+            "suggested_range": self.suggested_range,
+            "seed": self.seed,
+            "optimized_examples": self.optimized_examples,  # Store the original examples
+            "examples_data": examples_data,  # Store extracted examples for reference
+            "metric_card": self.metric_card,
+            "max_workers": self.max_workers,
+            "is_reference_based": self.is_reference_based,
+            # Optimization metadata
+            "attempts": self.attempts,
+            "examples_per_range": self.examples_per_range,
+            "eval_function_name": self.eval_function_name,
+        }
+
+    @classmethod
+    def _deserialize(cls, data: dict):
+        """Deserialize a dictionary to create a metric instance."""
+        # Convert model constructor code string back to model instance
+        model_code = data.pop("model")
+        model = eval(model_code)
+        data["model"] = model
+        
+        # Extract examples data
+        examples_data = data.pop("examples_data", [])
+        
+        # Create the instance
+        instance = cls(**data)
+        
+        # Load the examples if available
+        if examples_data:
+            try:
+                # Use the correct DSPy path we discovered through testing
+                instance.program.generate_score.predict.demos = examples_data
+                print(f"Loaded {len(examples_data)} examples during deserialization")
+            except Exception as e:
+                print(f"Warning: Could not load examples during deserialization: {e}")
+        
+        return instance
+    
+    # ------------------------------------------------------------------
+    # Metric-card helpers
+    # ------------------------------------------------------------------
+
+    def _metric_details_template(self, *, reference_based: bool) -> str:
+        """Return the *Metric Details* section for ref-free / ref-based example rubrics."""
+        kind = "reference-based" if reference_based else "reference-free"
+        ref_flag = "Yes" if reference_based else "No"
+        input_req = "Yes (plus reference)" if reference_based else "Yes"
+
+        # Count examples if available
+        num_examples = 0
+        try:
+            # Use the correct DSPy path we discovered through testing
+            if hasattr(self.program, 'generate_score') and hasattr(self.program.generate_score, 'predict'):
+                num_examples = len(self.program.generate_score.predict.demos)
+        except Exception:
+            num_examples = 0
+
+        lines = [
+            f"**{self.name}** is a **{kind}** example-based LLM-as-a-Judge metric that uses optimized few-shot examples to evaluate system outputs.",
+            f"The evaluation axis is: `{self.axis}`.",
+            "",
+            "Example-based LLM judging differs from standard LLM-as-a-Judge by:",
+            "",
+            "1. **Example Selection**: Uses quintile-based bucketing to select diverse examples across score ranges",
+            "2. **Few-Shot Optimization**: Optimizes example selection through multiple attempts and evaluation",
+            "3. **Consistent Scoring**: Examples provide concrete scoring patterns for the LLM to follow",
+            "",
+            f"This metric was optimized using {self.attempts} attempts with {self.examples_per_range} examples per score range.",
+            "",
+            "### Optimized Examples",
+            "",
+            f"The final optimized prompt includes {num_examples} carefully selected examples." if num_examples > 0 else "No examples were loaded for this metric.",
+        ]
+        
+        # Add examples table if available
+        if num_examples > 0:
+            lines.append("")
+            lines.extend(self._format_examples_as_markdown(max_examples=3))
+        
+        lines.extend([
+            "",
+            "### Evaluation Process",
+            "",
+            "The evaluation follows this process:",
+            "",
+            "1. **Task description** *d*",
+            f"2. **Evaluation axis** `{self.axis}`",
+            "3. **Optimized examples** showing score patterns",
+            "4. **Input text** *x*",
+        ])
+        if reference_based:
+            lines.append("5. **Reference text** *r*")
+            lines.append("6. **Output text** *y*")
+        else:
+            lines.append("5. **Output text** *y*")
+
+        lines.extend([
+            "",
+            r"The LLM follows the example patterns to assign scores "
+            r"$\hat{s}\!\in\!\{1,2,3,4,5\}$ within the suggested range; higher = better adherence to the axis.",
+            "",
+            "- **Metric Type:** Example-based LLM as a Judge",
+            "- **Range:** Variable (depends on suggested range, typically 1-5)",
+            "- **Higher is Better?:** Yes",
+            f"- **Reference-Based?:** {ref_flag}",
+            f"- **Input-Required?:** {input_req}",
+            "",
+            "### Example Optimization Details",
+            "",
+            f"- **Optimization Attempts**: {self.attempts}",
+            f"- **Examples per Score Range**: {self.examples_per_range}",
+            f"- **Evaluation Function**: {self.eval_function_name}",
+            f"- **Score Range**: {self.suggested_range[0]} to {self.suggested_range[1]}",
+            f"- **Random Seed**: {self.seed} (for reproducible example selection)",
+            "",
+            "### Inputs and Outputs",
+            "- **Inputs:**",
+            "  - **Task description** *d*",
+            f"  - **Evaluation axis** `{self.axis}`",
+            "  - **Optimized examples** (embedded in prompt)",
+            "  - **Input text** *x*",
+        ])
+        if reference_based:
+            lines.append("  - **Reference text** *r*")
+        lines.append("  - **Output text** *y*")
+        lines.extend([
+            "- **Outputs:**",
+            f"  - Scalar score within range {self.suggested_range[0]}-{self.suggested_range[1]}",
+        ])
+
+        return "\n".join(lines)
+    
+    def generate_metric_details_ref_free(self) -> str:
+        """Metric-details section for the **reference-free** variant."""
+        return self._metric_details_template(reference_based=False)
+
+    def generate_metric_details_ref_based(self) -> str:
+        """Metric-details section for the **reference-based** variant."""
+        return self._metric_details_template(reference_based=True)
+
+    def generate_intended_use(self):
+        class IntendedUseSignature(dspy.Signature):
+            """Given the task description, evaluation axis, and example-based optimization details, consider an example-based LLM Judge. Generate the domain, tasks, and circumstances where this optimized example-based evaluation is best suited."""
+            task_description: str = dspy.InputField(desc="Brief description of the underlying task which is being evaluated.")
+            axis: str = dspy.InputField(desc="The evaluation axis / rubric.")
+            model_name: str = dspy.InputField(desc="The name of the model that is being used as the LLM Judge.")
+            optimization_details: str = dspy.InputField(desc="Details about the example optimization process.")
+            domain: str = dspy.OutputField(desc="The domain of the task. Some examples are: Text Generation, Code Generation, Discourse, etc.")
+            tasks: List[str] = dspy.OutputField(desc="A list of tasks that example-based LLM Judge is best suited for.")
+            best_suited_for_circumstances: List[str] = dspy.OutputField(desc="A list of circumstances where example-based LLM Judge is best suited to be used.")
+            not_recommended_for_circumstances: List[str] = dspy.OutputField(desc="A list of circumstances where example-based LLM Judge is not recommended.")
+
+        optimization_details = f"Optimized with {self.attempts} attempts, {self.examples_per_range} examples per range, using {self.eval_function_name} evaluation function"
+
+        with dspy.settings.context(lm=self.metric_card_author_model):
+            outputs = dspy.ChainOfThought(IntendedUseSignature)(
+                task_description=self.task_description,
+                axis=self.axis,
+                model_name=str(getattr(self.model, "model", self.model)),
+                optimization_details=optimization_details,
+            )
+        
+        return f"""- **Domain:** {outputs.domain}
+- **Tasks:** {"\n  - " + "\n  - ".join(outputs.tasks)}
+- **Best Suited For:** {"\n  - " + "\n  - ".join(outputs.best_suited_for_circumstances)}
+- **Not Recommended For:** {"\n  - " + "\n  - ".join(outputs.not_recommended_for_circumstances)}"""
+
+    def generate_metric_implementation(self):
+        ref_type = "reference-based" if self.is_reference_based else "reference-free"
+        return f"""### Reference Implementations
+
+- **Libraries/Packages:**
+  - [AutoMetrics Example-based LLM Judge ({ref_type})](https://github.com/XenonMolecule/autometrics/blob/main/autometrics/metrics/generated/GeneratedExampleRubric.py)
+  - [DSPy Few-shot Optimization](https://dspy-docs.vercel.app/)
+
+### Computational Complexity
+
+- **Efficiency:**
+  - Requires a single LLM call per input-output pair (same as basic LLM judge).
+  - AutoMetrics does parallel calls on batched inputs.
+  - One-time optimization cost during metric creation.
+
+- **Scalability:**
+  - Performance is linear in the number of input-output pairs.
+  - Performance depends on the underlying LLM model and the dataset size.
+  - Example optimization improves consistency but doesn't affect runtime complexity."""
+
+    def generate_known_limitations(self):
+        class KnownLimitationsSignature(dspy.Signature):
+            """Given the task description, evaluation axis, and example-based optimization details, consider an example-based LLM Judge. Generate biases, task misalignment risks, and failure cases."""
+            task_description: str = dspy.InputField(desc="Brief description of the underlying task which is being evaluated.")
+            axis: str = dspy.InputField(desc="The evaluation axis / rubric.")
+            model_name: str = dspy.InputField(desc="The name of the model that is being used as the LLM Judge.")
+            optimization_details: str = dspy.InputField(desc="Details about the example optimization process.")
+            biases: List[str] = dspy.OutputField(desc="A list of biases that could be present in this evaluation.")
+            task_misalignment_risks: List[str] = dspy.OutputField(desc="A list of ways in which this evaluation could be misaligned with the task.")
+            failure_cases: List[str] = dspy.OutputField(desc="A list of failure cases that could occur in this evaluation.")
+
+        optimization_details = f"Optimized with {self.attempts} attempts, {self.examples_per_range} examples per range, using {self.eval_function_name} evaluation function"
+
+        with dspy.settings.context(lm=self.metric_card_author_model):
+            outputs = dspy.ChainOfThought(KnownLimitationsSignature)(
+                task_description=self.task_description,
+                axis=self.axis,
+                model_name=str(getattr(self.model, "model", self.model)),
+                optimization_details=optimization_details,
+            )
+        
+        return f"""- **Biases:** {"\n  - " + "\n  - ".join(outputs.biases)}
+- **Task Misalignment Risks:** {"\n  - " + "\n  - ".join(outputs.task_misalignment_risks)}
+- **Failure Cases:** {"\n  - " + "\n  - ".join(outputs.failure_cases)}"""
+
+    def generature_further_reading(self):
+        return generate_further_reading(self) + "\n  - [Few-Shot Learning with DSPy](https://dspy-docs.vercel.app/docs/building-blocks/optimizers)\n  - [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://openreview.net/pdf?id=uccHPGDlao)"
+
+    def _generate_metric_card(self, author_model: Optional[dspy.LM] = None):
+        """Produce a metric card via a custom builder."""
+        
+        class ExampleRubricMetricCardBuilder(MetricCardBuilder):
+            def metric_details(self) -> str:
+                if self.metric.is_reference_based:
+                    return self.metric.generate_metric_details_ref_based()
+                else:
+                    return self.metric.generate_metric_details_ref_free()
+            
+            def intended_use(self) -> str:
+                return self.metric.generate_intended_use()
+            
+            def metric_implementation(self) -> str:
+                return self.metric.generate_metric_implementation()
+            
+            def known_limitations(self) -> str:
+                return self.metric.generate_known_limitations()
+            
+            def further_reading(self) -> str:
+                return self.metric.generature_further_reading()
+
+        with dspy.settings.context(lm=author_model or self.metric_card_author_model):
+            builder = ExampleRubricMetricCardBuilder(self)
+            return builder.build()
+
+
+class GeneratedRefFreeExampleRubricMetric(_ExampleRubricMetricMixin, GeneratedRefFreeMetric):
+    """Reference-free metric that leverages example-based LLM judging with optimized few-shot examples.
+
+    Parameters
+    ----------
+    name            Human-readable metric identifier
+    description     Short description
+    axis            The textual axis/rubric used for judgement (e.g. "*Clarity*: How clear is …")
+    model           A *dspy.LM* instance used for judging
+    task_description Optional task context passed to the judge
+    train_dataset   Training dataset used for example selection
+    target_column   Column name containing target scores for optimization
+    train_buckets   Pre-computed quintile buckets of examples (optional)
+    trainset        Pre-computed DSPy training set (optional)
+    suggested_range Tuple of (min, max) suggested score range
+    attempts        Number of optimization attempts (default: 5)
+    examples_per_range Number of examples to select from each quintile (default: 2)
+    seed            Random seed for reproducible example selection (default: 42)
+    eval_function_name Name of evaluation function ('inverse_distance' or 'exact_match_rounded')
+    custom_eval_function Custom evaluation function (optional)
+    load_prompt     Path to load pre-optimized prompt (optional)
+    optimize        Whether to perform example optimization (default: True)
+    output_prompt_path Path to save optimized prompt (optional)
+    metric_card_author_model LLM used to generate the metric-card (defaults to *model*)
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs['is_reference_based'] = False
+        super().__init__(*args, **kwargs)
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
+        del references, kwargs  # pragma: no cover
+        return self._call_llm_judge(input, output)
+
+
+class GeneratedRefBasedExampleRubricMetric(_ExampleRubricMetricMixin, GeneratedRefBasedMetric):
+    """Reference-based metric that leverages example-based LLM judging with optimized few-shot examples using reference text.
+
+    Parameters
+    ----------
+    name            Human-readable metric identifier
+    description     Short description
+    axis            The textual axis/rubric used for judgement (e.g. "*Clarity*: How clear is …")
+    model           A *dspy.LM* instance used for judging
+    task_description Optional task context passed to the judge
+    train_dataset   Training dataset used for example selection
+    target_column   Column name containing target scores for optimization
+    train_buckets   Pre-computed quintile buckets of examples (optional)
+    trainset        Pre-computed DSPy training set (optional)
+    suggested_range Tuple of (min, max) suggested score range
+    attempts        Number of optimization attempts (default: 5)
+    examples_per_range Number of examples to select from each quintile (default: 2)
+    seed            Random seed for reproducible example selection (default: 42)
+    eval_function_name Name of evaluation function ('inverse_distance' or 'exact_match_rounded')
+    custom_eval_function Custom evaluation function (optional)
+    load_prompt     Path to load pre-optimized prompt (optional)
+    optimize        Whether to perform example optimization (default: True)
+    output_prompt_path Path to save optimized prompt (optional)
+    metric_card_author_model LLM used to generate the metric-card (defaults to *model*)
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs['is_reference_based'] = True
+        super().__init__(*args, **kwargs)
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
+        del kwargs  # pragma: no cover
+        return self._call_llm_judge(input, output, references) 

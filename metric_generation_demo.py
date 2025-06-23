@@ -11,6 +11,8 @@ from autometrics.dataset.datasets.cogym.cogym import CoGymTravelOutcome
 
 # Generators ---------------------------------------------------------------
 from autometrics.generator.LLMJudgeProposer import BasicLLMJudgeProposer
+from autometrics.generator.LLMJudgeExampleProposer import LLMJudgeExampleProposer
+from autometrics.generator.OptimizedJudgeProposer import OptimizedJudgeProposer
 from autometrics.generator.GEvalJudgeProposer import GEvalJudgeProposer
 from autometrics.generator.CodeGenerator import CodeGenerator
 from autometrics.generator.RubricGenerator import RubricGenerator
@@ -95,7 +97,7 @@ def configure_prometheus():
 # 2.  Run the full pipeline for a dataset
 # ----------------------------------------------------------------------------
 
-def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_type: str = "llm_judge", model_save_dir: str = None):
+def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_type: str = "llm_judge", model_save_dir: str = None, seed: int = None, max_optimization_samples: int = 100):
     banner(f"DATASET: {dataset.get_name()}")
     print("Task description:\n", dataset.get_task_description())
 
@@ -106,6 +108,29 @@ def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_typ
             executor_kwargs={"model": judge_lm},
         )
         print("Using G-Eval metrics...")
+    elif metric_type == "llm_judge_examples":
+        proposer = LLMJudgeExampleProposer(
+            generator_llm=generator_lm,
+            executor_kwargs={"model": judge_lm},
+            max_optimization_samples=max_optimization_samples,
+            seed=seed if seed is not None else 42,  # Pass seed for reproducible optimization
+        )
+        print("Using LLM Judge with optimized examples...")
+        print(f"   (Limited to {max_optimization_samples} samples for faster optimization)")
+        if seed is not None:
+            print(f"   Using seed: {seed}")
+    elif metric_type == "llm_judge_optimized":
+        proposer = OptimizedJudgeProposer(
+            generator_llm=generator_lm,
+            executor_kwargs={"model": judge_lm},
+            auto_mode="medium",  # MIPROv2 optimization level
+            num_threads=32,       # For faster optimization
+            eval_function_name='inverse_distance',
+            seed=seed
+        )
+        print("Using LLM Judge with MIPROv2-optimized prompts...")
+        if seed is not None:
+            print(f"   Using seed: {seed}")
     elif metric_type == "codegen":
         proposer = CodeGenerator(
             generator_llm=generator_lm,
@@ -157,6 +182,8 @@ def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_typ
         "geval": "G-Eval", 
         "codegen": "Code Generation", 
         "llm_judge": "LLM Judge",
+        "llm_judge_examples": "LLM Judge (Example-Based)",
+        "llm_judge_optimized": "LLM Judge (MIPROv2-Optimized)",
         "rubric_prometheus": "Rubric (Prometheus)",
         "rubric_dspy": "Rubric (DSPy)",
         "finetune": "Fine-tuned ModernBERT"
@@ -210,14 +237,18 @@ def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_typ
 
 if __name__ == "__main__":
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description="Demo metric generation with Basic LLM Judge, G-Eval, Code Generation, Rubric Generator, or Fine-tuned ModernBERT")
-    parser.add_argument("--metric-type", choices=["llm_judge", "geval", "codegen", "rubric_prometheus", "rubric_dspy", "finetune"], default="llm_judge", 
+    parser = argparse.ArgumentParser(description="Demo metric generation with Basic LLM Judge, Example-Optimized LLM Judge, MIPROv2-Optimized LLM Judge, G-Eval, Code Generation, Rubric Generator, or Fine-tuned ModernBERT")
+    parser.add_argument("--metric-type", choices=["llm_judge", "llm_judge_examples", "llm_judge_optimized", "geval", "codegen", "rubric_prometheus", "rubric_dspy", "finetune"], default="llm_judge", 
                        help="Choose the metric type to use (default: llm_judge)")
     parser.add_argument("--model", choices=["gpt4o_mini", "qwen"], default="gpt4o_mini", 
                        help="Choose the model to use (default: gpt4o_mini)")
     parser.add_argument("--n-metrics", type=int, default=3, help="Number of metrics to generate (default: 3)")
     parser.add_argument("--model-save-dir", type=str, default="/sphinx/u/salt-checkpoints/autometrics/models", 
                        help="Custom directory to save fine-tuned models (only used for finetune metric type)")
+    parser.add_argument("--seed", type=int, default=None, 
+                       help="Random seed for metric generation (creates different metrics with same parameters)")
+    parser.add_argument("--max-optimization-samples", type=int, default=100,
+                       help="Maximum number of samples to use for example optimization (default: 100, set higher for better optimization but slower processing)")
     args = parser.parse_args()
 
     # Configure models based on choice
@@ -231,6 +262,8 @@ if __name__ == "__main__":
     # Display configuration
     metric_type_display = {
         "llm_judge": "Basic LLM Judge", 
+        "llm_judge_examples": "LLM Judge with Example Selection",
+        "llm_judge_optimized": "LLM Judge with MIPROv2 Optimization",
         "geval": "G-Eval", 
         "codegen": "Code Generation",
         "rubric_prometheus": "Rubric Generator (Prometheus)",
@@ -245,13 +278,13 @@ if __name__ == "__main__":
     if args.metric_type == "rubric_prometheus":
         prometheus_lm = configure_prometheus()
         for ds in [CoGymTravelOutcome(), SimpDA()]:
-            run_pipeline(ds, generator_lm, prometheus_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir)
+            run_pipeline(ds, generator_lm, prometheus_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir, seed=args.seed, max_optimization_samples=args.max_optimization_samples)
     elif args.metric_type == "finetune":
         # For fine-tuning, we don't need a judge model, just the generator model for metric cards
         for ds in [CoGymTravelOutcome(), SimpDA()]:
-            run_pipeline(ds, generator_lm, None, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir)
+            run_pipeline(ds, generator_lm, None, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir, seed=args.seed, max_optimization_samples=args.max_optimization_samples)
     else:
         for ds in [CoGymTravelOutcome(), SimpDA()]:
-            run_pipeline(ds, generator_lm, judge_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir)
+            run_pipeline(ds, generator_lm, judge_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir, seed=args.seed, max_optimization_samples=args.max_optimization_samples)
 
     # print(generator_lm.inspect_history(n=2))

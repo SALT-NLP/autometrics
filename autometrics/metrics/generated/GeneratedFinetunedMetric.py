@@ -1,7 +1,6 @@
 import json
 import os
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 import torch
@@ -23,8 +22,6 @@ __all__ = ["GeneratedRefFreeFinetunedMetric", "GeneratedRefBasedFinetunedMetric"
 class _FinetunedMetricMixin:
     """Shared functionality for both reference-free and reference-based fine-tuned metrics."""
 
-    DEFAULT_MAX_WORKERS = 16  # Lower default due to model loading overhead
-
     def __init__(
         self,
         name: str,
@@ -36,8 +33,8 @@ class _FinetunedMetricMixin:
         training_stats: Optional[Dict[str, Any]] = None,
         metric_card: Optional[str] = None,
         metric_card_author_model: Optional[dspy.LM] = None,
-        max_workers: int = DEFAULT_MAX_WORKERS,
         max_seq_length: int = 2048,
+        batch_size: int = 8,  # Batch size for efficient inference
         is_reference_based: bool = False,
         **kwargs,
     ):
@@ -46,8 +43,8 @@ class _FinetunedMetricMixin:
         self.target_measure = target_measure or "quality"
         self.dataset_name = dataset_name or "unknown"
         self.training_stats = training_stats or {}
-        self.max_workers = max_workers
         self.max_seq_length = max_seq_length
+        self.batch_size = batch_size
         self.is_reference_based = is_reference_based
 
         # Model and tokenizer (loaded lazily)
@@ -79,96 +76,129 @@ class _FinetunedMetricMixin:
         )
 
         # Exclude heavy objects from cache key
-        self.exclude_from_cache_key("_model", "_tokenizer")
+        self.exclude_from_cache_key("_model", "_tokenizer", "batch_size")
 
     def _load_model_and_tokenizer(self):
         """Lazily load the fine-tuned model and tokenizer."""
         if self._model is None or self._tokenizer is None:
             try:
-                from unsloth import FastModel
                 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+                from peft import AutoPeftModelForSequenceClassification
+                import json
+                import os
             except ImportError as e:
-                raise ImportError(f"Required libraries not installed: {e}. Please install unsloth and transformers.")
+                raise ImportError(f"Required libraries not installed: {e}. Please install transformers and peft.")
 
             print(f"Loading fine-tuned model from {self.model_path}")
             
-            # Load the model and tokenizer
-            self._model, self._tokenizer = FastModel.from_pretrained(
-                model_name=self.model_path,
-                load_in_4bit=False,
-                max_seq_length=self.max_seq_length,
-                dtype=None,
-                auto_model=AutoModelForSequenceClassification,
-                num_labels=1,  # Regression
-            )
+            # Load tokenizer
+            self._tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+            
+            # Check if this is a PEFT model by looking for adapter_config.json
+            adapter_config_path = os.path.join(self.model_path, "adapter_config.json")
+            
+            if os.path.exists(adapter_config_path):
+                # Load PEFT model with device_map="auto" to handle meta tensors properly
+                self._model = AutoPeftModelForSequenceClassification.from_pretrained(
+                    self.model_path,
+                    num_labels=1,  # Regression
+                    torch_dtype=torch.float32,  # Use float32 for stability
+                    device_map="auto",  # Let transformers handle device placement
+                    low_cpu_mem_usage=True,  # More efficient loading
+                )
+                print("Loaded PEFT adapter model")
+            else:
+                # Fallback to standard model loading
+                self._model = AutoModelForSequenceClassification.from_pretrained(
+                    self.model_path,
+                    num_labels=1,  # Regression
+                    torch_dtype=torch.float32,  # Use float32 for stability
+                    device_map="auto",  # Let transformers handle device placement
+                    low_cpu_mem_usage=True,  # More efficient loading
+                )
+                print("Loaded standard fine-tuned model")
             
             # Set to evaluation mode
             self._model.eval()
-            if torch.cuda.is_available():
-                self._model = self._model.cuda()
+            
+            # Don't manually move to CUDA since device_map="auto" handles placement
 
         return self._model, self._tokenizer
 
-    def _predict_single(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
-        """Make a prediction using the fine-tuned model."""
+    def _predict_batch(self, texts: List[str]) -> List[float]:
+        """Make predictions on a batch of texts using the fine-tuned model."""
+        print(f"🔍 Processing batch of {len(texts)} texts")
+        if texts:
+            print(f"🔍 Sample text: {texts[0][:150]}...")
+        
         model, tokenizer = self._load_model_and_tokenizer()
         
-        # Format text for prediction (consistent with training format)
-        if self.is_reference_based and references is not None:
-            if isinstance(references, list):
-                refs = " ".join([str(ref) for ref in references if ref is not None])
-            else:
-                refs = str(references)
-            text = f"Input: {input_text} Output: {output_text} Reference: {refs}"
-        else:
-            text = f"Input: {input_text} Output: {output_text}"
-
-        # Tokenize and predict
+        # Tokenize the entire batch
         with torch.no_grad():
             inputs = tokenizer(
-                text,
+                texts,
                 return_tensors="pt",
                 padding=True,
                 truncation=True,
                 max_length=self.max_seq_length
             )
             
-            # Move to GPU if available
-            if torch.cuda.is_available():
-                inputs = {k: v.cuda() for k, v in inputs.items()}
+            # Move inputs to the same device as the model
+            device = next(model.parameters()).device
+            inputs = {k: v.to(device) for k, v in inputs.items()}
             
-            # Get prediction
+            # Get predictions for the entire batch
             outputs = model(**inputs)
-            prediction = outputs.logits.cpu().numpy().flatten()[0]
+            logits = outputs.logits.detach().cpu().numpy().flatten()
             
-        return float(prediction)
+            # For regression, directly use the logit outputs
+            predictions = [float(logit) for logit in logits]
+            print(f"🎯 Batch predictions: {predictions}")
+            
+        return predictions
+
+    def _format_text(self, input_text: str, output_text: str, references: Optional[str] = None) -> str:
+        """Format text for prediction (consistent with training format)."""
+        if self.is_reference_based and references is not None:
+            if isinstance(references, list):
+                refs = " ".join([str(ref) for ref in references if ref is not None])
+            else:
+                refs = str(references)
+            return f"Input: {input_text} Output: {output_text} Reference: {refs}"
+        else:
+            return f"Input: {input_text} Output: {output_text}"
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         del kwargs  # pragma: no cover
-        results: List[float] = [0.0] * len(outputs)
-
-        # Fail-fast if workers=1
-        if self.max_workers == 1:
-            return [self._predict_single(i, o, r) for i, o, r in zip(inputs, outputs, references or [None] * len(outputs))]
-
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {
-                executor.submit(self._predict_single, i, o, r): idx 
-                for idx, (i, o, r) in enumerate(zip(inputs, outputs, references or [None] * len(outputs)))
-            }
-            
-            # Collect results with progress bar
-            with tqdm(total=len(futures), desc="Processing Fine-tuned Predictions") as pbar:
-                for future in as_completed(futures):
-                    index = futures[future]
-                    try:
-                        results[index] = future.result()
-                    except Exception as e:
-                        print(f"Error processing item {index}: {e}")
-                        results[index] = 0.0
-                    pbar.update(1)
         
-        return results
+        print(f"📊 Fine-tuned inference on {len(inputs)} examples with batch_size={self.batch_size}")
+        
+        # Efficient batch processing for transformers model
+        all_results = []
+        references = references or [None] * len(outputs)
+        
+        # Format all texts first
+        formatted_texts = [
+            self._format_text(i, o, r) 
+            for i, o, r in zip(inputs, outputs, references)
+        ]
+        
+        # Process in batches
+        num_batches = (len(formatted_texts) + self.batch_size - 1) // self.batch_size
+        
+        with tqdm(total=num_batches, desc=f"Fine-tuned Predictions (batch_size={self.batch_size})") as pbar:
+            for batch_idx, batch_start in enumerate(range(0, len(formatted_texts), self.batch_size)):
+                batch_end = min(batch_start + self.batch_size, len(formatted_texts))
+                batch_texts = formatted_texts[batch_start:batch_end]
+                
+                # Get predictions for this batch
+                batch_results = self._predict_batch(batch_texts)
+                all_results.extend(batch_results)
+                
+                pbar.update(1)
+        
+        print(f"🎯 Final predictions: {all_results}")
+        return all_results
 
     # ------------------------------------------------------------------
     # Export helpers
@@ -200,8 +230,8 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Finetuned({class_name}):
             dataset_name={json.dumps(self.dataset_name)},
             training_stats={json.dumps(self.training_stats)},
             metric_card={json.dumps("provided" if include_metric_card else "None")},
-            max_workers={self.max_workers},
             max_seq_length={self.max_seq_length},
+            batch_size={self.batch_size},
         )
 
     def __repr__(self):
@@ -221,8 +251,8 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Finetuned({class_name}):
             "dataset_name": self.dataset_name,
             "training_stats": self.training_stats,
             "metric_card": self.metric_card,
-            "max_workers": self.max_workers,
             "max_seq_length": self.max_seq_length,
+            "batch_size": self.batch_size,
             "is_reference_based": self.is_reference_based,
         }
 
@@ -256,9 +286,35 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Finetuned({class_name}):
             "The model was trained using supervised learning on input-output pairs with quality scores,",
             "learning to predict numerical quality ratings directly from text patterns.",
             "",
+        ]
+
+        # Add training data size warnings
+        if isinstance(train_size, int):
+            if train_size < 100:
+                lines.extend([
+                    "⚠️ **WARNING: Limited Training Data** ⚠️",
+                    "",
+                    f"This model was trained on only **{train_size} examples**, which is quite small for fine-tuning.",
+                    "Performance may be limited due to insufficient training data. Consider:",
+                    "- Gathering more training examples if possible",
+                    "- Using this metric cautiously and validating against human judgments",
+                    "- Combining with other metrics for more robust evaluation",
+                    "",
+                ])
+            elif train_size < 250:
+                lines.extend([
+                    "⚠️ **Note: Moderate Training Data Size** ⚠️",
+                    "",
+                    f"This model was trained on **{train_size} examples**. While this can work,",
+                    "more training data typically leads to better performance. Consider validating",
+                    "against human judgments and using additional metrics when possible.",
+                    "",
+                ])
+
+        lines.extend([
             "### Training Details",
             "",
-            f"- **Base Model:** ModernBERT-Large (answerdotai/ModernBERT-large)",
+            f"- **Base Model:** ModernBERT-Large (answerdotai/ModernBERT-large) using PEFT/LoRA",
             f"- **Training Dataset:** {self.dataset_name}",
             f"- **Target Measure:** {self.target_measure}",
             f"- **Training Examples:** {train_size}",
@@ -270,7 +326,7 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Finetuned({class_name}):
             "### Input Format",
             "",
             "The model expects input in the format used during training:",
-        ]
+        ])
         
         if reference_based:
             lines.append("- `Input: [input_text] Output: [output_text] Reference: [reference_text]`")

@@ -95,7 +95,7 @@ def configure_prometheus():
 # 2.  Run the full pipeline for a dataset
 # ----------------------------------------------------------------------------
 
-def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_type: str = "llm_judge"):
+def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_type: str = "llm_judge", model_save_dir: str = None):
     banner(f"DATASET: {dataset.get_name()}")
     print("Task description:\n", dataset.get_task_description())
 
@@ -128,8 +128,11 @@ def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_typ
     elif metric_type == "finetune":
         proposer = FinetuneGenerator(
             generator_llm=generator_lm,
+            model_save_dir=model_save_dir,
         )
         print("Using Fine-tune Generator with ModernBERT...")
+        if model_save_dir:
+            print(f"   Custom model directory: {model_save_dir}")
     else:  # llm_judge
         proposer = BasicLLMJudgeProposer(
             generator_llm=generator_lm,
@@ -158,11 +161,11 @@ def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_typ
         "rubric_dspy": "Rubric (DSPy)",
         "finetune": "Fine-tuned ModernBERT"
     }[metric_type]
-    banner(f"Scoring first 5 examples with first generated {eval_type_display} metric …")
+    banner(f"Scoring first 10 examples with first generated {eval_type_display} metric …")
     first_metric = metrics[0] if len(metrics) > 0 else None
     
     if first_metric:
-        df = dataset.get_dataframe().head(5)
+        df = dataset.get_dataframe().head(10)
 
         # Prepare references if the dataset has them
         references = None
@@ -213,6 +216,8 @@ if __name__ == "__main__":
     parser.add_argument("--model", choices=["gpt4o_mini", "qwen"], default="gpt4o_mini", 
                        help="Choose the model to use (default: gpt4o_mini)")
     parser.add_argument("--n-metrics", type=int, default=3, help="Number of metrics to generate (default: 3)")
+    parser.add_argument("--model-save-dir", type=str, default="/sphinx/u/salt-checkpoints/autometrics/models", 
+                       help="Custom directory to save fine-tuned models (only used for finetune metric type)")
     args = parser.parse_args()
 
     # Configure models based on choice
@@ -240,13 +245,13 @@ if __name__ == "__main__":
     if args.metric_type == "rubric_prometheus":
         prometheus_lm = configure_prometheus()
         for ds in [CoGymTravelOutcome(), SimpDA()]:
-            run_pipeline(ds, generator_lm, prometheus_lm, n_metrics=args.n_metrics, metric_type=args.metric_type)
+            run_pipeline(ds, generator_lm, prometheus_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir)
     elif args.metric_type == "finetune":
         # For fine-tuning, we don't need a judge model, just the generator model for metric cards
         for ds in [CoGymTravelOutcome(), SimpDA()]:
-            run_pipeline(ds, generator_lm, None, n_metrics=args.n_metrics, metric_type=args.metric_type)
+            run_pipeline(ds, generator_lm, None, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir)
     else:
         for ds in [CoGymTravelOutcome(), SimpDA()]:
-            run_pipeline(ds, generator_lm, judge_lm, n_metrics=args.n_metrics, metric_type=args.metric_type)
+            run_pipeline(ds, generator_lm, judge_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir)
 
     # print(generator_lm.inspect_history(n=2))

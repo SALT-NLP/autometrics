@@ -47,6 +47,7 @@ class FinetuneGenerator(Generator):
         upload_to_hf: bool = False,
         hf_repo_name: Optional[str] = None,
         seed: int = 42,
+        model_save_dir: Optional[str] = None,
     ):
         super().__init__(
             name=name,
@@ -65,13 +66,23 @@ class FinetuneGenerator(Generator):
         self.upload_to_hf = upload_to_hf
         self.hf_repo_name = hf_repo_name
         self.seed = seed
+        self.model_save_dir_arg = model_save_dir
 
         # Guarantee attribute is a dictionary for ** expansion later
         if self.executor_kwargs is None:
             self.executor_kwargs = {}
 
-        # Set up model save directory
-        self.model_save_dir = Path(user_data_dir("autometrics")) / "models"
+        # Set up model save directory with precedence: arg > env var > default
+        if self.model_save_dir_arg:
+            self.model_save_dir = Path(self.model_save_dir_arg)
+            print(f"🗂️  Using model directory from argument: {self.model_save_dir}")
+        elif os.environ.get("AUTOMETRICS_MODEL_DIR"):
+            self.model_save_dir = Path(os.environ.get("AUTOMETRICS_MODEL_DIR"))
+            print(f"🗂️  Using model directory from AUTOMETRICS_MODEL_DIR: {self.model_save_dir}")
+        else:
+            self.model_save_dir = Path(user_data_dir("autometrics")) / "models"
+            print(f"🗂️  Using default model directory: {self.model_save_dir}")
+            
         self.model_save_dir.mkdir(parents=True, exist_ok=True)
 
     def _get_formatter(self, dataset):
@@ -106,16 +117,30 @@ class FinetuneGenerator(Generator):
         
         # Create text for training using the dataset's formatter
         texts = []
-        for _, row in df.iterrows():
-            formatted_text = formatter(row)
+        for row_tuple in df.iterrows():
+            formatted_text = formatter(row_tuple)
             texts.append(formatted_text)
 
-        # Get target values
+        # Get target values and handle missing data
         targets = df[target_measure].values
+        
+        # Find valid (non-NaN) indices
+        valid_indices = ~pd.isna(targets)
+        valid_texts = [texts[i] for i in range(len(texts)) if valid_indices[i]]
+        valid_targets = targets[valid_indices]
+        
+        print(f"📊 Data cleaning summary:")
+        print(f"   Total examples: {len(texts)}")
+        print(f"   Valid examples (non-NaN): {len(valid_texts)}")
+        print(f"   Removed examples: {len(texts) - len(valid_texts)}")
+        print(f"   Target range: [{valid_targets.min():.3f}, {valid_targets.max():.3f}]")
+        
+        if len(valid_texts) < 10:
+            raise ValueError(f"Insufficient valid training data after removing NaN values. Only {len(valid_texts)} examples remain.")
 
-        # 80/20 train/validation split
+        # 80/20 train/validation split on clean data
         train_texts, val_texts, train_targets, val_targets = train_test_split(
-            texts, targets, test_size=0.2, random_state=self.seed, stratify=None
+            valid_texts, valid_targets, test_size=0.2, random_state=self.seed, stratify=None
         )
 
         return train_texts, val_texts, train_targets, val_targets
@@ -123,48 +148,74 @@ class FinetuneGenerator(Generator):
     def _finetune_model(self, train_texts: List[str], train_targets: np.ndarray, 
                        val_texts: List[str], val_targets: np.ndarray, 
                        model_save_path: str) -> str:
-        """Fine-tune the ModernBERT model for regression."""
+        """Fine-tune the ModernBERT model for regression using PEFT/LoRA."""
         try:
-            from unsloth import FastModel
             from transformers import (
-                AutoModelForSequenceClassification, 
+                AutoModelForSequenceClassification,
+                AutoTokenizer,
                 TrainingArguments, 
                 Trainer,
-                training_args
             )
+            from peft import LoraConfig, get_peft_model, TaskType
             from datasets import Dataset
-            import torch.nn.functional as F
-            from sklearn.metrics import mean_squared_error
+            from sklearn.metrics import mean_squared_error, r2_score
+            import torch
         except ImportError as e:
-            raise ImportError(f"Required libraries not installed: {e}. Please install unsloth and transformers.")
+            raise ImportError(f"Required libraries not installed: {e}. Please install transformers and peft.")
 
-        print(f"Fine-tuning {self.model_name} for regression...")
+        print(f"Fine-tuning {self.model_name} for regression using PEFT/LoRA...")
         
-        # Load model with unsloth
-        model, tokenizer = FastModel.from_pretrained(
-            model_name=self.model_name,
-            load_in_4bit=False,
-            max_seq_length=self.max_seq_length,
-            dtype=None,
-            auto_model=AutoModelForSequenceClassification,
+        # Load base model and tokenizer
+        tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        base_model = AutoModelForSequenceClassification.from_pretrained(
+            self.model_name,
             num_labels=1,  # Regression - single output
+            torch_dtype=torch.float32,  # Use float32 for stability
         )
 
-        # Make all parameters trainable
-        for param in model.parameters():
-            param.requires_grad = True
+        # Configure LoRA for efficient fine-tuning
+        peft_config = LoraConfig(
+            task_type=TaskType.SEQ_CLS,  # Sequence Classification (includes regression)
+            inference_mode=False,
+            r=16,  # Smaller rank for stability
+            lora_alpha=32,  # Conservative scaling factor  
+            lora_dropout=0.1,  # Dropout for LoRA layers
+            bias="none",  # Don't train bias terms
+            target_modules=["query", "value", "key", "dense"],  # Target attention and dense layers
+            init_lora_weights=True,  # Ensure proper initialization
+        )
+        
+        # Wrap base model with LoRA adapters
+        model = get_peft_model(base_model, peft_config)
+        model.print_trainable_parameters()  # Show parameter efficiency
+        
+        # Ensure proper device placement for PEFT model
+        if torch.cuda.is_available():
+            model = model.cuda()
 
         # Prepare datasets
         def tokenize_function(examples):
             return tokenizer(examples['text'], truncation=True, padding=True, max_length=self.max_seq_length)
 
+        # Convert targets to float and validate
+        train_labels = train_targets.astype(float)
+        val_labels = val_targets.astype(float)
+        
+        # Check for NaN or infinite values in labels
+        if np.any(np.isnan(train_labels)) or np.any(np.isinf(train_labels)):
+            raise ValueError(f"Training labels contain NaN or infinite values: {train_labels}")
+        if np.any(np.isnan(val_labels)) or np.any(np.isinf(val_labels)):
+            raise ValueError(f"Validation labels contain NaN or infinite values: {val_labels}")
+            
+        print(f"✅ Labels validation passed - no NaN or infinite values detected")
+
         train_dataset = Dataset.from_dict({
             'text': train_texts,
-            'labels': train_targets.astype(float)
+            'labels': train_labels
         })
         val_dataset = Dataset.from_dict({
             'text': val_texts, 
-            'labels': val_targets.astype(float)
+            'labels': val_labels
         })
 
         train_dataset = train_dataset.map(tokenize_function, batched=True)
@@ -175,8 +226,32 @@ class FinetuneGenerator(Generator):
             predictions, labels = eval_pred
             # For regression, predictions is logits with shape (batch_size, 1)
             predictions = predictions.flatten()
-            mse = mean_squared_error(labels, predictions)
-            return {"mse": mse, "rmse": np.sqrt(mse)}
+            
+            # Handle NaN predictions gracefully
+            if np.any(np.isnan(predictions)):
+                predictions = np.nan_to_num(predictions, nan=np.mean(labels))
+            
+            # Handle infinite predictions
+            if np.any(np.isinf(predictions)):
+                predictions = np.clip(predictions, np.min(labels) - 1, np.max(labels) + 1)
+            
+            # Compute regression metrics
+            try:
+                mse = mean_squared_error(labels, predictions)
+                rmse = np.sqrt(mse)
+                r2 = r2_score(labels, predictions)
+                
+                return {
+                    "mse": mse,
+                    "rmse": rmse,
+                    "r2": r2,
+                }
+            except Exception as e:
+                return {
+                    "mse": float('inf'),
+                    "rmse": float('inf'),
+                    "r2": -float('inf'),
+                }
 
         # Set up training arguments
         training_args_config = TrainingArguments(
@@ -184,16 +259,17 @@ class FinetuneGenerator(Generator):
             per_device_train_batch_size=self.batch_size,
             per_device_eval_batch_size=self.batch_size,
             gradient_accumulation_steps=1,
-            warmup_steps=10,
-            fp16=not torch.cuda.is_bf16_supported(),
-            bf16=torch.cuda.is_bf16_supported(),
-            optim=training_args.OptimizerNames.ADAMW_TORCH,
+            warmup_steps=20,  # More warmup steps for stability
+            fp16=False,  # Disable FP16 for stability with PEFT
+            bf16=False,
+            optim="adamw_torch",
             learning_rate=self.learning_rate,
-            weight_decay=0.001,
+            weight_decay=0.01,  # Increase weight decay for stability
             lr_scheduler_type="cosine",
             seed=self.seed,  # Use consistent seed
             num_train_epochs=self.num_train_epochs,
-            save_strategy="epoch",
+            save_strategy="steps",
+            save_steps=0.25,
             report_to="none",
             group_by_length=True,
             eval_strategy="steps",
@@ -204,8 +280,7 @@ class FinetuneGenerator(Generator):
             metric_for_best_model="mse",
             greater_is_better=False,  # Lower MSE is better
             # Early stopping based on validation performance
-            save_total_limit=3,  # Keep only best 3 checkpoints
-            early_stopping_patience=5,  # Stop if no improvement for 5 eval steps
+            save_total_limit=1,  # Keep only best 1 checkpoints
         )
 
         # Create trainer
@@ -227,7 +302,7 @@ class FinetuneGenerator(Generator):
         tokenizer.save_pretrained(model_save_path)
         
         print(f"Model saved to {model_save_path}")
-        print(f"Training completed. Final train loss: {trainer_stats.training_history[-1].get('train_loss', 'N/A')}")
+        print(f"Training completed. Final training loss: {trainer_stats.training_loss:.4f}")
 
         # Upload to HuggingFace if requested
         if self.upload_to_hf and self.hf_repo_name:
@@ -268,6 +343,8 @@ class FinetuneGenerator(Generator):
 
         print(f"Training set size: {len(train_texts)}")
         print(f"Validation set size: {len(val_texts)}")
+        print(f"Training targets - Min: {train_targets.min():.3f}, Max: {train_targets.max():.3f}, Mean: {train_targets.mean():.3f}, Std: {train_targets.std():.3f}")
+        print(f"Validation targets - Min: {val_targets.min():.3f}, Max: {val_targets.max():.3f}, Mean: {val_targets.mean():.3f}, Std: {val_targets.std():.3f}")
 
         # Step-3: Generate metrics (typically just 1 for fine-tuning)
         new_metrics = []

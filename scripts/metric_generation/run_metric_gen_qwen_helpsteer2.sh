@@ -8,15 +8,15 @@
 #SBATCH --partition=sc-loprio
 #SBATCH --time=48:00:00
 #SBATCH --nodes=1
-#SBATCH --job-name=metric_gen_qwen_cogym
-#SBATCH --output=scripts/metric_generation/logs/metric_gen_qwen_cogym.out
-#SBATCH --error=scripts/metric_generation/logs/metric_gen_qwen_cogym.err
+#SBATCH --job-name=metric_gen_qwen_helpsteer2
+#SBATCH --output=scripts/metric_generation/logs/metric_gen_qwen_helpsteer2.out
+#SBATCH --error=scripts/metric_generation/logs/metric_gen_qwen_helpsteer2.err
 #SBATCH --constraint=141G
 #SBATCH --requeue
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mryan0@stanford.edu
 
-# Script for CoGym datasets with Qwen3-32B
+# Script for HelpSteer2 dataset with Qwen3-32B
 
 . /nlp/scr/mryan0/miniconda3/etc/profile.d/conda.sh
 conda activate sglang
@@ -25,10 +25,10 @@ cd /nlp/scr2/nlp/personal-rm/autometrics
 
 # Server configuration
 model="Qwen/Qwen3-32B"
-port=7440  # Different port, 10 apart spacing
+port=7420  # Different port, 10 apart from 7410
 model_nickname="qwen3_32b"
 
-echo "Starting Qwen3-32B server for CoGym metric generation..."
+echo "Starting Qwen3-32B server for HelpSteer2 metric generation..."
 python -m sglang.launch_server --model-path ${model} --port ${port} --host 0.0.0.0 --tp 1 --dtype bfloat16 --mem-fraction-static 0.8 --trust-remote-code > /dev/null 2>&1 &
 
 # Wait for server to be ready
@@ -52,44 +52,39 @@ echo "Server is up and running!"
 conda activate autometrics
 
 # Set environment variables for Qwen
-export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_metric_gen_qwen_cogym"
+export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_metric_gen_qwen_helpsteer2"
 export AUTOMETRICS_MODEL_DIR="/sphinx/u/salt-checkpoints/autometrics/models"
 
 # Set API base URL
 API_BASE=http://localhost:${port}/v1
 
-echo "Starting Metric Generation Benchmark with Qwen3-32B for CoGym datasets..."
+echo "Starting Metric Generation Benchmark with Qwen3-32B for HelpSteer2 dataset..."
 echo "Using DSPY cache: $DSPY_CACHEDIR"
 echo "Model save directory: $AUTOMETRICS_MODEL_DIR"
 echo "API Base: $API_BASE"
-echo "Processing datasets: CoGym variants"
+echo "Processing dataset: HelpSteer2"
 echo "Seeds: 42 43 44 45 46"
 echo "Correlation: all"
 
-# Run the benchmark for CoGym datasets
+# Run the benchmark for HelpSteer2 dataset only
 python analysis/ablations/run_metric_generation_benchmark.py \
     --generator-model qwen3_32b \
     --judge-model qwen3_32b \
     --api-base $API_BASE \
     --seeds 42 43 44 45 46 \
     --correlation all \
-    --dataset CoGymTravelOutcome CoGymTravelProcess CoGymTabularOutcome CoGymTabularProcess CoGymLessonOutcome CoGymLessonProcess \
+    --dataset HelpSteer2 \
     --output-dir results/ablations/metric_generation \
     --model-save-dir $AUTOMETRICS_MODEL_DIR
 
-echo "CoGym datasets benchmark completed with Qwen3-32B!"
+echo "HelpSteer2 dataset benchmark completed with Qwen3-32B!"
 
 # Cleanup: Kill the server
 pkill -f "sglang.launch_server"
 
 echo ""
 echo "Summary of processed dataset-measure combinations:"
-echo "  - CoGymTravelOutcome: outcomeRating"
-echo "  - CoGymTravelProcess: agentRating, communicationRating"
-echo "  - CoGymTabularOutcome: outcomeRating"
-echo "  - CoGymTabularProcess: agentRating, communicationRating"
-echo "  - CoGymLessonOutcome: outcomeRating"
-echo "  - CoGymLessonProcess: agentRating, communicationRating"
+echo "  - HelpSteer2: helpfulness, correctness, coherence, complexity, verbosity"
 echo ""
-echo "Total: 9 dataset-measure combinations"
+echo "Total: 5 dataset-measure combinations"
 echo "Results saved to: results/ablations/metric_generation/" 

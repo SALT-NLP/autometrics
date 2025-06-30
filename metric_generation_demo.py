@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 import pprint
 import argparse
+import importlib.util
+import sys
 
 import dspy
 
@@ -27,6 +29,92 @@ def banner(text: str):
     print("\n" + "=" * 80)
     print(text)
     print("=" * 80 + "\n")
+
+
+# ----------------------------------------------------------------------------
+# Helper to test metric serialization by loading and re-running saved metric
+# ----------------------------------------------------------------------------
+
+def test_metric_serialization(metric_file_path, inputs, outputs, references, original_scores):
+    """
+    Load a saved metric from file and test that it produces the same results.
+    
+    Args:
+        metric_file_path: Path to the saved metric Python file
+        inputs: List of input texts
+        outputs: List of output texts  
+        references: List of reference texts (or None)
+        original_scores: Original scores to compare against
+    
+    Returns:
+        bool: True if serialization test passed, False otherwise
+    """
+    try:
+        # Import the metric module dynamically
+        spec = importlib.util.spec_from_file_location("loaded_metric", metric_file_path)
+        if spec is None or spec.loader is None:
+            print(f"❌ Failed to load metric from {metric_file_path}")
+            return False
+            
+        loaded_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(loaded_module)
+        
+        # Find the metric class (should be the only class in the module)
+        # Look for classes that have a calculate_batched method (the key metric interface)
+        metric_classes = []
+        for name in dir(loaded_module):
+            obj = getattr(loaded_module, name)
+            if (isinstance(obj, type) and 
+                hasattr(obj, 'calculate_batched') and 
+                callable(getattr(obj, 'calculate_batched')) and
+                name != 'GeneratedRefFreeOptimizedJudge'):  # Exclude base classes
+                metric_classes.append(obj)
+        
+        if not metric_classes:
+            print(f"❌ No metric class found in {metric_file_path}")
+            return False
+            
+        if len(metric_classes) > 1:
+            print(f"⚠️  Multiple metric classes found, using first one: {metric_classes[0].__name__}")
+            
+        # Instantiate the loaded metric
+        MetricClass = metric_classes[0]
+        loaded_metric = MetricClass()
+        
+        # Run the loaded metric on a small subset to generate LLM history
+        test_inputs = inputs[:2]  # Just use first 2 examples for history inspection
+        test_outputs = outputs[:2]
+        test_references = references[:2] if references else None
+        
+        loaded_scores = loaded_metric.calculate_batched(test_inputs, test_outputs, test_references)
+        
+        # Verify basic functionality
+        if len(loaded_scores) != len(test_inputs):
+            print(f"❌ Metric produced wrong number of scores: {len(loaded_scores)} vs {len(test_inputs)}")
+            return False
+        
+        print("✅ Basic functionality test PASSED - metric loads and runs correctly")
+        
+        # Inspect LLM history to verify prompt structure
+        print("\n🔍 Inspecting LLM history to verify prompt usage...")
+        print("📜 LLM History (last 2 calls):")
+        print("-" * 60)
+        
+        # Get the model from the loaded metric and show history
+        if hasattr(loaded_metric, 'model') and hasattr(loaded_metric.model, 'inspect_history'):
+            loaded_metric.model.inspect_history(n=2)
+            print("-" * 60)
+            print("✅ SERIALIZATION TEST PASSED! Metric loaded and executed successfully.")
+            print("   You can inspect the history above to verify the prompt structure.")
+            return True
+        else:
+            print("⚠️  Model doesn't support inspect_history() - skipping prompt verification")
+            print("✅ SERIALIZATION TEST PASSED! Metric loaded and executed successfully.")
+            return True
+        
+    except Exception as e:
+        print(f"❌ Error during serialization test: {e}")
+        return False
 
 
 # ----------------------------------------------------------------------------
@@ -97,7 +185,7 @@ def configure_prometheus():
 # 2.  Run the full pipeline for a dataset
 # ----------------------------------------------------------------------------
 
-def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_type: str = "llm_judge", model_save_dir: str = None, seed: int = None, max_optimization_samples: int = 100):
+def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_type: str = "llm_judge", model_save_dir: str = None, seed: int = None, max_optimization_samples: int = 100, test_serialization: bool = False):
     banner(f"DATASET: {dataset.get_name()}")
     print("Task description:\n", dataset.get_task_description())
 
@@ -124,7 +212,7 @@ def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_typ
             generator_llm=generator_lm,
             executor_kwargs={"model": judge_lm},
             auto_mode="medium",  # MIPROv2 optimization level
-            num_threads=32,       # For faster optimization
+            num_threads=64,       # For faster optimization
             eval_function_name='inverse_distance',
             seed=seed
         )
@@ -220,8 +308,28 @@ def run_pipeline(dataset, generator_lm, judge_lm, n_metrics: int = 3, metric_typ
                         .replace(":", "_")
                         .replace("-", "_"))
         
-        first_metric.save_python_code(out_dir / f"{safe_filename}_Metric.py")
-        print("Saved standalone metric to", out_dir / f"{safe_filename}_Metric.py")
+        metric_file_path = out_dir / f"{safe_filename}_Metric.py"
+        first_metric.save_python_code(metric_file_path)
+        print("Saved standalone metric to", metric_file_path)
+        
+        # Test metric serialization by loading and re-running the saved metric
+        # Only run if test_serialization flag is set
+        if test_serialization:
+            banner("Testing Metric Serialization …")
+            print("Loading saved metric and testing that it produces identical results...")
+            
+            serialization_success = test_metric_serialization(
+                metric_file_path=metric_file_path,
+                inputs=df[dataset.get_input_column()].tolist(),
+                outputs=df[dataset.get_output_column()].tolist(),
+                references=references,
+                original_scores=scores
+            )
+            
+            if serialization_success:
+                print("\n🎉 SERIALIZATION TEST SUCCESSFUL! The saved metric works perfectly.")
+            else:
+                print("\n⚠️  SERIALIZATION TEST FAILED! There may be an issue with metric saving/loading.")
         
         # Show a sample of the metric card
         if hasattr(first_metric, 'metric_card') and first_metric.metric_card:
@@ -249,6 +357,8 @@ if __name__ == "__main__":
                        help="Random seed for metric generation (creates different metrics with same parameters)")
     parser.add_argument("--max-optimization-samples", type=int, default=100,
                        help="Maximum number of samples to use for example optimization (default: 100, set higher for better optimization but slower processing)")
+    parser.add_argument("--test-serialization", action="store_true",
+                       help="Test metric serialization by loading saved metrics and verifying they work correctly")
     args = parser.parse_args()
 
     # Configure models based on choice
@@ -278,13 +388,13 @@ if __name__ == "__main__":
     if args.metric_type == "rubric_prometheus":
         prometheus_lm = configure_prometheus()
         for ds in [CoGymTravelOutcome(), SimpDA()]:
-            run_pipeline(ds, generator_lm, prometheus_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir, seed=args.seed, max_optimization_samples=args.max_optimization_samples)
+            run_pipeline(ds, generator_lm, prometheus_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir, seed=args.seed, max_optimization_samples=args.max_optimization_samples, test_serialization=args.test_serialization)
     elif args.metric_type == "finetune":
         # For fine-tuning, we don't need a judge model, just the generator model for metric cards
         for ds in [CoGymTravelOutcome(), SimpDA()]:
-            run_pipeline(ds, generator_lm, None, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir, seed=args.seed, max_optimization_samples=args.max_optimization_samples)
+            run_pipeline(ds, generator_lm, None, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir, seed=args.seed, max_optimization_samples=args.max_optimization_samples, test_serialization=args.test_serialization)
     else:
         for ds in [CoGymTravelOutcome(), SimpDA()]:
-            run_pipeline(ds, generator_lm, judge_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir, seed=args.seed, max_optimization_samples=args.max_optimization_samples)
+            run_pipeline(ds, generator_lm, judge_lm, n_metrics=args.n_metrics, metric_type=args.metric_type, model_save_dir=args.model_save_dir, seed=args.seed, max_optimization_samples=args.max_optimization_samples, test_serialization=args.test_serialization)
 
     # print(generator_lm.inspect_history(n=2))

@@ -68,6 +68,7 @@ class RubricGenerator(Generator):
         executor_class: type | None = None,
         executor_kwargs: dict | None = None,
         use_prometheus: bool = True,
+        seed: Optional[int] = None,
     ):
 
         super().__init__(
@@ -79,6 +80,8 @@ class RubricGenerator(Generator):
         )
 
         self.use_prometheus = use_prometheus
+        # Store seed for temperature-based cache busting
+        self.seed = seed
 
         # Guarantee attribute is a dictionary for ** expansion later
         if self.executor_kwargs is None:
@@ -182,6 +185,7 @@ class RubricGenerator(Generator):
                 generator_llm=self.generator_llm,
                 target_name=target_measure,
                 num_axes_to_generate=n_metrics,
+                seed=self.seed,
             )
             print(f"DEBUG: Generated {len(axes)} axes")
         except Exception as e:
@@ -197,17 +201,33 @@ class RubricGenerator(Generator):
         def generate_rubric_with_context(task_description, good_examples_formatted, bad_examples_formatted, metric_title, metric_description):
             print(f"DEBUG: Generating rubric for '{metric_title}' in thread")
             try:
-                with dspy.settings.context(lm=self.generator_llm):
-                    rubric_generator = GenerateRubric()
-                    result = rubric_generator.forward(
-                        task_description,
-                        good_examples_formatted,
-                        bad_examples_formatted,
-                        metric_title,
-                        metric_description
-                    )
-                    print(f"DEBUG: Successfully generated rubric for '{metric_title}'")
-                    return result
+                # Set temperature based on seed for cache busting
+                temperature = 0.0001 * self.seed if self.seed is not None else None
+                
+                if temperature is not None:
+                    with dspy.settings.context(lm=self.generator_llm, temperature=temperature):
+                        rubric_generator = GenerateRubric()
+                        result = rubric_generator.forward(
+                            task_description,
+                            good_examples_formatted,
+                            bad_examples_formatted,
+                            metric_title,
+                            metric_description
+                        )
+                        print(f"DEBUG: Successfully generated rubric for '{metric_title}' (seed={self.seed}, temp={temperature})")
+                        return result
+                else:
+                    with dspy.settings.context(lm=self.generator_llm):
+                        rubric_generator = GenerateRubric()
+                        result = rubric_generator.forward(
+                            task_description,
+                            good_examples_formatted,
+                            bad_examples_formatted,
+                            metric_title,
+                            metric_description
+                        )
+                        print(f"DEBUG: Successfully generated rubric for '{metric_title}'")
+                        return result
             except Exception as e:
                 print(f"ERROR: Failed to generate rubric for '{metric_title}': {e}")
                 raise
@@ -287,6 +307,16 @@ class RubricGenerator(Generator):
                     
                     print(f"DEBUG: Creating metric '{metric_name}' with executor class {dynamic_executor_class}")
 
+                    # Validate and reconcile seed values
+                    executor_kwargs = self.executor_kwargs.copy()
+                    if self.seed is not None:
+                        if 'seed' in executor_kwargs and executor_kwargs['seed'] != self.seed:
+                            print(f"Warning: Seed mismatch detected. Proposer seed ({self.seed}) differs from executor_kwargs seed ({executor_kwargs['seed']}). Using proposer seed.")
+                        executor_kwargs['seed'] = self.seed
+                    elif 'seed' not in executor_kwargs:
+                        # No seed provided anywhere, that's fine
+                        pass
+                    
                     # Create the appropriate metric with rubric
                     if self.use_prometheus:
                         # For Prometheus metrics, pass the rubric
@@ -297,7 +327,7 @@ class RubricGenerator(Generator):
                                 rubric=rubric,
                                 task_description=task_description,
                                 metric_card_author_model=self.generator_llm,
-                                **self.executor_kwargs,
+                                **executor_kwargs,
                             )
                         )
                     else:
@@ -314,7 +344,7 @@ class RubricGenerator(Generator):
                                 rubric=rubric,  # Store the rubric for markdown display
                                 task_description=task_description,
                                 metric_card_author_model=self.generator_llm,
-                                **self.executor_kwargs,
+                                **executor_kwargs,
                             )
                         )
 

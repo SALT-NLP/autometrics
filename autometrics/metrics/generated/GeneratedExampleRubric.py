@@ -8,7 +8,7 @@ from tqdm import tqdm
 import dspy
 from dspy.evaluate import Evaluate
 
-from autometrics.metrics.generated.utils.utils import generate_llm_constructor_code
+from autometrics.metrics.generated.utils.utils import generate_llm_constructor_code, smart_truncate_text
 from autometrics.metrics.generated.utils.metric_card import generate_further_reading
 from autometrics.metrics.generated.utils.metric_card import MetricCardBuilder
 from autometrics.metrics.generated.GeneratedRefFreeMetric import GeneratedRefFreeMetric
@@ -217,9 +217,8 @@ class _ExampleRubricMetricMixin:
                     text = example.get('text', 'N/A')
                     score = example.get('score', 'N/A')
                     
-                    # Allow longer text now that we have more room (no Notes column)
-                    if len(str(text)) > 150:
-                        text = str(text)[:147] + "..."
+                    # Allow longer text for better readability, intelligently avoiding breaking markdown links
+                    text = smart_truncate_text(str(text), 400)
                     
                     # Escape pipe characters in text for markdown table
                     text = str(text).replace("|", "\\|").replace("\n", " ")

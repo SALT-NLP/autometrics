@@ -25,7 +25,7 @@ cd /nlp/scr2/nlp/personal-rm/autometrics
 
 # Server configuration
 model="Qwen/Qwen3-32B"
-port=7413  # Different port to avoid conflicts
+port=7450  # Different port, 10 apart spacing
 model_nickname="qwen3_32b"
 
 echo "Starting Qwen3-32B server for remaining datasets metric generation..."
@@ -64,7 +64,7 @@ echo "Model save directory: $AUTOMETRICS_MODEL_DIR"
 echo "API Base: $API_BASE"
 echo "Processing datasets: EvalGen, Primock57, RealHumanEval, SummEval"
 echo "Seeds: 42 43 44 45 46"
-echo "Correlation: kendall"
+echo "Correlation: all"
 
 # Run the benchmark for remaining datasets
 python analysis/ablations/run_metric_generation_benchmark.py \
@@ -72,7 +72,7 @@ python analysis/ablations/run_metric_generation_benchmark.py \
     --judge-model qwen3_32b \
     --api-base $API_BASE \
     --seeds 42 43 44 45 46 \
-    --correlation kendall \
+    --correlation all \
     --dataset EvalGenMedical EvalGenProduct Primock57 RealHumanEval SummEval \
     --output-dir results/ablations/metric_generation \
     --model-save-dir $AUTOMETRICS_MODEL_DIR

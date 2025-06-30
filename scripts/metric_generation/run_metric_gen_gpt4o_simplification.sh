@@ -36,14 +36,14 @@ echo "Using DSPY cache: $DSPY_CACHEDIR"
 echo "Model save directory: $AUTOMETRICS_MODEL_DIR"
 echo "Processing datasets: SimpDA, SimpEval"
 echo "Seeds: 42 43 44 45 46"
-echo "Correlation: kendall"
+echo "Correlation: all"
 
 # Run the benchmark for Simplification datasets
 python analysis/ablations/run_metric_generation_benchmark.py \
     --generator-model gpt4o_mini \
     --judge-model gpt4o_mini \
     --seeds 42 43 44 45 46 \
-    --correlation kendall \
+    --correlation all \
     --dataset SimpDA SimpEval \
     --output-dir results/ablations/metric_generation \
     --model-save-dir $AUTOMETRICS_MODEL_DIR

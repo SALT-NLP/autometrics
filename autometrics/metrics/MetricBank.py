@@ -97,8 +97,7 @@ _DEFAULT_EXTRA_KWARGS: Dict[str, Dict[str, Any]] = {
 # Factory helpers
 # ---------------------------------------------------------------------------
 
-# GPU allocation helper
-from autometrics.metrics.utils import allocate_gpus
+# GPU allocation helper - moved to lazy import to avoid 4.8s startup delay
 
 def _instantiate_metric(cls: Type, kwargs: Dict[str, Any]):
     """Instantiate a metric class with the provided kwargs (already filtered)."""
@@ -139,6 +138,8 @@ def build_metrics(
         needs_gpu = any(getattr(cls, "gpu_mem", 0) > 0 for cls in classes)
         
         if needs_gpu:
+            # Lazy import GPU allocation utilities only when needed (avoids 4.8s startup delay)
+            from autometrics.metrics.utils import allocate_gpus
             allocation_map = allocate_gpus(classes, buffer_ratio=gpu_buffer_ratio)
         else:
             # No metrics need GPUs, skip allocation entirely

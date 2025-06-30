@@ -2,11 +2,10 @@ import dspy
 import os
 from typing import Callable, Optional
 
-from autometrics.metrics.MetricBank import all_metric_classes
+# Heavy imports moved to lazy loading to avoid 90s startup delay
 from autometrics.recommend.MetricRecommender import MetricRecommender
 from autometrics.metrics.generated.GeneratedRefFreeMetric import GeneratedRefFreeMetric
 from autometrics.metrics.generated.GeneratedRefBasedMetric import GeneratedRefBasedMetric
-from autometrics.recommend.ColBERT import ColBERT
 from autometrics.dataset.Dataset import DummyDataset
 from platformdirs import user_data_dir
 
@@ -38,6 +37,9 @@ def generate_related_metrics(metric: GeneratedRefFreeMetric | GeneratedRefBasedM
 
     if recommender is None:
         if recommender_global is None:
+            # Lazy import heavy modules only when first needed (avoids 90s startup delay)
+            from autometrics.metrics.MetricBank import all_metric_classes
+            from autometrics.recommend.ColBERT import ColBERT
             recommender_global = ColBERT(metric_classes=all_metric_classes, index_path=colbert_index_path, force_reindex=force_reindex)
         recommender = recommender_global
 

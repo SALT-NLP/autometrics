@@ -9,6 +9,11 @@ import dspy
 from autometrics.metrics.generated.utils.utils import generate_llm_constructor_code
 from autometrics.metrics.generated.utils.metric_card import generate_further_reading
 from autometrics.metrics.generated.utils.metric_card import MetricCardBuilder
+from autometrics.metrics.generated.utils.dspy_inspection import (
+    inspect_dspy_program_from_path,
+    load_optimized_program_from_embedded_data,
+    format_examples_as_markdown_table
+)
 from autometrics.metrics.generated.GeneratedRefFreeMetric import GeneratedRefFreeMetric
 from autometrics.metrics.generated.GeneratedRefBasedMetric import GeneratedRefBasedMetric
 
@@ -96,6 +101,11 @@ class _OptimizedJudgeMetricMixin:
         # Load the optimized DSPy module
         self._optimized_module = None
         self._load_optimized_module()
+        
+        # Cache for optimized prompt inspection
+        self._prompt_data = None
+        self._prompt_examples = None
+        self._prompt_instructions = None
 
     def _load_optimized_module(self):
         """Load the optimized DSPy module from the saved path."""
@@ -174,6 +184,48 @@ class _OptimizedJudgeMetricMixin:
                 idx = futures[fut]
                 results[idx] = fut.result()
         return results
+
+    # ------------------------------------------------------------------
+    # Optimized prompt inspection
+    # ------------------------------------------------------------------
+
+    def _inspect_optimized_prompt(self):
+        """Inspect the optimized prompt to extract examples and instructions."""
+        if self._prompt_data is not None:
+            return  # Already cached
+        
+        try:
+            if self.optimized_prompt_path and os.path.exists(self.optimized_prompt_path):
+                # Load from file path
+                self._prompt_data, self._prompt_examples, self._prompt_instructions = inspect_dspy_program_from_path(
+                    self.optimized_prompt_path
+                )
+                print(f"✅ Extracted {len(self._prompt_examples)} examples from optimized prompt")
+            else:
+                # Fallback: empty data
+                self._prompt_data = None
+                self._prompt_examples = []
+                self._prompt_instructions = "No optimized prompt available."
+        except Exception as e:
+            print(f"⚠️  Failed to inspect optimized prompt: {e}")
+            self._prompt_data = None
+            self._prompt_examples = []
+            self._prompt_instructions = "Failed to load optimized prompt."
+
+    def _get_optimized_examples_markdown(self, max_examples: int = 3) -> List[str]:
+        """Get the optimized examples formatted as markdown table."""
+        self._inspect_optimized_prompt()
+        
+        if not self._prompt_examples:
+            return ["*No optimized examples available.*"]
+        
+        return format_examples_as_markdown_table(self._prompt_examples, max_examples)
+
+    def _get_optimized_instructions(self) -> str:
+        """Get the optimized prompt instructions."""
+        self._inspect_optimized_prompt()
+        
+        return self._prompt_instructions or "No optimized instructions available."
 
     # ------------------------------------------------------------------
     # Export helpers
@@ -295,65 +347,85 @@ class {self.name.replace(" ", "_").replace("-", "_")}_OptimizedJudge({class_name
         ref_flag = "Yes" if reference_based else "No"
         input_req = "Yes (plus reference)" if reference_based else "Yes"
 
+        # Get optimized prompt information
+        self._inspect_optimized_prompt()
+        num_examples = len(self._prompt_examples) if self._prompt_examples else 0
+
         # --- Header & description ----------------------------------------
         lines = [
             f"**{self.name}** is a **{kind}** Optimized LLM-as-a-Judge metric that uses MIPROv2-optimized prompts to rate system outputs.",
-            f"In this case the evaluation axis is `{self.description}`.",
+            f"The evaluation axis is: `{self.axis}`.",
             "",
-            "The metric differs from basic LLM-as-a-Judge by:",
+            "Optimized LLM judging differs from standard LLM-as-a-Judge by:",
             "",
             "1. **Using MIPROv2 optimization** to automatically improve prompts based on training data",
             "2. **Learning from examples** to develop better evaluation strategies",
             "3. **Optimizing demonstrations** to improve few-shot performance",
             "",
-            "The optimized prompt supplies:",
+            f"This metric was optimized with {num_examples} examples and includes an optimized instruction set.",
             "",
-            "1. **Task description** *d*",
-            f"2. **Axis rubric** `{self.description}`",
-            "3. **Input text** *x*",
+            "### Optimized Prompt Instructions",
+            "",
+            f"The optimized prompt uses the following instructions:",
+            "",
+            f"```",
+            f"{self._get_optimized_instructions()}",
+            f"```",
+            "",
+            "### Optimized Examples",
+            "",
+            f"The final optimized prompt includes {num_examples} carefully selected examples:" if num_examples > 0 else "No examples were found in the optimized prompt.",
         ]
-        if reference_based:
-            lines.append("4. **Reference text** *r*")
-            lines.append("5. **Output text** *y*")
-        else:
-            lines.append("4. **Output text** *y*")
 
-        # --- Scoring sentence --------------------------------------------
-        lines.extend(
-            [
-                "",
-                r"The optimized prompting strategy yields an integer score "
-                r"$\hat{s}\!\in\!\{1,2,3,4,5\}$; higher = better adherence "
-                "to the axis.",
-                "",
-                "- **Metric Type:** Optimized LLM as a Judge",
-                "- **Range:** 1-5 (1 = worst, 5 = best)",
-                "- **Higher is Better?:** Yes",
-                f"- **Reference-Based?:** {ref_flag}",
-                f"- **Input-Required?:** {input_req}",
-                f"- **Optimization Method:** MIPROv2",
-                "",
-                "### Optimization Details",
-                "",
-                f"This metric was optimized using **MIPROv2** (Multi-stage Instruction Proposer & Optimizer v2).",
-                "The optimization process:",
-                "",
-                "1. **Analyzed training examples** to understand the evaluation task",
-                "2. **Generated candidate prompts** with different strategies",
-                "3. **Tested prompts** against ground truth scores",
-                "4. **Selected best-performing** prompt configuration",
-                "",
-            ]
-        )
-
-        # Add optimization info if available
-        if self.optimized_prompt_path:
-            lines.extend([
-                f"**Optimized Prompt Location:** `{self.optimized_prompt_path}`",
-                "",
-            ])
+        # Add examples table if available
+        if num_examples > 0:
+            lines.append("")
+            lines.extend(self._get_optimized_examples_markdown(max_examples=3))
 
         lines.extend([
+            "",
+            "### Evaluation Process",
+            "",
+            "The evaluation follows this process:",
+            "",
+            "1. **Task description** *d*",
+            f"2. **Evaluation axis** `{self.axis}`",
+            "3. **Optimized prompt instructions** (shown above)",
+            "4. **Optimized examples** (if available)",
+            "5. **Input text** *x*",
+        ])
+        if reference_based:
+            lines.append("6. **Reference text** *r*")
+            lines.append("7. **Output text** *y*")
+        else:
+            lines.append("6. **Output text** *y*")
+
+        lines.extend([
+            "",
+            r"The LLM follows the optimized instructions and examples to assign scores "
+            r"$\hat{s}\!\in\!\{1,2,3,4,5\}$ within the suggested range; higher = better adherence to the axis.",
+            "",
+            "- **Metric Type:** Optimized LLM as a Judge",
+            "- **Range:** Variable (depends on suggested range, typically 1-5)",
+            "- **Higher is Better?:** Yes",
+            f"- **Reference-Based?:** {ref_flag}",
+            f"- **Input-Required?:** {input_req}",
+            "- **Optimization Method:** MIPROv2",
+            "",
+            "### Optimization Details",
+            "",
+            "This metric was optimized using **MIPROv2** (Multi-stage Instruction Proposer & Optimizer v2).",
+            "The optimization process:",
+            "",
+            "1. **Analyzed training examples** to understand the evaluation task",
+            "2. **Generated candidate prompts** with different strategies",
+            "3. **Tested prompts** against ground truth scores",
+            "4. **Selected best-performing** prompt configuration",
+            "",
+            f"- **Optimized Examples**: {num_examples}",
+            f"- **Score Range**: {self.suggested_range[0]} to {self.suggested_range[1]}",
+            f"- **Prompt Location**: `{self.optimized_prompt_path}`",
+            "",
             "### Formal Definition",
             "",
             r"Let $f _{\\theta}$ be the LLM with optimized prompting strategy $\pi^*$ and",
@@ -396,7 +468,9 @@ class {self.name.replace(" ", "_").replace("-", "_")}_OptimizedJudge({class_name
                 "### Inputs and Outputs",
                 "- **Inputs:**",
                 "  - **Task description** *d*",
-                f"  - **Axis rubric** `{self.description}`",
+                f"  - **Evaluation axis** `{self.axis}`",
+                "  - **Optimized instructions** (embedded in prompt)",
+                "  - **Optimized examples** (embedded in prompt)",
                 "  - **Input text** *x*",
             ]
         )
@@ -543,6 +617,10 @@ class GeneratedRefFreeOptimizedJudge(_OptimizedJudgeMetricMixin, GeneratedRefFre
 
     def __init__(self, *args, **kwargs):
         kwargs['is_reference_based'] = False
+        # Initialize cache variables first
+        self._prompt_data = None
+        self._prompt_examples = None
+        self._prompt_instructions = None
         super().__init__(*args, **kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
@@ -567,6 +645,10 @@ class GeneratedRefBasedOptimizedJudge(_OptimizedJudgeMetricMixin, GeneratedRefBa
 
     def __init__(self, *args, **kwargs):
         kwargs['is_reference_based'] = True
+        # Initialize cache variables first
+        self._prompt_data = None
+        self._prompt_examples = None
+        self._prompt_instructions = None
         super().__init__(*args, **kwargs)
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401

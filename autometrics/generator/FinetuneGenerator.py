@@ -369,6 +369,17 @@ class FinetuneGenerator(Generator):
             # Step-5: Create the metric instance
             # Note: Fine-tuned metrics don't need an LLM for metric card generation
             # They generate cards programmatically using template-based approach
+            
+            # Validate and reconcile seed values
+            executor_kwargs = self.executor_kwargs.copy()
+            if self.seed is not None:
+                if 'seed' in executor_kwargs and executor_kwargs['seed'] != self.seed:
+                    print(f"Warning: Seed mismatch detected. Proposer seed ({self.seed}) differs from executor_kwargs seed ({executor_kwargs['seed']}). Using proposer seed.")
+                executor_kwargs['seed'] = self.seed
+            elif 'seed' not in executor_kwargs:
+                # No seed provided anywhere, that's fine
+                pass
+            
             metric = dynamic_executor_class(
                 name=f"{model_name}_ModernBERT",
                 description=f"Fine-tuned ModernBERT metric for {target_measure} on {dataset.get_name()}",
@@ -385,7 +396,7 @@ class FinetuneGenerator(Generator):
                     "learning_rate": self.learning_rate,
                 },
                 metric_card_author_model=None,  # No LLM needed for programmatic generation
-                **self.executor_kwargs,
+                **executor_kwargs,
             )
 
             new_metrics.append(metric)

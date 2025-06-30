@@ -8,9 +8,9 @@
 #SBATCH --partition=sc-loprio
 #SBATCH --time=24:00:00
 #SBATCH --nodes=1
-#SBATCH --job-name=best_static_metric_helpsteer
-#SBATCH --output=logs/best_static_metric_helpsteer.out
-#SBATCH --error=logs/best_static_metric_helpsteer.err
+#SBATCH --job-name=best_static_metric_summeval
+#SBATCH --output=logs/best_static_metric_summeval.out
+#SBATCH --error=logs/best_static_metric_summeval.err
 #SBATCH --constraint=141G
 #SBATCH --requeue
 
@@ -32,7 +32,7 @@ python analysis/main_experiments/run_best_static_metric.py \
     --output-file results/main_runs/baselines/best_static_metric.csv \
     --seeds 42 43 44 45 46 \
     --correlation $CORRELATION_FUNCS \
-    --dataset HelpSteer HelpSteer2 \
+    --dataset SummEval \
     --verbose
 
 if [ "$CORRELATION_FUNCS" == "all" ]; then

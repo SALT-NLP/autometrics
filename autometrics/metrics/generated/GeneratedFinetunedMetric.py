@@ -407,7 +407,6 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Finetuned({class_name}):
 
 - **Libraries/Packages:**
   - [AutoMetrics Fine-tuned Metric ({ref_type})](https://github.com/XenonMolecule/autometrics/blob/main/autometrics/metrics/generated/GeneratedFinetunedMetric.py)
-  - [Unsloth Fine-tuning](https://github.com/unslothai/unsloth)
   - [ModernBERT](https://huggingface.co/answerdotai/ModernBERT-large)
 
 ### Computational Complexity
@@ -429,7 +428,7 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Finetuned({class_name}):
 ### Model Requirements
 
 - **Model Path:** `{self.model_path}`
-- **Dependencies:** unsloth, transformers, torch
+- **Dependencies:** transformers, torch
 - **Hardware:** GPU recommended for faster inference
 - **Memory:** ~16-24GB GPU memory for model loading"""
 
@@ -458,7 +457,6 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Finetuned({class_name}):
     def generate_further_reading(self):
         """Generate further reading section."""
         return """- [ModernBERT: Modernizing BERT with Better Pre-training](https://arxiv.org/abs/2412.13663)
-- [Unsloth: Fast and Memory-Efficient Fine-tuning](https://github.com/unslothai/unsloth)
 - [Fine-tuning Language Models for Text Classification](https://huggingface.co/docs/transformers/tasks/sequence_classification)
 - [BERT for Regression Tasks](https://arxiv.org/abs/1810.04805)"""
 

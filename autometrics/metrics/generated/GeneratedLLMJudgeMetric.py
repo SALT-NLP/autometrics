@@ -115,7 +115,8 @@ class _LLMJudgeMetricMixin:
                     bullets = [bullet.strip() for bullet in description.split("- ") if bullet.strip()]
                     formatted_description = "• " + "<br/>• ".join(bullets)
                 else:
-                    formatted_description = description
+                    bullets = [bullet.strip() for bullet in description.split("- ") if bullet.strip()]
+                    formatted_description = "<br/>• ".join(bullets)
                 lines.append(f"| {i} | {formatted_description} |")
             else:
                 lines.append(f"| {i} | N/A |")

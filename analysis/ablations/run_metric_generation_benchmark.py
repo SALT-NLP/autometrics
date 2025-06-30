@@ -34,6 +34,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from scipy import stats
 from pathlib import Path
 import dspy
+from collections import defaultdict
 
 # Add autometrics to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -237,6 +238,7 @@ def create_generator(
         return BasicLLMJudgeProposer(
             generator_llm=generator_llm,
             executor_kwargs={"model": judge_llm, "seed": seed},
+            seed=seed,
         )
     
     elif generator_type == "llm_judge_examples":
@@ -261,12 +263,14 @@ def create_generator(
         return GEvalJudgeProposer(
             generator_llm=generator_llm,
             executor_kwargs={"model": judge_llm, "seed": seed},
+            seed=seed,
         )
     
     elif generator_type == "codegen":
         return CodeGenerator(
             generator_llm=generator_llm,
-            seed=seed
+            executor_kwargs={"seed": seed},
+            seed=seed,
         )
     
     elif generator_type == "rubric_prometheus":
@@ -274,7 +278,7 @@ def create_generator(
             generator_llm=generator_llm,
             executor_kwargs={"model": judge_llm, "seed": seed},
             use_prometheus=True,
-            seed=seed
+            seed=seed,
         )
     
     elif generator_type == "rubric_dspy":
@@ -282,7 +286,7 @@ def create_generator(
             generator_llm=generator_llm,
             executor_kwargs={"model": judge_llm, "seed": seed},
             use_prometheus=False,
-            seed=seed
+            seed=seed,
         )
     
     elif generator_type == "finetune":
@@ -324,51 +328,85 @@ def run_correlation_evaluation(
     metrics: List, 
     val_dataset: Dataset, 
     measure: str, 
-    correlation_func,
+    correlation_funcs: Dict[str, Any],
     logger: logging.Logger
-) -> List[float]:
-    """Run correlation evaluation for a list of metrics on validation dataset."""
+) -> Dict[str, List[float]]:
+    """Run correlation evaluation for a list of metrics on validation dataset using all correlation functions."""
     
-    correlations = []
+    # Results dictionary: correlation_func_name -> list of correlations for each metric
+    all_correlations = {}
     
-    for i, metric in enumerate(metrics):
+    logger.debug(f"Starting correlation evaluation with {len(metrics)} metrics")
+    logger.debug(f"Metrics: {[m.name if m else 'None' for m in metrics]}")
+    
+    # Filter out None metrics
+    valid_metrics = [m for m in metrics if m is not None]
+    if len(valid_metrics) != len(metrics):
+        logger.warning(f"Filtered out {len(metrics) - len(valid_metrics)} None metrics")
+    
+    if not valid_metrics:
+        logger.error("No valid metrics to evaluate")
+        # Return empty results for all correlation functions
+        return {corr_name: [] for corr_name in correlation_funcs}
+    
+    for i, metric in enumerate(valid_metrics):
         try:
-            # Run correlation experiment for single metric
+            logger.debug(f"Processing metric {i+1}/{len(valid_metrics)}: {metric.name}")
+            
+            # Run correlation experiment for single metric with ALL correlation functions
             experiment = CorrelationExperiment(
                 name=f"MetricGen Eval - {metric.name}",
                 description=f"Evaluating generated metric: {metric.name}",
                 metrics=[metric],
-                output_dir=f"/tmp/metric_gen_eval_{i}",
+                output_dir=f"/tmp/metricgen_{hash(metric.name)}",
                 dataset=val_dataset,
-                correlation_funcs={"correlation": correlation_func},
-                seed=42,
+                correlation_funcs=correlation_funcs,
                 should_split=False
             )
             
-            # Run experiment and extract correlation
+            logger.debug(f"Running correlation experiment for {metric.name}")
             results = experiment.run(print_results=False)
+            logger.debug(f"Experiment results keys: {list(results.keys())}")
             
-            if measure not in results["correlation"]:
-                logger.warning(f"Measure {measure} not found in correlation results for metric {metric.name}")
-                correlations.append(np.nan)
-                continue
-            
-            df_corr = results["correlation"][measure]
-            metric_row = df_corr[df_corr['Metric'] == metric.name]
-            
-            if metric_row.empty:
-                logger.warning(f"Metric {metric.name} not found in correlation results")
-                correlations.append(np.nan)
-            else:
-                correlation = metric_row.iloc[0]['Correlation']
-                correlations.append(correlation)
-                logger.debug(f"Metric {metric.name}: correlation = {correlation:.4f}")
+            # Extract correlations for each correlation function
+            for corr_name, correlations_for_func in results.items():
+                if corr_name not in all_correlations:
+                    all_correlations[corr_name] = []
+                
+                logger.debug(f"Processing {corr_name} results for {metric.name}")
+                logger.debug(f"Available measures in results: {list(correlations_for_func.keys())}")
+                
+                if measure not in correlations_for_func:
+                    logger.error(f"Measure {measure} not found in {corr_name} results")
+                    all_correlations[corr_name].append(np.nan)
+                    continue
+                
+                df_corr = correlations_for_func[measure]
+                logger.debug(f"Correlation DataFrame shape: {df_corr.shape}")
+                logger.debug(f"Available metrics in DataFrame: {list(df_corr['Metric'].values)}")
+                
+                # Find the correlation for our specific metric
+                metric_row = df_corr[df_corr['Metric'] == metric.name]
+                
+                if metric_row.empty:
+                    logger.error(f"Metric {metric.name} not found in correlation results for {corr_name}")
+                    all_correlations[corr_name].append(np.nan)
+                else:
+                    correlation = metric_row.iloc[0]['Correlation']
+                    logger.debug(f"Found correlation for {metric.name} ({corr_name}): {correlation}")
+                    all_correlations[corr_name].append(correlation)
                 
         except Exception as e:
             logger.error(f"Error evaluating metric {metric.name}: {str(e)}")
-            correlations.append(np.nan)
+            logger.debug(f"Full traceback: {traceback.format_exc()}")
+            # Add NaN for all correlation functions for this metric
+            for corr_name in correlation_funcs:
+                if corr_name not in all_correlations:
+                    all_correlations[corr_name] = []
+                all_correlations[corr_name].append(np.nan)
     
-    return correlations
+    logger.debug(f"Final correlation results: {all_correlations}")
+    return all_correlations
 
 
 def compute_statistics(values: List[float]) -> Dict[str, float]:
@@ -493,9 +531,8 @@ def main():
     )
     parser.add_argument(
         "--correlation",
-        default="kendall",
-        choices=["pearson", "spearman", "kendall"],
-        help="Correlation function to use"
+        default="all",
+        help="Correlation function(s): 'pearson', 'spearman', 'kendall', or 'all' for all three"
     )
     parser.add_argument(
         "--dataset",
@@ -531,13 +568,24 @@ def main():
     logger.info(f"API Base: {args.api_base}")
     logger.info(f"Seeds: {args.seeds}")
     logger.info(f"Correlation: {args.correlation}")
+
+    output_dir = f"{args.output_dir}/{args.generator_model}"
     
     # Create output directories
-    os.makedirs(args.output_dir, exist_ok=True)
-    os.makedirs(f"{args.output_dir}/sub_results", exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(f"{output_dir}/sub_results", exist_ok=True)
     
-    # Get correlation function
-    correlation_func = correlation_func_from_name(args.correlation)
+    # Get correlation functions
+    if args.correlation.lower() == "all":
+        correlation_specs = ["kendall", "pearson", "spearman"]
+    else:
+        correlation_specs = [c.strip() for c in args.correlation.split(",")]
+    
+    correlation_funcs = {}
+    for spec in correlation_specs:
+        correlation_funcs[spec] = correlation_func_from_name(spec)
+    
+    print(f"Using correlation functions: {list(correlation_funcs.keys())}")
     
     # Get all available dataset-measure combinations
     all_dataset_measures = get_available_datasets_measures()
@@ -577,202 +625,302 @@ def main():
         generator_configs = {k: v for k, v in generator_configs.items() if k in args.generator}
         logger.info(f"Filtered to generators: {args.generator}")
     
-    # Load existing results
-    output_file = f"{args.output_dir}/metric_generation_benchmark_{args.generator_model}_{args.judge_model}_{args.correlation}.csv"
-    existing_results = load_existing_results(output_file)
-    logger.info(f"Loaded {len(existing_results)} existing results")
-    
-    # Process each dataset-measure combination
-    all_results = []
-    
-    for dataset_name, measure in all_dataset_measures:
+    # Process each correlation type
+    for correlation_type in correlation_funcs:
         logger.info(f"\n{'='*60}")
-        logger.info(f"Processing: {dataset_name} - {measure}")
+        logger.info(f"Running {correlation_type.upper()} correlation analysis")
         logger.info(f"{'='*60}")
         
-        try:
-            # Load dataset
-            dataset = load_dataset(dataset_name)
-            task_description = dataset.get_task_description()
+        # Get correlation function
+        correlation_func = correlation_funcs[correlation_type]
+        single_correlation_funcs = {correlation_type: correlation_func}
+        
+        # All results across datasets for final merging
+        all_results_for_correlation = []
+        dataset_output_files = []
+        
+        # Load existing merged results for this correlation function
+        output_base = f"{output_dir}/metric_generation_benchmark_{args.generator_model}_{args.judge_model}"
+        merged_output_file = f"{output_base}_{correlation_type}.csv"
+        existing_merged_results = load_existing_results(merged_output_file)
+        logger.info(f"Loaded {len(existing_merged_results)} existing {correlation_type} results from {merged_output_file}")
+
+        # Group dataset-measure combinations for dataset-specific files
+        dataset_measures_by_dataset = {}
+        for dataset_name, measure in all_dataset_measures:
+            if dataset_name not in dataset_measures_by_dataset:
+                dataset_measures_by_dataset[dataset_name] = []
+            dataset_measures_by_dataset[dataset_name].append((dataset_name, measure))
+
+        # Process each dataset separately
+        for dataset_name, dataset_measures in dataset_measures_by_dataset.items():
+            logger.info(f"\n--- Processing dataset: {dataset_name} ---")
             
-            logger.info(f"Dataset loaded: {dataset_name}")
-            logger.info(f"Task: {task_description}")
-            logger.info(f"Target measure: {measure}")
+            # Dataset-specific output file in sub-results directory
+            dataset_output_file = f"{output_dir}/sub_results/metric_generation_benchmark_{args.generator_model}_{args.judge_model}_{correlation_type}_{dataset_name}.csv"
+            dataset_output_files.append(dataset_output_file)
             
-            # Process each generator type
-            for generator_type, config in generator_configs.items():
-                logger.info(f"\n--- Generator: {config['description']} ---")
+            logger.info(f"Dataset output file: {dataset_output_file}")
+            
+            # Load existing dataset-specific results
+            existing_dataset_results = load_existing_results(dataset_output_file)
+            dataset_results = existing_dataset_results.copy()
+            logger.info(f"Loaded {len(existing_dataset_results)} existing dataset results from {dataset_output_file}")
+
+            # Process each dataset-measure combination for this dataset
+            for dataset_name, measure in dataset_measures:
+                logger.info(f"\nProcessing: {dataset_name} - {measure}")
                 
-                metrics_per_trial = config["metrics_per_trial"]
-                
-                # Check if we already have results for this combination
-                existing_result = None
-                for result in existing_results:
-                    if (result.get('dataset') == dataset_name and 
-                        result.get('measure') == measure and 
-                        result.get('generator_type') == generator_type):
-                        existing_result = result
-                        break
-                
-                # Collect seed results
-                seed_correlations = []
-                seed_errors = []
-                
-                for seed in args.seeds:
-                    # Check if we already have this seed's result
-                    seed_key = f'seed_{seed}_avg_correlation'
-                    if existing_result and seed_key in existing_result and not pd.isna(existing_result[seed_key]):
-                        seed_correlations.append(existing_result[seed_key])
-                        logger.info(f"  Seed {seed}: Using cached result {existing_result[seed_key]:.4f}")
-                        continue
+                try:
+                    # Load dataset
+                    dataset = load_dataset(dataset_name)
+                    task_description = dataset.get_task_description()
                     
-                    logger.info(f"  Running seed {seed}...")
+                    logger.info(f"Dataset loaded: {dataset_name}")
+                    logger.info(f"Task: {task_description}")
+                    logger.info(f"Target measure: {measure}")
                     
-                    try:
-                        # Create models with seed-specific temperature
-                        generator_llm = create_llm_model(args.generator_model, args.api_base, seed)
-                        judge_llm = create_llm_model(args.judge_model, args.api_base, seed)
+                    # Process each generator type
+                    for generator_type, config in generator_configs.items():
+                        logger.info(f"\n--- Generator: {config['description']} ---")
                         
-                        # Create generator
-                        generator = create_generator(
-                            generator_type, 
-                            generator_llm, 
-                            judge_llm, 
-                            seed,
-                            args.model_save_dir
-                        )
+                        metrics_per_trial = config["metrics_per_trial"]
                         
-                        # Get persistent splits - use TRAIN for generation, VAL for evaluation
-                        train_dataset, val_dataset, _ = dataset.load_permanent_splits()
-                        logger.info(f"    Using persistent splits - Train: {len(train_dataset.get_dataframe())} examples, Val: {len(val_dataset.get_dataframe())} examples")
+                        # Check existing results for this dataset-measure-generator combination
+                        existing_result = None
+                        for result in dataset_results:
+                            if (result.get('dataset') == dataset_name and 
+                                result.get('measure') == measure and 
+                                result.get('generator_type') == generator_type):
+                                existing_result = result
+                                break
                         
-                        # Generate metrics using TRAINING data
-                        logger.info(f"    Generating {metrics_per_trial} metrics using training split...")
-                        metrics = generator.generate(
-                            dataset=train_dataset,  # Use training split for generation
-                            target_measure=measure,
-                            n_metrics=metrics_per_trial
-                        )
+                        # Collect seed results
+                        seed_correlations = []
+                        seed_errors = []
                         
-                        if not metrics:
-                            logger.warning(f"    No metrics generated for seed {seed}")
-                            seed_correlations.append(np.nan)
-                            seed_errors.append(f"Seed {seed}: No metrics generated")
-                            continue
+                        for seed in args.seeds:
+                            # Check if we already have this seed's result
+                            seed_key = f'seed_{seed}_avg_correlation'
+                            
+                            if existing_result and seed_key in existing_result and not pd.isna(existing_result[seed_key]):
+                                seed_correlations.append(existing_result[seed_key])
+                                logger.info(f"  Seed {seed}: Using cached result")
+                                continue
+                            
+                            logger.info(f"  Running seed {seed}...")
+                            
+                            try:
+                                # Create models with seed-specific temperature
+                                generator_llm = create_llm_model(args.generator_model, args.api_base, seed)
+                                judge_llm = create_llm_model(args.judge_model, args.api_base, seed)
+                                
+                                # Create generator
+                                generator = create_generator(
+                                    generator_type, 
+                                    generator_llm, 
+                                    judge_llm, 
+                                    seed,
+                                    args.model_save_dir
+                                )
+                                
+                                # Get persistent splits - use TRAIN for generation, VAL for evaluation
+                                train_dataset, val_dataset, _ = dataset.load_permanent_splits()
+                                logger.info(f"    Using persistent splits - Train: {len(train_dataset.get_dataframe())} examples, Val: {len(val_dataset.get_dataframe())} examples")
+                                
+                                # Generate metrics using TRAINING data
+                                logger.info(f"    Generating {config['metrics_per_trial']} metrics using training split...")
+                                try:
+                                    logger.debug(f"    Creating generator: {generator_type}")
+                                    logger.debug(f"    Generator config: {config}")
+                                    logger.debug(f"    Seed being passed: {seed}")
+                                    
+                                    metrics = generator.generate(
+                                        dataset=train_dataset, 
+                                        target_measure=measure, 
+                                        n_metrics=config['metrics_per_trial']
+                                    )
+                                    logger.debug(f"    Generated {len(metrics) if metrics else 0} metrics: {[m.name if m else 'None' for m in (metrics or [])]}")
+                                    
+                                    # Check for None metrics or empty list
+                                    if not metrics:
+                                        logger.error(f"    No metrics generated for seed {seed}")
+                                        raise ValueError("Generator returned empty metrics list")
+                                        
+                                    none_metrics = [i for i, m in enumerate(metrics) if m is None]
+                                    if none_metrics:
+                                        logger.error(f"    Found None metrics at indices: {none_metrics}")
+                                        raise ValueError(f"Generator produced None metrics at indices: {none_metrics}")
+                                        
+                                except Exception as e:
+                                    logger.error(f"    Metric generation failed: {str(e)}")
+                                    logger.debug(f"    Full traceback: {traceback.format_exc()}")
+                                    # Record this as a seed error and continue
+                                    error_msg = f"Seed {seed}: {str(e)}"
+                                    seed_errors.append(error_msg)
+                                    seed_correlations.append(np.nan)
+                                    continue
+
+                                # Evaluate correlations using VALIDATION data
+                                logger.info(f"    Evaluating correlations on validation split...")
+                                try:
+                                    logger.debug(f"    Metrics for correlation: {[m.name if m else 'None' for m in metrics]}")
+                                    logger.debug(f"    Validation dataset size: {len(val_dataset.get_dataframe())}")
+                                    logger.debug(f"    Target measure: {measure}")
+                                    logger.debug(f"    Correlation function: {correlation_type}")
+                                    
+                                    all_correlations = run_correlation_evaluation(
+                                        metrics, val_dataset, measure, single_correlation_funcs, logger
+                                    )
+                                    logger.debug(f"    Correlation results: {all_correlations}")
+                                    
+                                    # Save generated metrics
+                                    metric_paths = save_generated_metrics(
+                                        metrics, generator_type, dataset_name, measure, seed, output_dir
+                                    )
+                                    logger.info(f"    Saved metrics to: {len(metric_paths)} files")
+                                    for path in metric_paths:
+                                        logger.info(f"    {path}")
+                                    
+                                except Exception as e:
+                                    logger.error(f"    Correlation evaluation failed: {str(e)}")
+                                    logger.debug(f"    Full traceback: {traceback.format_exc()}")
+                                    # Record this as a seed error and continue
+                                    error_msg = f"Seed {seed}: Correlation evaluation failed: {str(e)}"
+                                    seed_errors.append(error_msg)
+                                    seed_correlations.append(np.nan)
+                                    continue
+                                
+                                # Process results for this correlation function
+                                correlations = all_correlations[correlation_type]
+                                
+                                # For generators with multiple metrics, average the correlations
+                                if metrics_per_trial > 1:
+                                    valid_correlations = [c for c in correlations if not pd.isna(c)]
+                                    if valid_correlations:
+                                        avg_correlation = np.mean([abs(c) for c in valid_correlations])
+                                        logger.info(f"    Average {correlation_type} correlation: {avg_correlation:.4f} (from {len(valid_correlations)}/{len(correlations)} valid)")
+                                    else:
+                                        avg_correlation = np.nan
+                                        logger.warning(f"    No valid {correlation_type} correlations from {len(correlations)} metrics")
+                                else:
+                                    avg_correlation = abs(correlations[0]) if correlations and not pd.isna(correlations[0]) else np.nan
+                                    logger.info(f"    {correlation_type} correlation: {avg_correlation:.4f}")
+                                
+                                seed_correlations.append(avg_correlation)
+                                
+                            except Exception as e:
+                                error_msg = f"Seed {seed}: {str(e)}"
+                                seed_errors.append(error_msg)
+                                logger.error(f"    Error: {error_msg}")
+                                seed_correlations.append(np.nan)
                         
-                        logger.info(f"    Generated {len(metrics)} metrics")
+                        # Compute statistics
+                        stats_result = compute_statistics(seed_correlations)
                         
-                        # Save generated metrics
-                        metric_paths = save_generated_metrics(
-                            metrics, generator_type, dataset_name, measure, seed, args.output_dir
-                        )
-                        logger.info(f"    Saved metrics to: {len(metric_paths)} files")
+                        # Create result record
+                        result = {
+                            'dataset': dataset_name,
+                            'measure': measure,
+                            'generator_type': generator_type,
+                            'generator_description': config['description'],
+                            'metrics_per_trial': metrics_per_trial,
+                            'num_successful_runs': stats_result['num_successful_runs'],
+                            'errors': '; '.join(seed_errors) if seed_errors else ''
+                        }
                         
-                        # Evaluate correlations using VALIDATION data
-                        logger.info(f"    Evaluating correlations on validation split...")
-                        correlations = run_correlation_evaluation(
-                            metrics, val_dataset, measure, correlation_func, logger
-                        )
+                        # Add individual seed results
+                        for i, seed in enumerate(args.seeds):
+                            result[f'seed_{seed}_avg_correlation'] = seed_correlations[i] if i < len(seed_correlations) else np.nan
                         
-                        # For generators with multiple metrics, average the correlations
-                        if metrics_per_trial > 1:
-                            valid_correlations = [c for c in correlations if not pd.isna(c)]
-                            if valid_correlations:
-                                avg_correlation = np.mean([abs(c) for c in valid_correlations])
-                                logger.info(f"    Average correlation: {avg_correlation:.4f} (from {len(valid_correlations)}/{len(correlations)} valid)")
-                            else:
-                                avg_correlation = np.nan
-                                logger.warning(f"    No valid correlations from {len(correlations)} metrics")
+                        # Add statistics
+                        result.update({
+                            'mean_correlation': stats_result['mean'],
+                            'std_correlation': stats_result['std'],
+                            'ci_lower_correlation': stats_result['ci_lower'],
+                            'ci_upper_correlation': stats_result['ci_upper'],
+                            'mean_±_ci': format_mean_ci(stats_result['mean'], stats_result['ci_range'])
+                        })
+                        
+                        # Update existing results or add new result
+                        if existing_result:
+                            # Update existing result in dataset_results
+                            for i, res in enumerate(dataset_results):
+                                if (res.get('dataset') == dataset_name and 
+                                    res.get('measure') == measure and 
+                                    res.get('generator_type') == generator_type):
+                                    dataset_results[i] = result
+                                    break
+                            logger.info(f"Updated existing result for {generator_type}")
                         else:
-                            avg_correlation = abs(correlations[0]) if correlations and not pd.isna(correlations[0]) else np.nan
-                            logger.info(f"    Correlation: {avg_correlation:.4f}")
+                            dataset_results.append(result)
+                            logger.info(f"Added new result for {generator_type}")
                         
-                        seed_correlations.append(avg_correlation)
+                        # Save results immediately after each generator completes
+                        try:
+                            save_results(dataset_results, dataset_output_file, logger)
+                            logger.info(f"Saved intermediate results to {dataset_output_file}")
+                        except Exception as e:
+                            logger.warning(f"Failed to save intermediate results: {e}")
                         
-                    except Exception as e:
-                        error_msg = f"Seed {seed}: {str(e)}"
-                        seed_errors.append(error_msg)
-                        logger.error(f"    Error: {error_msg}")
-                        seed_correlations.append(np.nan)
+                        logger.info(f"Generator {generator_type} completed: mean={stats_result['mean']:.4f}, "
+                                  f"CI=[{stats_result['ci_lower']:.4f}, {stats_result['ci_upper']:.4f}]")
                 
-                # Compute statistics
-                stats_result = compute_statistics(seed_correlations)
-                
-                # Create result record
-                result = {
-                    'dataset': dataset_name,
-                    'measure': measure,
-                    'generator_type': generator_type,
-                    'generator_description': config['description'],
-                    'metrics_per_trial': metrics_per_trial,
-                    'num_successful_runs': stats_result['num_successful_runs'],
-                    'errors': '; '.join(seed_errors) if seed_errors else ''
-                }
-                
-                # Add individual seed results
-                for i, seed in enumerate(args.seeds):
-                    result[f'seed_{seed}_avg_correlation'] = seed_correlations[i] if i < len(seed_correlations) else np.nan
-                
-                # Add statistics
-                result.update({
-                    'mean_correlation': stats_result['mean'],
-                    'std_correlation': stats_result['std'],
-                    'ci_lower_correlation': stats_result['ci_lower'],
-                    'ci_upper_correlation': stats_result['ci_upper'],
-                    'mean_±_ci': format_mean_ci(stats_result['mean'], stats_result['ci_range'])
-                })
-                
-                # Update existing results or add new result
-                if existing_result:
-                    existing_result.update(result)
-                    logger.info(f"Updated existing result for {generator_type}")
-                else:
-                    all_results.append(result)
-                    logger.info(f"Added new result for {generator_type}")
-                
-                logger.info(f"Generator {generator_type} completed: mean={stats_result['mean']:.4f}, "
-                          f"CI=[{stats_result['ci_lower']:.4f}, {stats_result['ci_upper']:.4f}]")
+                except Exception as e:
+                    logger.error(f"Error processing {dataset_name}-{measure}: {str(e)}")
+                    logger.debug(traceback.format_exc())
+                    continue
+            
+            # Save dataset-specific results
+            if dataset_results:
+                save_results(dataset_results, dataset_output_file, logger)
+                all_results_for_correlation.extend(dataset_results)  # Add to combined results
+                logger.info(f"Dataset {dataset_name} results saved to {dataset_output_file}")
+            else:
+                logger.warning(f"No results generated for dataset {dataset_name}")
         
-        except Exception as e:
-            logger.error(f"Error processing {dataset_name}-{measure}: {str(e)}")
-            logger.debug(traceback.format_exc())
-            continue
-    
-    # Combine existing and new results
-    combined_results = existing_results.copy()
-    for result in all_results:
-        # Check if this result already exists in combined_results
-        found = False
-        for i, existing in enumerate(combined_results):
-            if (existing['dataset'] == result['dataset'] and 
-                existing['measure'] == result['measure'] and 
-                existing['generator_type'] == result['generator_type']):
-                combined_results[i] = result  # Update existing
-                found = True
-                break
-        if not found:
-            combined_results.append(result)  # Add new
-    
-    # Save final results
-    save_results(combined_results, output_file, logger)
-    
-    # Print summary
-    logger.info(f"\n{'='*60}")
-    logger.info("Metric Generation Benchmark Summary")
-    logger.info(f"{'='*60}")
-    logger.info(f"Results saved to: {output_file}")
-    logger.info(f"Total combinations processed: {len(combined_results)}")
-    
-    # Show top performers
-    logger.info("\nTop 5 performing generator-dataset combinations:")
-    df_results = pd.DataFrame(combined_results)
-    if not df_results.empty and 'mean_correlation' in df_results.columns:
-        df_top = df_results.nlargest(5, 'mean_correlation')
+        # Save merged results for this correlation function
+        if all_results_for_correlation:
+            # Merge with existing results
+            merged_results = existing_merged_results.copy()
+            for result in all_results_for_correlation:
+                # Check if this result already exists in merged_results
+                found = False
+                for i, existing in enumerate(merged_results):
+                    if (existing.get('dataset') == result['dataset'] and 
+                        existing.get('measure') == result['measure'] and 
+                        existing.get('generator_type') == result['generator_type']):
+                        merged_results[i] = result  # Update existing
+                        found = True
+                        break
+                if not found:
+                    merged_results.append(result)  # Add new
+            
+            save_results(merged_results, merged_output_file, logger)
+            
+            # Print summary for this correlation type
+            logger.info(f"\nSummary of Metric Generation {correlation_type.upper()} Results:")
+            logger.info(f"Generator Model: {args.generator_model}")
+            logger.info(f"Judge Model: {args.judge_model}")
+            logger.info(f"Seeds: {args.seeds}")
+            logger.info(f"Merged results saved to: {merged_output_file}")
+            logger.info(f"Dataset-specific results saved to:")
+            for dataset_file in dataset_output_files:
+                logger.info(f"  {dataset_file}")
+            
+            # Show top performers
+            logger.info(f"\nTop 5 performing generator-dataset combinations ({correlation_type}):")
+            df_results = pd.DataFrame(merged_results)
+            if not df_results.empty and 'mean_correlation' in df_results.columns:
+                df_top = df_results.nlargest(5, 'mean_correlation')
+                
+                for _, row in df_top.iterrows():
+                    logger.info(f"  {row['generator_description']} on {row['dataset']}.{row['measure']}: "
+                               f"{row['mean_correlation']:.4f} ± {row['ci_upper_correlation'] - row['ci_lower_correlation']:.4f}")
         
-        for _, row in df_top.iterrows():
-            logger.info(f"  {row['generator_description']} on {row['dataset']}.{row['measure']}: "
-                       f"{row['mean_correlation']:.4f} ± {row['ci_upper_correlation'] - row['ci_lower_correlation']:.4f}")
-    
+        else:
+            logger.error(f"No results generated for {correlation_type}")
+
     logger.info("Metric Generation Benchmark completed successfully!")
     return 0
 

@@ -25,6 +25,7 @@ class GEvalJudgeProposer(Generator):
         generator_llm: Optional[dspy.LM] = None,
         executor_class: type | None = None,
         executor_kwargs: dict | None = None,
+        seed: Optional[int] = None,
     ):
 
         super().__init__(
@@ -34,6 +35,9 @@ class GEvalJudgeProposer(Generator):
             executor_class=executor_class,
             executor_kwargs=executor_kwargs or {},
         )
+
+        # Store seed for temperature-based cache busting
+        self.seed = seed
 
         # Guarantee attribute is a dictionary for ** expansion later
         if self.executor_kwargs is None:
@@ -113,6 +117,7 @@ class GEvalJudgeProposer(Generator):
             generator_llm=self.generator_llm,
             target_name=target_measure,
             num_axes_to_generate=n_metrics,
+            seed=self.seed,
         )
 
         axes = axes[:n_metrics] if n_metrics else axes
@@ -129,6 +134,16 @@ class GEvalJudgeProposer(Generator):
             else:
                 metric_name = name_part + "_" + self.judge_model_name + "_geval"
 
+            # Validate and reconcile seed values
+            executor_kwargs = self.executor_kwargs.copy()
+            if self.seed is not None:
+                if 'seed' in executor_kwargs and executor_kwargs['seed'] != self.seed:
+                    print(f"Warning: Seed mismatch detected. Proposer seed ({self.seed}) differs from executor_kwargs seed ({executor_kwargs['seed']}). Using proposer seed.")
+                executor_kwargs['seed'] = self.seed
+            elif 'seed' not in executor_kwargs:
+                # No seed provided anywhere, that's fine
+                pass
+            
             new_metrics.append(
                 dynamic_executor_class(
                     name=metric_name,
@@ -136,7 +151,7 @@ class GEvalJudgeProposer(Generator):
                     evaluation_criteria=axis,
                     task_description=task_description,
                     metric_card_author_model=self.generator_llm,
-                    **self.executor_kwargs,
+                    **executor_kwargs,
                 )
             )
 

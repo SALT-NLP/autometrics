@@ -183,3 +183,4 @@ test_autometrics_cache/
 /bm25/
 core
 /results/
+/generated_metrics/

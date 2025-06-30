@@ -150,6 +150,7 @@ class CodeGenerator(Generator):
         generator_llm: Optional[dspy.LM] = None,
         executor_class: type | None = None,
         executor_kwargs: dict | None = None,
+        seed: Optional[int] = None,
     ):
 
         super().__init__(
@@ -159,6 +160,9 @@ class CodeGenerator(Generator):
             executor_class=executor_class,
             executor_kwargs=executor_kwargs or {},
         )
+
+        # Store seed for temperature-based cache busting
+        self.seed = seed
 
         # Guarantee attribute is a dictionary for ** expansion later
         if self.executor_kwargs is None:
@@ -231,6 +235,7 @@ class CodeGenerator(Generator):
             generator_llm=self.generator_llm,
             target_name=target_measure,
             num_axes_to_generate=n_metrics,
+            seed=self.seed,
         )
 
         axes = axes[:n_metrics] if n_metrics else axes
@@ -253,51 +258,81 @@ class CodeGenerator(Generator):
 
             # Generate code using appropriate signature
             try:
-                with dspy.settings.context(lm=self.generator_llm):
-                    if is_reference_based:
-                        code_gen = dspy.ChainOfThought(CodeGenReferenceBasedSignature, max_tokens=10000)
-                    else:
-                        code_gen = dspy.ChainOfThought(CodeGenReferenceFreeSignature, max_tokens=10000)
+                # Set temperature based on seed for cache busting
+                temperature = 0.0001 * self.seed if self.seed is not None else None
+                
+                if temperature is not None:
+                    with dspy.settings.context(lm=self.generator_llm, temperature=temperature):
+                        if is_reference_based:
+                            code_gen = dspy.ChainOfThought(CodeGenReferenceBasedSignature, max_tokens=10000)
+                        else:
+                            code_gen = dspy.ChainOfThought(CodeGenReferenceFreeSignature, max_tokens=10000)
+                        
+                        result = code_gen(
+                            task_description=task_description,
+                            measurement_name=axis,
+                            good_examples=good_examples_formatted,
+                            bad_examples=bad_examples_formatted
+                        )
+                else:
+                    with dspy.settings.context(lm=self.generator_llm):
+                        if is_reference_based:
+                            code_gen = dspy.ChainOfThought(CodeGenReferenceBasedSignature, max_tokens=10000)
+                        else:
+                            code_gen = dspy.ChainOfThought(CodeGenReferenceFreeSignature, max_tokens=10000)
+                        
+                        result = code_gen(
+                            task_description=task_description,
+                            measurement_name=axis,
+                            good_examples=good_examples_formatted,
+                            bad_examples=bad_examples_formatted
+                        )
                     
-                    result = code_gen(
-                        task_description=task_description,
-                        measurement_name=axis,
-                        good_examples=good_examples_formatted,
-                        bad_examples=bad_examples_formatted
-                    )
-                    
-                    generated_metric_name = result.metric_name.replace(" ", "_").replace("-", "_").replace("\"", "").replace("*", "").replace("\'", "")
-                    generated_code = self._clean_generated_code(result.code)
+                generated_metric_name = result.metric_name.replace(" ", "_").replace("-", "_").replace("\"", "").replace("*", "").replace("\'", "")
+                generated_code = self._clean_generated_code(result.code)
 
-                    # Skip metrics with too many imports (likely malformed)
-                    if generated_code.count("import") > 10:
-                        continue
+                # Skip metrics with too many imports (likely malformed)
+                if generated_code.count("import") > 10:
+                    continue
 
-                    # Create the metric instance
-                    metric = dynamic_executor_class(
-                        name=f"{generated_metric_name}_Generated",
-                        description=f"Generated code-based metric for {axis}",
-                        generated_code=generated_code,
-                        task_description=task_description,
-                        measurement_axis=axis,
-                        metric_card_author_model=self.generator_llm,
-                        **self.executor_kwargs,
-                    )
+                # Generate metric name and description (removed generator_llm_name reference)
+                # metric_name is already set above as generated_metric_name
+                
+                # Validate and reconcile seed values
+                executor_kwargs = self.executor_kwargs.copy()
+                if self.seed is not None:
+                    if 'seed' in executor_kwargs and executor_kwargs['seed'] != self.seed:
+                        print(f"Warning: Seed mismatch detected. Proposer seed ({self.seed}) differs from executor_kwargs seed ({executor_kwargs['seed']}). Using proposer seed.")
+                    executor_kwargs['seed'] = self.seed
+                elif 'seed' not in executor_kwargs:
+                    # No seed provided anywhere, that's fine
+                    pass
 
-                    # Test the metric on a sample example
-                    test_example = dataset.get_dataframe().iloc[0]
-                    test_input = test_example[dataset.get_input_column()]
-                    test_output = test_example[dataset.get_output_column()]
-                    
-                    if is_reference_based:
-                        ref_cols = dataset.get_reference_columns()
-                        test_references = test_example[ref_cols].tolist() if ref_cols else None
-                    else:
-                        test_references = None
+                # Create the metric instance
+                metric = dynamic_executor_class(
+                    name=f"{generated_metric_name}_Generated",
+                    description=f"Generated code-based metric for {axis}",
+                    generated_code=generated_code,
+                    task_description=task_description,
+                    measurement_axis=axis,
+                    metric_card_author_model=self.generator_llm,
+                    **executor_kwargs,
+                )
 
-                    # Try to run the metric
-                    test_score = metric.calculate(test_input, test_output, test_references)
-                    new_metrics.append(metric)
+                # Test the metric on a sample example
+                test_example = dataset.get_dataframe().iloc[0]
+                test_input = test_example[dataset.get_input_column()]
+                test_output = test_example[dataset.get_output_column()]
+                
+                if is_reference_based:
+                    ref_cols = dataset.get_reference_columns()
+                    test_references = test_example[ref_cols].tolist() if ref_cols else None
+                else:
+                    test_references = None
+
+                # Try to run the metric
+                test_score = metric.calculate(test_input, test_output, test_references)
+                new_metrics.append(metric)
 
             except Exception as e:
                 print(f"Error generating metric for {axis}: {e}")

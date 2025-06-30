@@ -81,17 +81,29 @@ def generate_axes_of_variation(
     generator_llm: Optional[dspy.LM] = None,
     target_name: Optional[str] = None,
     num_axes_to_generate: int = 5,
+    seed: Optional[int] = None,
 ) -> List[str]:
     """Generate a ranked list of textual axes of variation.
 
     This thin wrapper takes care of temporarily swapping in a custom LLM if
     provided so that call-sites do not need to handle *dspy.settings.context*
-    themselves.
+    themselves. Temperature is set based on seed for cache busting.
     """
+    # Set temperature based on seed for cache busting
+    temperature = 0.0001 * seed if seed is not None else None
+    
     if generator_llm is not None:
-        with dspy.settings.context(lm=generator_llm):
-            axes_pred = GenerateAxisOfVariation()(task_description, good_examples, bad_examples, target_name, num_axes_to_generate)
+        if temperature is not None:
+            with dspy.settings.context(lm=generator_llm, temperature=temperature):
+                axes_pred = GenerateAxisOfVariation()(task_description, good_examples, bad_examples, target_name, num_axes_to_generate)
+        else:
+            with dspy.settings.context(lm=generator_llm):
+                axes_pred = GenerateAxisOfVariation()(task_description, good_examples, bad_examples, target_name, num_axes_to_generate)
     else:
-        axes_pred = GenerateAxisOfVariation()(task_description, good_examples, bad_examples, target_name, num_axes_to_generate)
+        if temperature is not None:
+            with dspy.settings.context(temperature=temperature):
+                axes_pred = GenerateAxisOfVariation()(task_description, good_examples, bad_examples, target_name, num_axes_to_generate)
+        else:
+            axes_pred = GenerateAxisOfVariation()(task_description, good_examples, bad_examples, target_name, num_axes_to_generate)
 
     return axes_pred.axes_of_variation

@@ -25,7 +25,9 @@ def exact_match_rounded(x, y):
     """Evaluation function for MIPROv2 optimization - exact match on rounded values."""
     return int(round(x) == round(y))
 
-
+# Possible improvement: Change the scaling based on the range of the target column
+# 1 / (5 * (1 - abs((x - y) / (max - min))))
+# This would be a less harsh function for wide ranges of values
 def inverse_distance(x, y):
     """Evaluation function for MIPROv2 optimization - inverse distance metric."""
     if x == y:
@@ -249,7 +251,22 @@ class OptimizedJudgeProposer(Generator):
         
         # Calculate suggested range from data
         target_column_data = dataset.get_dataframe()[target_column]
-        suggested_range = (target_column_data.min().item(), target_column_data.max().item())
+
+        # Filter out NaN values before calculating range
+        target_column_clean = target_column_data.dropna()
+
+        if len(target_column_clean) == 0:
+            print(f"Warning: No valid (non-NaN) values found in target column '{target_column}'. Using default range (1, 5).")
+            suggested_range = (1, 5)
+        elif len(target_column_clean.unique()) == 1:
+            # All values are the same - create a small range around the single value
+            single_value = target_column_clean.iloc[0]
+            suggested_range = (single_value - 0.5, single_value + 0.5)
+            print(f"Warning: All values in target column '{target_column}' are the same ({single_value}). Using range {suggested_range}.")
+        else:
+            suggested_range = (target_column_clean.min().item(), target_column_clean.max().item())
+
+        print(f"📊 Calculated suggested_range for '{target_column}': {suggested_range} (from {len(target_column_clean)} valid values)")
         
         # Create a descriptive axis for optimization
         axis_description = f"Evaluate the output on the '{target_column}' criterion (may or may not be super descriptive). Rate from around {suggested_range[0]} to {suggested_range[1]}."
@@ -304,6 +321,14 @@ class OptimizedJudgeProposer(Generator):
         else:
             optimization_model_with_temp = optimization_model
             
+        print(f"🔧 Starting MIPROv2 optimization with:")
+        print(f"  - Model: {optimization_model_with_temp}")
+        print(f"  - Train set size: {len(train_set)}")
+        print(f"  - Auto mode: {self.auto_mode}")
+        print(f"  - Num threads: {self.num_threads}")
+        print(f"  - Max bootstrapped demos: {self.max_bootstrapped_demos}")
+        print(f"  - Max labeled demos: {self.max_labeled_demos}")
+        
         with dspy.settings.context(lm=optimization_model_with_temp):
             optimized_program = teleprompter.compile(
                 base_program,
@@ -312,6 +337,8 @@ class OptimizedJudgeProposer(Generator):
                 max_labeled_demos=self.max_labeled_demos,
                 requires_permission_to_run=False,
             )
+            
+        print(f"🎯 MIPROv2 optimization completed. Result type: {type(optimized_program)}")
         
         # Save optimized prompt
         unique_id = str(uuid.uuid4())[:8]
@@ -363,12 +390,20 @@ class OptimizedJudgeProposer(Generator):
             print(f"\n🎯 Optimizing metric for target: {current_target}")
             
             # Optimize prompt for this target measure
+            print(f"🚀 Calling _optimize_prompt_for_target with:")
+            print(f"  - target_column: {current_target}")
+            print(f"  - dataset: {dataset.get_name()}")
+            print(f"  - task_description: {task_description[:100]}...")
+            
             optimization_result = self._optimize_prompt_for_target(
                 target_column=current_target,
                 dataset=dataset,
                 task_description=task_description,
                 formatter=formatter
             )
+            
+            print(f"📊 Optimization result type: {type(optimization_result)}")
+            print(f"📊 Optimization result: {optimization_result}")
             
             # Create metric name with dataset name to avoid collisions
             dataset_name = getattr(dataset, 'name', 'UnknownDataset')
@@ -377,6 +412,16 @@ class OptimizedJudgeProposer(Generator):
 
             # Create a descriptive axis for the target column
             axis_description = f"Evaluate the output on the '{current_target}' criterion (may or may not be super descriptive). Rate from around {optimization_result['suggested_range'][0]} to {optimization_result['suggested_range'][1]}."
+            
+            # Validate and reconcile seed values
+            executor_kwargs = self.executor_kwargs.copy()
+            if self.seed is not None:
+                if 'seed' in executor_kwargs and executor_kwargs['seed'] != self.seed:
+                    print(f"Warning: Seed mismatch detected. Proposer seed ({self.seed}) differs from executor_kwargs seed ({executor_kwargs['seed']}). Using proposer seed.")
+                executor_kwargs['seed'] = self.seed
+            elif 'seed' not in executor_kwargs:
+                # No seed provided anywhere, that's fine
+                pass
             
             new_metrics.append(
                 dynamic_executor_class(
@@ -387,8 +432,7 @@ class OptimizedJudgeProposer(Generator):
                     optimized_prompt_path=optimization_result['prompt_path'],
                     suggested_range=optimization_result['suggested_range'],
                     metric_card_author_model=self.generator_llm,
-                    seed=self.seed,  # Pass seed to the generated metric for cache differentiation
-                    **self.executor_kwargs,
+                    **executor_kwargs,
                 )
             )
             

@@ -748,13 +748,17 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Code({class_name}):
             outputs = dspy.ChainOfThought(IntendedUseSignature)(
                 task_description=self.task_description,
                 measurement_axis=self.measurement_axis,
-                generated_code=self.generated_code[:1000] + "..." if len(self.generated_code) > 1000 else self.generated_code,
+                generated_code=self.generated_code[:3000] + "..." if len(self.generated_code) > 3000 else self.generated_code,
             )
         
+        tasks_list = "\n  - " + "\n  - ".join(outputs.tasks)
+        suited_list = "\n  - " + "\n  - ".join(outputs.best_suited_for_circumstances)
+        not_recommended_list = "\n  - " + "\n  - ".join(outputs.not_recommended_for_circumstances)
+        
         return f"""- **Domain:** {outputs.domain}
-- **Tasks:** {"\n  - " + "\n  - ".join(outputs.tasks)}
-- **Best Suited For:** {"\n  - " + "\n  - ".join(outputs.best_suited_for_circumstances)}
-- **Not Recommended For:** {"\n  - " + "\n  - ".join(outputs.not_recommended_for_circumstances)}"""
+- **Tasks:** {tasks_list}
+- **Best Suited For:** {suited_list}
+- **Not Recommended For:** {not_recommended_list}"""
 
     def generate_metric_implementation(self):
         ref_type = "reference-based" if self.is_reference_based else "reference-free"
@@ -789,15 +793,16 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Code({class_name}):
             outputs = dspy.ChainOfThought(KnownLimitationsSignature)(
                 task_description=self.task_description,
                 measurement_axis=self.measurement_axis,
-                generated_code=self.generated_code[:1000] + "..." if len(self.generated_code) > 1000 else self.generated_code,
+                generated_code=self.generated_code[:3000] + "..." if len(self.generated_code) > 3000 else self.generated_code,
             )
         
-        return f"""- **Biases:** {"\n  - " + "\n  - ".join(outputs.biases)}
-- **Task Misalignment Risks:** {"\n  - " + "\n  - ".join(outputs.task_misalignment_risks)}
-- **Failure Cases:** {"\n  - " + "\n  - ".join(outputs.failure_cases)}"""
-
-    def generature_further_reading(self):
-        return generate_further_reading(self) + "\n  - [Code Generation for Evaluation Metrics](https://arxiv.org/abs/2206.07405)"
+        biases_list = "\n  - " + "\n  - ".join(outputs.biases)
+        risks_list = "\n  - " + "\n  - ".join(outputs.task_misalignment_risks)
+        failures_list = "\n  - " + "\n  - ".join(outputs.failure_cases)
+        
+        return f"""- **Biases:** {biases_list}
+- **Task Misalignment Risks:** {risks_list}
+- **Failure Cases:** {failures_list}"""
 
     def _generate_metric_card(self, author_model: Optional[dspy.LM] = None):
         """Produce a metric card via a custom builder."""
@@ -818,9 +823,6 @@ class {self.name.replace(" ", "_").replace("-", "_")}_Code({class_name}):
             def known_limitations(self) -> str:
                 return self.metric.generate_known_limitations()
             
-            def further_reading(self) -> str:
-                return self.metric.generature_further_reading()
-
         with dspy.settings.context(lm=author_model or self.metric_card_author_model):
             builder = CodeMetricCardBuilder(self)
             return builder.build()

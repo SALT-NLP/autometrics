@@ -335,6 +335,17 @@ class LLMJudgeExampleProposer(Generator):
         )
 
         # Step-6: Create the simplified metric with pre-optimized examples -----------
+        
+        # Validate and reconcile seed values
+        executor_kwargs = self.executor_kwargs.copy()
+        if self.seed is not None:
+            if 'seed' in executor_kwargs and executor_kwargs['seed'] != self.seed:
+                print(f"Warning: Seed mismatch detected. Proposer seed ({self.seed}) differs from executor_kwargs seed ({executor_kwargs['seed']}). Using proposer seed.")
+            executor_kwargs['seed'] = self.seed
+        elif 'seed' not in executor_kwargs:
+            # No seed provided anywhere, that's fine
+            pass
+        
         metric = dynamic_executor_class(
             name=metric_name,
             description=metric_description,
@@ -343,14 +354,13 @@ class LLMJudgeExampleProposer(Generator):
             train_dataset=dataset,
             target_column=target_column,
             suggested_range=suggested_range,
-            seed=self.seed,  # Pass seed for cache busting
             optimized_examples=optimized_examples,  # Pass pre-optimized examples
             # Pass optimization metadata for metric card generation
             attempts=self.attempts,
             examples_per_range=self.examples_per_range,
             eval_function_name=self.eval_function_name,
             metric_card_author_model=self.generator_llm,
-            **self.executor_kwargs,
+            **executor_kwargs,
         )
 
         # Return list with one metric (or multiple if n_metrics > 1)

@@ -1,13 +1,67 @@
 dataset,measure,prompt,score_range
-CoGymLessonOutcome,outcomeRating,"Overall rating to the final outcome (i.e., travel plan, analysis result) (1-5 scale)","[1,5]"
-CoGymLessonProcess,agentRating,Overall rating to the agent through out the experience within the session (1-5 scale),"[1,5]"
-CoGymLessonProcess,communicationRating,Overall Rating to the communication capability of the agent (1-5 scale),"[1,5]"
-CoGymTabularOutcome,outcomeRating,"Overall rating to the final outcome (i.e., travel plan, analysis result) (1-5 scale)","[1,5]"
-CoGymTabularProcess,agentRating,Overall rating to the agent through out the experience within the session (1-5 scale),"[1,5]"
-CoGymTabularProcess,communicationRating,Overall Rating to the communication capability of the agent (1-5 scale),"[1,5]"
-CoGymTravelOutcome,outcomeRating,"Overall rating to the final outcome (i.e., travel plan, analysis result) (1-5 scale)","[1,5]"
-CoGymTravelProcess,agentRating,Overall rating to the agent through out the experience within the session (1-5 scale),"[1,5]"
-CoGymTravelProcess,communicationRating,Overall Rating to the communication capability of the agent (1-5 scale),"[1,5]"
+CoGymLessonOutcome,outcomeRating,"Overall rating to the final outcome (i.e., travel plan, analysis result) (1-5 scale)
+
+(1) “Extremely dissatisfied”, 
+(2) “Somewhat dissatisfied"",
+(3) “Neutral”,
+(4) “Somewhat satisfied"",
+(5) “Extremely satisfied""","[1,5]"
+CoGymLessonProcess,agentRating,"Rate the Agent Behavior on the following criteria.
+
+(1) Extremely dissatisfied: The agent communicates poorly all the time and is not helpful for the task at all.',
+(2) ’Somewhat dissatisfied: The agent communicates poorly and is not very helpful for the task.',
+(3) ’Neutral: The agent can have meaningful communication and is somewhat helpful for the task.',
+(4) ’Somewhat satisfied: The agent communicates effectively overall and is helpful for the task.',
+(5) ’Extremely satisfied: The agent communicates effectively all the time and is very helpful for the task.'","[1,5]"
+CoGymLessonProcess,communicationRating,"Overall Rating to the communication capability of the agent (1-5 scale)
+
+(1) “Extremely dissatisfied”, 
+(2) “Somewhat dissatisfied"",
+(3) “Neutral”,
+(4) “Somewhat satisfied"",
+(5) “Extremely satisfied”","[1,5]"
+CoGymTabularOutcome,outcomeRating,"Overall rating to the final outcome (i.e., travel plan, analysis result) (1-5 scale)
+
+(1) “Extremely dissatisfied”, 
+(2) “Somewhat dissatisfied"",
+(3) “Neutral”,
+(4) “Somewhat satisfied"",
+(5) “Extremely satisfied""","[1,5]"
+CoGymTabularProcess,agentRating,"Rate the Agent Behavior on the following criteria.
+
+(1) Extremely dissatisfied: The agent communicates poorly all the time and is not helpful for the task at all.',
+(2) ’Somewhat dissatisfied: The agent communicates poorly and is not very helpful for the task.',
+(3) ’Neutral: The agent can have meaningful communication and is somewhat helpful for the task.',
+(4) ’Somewhat satisfied: The agent communicates effectively overall and is helpful for the task.',
+(5) ’Extremely satisfied: The agent communicates effectively all the time and is very helpful for the task.'","[1,5]"
+CoGymTabularProcess,communicationRating,"Overall Rating to the communication capability of the agent (1-5 scale)
+
+(1) “Extremely dissatisfied”, 
+(2) “Somewhat dissatisfied"",
+(3) “Neutral”,
+(4) “Somewhat satisfied"",
+(5) “Extremely satisfied”","[1,5]"
+CoGymTravelOutcome,outcomeRating,"Overall rating to the final outcome (i.e., travel plan, analysis result) (1-5 scale)
+
+(1) “Extremely dissatisfied”, 
+(2) “Somewhat dissatisfied"",
+(3) “Neutral”,
+(4) “Somewhat satisfied"",
+(5) “Extremely satisfied""","[1,5]"
+CoGymTravelProcess,agentRating,"Rate the Agent Behavior on the following criteria.
+
+(1) Extremely dissatisfied: The agent communicates poorly all the time and is not helpful for the task at all.',
+(2) ’Somewhat dissatisfied: The agent communicates poorly and is not very helpful for the task.',
+(3) ’Neutral: The agent can have meaningful communication and is somewhat helpful for the task.',
+(4) ’Somewhat satisfied: The agent communicates effectively overall and is helpful for the task.',
+(5) ’Extremely satisfied: The agent communicates effectively all the time and is very helpful for the task.'","[1,5]"
+CoGymTravelProcess,communicationRating,"Overall Rating to the communication capability of the agent (1-5 scale)
+
+(1) “Extremely dissatisfied”, 
+(2) “Somewhat dissatisfied"",
+(3) “Neutral”,
+(4) “Somewhat satisfied"",
+(5) “Extremely satisfied”","[1,5]"
 EvalGenMedical,grade,Is this response good (1) or bad (0)?,"[0,1]"
 EvalGenProduct,grade,Is this response good (1) or bad (0)?,"[0,1]"
 HelpSteer,coherence,"**Coherence** With this attribute, we measure how

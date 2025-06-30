@@ -25,7 +25,7 @@ cd /nlp/scr2/nlp/personal-rm/autometrics
 
 # Server configuration
 model="Qwen/Qwen3-32B"
-port=7411  # Different port to avoid conflicts
+port=7430  # Different port, 10 apart spacing
 model_nickname="qwen3_32b"
 
 echo "Starting Qwen3-32B server for Simplification metric generation..."
@@ -64,7 +64,7 @@ echo "Model save directory: $AUTOMETRICS_MODEL_DIR"
 echo "API Base: $API_BASE"
 echo "Processing datasets: SimpDA, SimpEval"
 echo "Seeds: 42 43 44 45 46"
-echo "Correlation: kendall"
+echo "Correlation: all"
 
 # Run the benchmark for Simplification datasets
 python analysis/ablations/run_metric_generation_benchmark.py \
@@ -72,7 +72,7 @@ python analysis/ablations/run_metric_generation_benchmark.py \
     --judge-model qwen3_32b \
     --api-base $API_BASE \
     --seeds 42 43 44 45 46 \
-    --correlation kendall \
+    --correlation all \
     --dataset SimpDA SimpEval \
     --output-dir results/ablations/metric_generation \
     --model-save-dir $AUTOMETRICS_MODEL_DIR

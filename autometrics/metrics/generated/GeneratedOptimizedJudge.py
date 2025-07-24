@@ -109,29 +109,67 @@ class _OptimizedJudgeMetricMixin:
 
     def _load_optimized_module(self):
         """Load the optimized DSPy module from the saved path."""
+        print(f"Loading optimized module from path: {self.optimized_prompt_path}")
+        
         if self.optimized_prompt_path and os.path.exists(self.optimized_prompt_path):
             try:
+                print(f"Optimized prompt file exists, size: {os.path.getsize(self.optimized_prompt_path)} bytes")
+                
                 # Create a temporary module to load the optimized prompt
                 signature = _OptimizedJudgeSignatureRefBased if self.is_reference_based else _OptimizedJudgeSignatureRefFree
                 temp_module = dspy.ChainOfThought(signature)
+                
+                print(f"Loading optimized prompt...")
                 temp_module.load(self.optimized_prompt_path)
                 self._optimized_module = temp_module
-                print(f"✅ Loaded optimized prompt from: {self.optimized_prompt_path}")
+                
+                print(f"✅ Successfully loaded optimized prompt from: {self.optimized_prompt_path}")
+                
+                # Try to inspect what was loaded
+                try:
+                    if hasattr(self._optimized_module, 'predict') and hasattr(self._optimized_module.predict, 'demos'):
+                        demos = self._optimized_module.predict.demos
+                        print(f"✅ Loaded module has {len(demos)} demos")
+                        if demos:
+                            print(f"✅ First demo keys: {demos[0].__dict__.keys() if hasattr(demos[0], '__dict__') else 'No __dict__'}")
+                    else:
+                        print("⚠️  Loaded module structure doesn't match expected format")
+                except Exception as inspect_e:
+                    print(f"⚠️  Could not inspect loaded module: {inspect_e}")
+                    
             except Exception as e:
-                print(f"⚠️  Failed to load optimized prompt from {self.optimized_prompt_path}: {e}")
+                print(f"❌ Failed to load optimized prompt from {self.optimized_prompt_path}: {e}")
+                print(f"❌ Exception type: {type(e)}")
+                import traceback
+                traceback.print_exc()
                 print("📝 Falling back to base signature...")
                 signature = _OptimizedJudgeSignatureRefBased if self.is_reference_based else _OptimizedJudgeSignatureRefFree
                 self._optimized_module = dspy.ChainOfThought(signature)
         else:
+            if self.optimized_prompt_path:
+                print(f"❌ Optimized prompt file does not exist: {self.optimized_prompt_path}")
+            else:
+                print("❌ No optimized prompt path provided")
             # Fallback to base signature if no optimized prompt path provided
             signature = _OptimizedJudgeSignatureRefBased if self.is_reference_based else _OptimizedJudgeSignatureRefFree
             self._optimized_module = dspy.ChainOfThought(signature)
+            print("📝 Using base signature (no optimization)")
 
     def _call_optimized_llm(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
-        with dspy.settings.context(lm=self.model):
-            if self.is_reference_based and references is not None:
+        input_text = str(input_text) if input_text is not None else ""
+        output_text = str(output_text) if output_text is not None else ""
+        if references is not None:
+            if isinstance(references, list):
+                references = [str(ref) if ref is not None else "" for ref in references]
                 # Use first reference if multiple are provided
-                reference_text = references[0] if isinstance(references, list) else references
+                reference_text = references[0] if references else ""
+            else:
+                reference_text = str(references)
+        else:
+            reference_text = None
+            
+        with dspy.settings.context(lm=self.model):
+            if self.is_reference_based and reference_text is not None:
                 score = self._optimized_module(
                     task_description=self.task_description,
                     axis=self.axis,
@@ -249,23 +287,48 @@ import dspy
 import os
 import tempfile
 import json
+import atexit
 from autometrics.metrics.generated.GeneratedOptimizedJudge import {class_name}
 
 DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
 
 # Embedded optimized prompt data
-OPTIMIZED_PROMPT_DATA = '''{prompt_data}'''
+OPTIMIZED_PROMPT_DATA = {json.dumps(prompt_data)}
 
 class {self.name.replace(" ", "_").replace("-", "_")}_OptimizedJudge({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
     def __init__(self, model: dspy.LM = DEFAULT_MODEL):
-        # Create temporary file for optimized prompt
+        # Create persistent temporary file for optimized prompt
         temp_prompt_path = None
         if OPTIMIZED_PROMPT_DATA.strip():
-            import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-                f.write(OPTIMIZED_PROMPT_DATA)
-                temp_prompt_path = f.name
+            try:
+                print("Creating temporary file for optimized prompt...")
+                temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+                # Parse the JSON string back to JSON data
+                import json
+                json_data = json.loads(OPTIMIZED_PROMPT_DATA)
+                temp_file.write(json.dumps(json_data, indent=2))
+                temp_file.flush()
+                temp_file.close()
+                temp_prompt_path = temp_file.name
+                print(f"Created temporary file: {{temp_prompt_path}}")
+                
+                # Register cleanup function
+                def cleanup_temp_file():
+                    try:
+                        if os.path.exists(temp_prompt_path):
+                            os.unlink(temp_prompt_path)
+                            print(f"Cleaned up temporary file: {{temp_prompt_path}}")
+                    except Exception as e:
+                        print(f"Warning: Could not clean up temporary file: {{e}}")
+                        
+                atexit.register(cleanup_temp_file)
+                
+            except Exception as e:
+                print(f"Error creating temporary file for optimized prompt: {{e}}")
+                temp_prompt_path = None
+        else:
+            print("No optimized prompt data available")
         
         super().__init__(
             name={json.dumps(self.name)},
@@ -286,15 +349,17 @@ class {self.name.replace(" ", "_").replace("-", "_")}_OptimizedJudge({class_name
         return code
     
     def _serialize(self) -> dict:
-        """Serialize the metric to a dictionary for in-memory operations."""
+        """Serialize the metric to a dictionary for standalone Python generation."""
         # Read prompt data for serialization
         prompt_data = ""
         if self.optimized_prompt_path and os.path.exists(self.optimized_prompt_path):
             try:
                 with open(self.optimized_prompt_path, 'r') as f:
                     prompt_data = f.read()
-            except Exception:
-                pass
+                print(f"🔧 Read prompt data ({len(prompt_data)} chars) for serialization")
+            except Exception as e:
+                print(f"❌ Error reading optimized prompt file: {e}")
+                prompt_data = ""
         
         return {
             "name": self.name,
@@ -320,16 +385,38 @@ class {self.name.replace(" ", "_").replace("-", "_")}_OptimizedJudge({class_name
         prompt_data = data.pop("optimized_prompt_data", "")
         temp_prompt_path = None
         if prompt_data.strip():
+            print(f"🔍 Deserializing optimized prompt data ({len(prompt_data)} chars)")
+            
             import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-                f.write(prompt_data)
-                temp_prompt_path = f.name
+            import json
+            
+            try:
+                # Basic validation - ensure it's valid JSON
+                json.loads(prompt_data)
+                print(f"✅ Prompt data is valid JSON")
+                
+                # Create temporary file
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                    f.write(prompt_data)
+                    temp_prompt_path = f.name
+                    
+                print(f"✅ Created temporary file: {temp_prompt_path}")
+                
+            except json.JSONDecodeError as je:
+                print(f"❌ Invalid JSON in prompt data: {je}")
+                print(f"❌ First 200 chars: {prompt_data[:200]}...")
+                print("❌ Will use base signature instead")
+                temp_prompt_path = None
+                
+            except Exception as e:
+                print(f"❌ Error creating temp file: {e}")
+                temp_prompt_path = None
         
         data["model"] = model
         data["optimized_prompt_path"] = temp_prompt_path
         
         return cls(**data)
-    
+
     # ------------------------------------------------------------------
     # Metric-card helpers
     # ------------------------------------------------------------------

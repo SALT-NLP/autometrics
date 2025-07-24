@@ -86,79 +86,139 @@ class _FinetunedMetricMixin:
                 from peft import AutoPeftModelForSequenceClassification
                 import json
                 import os
+                import torch
             except ImportError as e:
                 raise ImportError(f"Required libraries not installed: {e}. Please install transformers and peft.")
 
-            print(f"Loading fine-tuned model from {self.model_path}")
+            print(f"🤖 Loading fine-tuned model from: {self.model_path}")
+            print(f"🤖 Model path exists: {os.path.exists(self.model_path)}")
             
-            # Load tokenizer
-            self._tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+            if not os.path.exists(self.model_path):
+                raise FileNotFoundError(f"Model path does not exist: {self.model_path}")
             
-            # Check if this is a PEFT model by looking for adapter_config.json
-            adapter_config_path = os.path.join(self.model_path, "adapter_config.json")
-            
-            if os.path.exists(adapter_config_path):
-                # Load PEFT model with device_map="auto" to handle meta tensors properly
-                self._model = AutoPeftModelForSequenceClassification.from_pretrained(
-                    self.model_path,
-                    num_labels=1,  # Regression
-                    torch_dtype=torch.float32,  # Use float32 for stability
-                    device_map="auto",  # Let transformers handle device placement
-                    low_cpu_mem_usage=True,  # More efficient loading
-                )
-                print("Loaded PEFT adapter model")
-            else:
-                # Fallback to standard model loading
-                self._model = AutoModelForSequenceClassification.from_pretrained(
-                    self.model_path,
-                    num_labels=1,  # Regression
-                    torch_dtype=torch.float32,  # Use float32 for stability
-                    device_map="auto",  # Let transformers handle device placement
-                    low_cpu_mem_usage=True,  # More efficient loading
-                )
-                print("Loaded standard fine-tuned model")
-            
-            # Set to evaluation mode
-            self._model.eval()
-            
-            # Don't manually move to CUDA since device_map="auto" handles placement
+            try:
+                # Load tokenizer
+                print(f"🤖 Loading tokenizer...")
+                self._tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+                print(f"✅ Tokenizer loaded successfully")
+                
+                # Check if this is a PEFT model by looking for adapter_config.json
+                adapter_config_path = os.path.join(self.model_path, "adapter_config.json")
+                
+                if os.path.exists(adapter_config_path):
+                    print(f"🤖 Found adapter config, loading PEFT model...")
+                    # Load PEFT model with device_map="auto" to handle meta tensors properly
+                    self._model = AutoPeftModelForSequenceClassification.from_pretrained(
+                        self.model_path,
+                        num_labels=1,  # Regression
+                        torch_dtype=torch.float32,  # Use float32 for stability
+                        device_map="auto",  # Let transformers handle device placement
+                        low_cpu_mem_usage=True,  # More efficient loading
+                    )
+                    print("✅ PEFT adapter model loaded successfully")
+                else:
+                    print(f"🤖 No adapter config found, loading standard model...")
+                    # Fallback to standard model loading
+                    self._model = AutoModelForSequenceClassification.from_pretrained(
+                        self.model_path,
+                        num_labels=1,  # Regression
+                        torch_dtype=torch.float32,  # Use float32 for stability
+                        device_map="auto",  # Let transformers handle device placement
+                        low_cpu_mem_usage=True,  # More efficient loading
+                    )
+                    print("✅ Standard fine-tuned model loaded successfully")
+                
+                # Set to evaluation mode
+                self._model.eval()
+                
+                # Print model info
+                device = next(self._model.parameters()).device
+                print(f"✅ Model loaded on device: {device}")
+                print(f"✅ Model dtype: {next(self._model.parameters()).dtype}")
+                
+                # Don't manually move to CUDA since device_map="auto" handles placement
+                
+            except Exception as e:
+                print(f"❌ Error loading model: {e}")
+                import traceback
+                traceback.print_exc()
+                raise e
 
         return self._model, self._tokenizer
 
     def _predict_batch(self, texts: List[str]) -> List[float]:
         """Make predictions on a batch of texts using the fine-tuned model."""
+        print("=" * 80)
+        print(f"🚨 FINETUNED DEBUG: _predict_batch called with {len(texts)} texts")
+        print("=" * 80)
+        
         print(f"🔍 Processing batch of {len(texts)} texts")
         if texts:
             print(f"🔍 Sample text: {texts[0][:150]}...")
         
-        model, tokenizer = self._load_model_and_tokenizer()
-        
-        # Tokenize the entire batch
-        with torch.no_grad():
-            inputs = tokenizer(
-                texts,
-                return_tensors="pt",
-                padding=True,
-                truncation=True,
-                max_length=self.max_seq_length
-            )
+        try:
+            print(f"🚨 FINETUNED DEBUG: About to call _load_model_and_tokenizer()")
+            model, tokenizer = self._load_model_and_tokenizer()
+            print(f"🚨 FINETUNED DEBUG: Model and tokenizer loaded successfully")
+            print(f"🔍 Model and tokenizer loaded successfully")
             
-            # Move inputs to the same device as the model
-            device = next(model.parameters()).device
-            inputs = {k: v.to(device) for k, v in inputs.items()}
+            # Tokenize the entire batch
+            print(f"🚨 FINETUNED DEBUG: Tokenizing {len(texts)} texts...")
+            print(f"🔍 Tokenizing {len(texts)} texts...")
             
-            # Get predictions for the entire batch
-            outputs = model(**inputs)
-            logits = outputs.logits.detach().cpu().numpy().flatten()
-            
-            # For regression, directly use the logit outputs
-            predictions = [float(logit) for logit in logits]
-            print(f"🎯 Batch predictions: {predictions}")
+            import torch
+            with torch.no_grad():
+                inputs = tokenizer(
+                    texts,
+                    return_tensors="pt",
+                    padding=True,
+                    truncation=True,
+                    max_length=self.max_seq_length
+                )
+                print(f"🚨 FINETUNED DEBUG: Tokenization complete. Input shape: {inputs['input_ids'].shape}")
+                print(f"🔍 Tokenization complete. Input shape: {inputs['input_ids'].shape}")
+                
+                # Move inputs to the same device as the model
+                device = next(model.parameters()).device
+                print(f"🚨 FINETUNED DEBUG: Moving inputs to device: {device}")
+                print(f"🔍 Moving inputs to device: {device}")
+                inputs = {k: v.to(device) for k, v in inputs.items()}
+                
+                # Get predictions for the entire batch
+                print(f"🚨 FINETUNED DEBUG: Running model inference...")
+                print(f"🔍 Running model inference...")
+                outputs = model(**inputs)
+                logits = outputs.logits.detach().cpu().numpy().flatten()
+                print(f"🚨 FINETUNED DEBUG: Raw logits: {logits}")
+                print(f"🔍 Raw logits: {logits}")
+                print(f"🔍 Logits shape: {logits.shape}")
+                print(f"🔍 Logits dtype: {logits.dtype}")
+                
+                # For regression, directly use the logit outputs
+                predictions = [float(logit) for logit in logits]
+                print(f"🚨 FINETUNED DEBUG: Final predictions: {predictions}")
+                print(f"🎯 Final predictions: {predictions}")
+                
+        except Exception as e:
+            print("=" * 80)
+            print(f"🚨 CRITICAL ERROR in Fine-tuned Model:")
+            print(f"   Error: {e}")
+            print(f"   Error Type: {type(e).__name__}")
+            print(f"   Model Path: {getattr(self, 'model_path', 'UNKNOWN')}")
+            print("=" * 80)
+            import traceback
+            traceback.print_exc()
+            # Return zeros if prediction fails
+            predictions = [0.0] * len(texts)
+            print(f"❌ Returning zeros due to error: {predictions}")
             
         return predictions
 
     def _format_text(self, input_text: str, output_text: str, references: Optional[str] = None) -> str:
         """Format text for prediction (consistent with training format)."""
+        input_text = str(input_text) if input_text is not None else ""
+        output_text = str(output_text) if output_text is not None else ""
+        
         if self.is_reference_based and references is not None:
             if isinstance(references, list):
                 refs = " ".join([str(ref) for ref in references if ref is not None])

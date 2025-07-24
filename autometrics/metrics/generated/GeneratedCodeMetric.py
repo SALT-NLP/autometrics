@@ -104,26 +104,26 @@ def _smart_dedent(code: str) -> str:
     return '\n'.join(dedented_lines)
 
 def _strip_header_and_dedent(code: str) -> str:
-    """Strip function header and dedent the body (from user's old code)"""
+    """Strip function header and dedent the body. If no function header, do NOT dedent (preserve indentation)."""
     code_lines = code.split("\n")
     code = ""
     for line in code_lines:
         if not line.startswith("#"):
             code += line + "\n"
     if "```python" in code:
-        code = code.split("```python")[1].split("```")[0]
+        code = code.split("```python")[1].split("```", 1)[0]
     elif "```" in code:
-        code = code.split("```")[1]
-    
-    code = _HEADER_RE.split(code)
-    if len(code) > 1:
+        code = code.split("```", 1)[1]
+
+    code_parts = _HEADER_RE.split(code)
+    if len(code_parts) > 1:
         # Found function header, dedent the function body
-        dedented_body = _smart_dedent(code[1])
-        result = code[0] + dedented_body.rstrip()
+        dedented_body = _smart_dedent(code_parts[1])
+        result = code_parts[0] + dedented_body.rstrip()
         return result
     else:
-        # No header found, apply smart dedent to whole code in case it's uniformly indented
-        result = _smart_dedent(code[0])
+        # No header found, DO NOT dedent—just return cleaned code as-is
+        result = code_parts[0].rstrip("\n")
         return result
 
 
@@ -288,6 +288,11 @@ class _CodeMetricMixin:
 
     def _execute_generated_code(self, input_text: str, output_text: str, references: Optional[List[str]] = None) -> float:
         """Execute the generated code with the given inputs using direct eval (simpler approach)"""
+        
+        input_text = str(input_text) if input_text is not None else ""
+        output_text = str(output_text) if output_text is not None else ""
+        if references is not None:
+            references = [str(ref) if ref is not None else "" for ref in references]
         
         # Clean the generated code using the proven approach from the old CodeGenerator
         cleaned_code = _strip_header_and_dedent(self.generated_code)
@@ -578,10 +583,18 @@ class _CodeMetricMixin:
         if self.is_reference_based:
             method_signature = "    def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401"
             method_body = f"""        del kwargs  # pragma: no cover
+        input = str(input)
+        output = str(output)
+        references = [str(ref) for ref in references] if references is not None else None
+
 {indented_logic}"""
         else:
             method_signature = "    def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401"
             method_body = f"""        del references, kwargs  # pragma: no cover
+        input = str(input)
+        output = str(output)
+        references = [str(ref) for ref in references] if references is not None else None
+
 {indented_logic}"""
         
         # Include imports at module level if any

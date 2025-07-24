@@ -7,6 +7,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from autometrics.generator.utils import (
     get_good_bad_examples,
     generate_axes_of_variation,
+    is_context_length_error,
+    truncate_examples_if_needed,
 )
 
 from autometrics.util.format import get_default_formatter
@@ -200,37 +202,58 @@ class RubricGenerator(Generator):
         # Helper function to generate rubric with proper DSPy context
         def generate_rubric_with_context(task_description, good_examples_formatted, bad_examples_formatted, metric_title, metric_description):
             print(f"DEBUG: Generating rubric for '{metric_title}' in thread")
-            try:
-                # Set temperature based on seed for cache busting
-                temperature = 0.0001 * self.seed if self.seed is not None else None
-                
-                if temperature is not None:
-                    with dspy.settings.context(lm=self.generator_llm, temperature=temperature):
-                        rubric_generator = GenerateRubric()
-                        result = rubric_generator.forward(
-                            task_description,
-                            good_examples_formatted,
-                            bad_examples_formatted,
-                            metric_title,
-                            metric_description
-                        )
-                        print(f"DEBUG: Successfully generated rubric for '{metric_title}' (seed={self.seed}, temp={temperature})")
-                        return result
-                else:
-                    with dspy.settings.context(lm=self.generator_llm):
-                        rubric_generator = GenerateRubric()
-                        result = rubric_generator.forward(
-                            task_description,
-                            good_examples_formatted,
-                            bad_examples_formatted,
-                            metric_title,
-                            metric_description
-                        )
-                        print(f"DEBUG: Successfully generated rubric for '{metric_title}'")
-                        return result
-            except Exception as e:
-                print(f"ERROR: Failed to generate rubric for '{metric_title}': {e}")
-                raise
+            # Fallback configs: try full, then fewer, then truncated examples
+            fallback_configs = [
+                {"good": good_examples_formatted, "bad": bad_examples_formatted, "desc": "full examples"},
+                {"good": good_examples_formatted[:3], "bad": bad_examples_formatted[:3], "desc": "3 examples each"},
+                {"good": good_examples_formatted[:2], "bad": bad_examples_formatted[:2], "desc": "2 examples each"},
+                {"good": good_examples_formatted[:1], "bad": bad_examples_formatted[:1], "desc": "1 example each"},
+                {"good": truncate_examples_if_needed(good_examples_formatted[:2], 1500), "bad": truncate_examples_if_needed(bad_examples_formatted[:2], 1500), "desc": "2 examples truncated to 1500 chars"},
+                {"good": truncate_examples_if_needed(good_examples_formatted[:1], 1000), "bad": truncate_examples_if_needed(bad_examples_formatted[:1], 1000), "desc": "1 example truncated to 1000 chars"},
+            ]
+            last_error = None
+            for i, config in enumerate(fallback_configs):
+                try:
+                    print(f"  Trying rubric generation with {config['desc']}...")
+                    temperature = 0.0001 * self.seed if self.seed is not None else None
+                    if temperature is not None:
+                        with dspy.settings.context(lm=self.generator_llm, temperature=temperature):
+                            rubric_generator = GenerateRubric()
+                            result = rubric_generator.forward(
+                                task_description,
+                                config["good"],
+                                config["bad"],
+                                metric_title,
+                                metric_description
+                            )
+                            print(f"  Success with {config['desc']} (seed={self.seed}, temp={temperature})")
+                            return result
+                    else:
+                        with dspy.settings.context(lm=self.generator_llm):
+                            rubric_generator = GenerateRubric()
+                            result = rubric_generator.forward(
+                                task_description,
+                                config["good"],
+                                config["bad"],
+                                metric_title,
+                                metric_description
+                            )
+                            print(f"  Success with {config['desc']}")
+                            return result
+                except Exception as e:
+                    last_error = e
+                    error_str = str(e)
+                    if is_context_length_error(error_str):
+                        print(f"  Context length error with {config['desc']}, trying fallback {i+2}/{len(fallback_configs)}...")
+                        if i == len(fallback_configs) - 1:
+                            print(f"  All rubric fallbacks failed. Final error: {error_str}")
+                            raise Exception(f"Context length exceeded even with minimal examples for rubric. Original error: {error_str}")
+                        continue
+                    else:
+                        print(f"  Non-context error in rubric generation: {error_str}")
+                        raise
+            # Should never reach here
+            raise last_error if last_error else Exception("Unexpected error in rubric fallback logic")
 
         print("DEBUG: Starting rubric generation with ThreadPoolExecutor...")
         with ThreadPoolExecutor() as executor:

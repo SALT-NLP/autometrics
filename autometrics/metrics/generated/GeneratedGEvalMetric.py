@@ -134,6 +134,8 @@ def extract_score_probabilities(logprobs_content, possible_scores=[1, 2, 3, 4, 5
 
 def GEval(formatted_prompt, source, references, model_output, dspy_lm):
     """Perform G-Eval scoring with logprobs."""
+    # Replace {user_query} placeholder with the actual source text if present
+    formatted_prompt = formatted_prompt.replace("{user_query}", source)
     prompt = formatted_prompt.format(source=source, references=references, model_output=model_output)
 
     results = dspy_lm.forward(prompt=prompt, logprobs=True, top_logprobs=5)
@@ -241,11 +243,14 @@ class _GEvalMetricMixin:
 
     def _call_geval(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
         """Call G-Eval scoring function."""
+        input_text = str(input_text) if input_text is not None else ""
+        output_text = str(output_text) if output_text is not None else ""
+        
         # Prepare references string
         if references is None:
             references_str = "None provided"
         elif isinstance(references, list):
-            references_str = "\n".join([f"Reference {i+1}: {ref}" for i, ref in enumerate(references)])
+            references_str = "\n".join([f"Reference {i+1}: {str(ref)}" for i, ref in enumerate(references) if ref is not None])
         else:
             references_str = str(references)
         
@@ -277,11 +282,9 @@ class _GEvalMetricMixin:
             with tqdm(total=len(futures), desc="Processing G-Eval") as pbar:
                 for future in as_completed(futures):
                     index = futures[future]
-                    try:
-                        results[index] = future.result()
-                    except Exception as e:
-                        print(f"Error processing item {index}: {e}")
-                        results[index] = 0.0
+                    # FIXED: Let errors propagate naturally instead of catching and returning 0.0
+                    # This allows the cache to distinguish between failures and valid results
+                    results[index] = future.result()
                     pbar.update(1)
         
         return results

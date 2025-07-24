@@ -151,6 +151,7 @@ FastText
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 3819.453125  # in MB
+    description: ClassVar[str] = "FastTextEducationalValue is a reference-free classification-based metric that evaluates the educational quality of generated text. It uses a FastText classifier trained to predict three levels of educational value—Low, Mid, and High—and outputs an expected value score by taking a weighted sum over the classifier's label probabilities. This metric is particularly useful for content filtering, ranking, or prioritizing educational materials in generative settings, especially when no reference output is available."
 
     def __init__(
         self,

@@ -3,20 +3,20 @@
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --mem=140GB
+#SBATCH --mem=100GB
 #SBATCH --open-mode=append
 #SBATCH --partition=sc-loprio
-#SBATCH --time=48:00:00
+#SBATCH --time=36:00:00
 #SBATCH --nodes=1
-#SBATCH --job-name=metric_gen_qwen_remaining
-#SBATCH --output=scripts/metric_generation/logs/metric_gen_qwen_remaining.out
-#SBATCH --error=scripts/metric_generation/logs/metric_gen_qwen_remaining.err
+#SBATCH --job-name=metric_gen_qwen_simpeval
+#SBATCH --output=scripts/metric_generation/logs/metric_gen_qwen_simpeval.out
+#SBATCH --error=scripts/metric_generation/logs/metric_gen_qwen_simpeval.err
 #SBATCH --constraint=141G
 #SBATCH --requeue
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mryan0@stanford.edu
 
-# Script for remaining datasets with Qwen3-32B
+# Script for SimpEval datasets with Qwen3-32B
 
 . /nlp/scr/mryan0/miniconda3/etc/profile.d/conda.sh
 conda activate sglang
@@ -25,10 +25,10 @@ cd /nlp/scr2/nlp/personal-rm/autometrics
 
 # Server configuration
 model="Qwen/Qwen3-32B"
-port=7450  # Different port, 10 apart spacing
+port=7430  # Different port, 10 apart spacing
 model_nickname="qwen3_32b"
 
-echo "Starting Qwen3-32B server for remaining datasets metric generation..."
+echo "Starting Qwen3-32B server for SimpEval metric generation..."
 python -m sglang.launch_server --model-path ${model} --port ${port} --host 0.0.0.0 --tp 1 --dtype bfloat16 --mem-fraction-static 0.8 --trust-remote-code > /dev/null 2>&1 &
 
 # Wait for server to be ready
@@ -52,43 +52,39 @@ echo "Server is up and running!"
 conda activate autometrics
 
 # Set environment variables for Qwen
-export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_metric_gen_qwen_remaining"
+export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_metric_gen_qwen_simpeval"
 export AUTOMETRICS_MODEL_DIR="/sphinx/u/salt-checkpoints/autometrics/models"
 
 # Set API base URL
 API_BASE=http://localhost:${port}/v1
 
-echo "Starting Metric Generation Benchmark with Qwen3-32B for remaining datasets..."
+echo "Starting Metric Generation Benchmark with Qwen3-32B for SimpEval datasets..."
 echo "Using DSPY cache: $DSPY_CACHEDIR"
 echo "Model save directory: $AUTOMETRICS_MODEL_DIR"
 echo "API Base: $API_BASE"
-echo "Processing datasets: EvalGen, Primock57, RealHumanEval, SummEval"
+echo "Processing datasets: SimpDA, SimpEval"
 echo "Seeds: 42 43 44 45 46"
 echo "Correlation: all"
 
-# Run the benchmark for remaining datasets
+# Run the benchmark for SimpEval datasets
 python analysis/ablations/run_metric_generation_benchmark.py \
     --generator-model qwen3_32b \
     --judge-model qwen3_32b \
     --api-base $API_BASE \
     --seeds 42 43 44 45 46 \
     --correlation all \
-    --dataset EvalGenMedical EvalGenProduct Primock57 RealHumanEval SummEval \
+    --dataset SimpEval \
     --output-dir results/ablations/metric_generation \
     --model-save-dir $AUTOMETRICS_MODEL_DIR
 
-echo "Remaining datasets benchmark completed with Qwen3-32B!"
+echo "SimpEval datasets benchmark completed with Qwen3-32B!"
 
 # Cleanup: Kill the server
 pkill -f "sglang.launch_server"
 
 echo ""
 echo "Summary of processed dataset-measure combinations:"
-echo "  - EvalGenMedical: quality"
-echo "  - EvalGenProduct: quality"
-echo "  - Primock57: helpfulness"
-echo "  - RealHumanEval: quality"
-echo "  - SummEval: consistency, relevance, fluency, coherence"
+echo "  - SimpEval: score"
 echo ""
-echo "Total: 8 dataset-measure combinations"
+echo "Total: 1 dataset-measure combination"
 echo "Results saved to: results/ablations/metric_generation/" 

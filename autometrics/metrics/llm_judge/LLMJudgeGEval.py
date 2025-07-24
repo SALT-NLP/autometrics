@@ -125,6 +125,8 @@ def extract_score_probabilities(logprobs_content, possible_scores=[1, 2, 3, 4, 5
     return result
 
 def GEval(formatted_prompt, source, references, model_output, dspy_lm):
+    # Replace {user_query} placeholder with the actual source text if present
+    formatted_prompt = formatted_prompt.replace("{user_query}", source)
     prompt = formatted_prompt.format(source=source, references=references, model_output=model_output)
 
     results = dspy_lm.forward(prompt=prompt, logprobs=True, top_logprobs=5)
@@ -289,11 +291,9 @@ class LLMJudgeGEval(Metric):
             with tqdm(total=len(futures), desc="Processing G-Eval") as pbar:
                 for future in as_completed(futures):
                     index = futures[future]
-                    try:
-                        results[index] = future.result()
-                    except Exception as e:
-                        print(f"Error processing item {index}: {e}")
-                        results[index] = 0.0
+                    # FIXED: Let errors propagate naturally instead of catching and returning 0.0
+                    # This allows the cache to distinguish between failures and valid results
+                    results[index] = future.result()
                     pbar.update(1)
         
         return results

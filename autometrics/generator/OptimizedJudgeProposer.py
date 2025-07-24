@@ -11,11 +11,14 @@ import os
 import uuid
 import tempfile
 import re
+import random
 
 # Utilities to avoid duplication and enable reuse across generators
 from autometrics.generator.utils import (
     get_good_bad_examples,
     generate_axes_of_variation,
+    smart_limit_examples_for_context,
+    get_max_context_tokens,
 )
 
 from autometrics.util.format import get_default_formatter
@@ -160,6 +163,7 @@ class OptimizedJudgeProposer(Generator):
         num_threads: int = 64,
         max_bootstrapped_demos: int = 8,
         max_labeled_demos: int = 8,
+        max_train_set_size: int = 200, # To limit training time
         seed: Optional[int] = None,
     ):
 
@@ -190,7 +194,8 @@ class OptimizedJudgeProposer(Generator):
         self.num_threads = num_threads
         self.max_bootstrapped_demos = max_bootstrapped_demos
         self.max_labeled_demos = max_labeled_demos
-        
+        self.max_train_set_size = max_train_set_size
+
         # Seed for reproducible variation in metric generation
         self.seed = seed
 
@@ -280,6 +285,49 @@ class OptimizedJudgeProposer(Generator):
             formatter,
             suggested_range
         )
+
+        if train_set is None:
+            train_set = []
+        
+        # Smart limit examples for context window constraints
+        if len(train_set) > 0:
+            # Extract example texts for token estimation
+            example_texts = []
+            for example in train_set:
+                if hasattr(example, 'text'):
+                    example_texts.append(example.text)
+                elif hasattr(example, 'input') and hasattr(example.input, 'text'):
+                    example_texts.append(example.input.text)
+                else:
+                    # Fallback: convert example to string
+                    example_texts.append(str(example))
+            
+            # Get model name for token estimation
+            model_name = "gpt-3.5-turbo"  # Default
+            if self.judge_model and hasattr(self.judge_model, 'model'):
+                model_name = self.judge_model.model
+            elif self.generator_llm and hasattr(self.generator_llm, 'model'):
+                model_name = self.generator_llm.model
+            
+            # Smart limit examples
+            limited_examples = smart_limit_examples_for_context(
+                example_texts,
+                task_description,
+                model_name,
+                target_examples=min(self.max_bootstrapped_demos + self.max_labeled_demos, len(train_set)),
+                dspy_overhead_tokens=4096,
+                output_tokens=2048,
+                safety_margin=2000
+            )
+            
+            # If we need to limit examples, recreate train_set with limited examples
+            if len(limited_examples) < len(train_set):
+                print(f"Limiting MIPROv2 prompt to {len(limited_examples)} examples due to context constraints")
+                
+                # Update optimization parameters to match limited examples
+                self.max_bootstrapped_demos = min(self.max_bootstrapped_demos, len(limited_examples) // 2)
+                self.max_labeled_demos = min(self.max_labeled_demos, len(limited_examples) // 2)
+                print(f"Adjusted optimization params: bootstrapped={self.max_bootstrapped_demos}, labeled={self.max_labeled_demos}")
         
         # Initialize DSPy signature and module based on reference type
         reference_columns = dataset.get_reference_columns()
@@ -320,6 +368,12 @@ class OptimizedJudgeProposer(Generator):
                 optimization_model_with_temp = optimization_model
         else:
             optimization_model_with_temp = optimization_model
+
+        if self.max_train_set_size is not None and len(train_set) > self.max_train_set_size:
+            print(f"Warning: Train set size ({len(train_set)}) exceeds max_train_set_size ({self.max_train_set_size}). Truncating train set to reduce training time.")
+            random.seed(self.seed)
+            random.shuffle(train_set)
+            train_set = train_set[:self.max_train_set_size]
             
         print(f"🔧 Starting MIPROv2 optimization with:")
         print(f"  - Model: {optimization_model_with_temp}")
@@ -366,6 +420,9 @@ class OptimizedJudgeProposer(Generator):
         """
 
         task_description = dataset.get_task_description()
+
+        if not task_description:
+            task_description = "Respond to the user's query."
 
         if not formatter:
             formatter = self._get_formatter(dataset)

@@ -4,6 +4,7 @@ from typing import List, Optional, Dict, Any
 import math
 import pandas as pd
 from tqdm import tqdm
+import os
 
 import dspy
 
@@ -42,6 +43,10 @@ class _PrometheusMetricMixin:
         is_reference_based: bool = False,
         **kwargs,
     ):
+        # Ensure LITELLM_PROXY_API_KEY is set to 'None' if not already set
+        if 'LITELLM_PROXY_API_KEY' not in os.environ:
+            os.environ['LITELLM_PROXY_API_KEY'] = 'None'
+
         self.rubric = rubric
         self.task_description = task_description or "No task description provided"
         self.judge_api_base = judge_api_base
@@ -93,17 +98,29 @@ class _PrometheusMetricMixin:
             metric_card = self.metric_card
 
         # Initialize parent with shared parameters
-        super().__init__(
-            name,
-            description,
-            metric_card=metric_card,
-            metric_card_author_model=metric_card_author_model,
-            rubric=rubric,
-            model_str=self.model_str,
-            task_description=self.task_description,
-            judge_api_base=judge_api_base,
-            **kwargs,
-        )
+        try:
+            super().__init__(
+                name,
+                description,
+                metric_card=metric_card,
+                metric_card_author_model=metric_card_author_model,
+                rubric=rubric,
+                model_str=self.model_str,
+                task_description=self.task_description,
+                judge_api_base=judge_api_base,
+                **kwargs,
+            )
+        except AssertionError as e:
+            if "No LM is loaded" in str(e):
+                raise RuntimeError(
+                    "DSPy metric card generation failed: No LM is loaded. "
+                    "To fix this, either:\n"
+                    "1. Pass a valid LM as metric_card_author_model parameter, or\n"
+                    "2. Set dspy.settings.lm to a valid LM instance, or\n"
+                    "3. Use metric_card='provided' to skip automatic generation"
+                ) from e
+            else:
+                raise
 
         # Exclude heavy objects from cache key
         self.exclude_from_cache_key("model", "judge")
@@ -135,6 +152,14 @@ class _PrometheusMetricMixin:
         return lines
 
     def _call_prometheus(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
+        input_text = str(input_text) if input_text is not None else ""
+        output_text = str(output_text) if output_text is not None else ""
+        if references is not None:
+            if isinstance(references, list):
+                references = "\n".join([str(ref) for ref in references if ref is not None])
+            else:
+                references = str(references)
+        
         # Format the rubric for Prometheus evaluation
         rubric_formatted = f"""**Criteria:** {self.rubric['criteria']}
 
@@ -172,11 +197,9 @@ class _PrometheusMetricMixin:
         # Fail-fast if workers=1
         if self.max_workers == 1:
             for i, (inp, out, ref) in enumerate(zip(inputs, outputs, references or [None] * len(outputs))):
-                try:
-                    results[i] = self._call_prometheus(inp, out, ref)
-                except Exception as e:
-                    print(f"Error processing item {i}: {e}")
-                    results[i] = 0.0
+                # FIXED: Let errors propagate naturally instead of catching and returning 0.0
+                # This allows the cache to distinguish between failures and valid results
+                results[i] = self._call_prometheus(inp, out, ref)
             return results
 
         # Use ThreadPoolExecutor to process each item in parallel
@@ -190,11 +213,9 @@ class _PrometheusMetricMixin:
             with tqdm(total=len(futures), desc="Processing Prometheus Evaluation") as pbar:
                 for future in as_completed(futures):
                     index = futures[future]
-                    try:
-                        results[index] = future.result()
-                    except Exception as e:
-                        print(f"Error processing item {index}: {e}")
-                        results[index] = 0.0
+                    # FIXED: Let errors propagate naturally instead of catching and returning 0.0
+                    # This allows the cache to distinguish between failures and valid results
+                    results[index] = future.result()
                     pbar.update(1)
 
         return results

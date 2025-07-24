@@ -9,7 +9,10 @@ from autometrics.metrics.generated.GeneratedRefBasedMetric import GeneratedRefBa
 from autometrics.dataset.Dataset import DummyDataset
 from platformdirs import user_data_dir
 
+
 colbert_index_path = os.path.join(user_data_dir("autometrics"), "colbert_all_metrics")
+bm25_index_path = os.path.join(user_data_dir("autometrics"), "bm25_all_metrics")
+
 recommender_global = None
 
 def generate_metric_details(metric: GeneratedRefFreeMetric | GeneratedRefBasedMetric):
@@ -39,18 +42,53 @@ def generate_related_metrics(metric: GeneratedRefFreeMetric | GeneratedRefBasedM
         if recommender_global is None:
             # Lazy import heavy modules only when first needed (avoids 90s startup delay)
             from autometrics.metrics.MetricBank import all_metric_classes
+            from autometrics.recommend.BM25 import BM25
             from autometrics.recommend.ColBERT import ColBERT
-            recommender_global = ColBERT(metric_classes=all_metric_classes, index_path=colbert_index_path, force_reindex=force_reindex)
+            # Try to initialize BM25 recommender first
+            try:
+                print(f"Initializing BM25 recommender with index path: {bm25_index_path}")
+                recommender_global = BM25(metric_classes=all_metric_classes, index_path=bm25_index_path)
+                print("BM25 recommender loaded successfully")
+            except Exception as bm25_error:
+                print(f"Error initializing BM25 recommender: {bm25_error}")
+                print("Falling back to ColBERT recommender...")
+                try:
+                    recommender_global = ColBERT(metric_classes=all_metric_classes, index_path=colbert_index_path, force_reindex=force_reindex)
+                    # Check if the searcher is properly initialized
+                    if hasattr(recommender_global, 'index') and hasattr(recommender_global.index, 'searcher'):
+                        if recommender_global.index.searcher is None:
+                            print("Warning: ColBERT index searcher is None, rebuilding index...")
+                            recommender_global = ColBERT(metric_classes=all_metric_classes, index_path=colbert_index_path, force_reindex=True)
+                            print("ColBERT index rebuilt successfully")
+                        else:
+                            print("ColBERT index loaded successfully")
+                    else:
+                        print("Warning: ColBERT index doesn't have searcher attribute, rebuilding...")
+                        recommender_global = ColBERT(metric_classes=all_metric_classes, index_path=colbert_index_path, force_reindex=True)
+                        print("ColBERT index rebuilt successfully")
+                except Exception as colbert_error:
+                    print(f"Failed to initialize ColBERT recommender: {colbert_error}")
+                    print("No recommender could be initialized.")
+                    recommender_global = None
         recommender = recommender_global
 
-    dataset = DummyDataset(task_description=f"NA; Please recommend a related metric to {metric.name}.")
-    results = recommender.recommend(dataset=dataset, target_measurement=metric.name, k=3)
+    if recommender is None:
+        print("No recommender available for related metrics.")
+        return """- **Related Metrics:**\n  - None"""
 
-    results_str = ""
-    for result in results:
-        results_str += f"\n  - **{result.__name__}:** {result.description.split('.')[0] + '.'}"
+    try:
+        dataset = DummyDataset(task_description=f"NA; Please recommend a related metric to {metric.name}.")
+        results = recommender.recommend(dataset=dataset, target_measurement=metric.name, k=3)
 
-    return f"""- **Related Metrics:**{results_str}"""
+        results_str = ""
+        for result in results:
+            results_str += f"\n  - **{result.__name__}:** {result.description.split('.')[0] + '.'}"
+
+        return f"""- **Related Metrics:**{results_str}"""
+    
+    except Exception as e:
+        print(f"Error generating related metrics: {e}")
+        return """- **Related Metrics:**\n  - None"""
 
 def generate_further_reading(metric: GeneratedRefFreeMetric | GeneratedRefBasedMetric):
     """Generate further reading for a given metric."""

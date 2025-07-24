@@ -143,6 +143,21 @@ class _ExampleRubricMetricMixin:
 
         # Initialize the DSPy program
         self.program = LLMAsAJudge()
+        
+        # Debug: Verify the program was created correctly
+        print(f"🔍 Example Judge program created: {type(self.program)}")
+        print(f"🔍 Example Judge program attributes: {[attr for attr in dir(self.program) if not attr.startswith('_')]}")
+        
+        if hasattr(self.program, 'generate_score'):
+            print(f"🔍 Example Judge program.generate_score: {type(self.program.generate_score)}")
+            if hasattr(self.program.generate_score, 'predict'):
+                print(f"🔍 Example Judge program.generate_score.predict: {type(self.program.generate_score.predict)}")
+                initial_demos = getattr(self.program.generate_score.predict, 'demos', [])
+                print(f"🔍 Example Judge initial demo count: {len(initial_demos)}")
+            else:
+                print("❌ Example Judge program.generate_score missing predict attribute")
+        else:
+            print("❌ Example Judge program missing generate_score attribute")
 
         # Load pre-optimized examples or load from prompt
         if load_prompt is not None:
@@ -181,15 +196,47 @@ class _ExampleRubricMetricMixin:
     def _load_optimized_examples(self, optimized_examples):
         """Load pre-optimized examples into the DSPy program."""
         if not optimized_examples:
+            print("No optimized examples provided")
             return
             
         try:
-            # Use the correct DSPy path we discovered through testing
+            print(f"Loading {len(optimized_examples)} optimized examples...")
+            print(f"Example data type: {type(optimized_examples)}")
+            if optimized_examples:
+                print(f"First example type: {type(optimized_examples[0])}")
+                
+                # With the fixed serialization, these should all be proper DSPy Example objects
+                first_example = optimized_examples[0]
+                if hasattr(first_example, '_store'):
+                    print(f"✅ First example is a proper DSPy Example with _store attribute")
+                    print(f"✅ Example fields: {list(first_example._store.keys())}")
+                elif hasattr(first_example, '__dict__'):
+                    print(f"✅ First example has __dict__: {first_example.__dict__.keys()}")
+                else:
+                    print(f"❌ First example type not recognized: {type(first_example)}")
+                    
+            # Directly assign the examples to the DSPy program
+            # Since they should now be properly constructed DSPy Example objects
             self.program.generate_score.predict.demos = optimized_examples
-            print(f"Loaded {len(optimized_examples)} optimized examples into DSPy program")
+            
+            print(f"✅ Successfully loaded {len(optimized_examples)} optimized examples into DSPy program")
+            print(f"✅ Verification: {len(self.program.generate_score.predict.demos)} examples now in program.generate_score.predict.demos")
+            
+            if optimized_examples:
+                first_demo = self.program.generate_score.predict.demos[0]
+                print(f"🔍 First demo type: {type(first_demo)}")
+                if hasattr(first_demo, '_store'):
+                    print(f"🔍 First demo fields: {list(first_demo._store.keys())}")
+                elif hasattr(first_demo, '__dict__'):
+                    print(f"🔍 First demo attributes: {list(first_demo.__dict__.keys())}")
+                    
+            print("Loaded optimized examples from Generator")
+            
         except Exception as e:
-            print(f"Warning: Could not load optimized examples: {e}")
-            print("Continuing without examples...")
+            print(f"❌ Error loading optimized examples: {e}")
+            import traceback
+            traceback.print_exc()
+            print("Continuing without optimized examples")
 
     def _format_examples_as_markdown(self, max_examples: int = 3) -> List[str]:
         """Format the first few examples as a markdown table."""
@@ -238,7 +285,23 @@ class _ExampleRubricMetricMixin:
         return ["*No examples available.*"]
 
     def _call_llm_judge(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
-        """Call the LLM judge with the given inputs."""
+        """Call the LLM judge with the given inputs. If context length is exceeded, drop the longest demo and retry. Never modify self.program or its demos; always work on a deepcopy."""
+        
+        input_text = str(input_text) if input_text is not None else ""
+        output_text = str(output_text) if output_text is not None else ""
+        if references is not None:
+            if isinstance(references, list):
+                references = [str(ref) if ref is not None else "" for ref in references]
+            else:
+                references = str(references)
+        
+        print(f"🔍 Example Judge Debug - Processing:")
+        print(f"   Input: {input_text[:100]}...")
+        print(f"   Output: {output_text[:100]}...")
+        print(f"   References: {references}")
+        print(f"   Axis: {self.axis}")
+        print(f"   Program type: {type(self.program)}")
+        
         # For example-based metrics, we format the full text using the dataset's formatter
         if self.train_dataset:
             # Reconstruct a row-like object for formatting
@@ -268,17 +331,105 @@ class _ExampleRubricMetricMixin:
             else:
                 formatted_text = f"Input: {input_text}\nOutput: {output_text}"
 
+        print(f"🔍 Example Judge Formatted text: {formatted_text[:200]}...")
+
         # Set temperature based on seed for cache busting
         temperature = 0.0001 * self.seed
         
-        with dspy.settings.context(lm=self.model, temperature=temperature):
-            result = self.program(
-                text=formatted_text,
-                measure=self.axis,
-                suggested_range=self.suggested_range,
-                task_description=self.task_description
-            )
-            return float(result.score)
+        print(f"🔍 Example Judge calling DSPy program with temperature: {temperature}")
+
+        # --- Begin context length error handling logic ---
+        import copy
+        # Start with a shallow reference to self.program for performance
+        program = self.program
+        demos = []
+        if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
+            orig_demos = getattr(program.generate_score.predict, 'demos', [])
+            demos = list(orig_demos)  # shallow copy for removal
+        else:
+            orig_demos = []
+        deepcopied = False  # Track if we've switched to a deepcopy
+        
+        while True:
+            try:
+                # Set the current demos for this attempt (on the current program)
+                if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
+                    program.generate_score.predict.demos = demos
+                    demos_count = len(demos)
+                    print(f"🔍 Example Judge program has {demos_count} demos loaded ({'deepcopy' if deepcopied else 'shallow'})")
+                    if demos_count == 0:
+                        print("⚠️  Example Judge WARNING: No demos loaded - this will likely cause poor scoring!")
+                else:
+                    print(f"❌ Example Judge program missing demos attribute ({'deepcopy' if deepcopied else 'shallow'})")
+                
+                with dspy.settings.context(lm=self.model, temperature=temperature):
+                    print(f"🔍 Example Judge DSPy context set with model: {self.model}")
+                    print(f"🔍 Example Judge current DSPy settings LM: {dspy.settings.lm}")
+                    result = program(
+                        text=formatted_text,
+                        measure=self.axis,
+                        suggested_range=self.suggested_range,
+                        task_description=self.task_description
+                    )
+                print(f"🔍 Example Judge DSPy result: {result}")
+                print(f"🔍 Example Judge result type: {type(result)}")
+                if hasattr(result, 'score'):
+                    print(f"🔍 Example Judge result.score: {result.score}")
+                    print(f"🔍 Example Judge result.score type: {type(result.score)}")
+                    score_value = float(result.score)
+                    print(f"🔍 Example Judge final score: {score_value}")
+                    # Check model history to verify LLM was actually called
+                    if hasattr(self.model, 'history') and score_value == 0.0:
+                        history_len = len(self.model.history)
+                        print(f"⚠️  Example Judge Model history length: {history_len}")
+                        if history_len == 0:
+                            print("🚨 CRITICAL: Model history is empty - LLM was never called!")
+                        else:
+                            print(f"🔍 Example Judge Last call: {self.model.history[-1]}")
+                    return score_value
+                else:
+                    print(f"❌ Example Judge result has no 'score' attribute")
+                    print(f"❌ Example Judge result attributes: {[attr for attr in dir(result) if not attr.startswith('_')]}")
+                    raise ValueError(f"DSPy result missing score attribute: {result}")
+            except Exception as e:
+                error_str = str(e)
+                # Check for context length error (robust to different error types)
+                if "ContextWindowExceededError" in error_str or "context length" in error_str or "input is longer than the model's context length" in error_str:
+                    print(f"⚠️  Context length error detected: {e}")
+                    if len(demos) == 0:
+                        print("🚨 No demos left to drop, cannot proceed.")
+                        raise
+                    # On first context error, switch to a deepcopy of the program and demos
+                    if not deepcopied:
+                        print("⚠️  Switching to deepcopy of program and demos due to context error.")
+                        program = copy.deepcopy(self.program)
+                        if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
+                            demos = list(program.generate_score.predict.demos)
+                        else:
+                            demos = []
+                        deepcopied = True
+                    # Find the longest demo (by text length)
+                    def demo_length(demo):
+                        # Try to get the 'text' field, fallback to str
+                        if hasattr(demo, 'get'):
+                            return len(str(demo.get('text', demo)))
+                        elif hasattr(demo, 'text'):
+                            return len(str(demo.text))
+                        else:
+                            return len(str(demo))
+                    longest_idx = max(range(len(demos)), key=lambda i: demo_length(demos[i]))
+                    print(f"⚠️  Dropping demo #{longest_idx} (length={demo_length(demos[longest_idx])}) and retrying...")
+                    demos.pop(longest_idx)
+                    continue
+                else:
+                    print(f"🚨 CRITICAL EXCEPTION in Example Judge DSPy call:")
+                    print(f"   Exception: {e}")
+                    print(f"   Exception Type: {type(e).__name__}")
+                    print(f"   Program: {program}")
+                    print(f"   Model: {self.model}")
+                    import traceback
+                    traceback.print_exc()
+                    raise
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         del kwargs  # pragma: no cover
@@ -287,11 +438,9 @@ class _ExampleRubricMetricMixin:
         # Fail-fast if workers=1
         if self.max_workers == 1:
             for i, (inp, out, ref) in enumerate(zip(inputs, outputs, references or [None] * len(outputs))):
-                try:
-                    results[i] = self._call_llm_judge(inp, out, ref)
-                except Exception as e:
-                    print(f"Error processing item {i}: {e}")
-                    results[i] = 0.0
+                # FIXED: Let errors propagate naturally instead of catching and returning 0.0
+                # This allows the cache to distinguish between failures and valid results
+                results[i] = self._call_llm_judge(inp, out, ref)
             return results
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
@@ -304,11 +453,9 @@ class _ExampleRubricMetricMixin:
             with tqdm(total=len(futures), desc="Processing Example Rubric Evaluation") as pbar:
                 for future in as_completed(futures):
                     index = futures[future]
-                    try:
-                        results[index] = future.result()
-                    except Exception as e:
-                        print(f"Error processing item {index}: {e}")
-                        results[index] = 0.0
+                    # FIXED: Let errors propagate naturally instead of catching and returning 0.0
+                    # This allows the cache to distinguish between failures and valid results
+                    results[index] = future.result()
                     pbar.update(1)
         
         return results
@@ -321,21 +468,113 @@ class _ExampleRubricMetricMixin:
         """Export a standalone python file that re-creates this metric."""
         class_name = "GeneratedRefBasedExampleRubricMetric" if self.is_reference_based else "GeneratedRefFreeExampleRubricMetric"
         
-        # For standalone export, we need to include the optimized examples if available
+        # CRITICAL FIX: Better example extraction with debugging
         examples_data = []
-        try:
-            # Use the correct DSPy path we discovered through testing
-            if hasattr(self.program, 'generate_score') and hasattr(self.program.generate_score, 'predict'):
-                examples_data = self.program.generate_score.predict.demos
-        except Exception as e:
-            print(f"Warning: Could not extract examples for code generation: {e}")
+        print(f"🔍 DEBUG: Extracting examples for serialization...")
+        print(f"🔍 DEBUG: Program type: {type(self.program)}")
         
-        code = f"""# Auto-generated Example Rubric metric file for {self.name}
+        try:
+            # Try multiple paths to find examples
+            if hasattr(self.program, 'generate_score'):
+                print(f"🔍 DEBUG: Found generate_score: {type(self.program.generate_score)}")
+                if hasattr(self.program.generate_score, 'predict'):
+                    print(f"🔍 DEBUG: Found predict: {type(self.program.generate_score.predict)}")
+                    if hasattr(self.program.generate_score.predict, 'demos'):
+                        examples_data = self.program.generate_score.predict.demos
+                        print(f"🔍 DEBUG: Found demos: {len(examples_data)} examples")
+                    else:
+                        print(f"🔍 DEBUG: No demos attribute in predict")
+                else:
+                    print(f"🔍 DEBUG: No predict attribute in generate_score")
+            else:
+                print(f"🔍 DEBUG: No generate_score attribute in program")
+                
+        except Exception as e:
+            print(f"🔍 DEBUG: Exception during example extraction: {e}")
+        
+        # Convert examples to proper serializable format
+        serialized_examples = []
+        if examples_data:
+            print(f"🔍 DEBUG: Serializing {len(examples_data)} examples...")
+            
+            for i, example in enumerate(examples_data):
+                try:
+                    # CRITICAL FIX: Handle different example types
+                    example_dict = None
+                    input_keys = []
+                    
+                    if hasattr(example, '__dict__'):
+                        # DSPy Example object
+                        print(f"🔍 DEBUG: Example {i} is DSPy Example object")
+                        example_dict = {}
+                        for key, value in example.__dict__.items():
+                            if not key.startswith('_'):  # Skip private attributes
+                                example_dict[key] = value
+                        
+                        # Get input keys from the example
+                        if hasattr(example, '_input_keys'):
+                            input_keys = list(example._input_keys)
+                        elif hasattr(example, 'inputs'):
+                            input_keys = list(example.inputs())
+                        else:
+                            input_keys = [k for k in example_dict.keys() if k != 'score']
+                    
+                    elif isinstance(example, dict):
+                        # Plain dictionary
+                        print(f"🔍 DEBUG: Example {i} is dictionary")
+                        example_dict = dict(example)  # Make a copy
+                        # Infer input keys - all keys except score
+                        input_keys = [k for k in example_dict.keys() if k != 'score']
+                    
+                    else:
+                        # Try to convert to dict if possible
+                        print(f"🔍 DEBUG: Example {i} is {type(example)}, trying to convert")
+                        try:
+                            example_dict = dict(example)
+                            input_keys = [k for k in example_dict.keys() if k != 'score']
+                            print(f"🔍 DEBUG: Successfully converted example {i} to dict")
+                        except Exception as convert_e:
+                            print(f"🔍 DEBUG: Failed to convert example {i} to dict: {convert_e}")
+                            continue
+                    
+                    if example_dict is not None:
+                        # Generate individual arguments, not a list
+                        input_keys_args = ', '.join(f'"{key}"' for key in input_keys)
+                        
+                        # Create properly formatted DSPy Example
+                        serialized_example = (
+                            f"dspy.Example({example_dict})"
+                            f".with_inputs({input_keys_args})"
+                        )
+                        serialized_examples.append(serialized_example)
+                        print(f"🔍 DEBUG: Serialized example {i}")
+                    else:
+                        print(f"🔍 DEBUG: Could not extract data from example {i}")
+                        
+                except Exception as e:
+                    print(f"🔍 DEBUG: Failed to serialize example {i}: {e}")
+                    continue
+        else:
+            print(f"🔍 DEBUG: No examples found for serialization!")
+        
+        # Format examples for the Python file
+        examples_list_str = "[]"
+        if serialized_examples:
+            print(f"🔍 DEBUG: Formatting {len(serialized_examples)} serialized examples")
+            # Multi-line format for readability
+            examples_list_str = "[\n    " + ",\n    ".join(serialized_examples) + "\n]"
+        else:
+            print(f"🔍 DEBUG: Using empty examples list")
+        
+        # Generate the code
+        code = f'''# Auto-generated Example Rubric metric file for {self.name}
 import dspy
-import os
 from autometrics.metrics.generated.GeneratedExampleRubric import {class_name}
 
 DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
+
+# Optimized examples data (properly serialized DSPy Examples)
+OPTIMIZED_EXAMPLES = {examples_list_str}
 
 class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
@@ -348,15 +587,16 @@ class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}
             task_description={json.dumps(self.task_description)},
             suggested_range={self.suggested_range},
             seed={self.seed},
-            optimized_examples={json.dumps(examples_data) if examples_data else 'None'},
+            optimized_examples=OPTIMIZED_EXAMPLES,
             metric_card={json.dumps("provided" if include_metric_card else "None")},
             max_workers={self.max_workers},
+            is_reference_based={self.is_reference_based},
         )
 
     def __repr__(self):
         return f"{self.name.replace(' ', '_').replace('-', '_')}_ExampleRubric(model={generate_llm_constructor_code(self.model).replace('\"', '\\\\')})"
 
-"""
+'''
         return code
 
     def _serialize(self) -> dict:
@@ -400,6 +640,7 @@ class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}
         
         # Extract examples data
         examples_data = data.pop("examples_data", [])
+        print(f"Deserializing with {len(examples_data)} examples_data")
         
         # Create the instance
         instance = cls(**data)
@@ -407,11 +648,33 @@ class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}
         # Load the examples if available
         if examples_data:
             try:
+                print(f"Loading {len(examples_data)} examples during deserialization...")
+                print(f"Examples data type: {type(examples_data)}")
+                
+                # Ensure we have a program with the right structure
+                if not hasattr(instance.program, 'generate_score'):
+                    print("Warning: deserialized program does not have generate_score attribute")
+                    return instance
+                    
+                if not hasattr(instance.program.generate_score, 'predict'):
+                    print("Warning: deserialized program.generate_score does not have predict attribute")
+                    return instance
+                
                 # Use the correct DSPy path we discovered through testing
                 instance.program.generate_score.predict.demos = examples_data
-                print(f"Loaded {len(examples_data)} examples during deserialization")
+                print(f"✅ Successfully loaded {len(examples_data)} examples during deserialization")
+                
+                # Verify the examples were loaded
+                loaded_demos = getattr(instance.program.generate_score.predict, 'demos', [])
+                print(f"✅ Verification: {len(loaded_demos)} examples now in deserialized program")
+                
             except Exception as e:
-                print(f"Warning: Could not load examples during deserialization: {e}")
+                print(f"❌ Error: Could not load examples during deserialization: {e}")
+                print(f"❌ Exception type: {type(e)}")
+                import traceback
+                traceback.print_exc()
+        else:
+            print("No examples_data to load during deserialization")
         
         return instance
     

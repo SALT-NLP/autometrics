@@ -124,10 +124,20 @@ class _LLMJudgeMetricMixin:
         return lines
 
     def _call_llm(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
-        with dspy.settings.context(lm=self.model):
-            if self.is_reference_based and references is not None:
+        input_text = str(input_text) if input_text is not None else ""
+        output_text = str(output_text) if output_text is not None else ""
+        if references is not None:
+            if isinstance(references, list):
+                references = [str(ref) if ref is not None else "" for ref in references]
                 # Use first reference if multiple are provided
-                reference_text = references[0] if isinstance(references, list) else references
+                reference_text = references[0] if references else ""
+            else:
+                reference_text = str(references)
+        else:
+            reference_text = None
+            
+        with dspy.settings.context(lm=self.model):
+            if self.is_reference_based and reference_text is not None:
                 score = self._judge_module(
                     task_description=self.task_description,
                     axis=self.axis,

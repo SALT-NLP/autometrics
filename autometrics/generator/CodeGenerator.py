@@ -10,9 +10,48 @@ from typing import Optional, Callable
 from autometrics.generator.utils import (
     get_good_bad_examples,
     generate_axes_of_variation,
+    truncate_examples_if_needed,
+    is_context_length_error,
 )
 
 from autometrics.util.format import get_default_formatter
+
+# DSPy signature for revolutionary code healing system
+class FixCodeSignature(dspy.Signature):
+    """You are an expert Python programmer tasked with fixing broken code generation for evaluation metrics.
+    
+    REPAIR GOAL: The original code was generated to measure a specific quality aspect of text generation systems,
+    but it failed during execution. Your job is to analyze the failure and create robust, working code that 
+    fulfills the original measurement intention while handling edge cases properly.
+    
+    CONTEXT: This code will be used in an evaluation metric that assesses text generation quality. The metric
+    should return a meaningful numeric score that correlates with the specified measurement dimension.
+    
+    REQUIREMENTS:
+    - Return working Python code that executes without errors
+    - Preserve the original measurement intention
+    - Handle edge cases (empty strings, None values, type mismatches)
+    - Return appropriate numeric values (floats)
+    - Be concise but robust
+    
+    The fixed code will plug into this method signature:
+    def compute_score(input: str, output: str, references: list[str] = None) -> float
+    
+    Focus on the core measurement logic while ensuring type safety and error handling.
+    """
+    
+    original_task_description: str = dspy.InputField(desc="The original task description that the code was supposed to help evaluate")
+    measurement_axis: str = dspy.InputField(desc="The specific measurement dimension or quality aspect this code should assess")
+    original_specification: str = dspy.InputField(desc="The original specification that guided code generation")
+    broken_code: str = dspy.InputField(desc="The generated code that failed to execute")
+    error_message: str = dspy.InputField(desc="The specific error message that occurred during execution")
+    sample_input: str = dspy.InputField(desc="Sample input text that was being processed when the error occurred")
+    sample_output: str = dspy.InputField(desc="Sample output text that was being processed when the error occurred") 
+    sample_references: str = dspy.InputField(desc="Sample reference texts if available (may be empty)")
+    
+    fix_explanation: str = dspy.OutputField(desc="Brief explanation of what was wrong and how you plan to fix it, focusing on the core issue.  Do not include any code in the explanation.")
+    fixed_code: str = dspy.OutputField(desc="The corrected Python code that executes without errors and fulfills the measurement intention. Surround with ```python and ``` tags.")
+
 
 # DSPy signatures for code generation
 class CodeGenReferenceBasedSignature(dspy.Signature):
@@ -168,6 +207,64 @@ class CodeGenerator(Generator):
         if self.executor_kwargs is None:
             self.executor_kwargs = {}
 
+    def _attempt_code_healing(self, original_code: str, error_message: str, task_description: str, measurement_axis: str, test_input: str, test_output: str, test_references=None, is_reference_based: bool = False) -> Optional[str]:
+        """
+        Revolutionary code healing system: Give the LLM ONE SHOT to fix broken generated code.
+        Provides rich context about the original task and specification.
+        """
+        try:
+            print(f"🔧 ATTEMPTING CODE HEALING for axis: {measurement_axis}")
+            print(f"🔧 Error was: {str(error_message)[:200]}...")
+            
+            # Create the code fixer with rich context
+            code_fixer = dspy.ChainOfThought(FixCodeSignature)
+            
+            # Prepare the original specification context
+            ref_context = "reference-based" if is_reference_based else "reference-free"
+            original_specification = f"""
+Generate Python code for a {ref_context} evaluation metric that measures: {measurement_axis}
+
+The code should:
+- Take input text, output text{', and reference texts' if is_reference_based else ''} as parameters
+- Return a numeric score indicating quality on the '{measurement_axis}' dimension
+- Be robust and handle various text inputs appropriately
+
+Task context: {task_description}
+"""
+            
+            # Prepare sample references string
+            sample_references_str = ""
+            if test_references:
+                if isinstance(test_references, list):
+                    sample_references_str = " | ".join([str(ref) for ref in test_references if ref is not None])
+                else:
+                    sample_references_str = str(test_references)
+            
+            # Ask the LLM to heal the code with full context
+            with dspy.settings.context(lm=self.generator_llm):
+                fix_result = code_fixer(
+                    original_task_description=str(task_description)[:1000],
+                    measurement_axis=str(measurement_axis)[:500],
+                    original_specification=original_specification[:1500],
+                    broken_code=str(original_code)[:2000],
+                    error_message=str(error_message)[:800],
+                    sample_input=str(test_input)[:400],
+                    sample_output=str(test_output)[:400],
+                    sample_references=sample_references_str[:400]
+                )
+            
+            fixed_code = self._clean_generated_code(fix_result.fixed_code)
+            explanation = fix_result.fix_explanation.strip()
+            
+            print(f"🔧 HEALING EXPLANATION: {explanation}")
+            print(f"🔧 Fixed code preview: {fixed_code[:200]}...")
+            
+            return fixed_code
+            
+        except Exception as healing_error:
+            print(f"❌ Code healing attempt failed: {healing_error}")
+            return None
+
     def _get_formatter(self, dataset):
         if not dataset:
             return lambda x: str(x)
@@ -256,37 +353,70 @@ class CodeGenerator(Generator):
             else:
                 metric_name = name_part + "_code"
 
-            # Generate code using appropriate signature
+            # Generate code using appropriate signature with fallback for context length
             try:
                 # Set temperature based on seed for cache busting
                 temperature = 0.0001 * self.seed if self.seed is not None else None
                 
-                if temperature is not None:
-                    with dspy.settings.context(lm=self.generator_llm, temperature=temperature):
-                        if is_reference_based:
-                            code_gen = dspy.ChainOfThought(CodeGenReferenceBasedSignature, max_tokens=10000)
+                def try_code_generation(good_ex, bad_ex):
+                    """Helper to try code generation with given examples."""
+                    if temperature is not None:
+                        with dspy.settings.context(lm=self.generator_llm, temperature=temperature):
+                            if is_reference_based:
+                                code_gen = dspy.ChainOfThought(CodeGenReferenceBasedSignature, max_tokens=10000)
+                            else:
+                                code_gen = dspy.ChainOfThought(CodeGenReferenceFreeSignature, max_tokens=10000)
+                            
+                            return code_gen(
+                                task_description=task_description,
+                                measurement_name=axis,
+                                good_examples=good_ex,
+                                bad_examples=bad_ex
+                            )
+                    else:
+                        with dspy.settings.context(lm=self.generator_llm):
+                            if is_reference_based:
+                                code_gen = dspy.ChainOfThought(CodeGenReferenceBasedSignature, max_tokens=10000)
+                            else:
+                                code_gen = dspy.ChainOfThought(CodeGenReferenceFreeSignature, max_tokens=10000)
+                            
+                            return code_gen(
+                                task_description=task_description,
+                                measurement_name=axis,
+                                good_examples=good_ex,
+                                bad_examples=bad_ex
+                            )
+                
+                # Fallback strategy for code generation
+                fallback_configs = [
+                    {"good": good_examples_formatted, "bad": bad_examples_formatted, "description": "full examples"},
+                    {"good": good_examples_formatted[:3], "bad": bad_examples_formatted[:3], "description": "3 examples each"},
+                    {"good": good_examples_formatted[:2], "bad": bad_examples_formatted[:2], "description": "2 examples each"},
+                    {"good": good_examples_formatted[:1], "bad": bad_examples_formatted[:1], "description": "1 example each"},
+                    {"good": truncate_examples_if_needed(good_examples_formatted[:2], 1500), "bad": truncate_examples_if_needed(bad_examples_formatted[:2], 1500), "description": "2 examples truncated"},
+                    {"good": truncate_examples_if_needed(good_examples_formatted[:1], 1000), "bad": truncate_examples_if_needed(bad_examples_formatted[:1], 1000), "description": "1 example truncated"}
+                ]
+                
+                result = None
+                for i, config in enumerate(fallback_configs):
+                    try:
+                        result = try_code_generation(config["good"], config["bad"])
+                        if i > 0:  # Used fallback
+                            print(f"Code generation succeeded with {config['description']} for {axis}")
+                        break
+                    except Exception as e:
+                        if is_context_length_error(str(e)):
+                            print(f"Context length error in code generation with {config['description']}, trying fallback...")
+                            if i == len(fallback_configs) - 1:  # Last attempt
+                                print(f"All code generation fallbacks failed for {axis}: {str(e)}")
+                                raise e
+                            continue
                         else:
-                            code_gen = dspy.ChainOfThought(CodeGenReferenceFreeSignature, max_tokens=10000)
-                        
-                        result = code_gen(
-                            task_description=task_description,
-                            measurement_name=axis,
-                            good_examples=good_examples_formatted,
-                            bad_examples=bad_examples_formatted
-                        )
-                else:
-                    with dspy.settings.context(lm=self.generator_llm):
-                        if is_reference_based:
-                            code_gen = dspy.ChainOfThought(CodeGenReferenceBasedSignature, max_tokens=10000)
-                        else:
-                            code_gen = dspy.ChainOfThought(CodeGenReferenceFreeSignature, max_tokens=10000)
-                        
-                        result = code_gen(
-                            task_description=task_description,
-                            measurement_name=axis,
-                            good_examples=good_examples_formatted,
-                            bad_examples=bad_examples_formatted
-                        )
+                            # Non-context-length error, re-raise
+                            raise e
+                
+                if result is None:
+                    raise Exception("Code generation failed unexpectedly")
                     
                 generated_metric_name = result.metric_name.replace(" ", "_").replace("-", "_").replace("\"", "").replace("*", "").replace("\'", "")
                 generated_code = self._clean_generated_code(result.code)
@@ -330,9 +460,54 @@ class CodeGenerator(Generator):
                 else:
                     test_references = None
 
-                # Try to run the metric
-                test_score = metric.calculate(test_input, test_output, test_references)
-                new_metrics.append(metric)
+                # Try to run the metric - with ONE SHOT healing if it fails
+                try:
+                    test_score = metric.calculate(test_input, test_output, test_references)
+                    print(f"✅ Generated metric works! Test score: {test_score}")
+                    new_metrics.append(metric)
+                    
+                except Exception as test_error:
+                    print(f"❌ Generated metric failed on test: {test_error}")
+                    
+                    # CODE HEALING SYSTEM: Give LLM ONE SHOT to fix it
+                    healed_code = self._attempt_code_healing(
+                        original_code=generated_code,
+                        error_message=str(test_error),
+                        task_description=task_description,
+                        measurement_axis=axis,
+                        test_input=str(test_input),
+                        test_output=str(test_output),
+                        test_references=test_references,
+                        is_reference_based=is_reference_based
+                    )
+                    
+                    if healed_code:
+                        try:
+                            print(f"🔧 Testing healed code...")
+                            
+                            # Create a new metric with the healed code
+                            healed_metric = dynamic_executor_class(
+                                name=f"{generated_metric_name}_Healed",
+                                description=f"Self-healed code-based metric for {axis}",
+                                generated_code=healed_code,
+                                task_description=task_description,
+                                measurement_axis=axis,
+                                metric_card_author_model=self.generator_llm,
+                                **executor_kwargs,
+                            )
+                            
+                            # Test the healed metric
+                            healed_test_score = healed_metric.calculate(test_input, test_output, test_references)
+                            print(f"🎉 HEALING SUCCESSFUL! Healed metric works! Test score: {healed_test_score}")
+                            new_metrics.append(healed_metric)
+                            
+                        except Exception as heal_test_error:
+                            print(f"❌ Healed code also failed: {heal_test_error}")
+                            print(f"❌ Skipping this metric: {axis}")
+                            continue
+                    else:
+                        print(f"❌ Code healing failed, skipping metric: {axis}")
+                        continue
 
             except Exception as e:
                 print(f"Error generating metric for {axis}: {e}")

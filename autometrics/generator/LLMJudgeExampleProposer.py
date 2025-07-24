@@ -25,6 +25,15 @@ def get_wrapped_metric(metric_func):
         return metric_func(example.score, pred.score)
     return wrapped_metric
 
+# Utilities to avoid duplication and enable reuse across generators
+from autometrics.generator.utils import (
+    get_good_bad_examples,
+    generate_axes_of_variation,
+    smart_limit_examples_for_context,
+    get_max_context_tokens,
+    is_context_length_error,
+)
+
 class LLMAsAJudgeSignature(dspy.Signature):
     """Given an input text, the task description that the model was trying to follow, and a measure to rate the text on, return a score on this measure."""
     text = dspy.InputField(desc="The input text that we want to rate.")
@@ -236,13 +245,54 @@ class LLMJudgeExampleProposer(Generator):
             display_table=False
         )
 
-        # Generate different demo sets
+        # Smart limit examples for context window constraints
+        # Get model name for token estimation
+        model_name = "gpt-3.5-turbo"  # Default
+        if self.judge_model and hasattr(self.judge_model, 'model'):
+            model_name = self.judge_model.model
+        elif self.generator_llm and hasattr(self.generator_llm, 'model'):
+            model_name = self.generator_llm.model
+        
+        # Estimate total examples we would use
+        total_examples = sum(len(bucket) for bucket in buckets if bucket)
+        target_examples = min(total_examples, self.attempts * self.examples_per_range * len(buckets))
+        
+        # Extract example texts for token estimation
+        example_texts = []
+        for bucket in buckets:
+            for example in bucket:
+                if hasattr(example, 'text'):
+                    example_texts.append(example.text)
+                elif hasattr(example, 'input') and hasattr(example.input, 'text'):
+                    example_texts.append(example.input.text)
+                else:
+                    example_texts.append(str(example))
+        
+        # Smart limit examples
+        limited_examples = smart_limit_examples_for_context(
+            example_texts,
+            "Task description for optimization",  # We'll use actual task description in optimization
+            model_name,
+            target_examples=target_examples,
+            dspy_overhead_tokens=4096,
+            output_tokens=2048,
+            safety_margin=2000
+        )
+        
+        # Calculate how many examples per bucket we can use
+        max_examples_per_bucket = max(1, len(limited_examples) // len(buckets)) if buckets else 1
+        adjusted_examples_per_range = min(self.examples_per_range, max_examples_per_bucket)
+        
+        if adjusted_examples_per_range < self.examples_per_range:
+            print(f"Adjusted examples per range from {self.examples_per_range} to {adjusted_examples_per_range} due to context constraints")
+        
+        # Generate different demo sets with adjusted limits
         random.seed(seed)  # Reseed for consistent behavior
         demosets = [[] for _ in range(self.attempts)]
         for i in range(self.attempts):
             for bucket in buckets:
                 if bucket:  # Only sample from non-empty buckets
-                    sample = random.sample(bucket, min(self.examples_per_range, len(bucket)))
+                    sample = random.sample(bucket, min(adjusted_examples_per_range, len(bucket)))
                     demosets[i].extend(sample)
 
         # Find the best demo set
@@ -270,7 +320,25 @@ class LLMJudgeExampleProposer(Generator):
                         best_examples = demoset
                         print(f"New best score: {best_score:.4f}")
                 except Exception as e:
-                    print(f"Error in attempt {i+1}: {e}")
+                    error_str = str(e)
+                    if is_context_length_error(error_str):
+                        print(f"Context length error in attempt {i+1}: {error_str}")
+                        # Try with fewer examples if this is a context length error
+                        if len(demoset) > 1:
+                            reduced_demoset = demoset[:len(demoset)//2]
+                            try:
+                                new_program = program.deepcopy()
+                                new_program.generate_score.predict.demos = reduced_demoset
+                                score = evaluate(new_program)
+                                print(f"  Reduced attempt {i+1}: Score = {score:.4f} with {len(reduced_demoset)} examples")
+                                if score > best_score:
+                                    best_score = score
+                                    best_examples = reduced_demoset
+                                    print(f"  New best score: {best_score:.4f}")
+                            except Exception as e2:
+                                print(f"  Reduced attempt also failed: {e2}")
+                    else:
+                        print(f"Non-context error in attempt {i+1}: {e}")
                     continue
 
         if best_examples:
@@ -327,6 +395,7 @@ class LLMJudgeExampleProposer(Generator):
         )
 
         # Step-5: OPTIMIZATION HAPPENS IN GENERATOR - NOT EXECUTOR ------------------
+        print(f"🔍 Starting example optimization with {len(train_buckets)} buckets...")
         optimized_examples = self._optimize_examples(
             train_buckets, 
             trainset, 

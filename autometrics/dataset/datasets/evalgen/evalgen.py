@@ -6,7 +6,7 @@ from sklearn.model_selection import KFold
 from autometrics.metrics.dummy import DummyMetric
 
 class EvalGen(Dataset):
-    def __init__(self, path='./autometrics/dataset/datasets/evalgen/product.csv'): # Path to the dataset: './autometrics/dataset/datasets/evalgen/medical.csv'
+    def __init__(self, path='./autometrics/dataset/datasets/evalgen/product.csv', task_description: Optional[str] = None, name: Optional[str] = None): # Path to the dataset: './autometrics/dataset/datasets/evalgen/medical.csv'
         #LLM,Prompt,Response,Response Batch Id,Var: document,Metavar: id,Metavar: split,Metavar: __pt,Metavar: LLM_0,grade,grading_feedback
         df = pd.read_csv(path)
 
@@ -19,7 +19,8 @@ class EvalGen(Dataset):
         ignore_columns = ["grading_feedback", "Metavar: split", "Metavar: id", "LLM", "Prompt", "Response"]
         metric_columns = []
 
-        name = "evalgen"
+        name = name if name else "evalgen"
+        task_description = task_description if task_description else None
 
         data_id_column = "Metavar: id"
         model_id_column = "LLM"
@@ -29,7 +30,7 @@ class EvalGen(Dataset):
 
         metrics = [DummyMetric(col) for col in metric_columns]
 
-        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics)
+        super().__init__(df, target_columns, ignore_columns, metric_columns, name, data_id_column, model_id_column, input_column, output_column, reference_columns, metrics, task_description)
 
     def get_splits(self, split_column: Optional[str] = None, train_ratio: float = 0.5, val_ratio: float = 0.2, seed: Optional[int] = None, max_size: Optional[int] = None, *, preserve_splits=True):
         """
@@ -168,12 +169,12 @@ class EvalGen(Dataset):
 
 class EvalGenProduct(EvalGen):
     def __init__(self, path='./autometrics/dataset/datasets/evalgen/product.csv'):
-        super().__init__(path)
-        self.name = "evalgen_product"
-        self.task_description = """You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format.\n\n"""
+        name = "evalgen_product"
+        task_description = "You are an expert copywriter. You need to write an e-commerce product description based on the product details and customer reviews. Your description should be SEO-optimized. It should use an active voice and include the product's features, benefits, unique selling points without overpromising, and a call to action for the buyer. Benefits describe how product features will work for the buyer, addressing exactly how the product will improve their lives. Clearly distinguish between features (e.g., lightweight, USB-chargeable) and benefits (e.g., convenience, nutritious drinks on-the-go). Don't mention weaknesses of the product or use generic or repetitive language. Don't make up review text or quotes. Don't include any links. Don't cite the reviews too heavily. Divide your description into readable chunks divided by relevant subheadings. Keep your description around 200 words, no more than 300, in Markdown format."
+        super().__init__(path, task_description, name)
 
 class EvalGenMedical(EvalGen):
     def __init__(self, path='./autometrics/dataset/datasets/evalgen/medical.csv'):
-        super().__init__(path)
-        self.name = "evalgen_medical"
-        self.task_description = """You are extracting insights from some medical records. The records contain a medical note and a dialogue between a doctor and a patient. You need to extract values for the following: Chief complaint, History of present illness, Physical examination, Symptoms experienced by the patient, New medications prescribed or changed, including dosages (N/A if not provided), and Follow-up instructions (N/A if not provided). Your answer should not include any personal identifiable information (PII) such as name, age, gender, or ID. Use "the patient" instead of their name, for example. Return your answer as a bullet list, where each bullet is formatted like `chief complaint: xx.` If there is no value for the key, the value should be `N/A`. Keep your response around 150 words (you may have to summarize some extracted values to stay within the word limit)."""
+        name = "evalgen_medical"
+        task_description = "You are extracting insights from some medical records. The records contain a medical note and a dialogue between a doctor and a patient. You need to extract values for the following: Chief complaint, History of present illness, Physical examination, Symptoms experienced by the patient, New medications prescribed or changed, including dosages (N/A if not provided), and Follow-up instructions (N/A if not provided). Your answer should not include any personal identifiable information (PII) such as name, age, gender, or ID. Use 'the patient' instead of their name, for example. Return your answer as a bullet list, where each bullet is formatted like `chief complaint: xx.` If there is no value for the key, the value should be `N/A`. Keep your response around 150 words (you may have to summarize some extracted values to stay within the word limit)."
+        super().__init__(path, task_description, name)

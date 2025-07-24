@@ -804,6 +804,7 @@ where:
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 0.0  # in MB
     cpu_mem: ClassVar[float] = 728.59765625  # in MB
+    description: ClassVar[str] = "Jaro-Winkler Similarity is a string metric that builds upon the Jaro Similarity by incorporating a prefix scale to give extra weight to common prefixes. It is widely used in record linkage, data deduplication, and other applications where matching similar strings (such as names) is critical."
 
     # String similarity metrics are fast enough without caching
     DEFAULT_USE_CACHE = False

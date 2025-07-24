@@ -222,6 +222,7 @@ with typical $\alpha = 0.8$ for MT evaluation, or $\alpha = 0.5$ for MT optimiza
     # Resource usage statistics (in megabytes)
     gpu_mem: ClassVar[float] = 686.8544921875  # in MB
     cpu_mem: ClassVar[float] = 1420.12890625  # in MB
+    description: ClassVar[str] = """YiSi-2 is a semantic machine translation evaluation and quality estimation metric designed for cross-lingual assessment. It measures the semantic similarity between the source sentence and the machine-translated output using bilingual word embeddings, optionally incorporating shallow semantic structures through semantic role labeling."""
 
     def __init__(
         self,

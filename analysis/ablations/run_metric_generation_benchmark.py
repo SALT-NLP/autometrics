@@ -35,6 +35,10 @@ from scipy import stats
 from pathlib import Path
 import dspy
 from collections import defaultdict
+import requests
+import signal
+from datetime import datetime
+import litellm
 
 # Add autometrics to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -50,6 +54,266 @@ from autometrics.generator.GEvalJudgeProposer import GEvalJudgeProposer
 from autometrics.generator.CodeGenerator import CodeGenerator
 from autometrics.generator.RubricGenerator import RubricGenerator
 from autometrics.generator.FinetuneGenerator import FinetuneGenerator
+
+
+# Exit codes for different failure types
+EXIT_CODE_SERVER_FAILURE = 42
+EXIT_CODE_GENERAL_ERROR = 1
+EXIT_CODE_SUCCESS = 0
+
+
+class DetailedErrorInfo:
+    """Enhanced error tracking with context preservation."""
+    def __init__(self, operation: str, context: dict = None):
+        self.operation = operation
+        self.context = context or {}
+        self.timestamp = datetime.now().isoformat()
+        
+    def log_error(self, logger: logging.Logger, error: Exception, additional_context: dict = None):
+        """Log detailed error information with full context and traceback."""
+        combined_context = {**self.context}
+        if additional_context:
+            combined_context.update(additional_context)
+            
+        logger.error(f"{'='*60}")
+        logger.error(f"DETAILED ERROR REPORT")
+        logger.error(f"{'='*60}")
+        logger.error(f"Operation: {self.operation}")
+        logger.error(f"Timestamp: {self.timestamp}")
+        logger.error(f"Error Type: {type(error).__name__}")
+        logger.error(f"Error Message: {str(error)}")
+        logger.error(f"Context: {json.dumps(combined_context, indent=2, default=str)}")
+        logger.error(f"Full Traceback:")
+        logger.error(traceback.format_exc())
+        logger.error(f"{'='*60}")
+        
+    def create_error_dict(self, error: Exception, additional_context: dict = None) -> dict:
+        """Create a structured error dictionary for storage/analysis."""
+        combined_context = {**self.context}
+        if additional_context:
+            combined_context.update(additional_context)
+            
+        return {
+            'operation': self.operation,
+            'timestamp': self.timestamp,
+            'error_type': type(error).__name__,
+            'error_message': str(error),
+            'context': combined_context,
+            'traceback': traceback.format_exc()
+        }
+
+
+def enhanced_exception_handler(operation: str, context: dict = None):
+    """Decorator for enhanced exception handling with detailed logging."""
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            error_info = DetailedErrorInfo(operation, context)
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                # Get logger from args if available
+                logger = None
+                for arg in args:
+                    if hasattr(arg, '__class__') and 'logger' in arg.__class__.__name__.lower():
+                        logger = arg
+                        break
+                if not logger:
+                    logger = logging.getLogger(__name__)
+                
+                error_info.log_error(logger, e)
+                raise  # Re-raise the original exception
+        return wrapper
+    return decorator
+
+
+# Global tracking for server failures
+class ServerFailureTracker:
+    def __init__(self, failure_threshold: int = 5, time_window: int = 300):
+        self.failure_count = 0
+        self.failure_threshold = failure_threshold
+        self.failure_times = []
+        self.time_window = time_window  # 5 minutes
+        self.last_health_check = 0
+        
+    def record_failure(self):
+        """Record a server failure and check if we should give up."""
+        current_time = time.time()
+        self.failure_times.append(current_time)
+        
+        # Clean old failures outside time window
+        self.failure_times = [t for t in self.failure_times if current_time - t <= self.time_window]
+        
+        self.failure_count = len(self.failure_times)
+        return self.failure_count >= self.failure_threshold
+    
+    def reset(self):
+        """Reset failure tracking after successful operations."""
+        self.failure_count = 0
+        self.failure_times = []
+
+# Global tracker instance
+server_tracker = ServerFailureTracker()
+
+
+def is_server_failure_error(error_str: str) -> bool:
+    """Check if an error indicates server failure."""
+    server_failure_indicators = [
+        "InternalServerError: Litellm_proxyException",
+        "Connection error",
+        "ConnectionError",
+        "Connection refused",
+        "connection refused",
+        "server.*down",
+        "timeout",
+        "503",
+        "502", 
+        "500",
+        "ConnectTimeout",
+        "ReadTimeout",
+        "ConnectionResetError",
+        "RemoteDisconnected"
+    ]
+    
+    error_lower = error_str.lower()
+    return any(indicator.lower() in error_lower for indicator in server_failure_indicators)
+
+
+def check_server_health(api_base: str, timeout: int = 10) -> bool:
+    """Check if the server is healthy by making a health check request."""
+    if not api_base:
+        return True  # Can't check health for OpenAI API
+        
+    try:
+        # Try multiple health check endpoints
+        health_endpoints = [
+            f"{api_base.rstrip('/')}/models",
+            f"{api_base.rstrip('/')}/health",
+            f"{api_base.rstrip('/')}/v1/models",
+            f"{api_base.rstrip('/')}/v1/health"
+        ]
+        
+        for endpoint in health_endpoints:
+            try:
+                response = requests.get(endpoint, timeout=timeout)
+                if response.status_code == 200:
+                    logging.info(f"✅ Server health check passed: {endpoint}")
+                    return True
+            except Exception as e:
+                logging.debug(f"Health check failed for {endpoint}: {e}")
+                continue
+        
+        logging.warning(f"❌ All server health check endpoints failed for {api_base}")
+        return False
+    except Exception as e:
+        logging.warning(f"❌ Server health check failed: {e}")
+        return False
+
+
+def log_server_status(logger: logging.Logger, api_base: str, operation: str = "Unknown"):
+    """Log detailed server status information."""
+    if not api_base:
+        logger.info(f"🔍 Server Status Check ({operation}): No API base - skipping health check")
+        return True
+    
+    logger.info(f"🔍 Server Status Check ({operation}): {api_base}")
+    
+    # Check server health
+    is_healthy = check_server_health(api_base)
+    
+    if is_healthy:
+        logger.info(f"✅ Server is healthy and responding")
+        
+        # Try to get additional server info
+        try:
+            models_url = f"{api_base.rstrip('/')}/models"
+            response = requests.get(models_url, timeout=5)
+            if response.status_code == 200:
+                models_data = response.json()
+                if 'data' in models_data:
+                    model_names = [model.get('id', 'unknown') for model in models_data['data']]
+                    logger.info(f"📋 Available models: {model_names}")
+                else:
+                    logger.info(f"📋 Server responded but no model data found")
+            else:
+                logger.warning(f"⚠️  Server responded with status {response.status_code}")
+        except Exception as e:
+            logger.debug(f"Could not get detailed server info: {e}")
+    else:
+        logger.error(f"❌ Server is NOT responding - this may cause metric generation failures!")
+        
+        # Try to get more diagnostic info
+        try:
+            # Try a simple ping to see if server is reachable at all
+            import socket
+            from urllib.parse import urlparse
+            
+            parsed_url = urlparse(api_base)
+            host = parsed_url.hostname
+            port = parsed_url.port or (443 if parsed_url.scheme == 'https' else 80)
+            
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(5)
+            result = sock.connect_ex((host, port))
+            sock.close()
+            
+            if result == 0:
+                logger.warning(f"⚠️  Server port {port} is reachable but API endpoints are not responding")
+                logger.warning(f"   This suggests the server may be running but the API is down")
+            else:
+                logger.error(f"❌ Server port {port} is not reachable - server may be completely down")
+                
+        except Exception as e:
+            logger.error(f"❌ Could not diagnose server connectivity: {e}")
+    
+    return is_healthy
+
+
+def handle_server_failure(logger: logging.Logger, api_base: str):
+    """Handle server failure by manual requeue then exit."""
+    logger.error("=" * 60)
+    logger.error("CRITICAL: Server failure detected!")
+    logger.error(f"Server failure threshold exceeded ({server_tracker.failure_count} failures)")
+    logger.error(f"API Base: {api_base}")
+    logger.error(f"Time: {datetime.now().isoformat()}")
+    logger.error("=" * 60)
+    
+    # Try to check server health one more time
+    if api_base and not check_server_health(api_base):
+        logger.error("Server health check failed - server appears to be down")
+    else:
+        logger.warning("Server health check passed - may be intermittent issues")
+    
+    # Manually requeue the job since --requeue doesn't work with exit codes
+    slurm_job_id = os.environ.get('SLURM_JOB_ID')
+    if slurm_job_id:
+        logger.info(f"Attempting to requeue job {slurm_job_id} due to server failure")
+        try:
+            import subprocess
+            result = subprocess.run(['scontrol', 'requeue', slurm_job_id], 
+                                  capture_output=True, text=True, timeout=30)
+            if result.returncode == 0:
+                logger.info(f"Successfully requeued job {slurm_job_id}")
+            else:
+                logger.error(f"Failed to requeue job {slurm_job_id}: {result.stderr}")
+        except Exception as e:
+            logger.error(f"Error requeuing job {slurm_job_id}: {e}")
+    else:
+        logger.warning("SLURM_JOB_ID not found - cannot requeue job")
+    
+    logger.info("Exiting after requeue attempt")
+    sys.exit(EXIT_CODE_SERVER_FAILURE)
+
+
+def setup_signal_handlers(logger: logging.Logger):
+    """Setup signal handlers for graceful shutdown."""
+    def signal_handler(signum, frame):
+        logger.info(f"Received signal {signum}, initiating graceful shutdown...")
+        logger.info("Exiting gracefully - server cleanup will be handled by SLURM job termination")
+        sys.exit(EXIT_CODE_GENERAL_ERROR)
+    
+    # Handle common termination signals
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
 
 
 def setup_logging(verbose: bool = False) -> logging.Logger:
@@ -198,7 +462,7 @@ def get_available_datasets_measures() -> List[Tuple[str, str]]:
     return datasets_measures
 
 
-def create_llm_model(model_name: str, api_base: Optional[str] = None, seed: int = 42) -> dspy.LM:
+def create_llm_model(model_name: str, api_base: Optional[str] = None, seed: int = 42):
     """Create LLM model instance based on model name with unique cache busting per seed."""
     
     temperature = 0.0001 * seed
@@ -212,12 +476,21 @@ def create_llm_model(model_name: str, api_base: Optional[str] = None, seed: int 
     elif model_name == "qwen3_32b":
         # Use provided api_base or default to localhost (for local server)
         base_url = api_base or "http://localhost:7410/v1"
-        model = dspy.LM("litellm_proxy/Qwen/Qwen3-32B", api_base=base_url, temperature=temperature, max_tokens=4096)
+        # FIXED: Use the full API base with /v1 like the working demo
+        # The server only responds to /v1 endpoints, not root endpoints
+        if not base_url.endswith('/v1'):
+            base_url = f"{base_url.rstrip('/')}/v1"
+        # FIXED: Include api_key="None" like the working demo configuration
+        model = dspy.LM("litellm_proxy/Qwen/Qwen3-32B", api_base=base_url, api_key="None", temperature=temperature, max_tokens=4096)
     
     elif model_name == "prometheus":
         # Use provided api_base or default to permanent prometheus server
+        from prometheus_eval.litellm import LiteLLM
         base_url = api_base or "http://future-hgx-1:7420/v1"
-        model = dspy.LM("litellm_proxy/Unbabel/M-Prometheus-14B", api_base=base_url, temperature=temperature)
+        model = LiteLLM(
+            "litellm_proxy/Unbabel/M-Prometheus-14B",
+            api_base=base_url
+        )
     
     else:
         raise ValueError(f"Unknown model: {model_name}")
@@ -230,7 +503,8 @@ def create_generator(
     generator_llm: dspy.LM, 
     judge_llm: dspy.LM, 
     seed: int, 
-    model_save_dir: Optional[str] = None
+    model_save_dir: Optional[str] = None,
+    api_base: Optional[str] = None
 ):
     """Create generator instance based on type with seed-specific configuration."""
     
@@ -274,9 +548,10 @@ def create_generator(
         )
     
     elif generator_type == "rubric_prometheus":
+        judge_llm_prometheus = create_llm_model("prometheus", api_base="http://future-hgx-1:7420/v1")
         return RubricGenerator(
             generator_llm=generator_llm,
-            executor_kwargs={"model": judge_llm, "seed": seed},
+            executor_kwargs={"model": judge_llm_prometheus, "seed": seed},
             use_prometheus=True,
             seed=seed,
         )
@@ -397,8 +672,22 @@ def run_correlation_evaluation(
                     all_correlations[corr_name].append(correlation)
                 
         except Exception as e:
-            logger.error(f"Error evaluating metric {metric.name}: {str(e)}")
-            logger.debug(f"Full traceback: {traceback.format_exc()}")
+            # Enhanced error logging for individual metric evaluation
+            metric_error_info = DetailedErrorInfo(
+                operation="single_metric_correlation",
+                context={
+                    'metric_name': metric.name if metric else 'Unknown',
+                    'metric_index': i,
+                    'correlation_funcs': list(correlation_funcs.keys()),
+                    'measure': measure,
+                    'val_dataset_size': len(val_dataset.get_dataframe()) if val_dataset else 'unknown'
+                }
+            )
+            metric_error_info.log_error(logger, e, {
+                'operation_details': 'individual_metric_correlation_phase',
+                'metric_type': type(metric).__name__ if metric else 'None'
+            })
+            
             # Add NaN for all correlation functions for this metric
             for corr_name in correlation_funcs:
                 if corr_name not in all_correlations:
@@ -552,9 +841,21 @@ def main():
         help="Filter to specific generator types"
     )
     parser.add_argument(
+        "--skip-generators",
+        nargs="*",
+        choices=["llm_judge", "llm_judge_examples", "llm_judge_optimized", "geval", 
+                "codegen", "rubric_prometheus", "rubric_dspy", "finetune"],
+        help="Filter to specific generator types to skip"
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Verbose logging"
+    )
+    parser.add_argument(
+        "--per-measure-files",
+        action="store_true",
+        help="If set, write per-measure output files for HelpSteer/HelpSteer2 (for parallel safety). Backwards compatible."
     )
     
     args = parser.parse_args()
@@ -562,12 +863,26 @@ def main():
     # Setup logging
     logger = setup_logging(args.verbose)
     
+    # Setup signal handlers for graceful shutdown
+    setup_signal_handlers(logger)
+    
     logger.info("Starting Metric Generation Benchmark")
     logger.info(f"Generator Model: {args.generator_model}")
     logger.info(f"Judge Model: {args.judge_model}")
     logger.info(f"API Base: {args.api_base}")
     logger.info(f"Seeds: {args.seeds}")
     logger.info(f"Correlation: {args.correlation}")
+    
+    # Initial server health check if using local server
+    if args.api_base and "localhost" in args.api_base:
+        logger.info("Performing initial server health check...")
+        log_server_status(logger, args.api_base, "Initial Startup")
+        if not check_server_health(args.api_base):
+            logger.error(f"Initial server health check failed for {args.api_base}")
+            logger.error("Please ensure the server is running before starting the benchmark")
+            return EXIT_CODE_SERVER_FAILURE
+        else:
+            logger.info("Initial server health check passed")
 
     output_dir = f"{args.output_dir}/{args.generator_model}"
     
@@ -625,6 +940,18 @@ def main():
         generator_configs = {k: v for k, v in generator_configs.items() if k in args.generator}
         logger.info(f"Filtered to generators: {args.generator}")
     
+    # Filter generators if specified
+    if args.skip_generators:
+        generator_configs = {k: v for k, v in generator_configs.items() if k not in args.skip_generators}
+        logger.info(f"Skipped generators: {args.skip_generators}")
+    
+    # Patch: determine if we want per-measure output files for HelpSteer/HelpSteer2
+    def get_dataset_output_file(dataset_name, measure, correlation_type):
+        if args.per_measure_files and dataset_name in ("HelpSteer", "HelpSteer2"):
+            return f"{output_dir}/sub_results/metric_generation_benchmark_{args.generator_model}_{args.judge_model}_{correlation_type}_{dataset_name}_{measure}.csv"
+        else:
+            return f"{output_dir}/sub_results/metric_generation_benchmark_{args.generator_model}_{args.judge_model}_{correlation_type}_{dataset_name}.csv"
+    
     # Process each correlation type
     for correlation_type in correlation_funcs:
         logger.info(f"\n{'='*60}")
@@ -656,11 +983,20 @@ def main():
         for dataset_name, dataset_measures in dataset_measures_by_dataset.items():
             logger.info(f"\n--- Processing dataset: {dataset_name} ---")
             
-            # Dataset-specific output file in sub-results directory
-            dataset_output_file = f"{output_dir}/sub_results/metric_generation_benchmark_{args.generator_model}_{args.judge_model}_{correlation_type}_{dataset_name}.csv"
-            dataset_output_files.append(dataset_output_file)
+            # Periodic server health check before each dataset
+            if args.api_base and "localhost" in args.api_base:
+                logger.info(f"🔍 Pre-dataset server health check for {dataset_name}...")
+                log_server_status(logger, args.api_base, f"Before {dataset_name}")
+                if not check_server_health(args.api_base):
+                    logger.warning(f"Server health check failed before processing {dataset_name}")
+                    if server_tracker.record_failure():
+                        handle_server_failure(logger, args.api_base)
             
-            logger.info(f"Dataset output file: {dataset_output_file}")
+            # For per-measure files, process each measure separately
+            for dataset_name, measure in dataset_measures:
+                dataset_output_file = get_dataset_output_file(dataset_name, measure, correlation_type)
+                dataset_output_files.append(dataset_output_file)
+                logger.info(f"Dataset output file: {dataset_output_file}")
             
             # Load existing dataset-specific results
             existing_dataset_results = load_existing_results(dataset_output_file)
@@ -670,6 +1006,16 @@ def main():
             # Process each dataset-measure combination for this dataset
             for dataset_name, measure in dataset_measures:
                 logger.info(f"\nProcessing: {dataset_name} - {measure}")
+                
+                # Enhanced dataset loading with detailed error tracking
+                dataset_error_info = DetailedErrorInfo(
+                    operation="dataset_loading",
+                    context={
+                        'dataset_name': dataset_name,
+                        'measure': measure,
+                        'correlation_type': correlation_type
+                    }
+                )
                 
                 try:
                     # Load dataset
@@ -683,6 +1029,19 @@ def main():
                     # Process each generator type
                     for generator_type, config in generator_configs.items():
                         logger.info(f"\n--- Generator: {config['description']} ---")
+                        
+                        # Server health check before each generator (especially important for long-running ones)
+                        if args.api_base and "localhost" in args.api_base:
+                            logger.info(f"🔍 Pre-generator server health check for {generator_type}...")
+                            log_server_status(logger, args.api_base, f"Before {generator_type}")
+                            
+                            # For long-running generators, be more strict about server health
+                            long_running_generators = ["llm_judge_examples", "llm_judge_optimized", "finetune"]
+                            if generator_type in long_running_generators:
+                                if not check_server_health(args.api_base):
+                                    logger.error(f"❌ Server health check failed before long-running generator {generator_type}")
+                                    logger.error(f"   Skipping {generator_type} to avoid wasting time on failing server")
+                                    continue
                         
                         metrics_per_trial = config["metrics_per_trial"]
                         
@@ -721,7 +1080,8 @@ def main():
                                     generator_llm, 
                                     judge_llm, 
                                     seed,
-                                    args.model_save_dir
+                                    args.model_save_dir,
+                                    args.api_base
                                 )
                                 
                                 # Get persistent splits - use TRAIN for generation, VAL for evaluation
@@ -730,6 +1090,18 @@ def main():
                                 
                                 # Generate metrics using TRAINING data
                                 logger.info(f"    Generating {config['metrics_per_trial']} metrics using training split...")
+                                # Enhanced metric generation with detailed error tracking
+                                error_info = DetailedErrorInfo(
+                                    operation="metric_generation",
+                                    context={
+                                        'generator_type': generator_type,
+                                        'dataset_name': dataset_name,
+                                        'measure': measure,
+                                        'seed': seed,
+                                        'metrics_per_trial': config['metrics_per_trial']
+                                    }
+                                )
+                                
                                 try:
                                     logger.debug(f"    Creating generator: {generator_type}")
                                     logger.debug(f"    Generator config: {config}")
@@ -753,8 +1125,23 @@ def main():
                                         raise ValueError(f"Generator produced None metrics at indices: {none_metrics}")
                                         
                                 except Exception as e:
-                                    logger.error(f"    Metric generation failed: {str(e)}")
-                                    logger.debug(f"    Full traceback: {traceback.format_exc()}")
+                                    # Enhanced error logging with full context
+                                    error_info.log_error(logger, e, {
+                                        'operation_details': 'metric_generation_phase',
+                                        'generator_instance': str(generator),
+                                        'train_dataset_size': len(train_dataset.get_dataframe()) if train_dataset else 'unknown'
+                                    })
+                                    
+                                    # Also log the full traceback for immediate visibility
+                                    logger.error(f"    Full traceback for metric generation error:")
+                                    logger.error(traceback.format_exc())
+                                    
+                                    # Check if this is a server failure
+                                    if is_server_failure_error(str(e)):
+                                        logger.warning(f"    Detected server failure error: {str(e)}")
+                                        if server_tracker.record_failure():
+                                            handle_server_failure(logger, args.api_base)
+                                    
                                     # Record this as a seed error and continue
                                     error_msg = f"Seed {seed}: {str(e)}"
                                     seed_errors.append(error_msg)
@@ -763,6 +1150,19 @@ def main():
 
                                 # Evaluate correlations using VALIDATION data
                                 logger.info(f"    Evaluating correlations on validation split...")
+                                correlation_error_info = DetailedErrorInfo(
+                                    operation="correlation_evaluation",
+                                    context={
+                                        'generator_type': generator_type,
+                                        'dataset_name': dataset_name,
+                                        'measure': measure,
+                                        'seed': seed,
+                                        'correlation_type': correlation_type,
+                                        'num_metrics': len(metrics) if metrics else 0,
+                                        'metric_names': [m.name if m else 'None' for m in (metrics or [])]
+                                    }
+                                )
+                                
                                 try:
                                     logger.debug(f"    Metrics for correlation: {[m.name if m else 'None' for m in metrics]}")
                                     logger.debug(f"    Validation dataset size: {len(val_dataset.get_dataframe())}")
@@ -782,9 +1182,33 @@ def main():
                                     for path in metric_paths:
                                         logger.info(f"    {path}")
                                     
+                                    # Post-generation server health check
+                                    if args.api_base and "localhost" in args.api_base:
+                                        logger.info(f"🔍 Post-generation server health check for {generator_type}...")
+                                        log_server_status(logger, args.api_base, f"After {generator_type}")
+                                    
+                                    # Reset failure tracker on successful operation
+                                    server_tracker.reset()
+                                    
                                 except Exception as e:
-                                    logger.error(f"    Correlation evaluation failed: {str(e)}")
-                                    logger.debug(f"    Full traceback: {traceback.format_exc()}")
+                                    # Enhanced error logging with full context
+                                    correlation_error_info.log_error(logger, e, {
+                                        'operation_details': 'correlation_evaluation_phase',
+                                        'val_dataset_size': len(val_dataset.get_dataframe()) if val_dataset else 'unknown',
+                                        'correlation_funcs': list(single_correlation_funcs.keys()),
+                                        'metrics_generated': len(metrics) if metrics else 0
+                                    })
+                                    
+                                    # Also log the full traceback for immediate visibility
+                                    logger.error(f"    Full traceback for correlation evaluation error:")
+                                    logger.error(traceback.format_exc())
+                                    
+                                    # Check if this is a server failure
+                                    if is_server_failure_error(str(e)):
+                                        logger.warning(f"    Detected server failure error in correlation: {str(e)}")
+                                        if server_tracker.record_failure():
+                                            handle_server_failure(logger, args.api_base)
+                                    
                                     # Record this as a seed error and continue
                                     error_msg = f"Seed {seed}: Correlation evaluation failed: {str(e)}"
                                     seed_errors.append(error_msg)
@@ -813,6 +1237,15 @@ def main():
                                 error_msg = f"Seed {seed}: {str(e)}"
                                 seed_errors.append(error_msg)
                                 logger.error(f"    Error: {error_msg}")
+                                logger.error(f"    Full traceback:")
+                                logger.error(traceback.format_exc())
+                                
+                                # Check if this is a server failure
+                                if is_server_failure_error(str(e)):
+                                    logger.warning(f"    Detected server failure error in seed processing: {str(e)}")
+                                    if server_tracker.record_failure():
+                                        handle_server_failure(logger, args.api_base)
+                                
                                 seed_correlations.append(np.nan)
                         
                         # Compute statistics
@@ -867,8 +1300,12 @@ def main():
                                   f"CI=[{stats_result['ci_lower']:.4f}, {stats_result['ci_upper']:.4f}]")
                 
                 except Exception as e:
-                    logger.error(f"Error processing {dataset_name}-{measure}: {str(e)}")
-                    logger.debug(traceback.format_exc())
+                    # Enhanced error logging for dataset processing
+                    dataset_error_info.log_error(logger, e, {
+                        'operation_details': 'dataset_processing_main_loop',
+                        'generators_attempted': list(generator_configs.keys()),
+                        'task_description': task_description[:200] + '...' if 'task_description' in locals() and len(task_description) > 200 else getattr(locals().get('task_description'), 'task_description', 'unknown')
+                    })
                     continue
             
             # Save dataset-specific results
@@ -881,21 +1318,51 @@ def main():
         
         # Save merged results for this correlation function
         if all_results_for_correlation:
-            # Merge with existing results
+            # Patch: merge all per-measure files if present, else fall back to per-dataset file
             merged_results = existing_merged_results.copy()
-            for result in all_results_for_correlation:
-                # Check if this result already exists in merged_results
-                found = False
-                for i, existing in enumerate(merged_results):
-                    if (existing.get('dataset') == result['dataset'] and 
-                        existing.get('measure') == result['measure'] and 
-                        existing.get('generator_type') == result['generator_type']):
-                        merged_results[i] = result  # Update existing
-                        found = True
-                        break
-                if not found:
-                    merged_results.append(result)  # Add new
-            
+            per_measure_files = []
+            for dataset_name, dataset_measures in dataset_measures_by_dataset.items():
+                for _, measure in dataset_measures:
+                    pm_file = get_dataset_output_file(dataset_name, measure, correlation_type)
+                    if os.path.exists(pm_file):
+                        per_measure_files.append(pm_file)
+            if per_measure_files:
+                logger.info(f"Merging from per-measure files: {per_measure_files}")
+                for pm_file in per_measure_files:
+                    pm_results = load_existing_results(pm_file)
+                    for result in pm_results:
+                        found = False
+                        for i, existing in enumerate(merged_results):
+                            if (existing.get('dataset') == result['dataset'] and 
+                                existing.get('measure') == result['measure'] and 
+                                existing.get('generator_type') == result['generator_type']):
+                                merged_results[i] = result  # Update existing
+                                found = True
+                                break
+                        if not found:
+                            merged_results.append(result)  # Add new
+                # Warn if old per-dataset file also exists
+                for dataset_name in dataset_measures_by_dataset:
+                    old_file = get_dataset_output_file(dataset_name, dataset_measures_by_dataset[dataset_name][0][1], correlation_type)
+                    if os.path.exists(old_file) and old_file not in per_measure_files:
+                        logger.warning(f"Both per-measure and per-dataset files exist for {dataset_name}. Using per-measure files.")
+            else:
+                logger.info(f"No per-measure files found, using per-dataset files.")
+                for dataset_name in dataset_measures_by_dataset:
+                    old_file = get_dataset_output_file(dataset_name, dataset_measures_by_dataset[dataset_name][0][1], correlation_type)
+                    if os.path.exists(old_file):
+                        old_results = load_existing_results(old_file)
+                        for result in old_results:
+                            found = False
+                            for i, existing in enumerate(merged_results):
+                                if (existing.get('dataset') == result['dataset'] and 
+                                    existing.get('measure') == result['measure'] and 
+                                    existing.get('generator_type') == result['generator_type']):
+                                    merged_results[i] = result  # Update existing
+                                    found = True
+                                    break
+                            if not found:
+                                merged_results.append(result)  # Add new
             save_results(merged_results, merged_output_file, logger)
             
             # Print summary for this correlation type
@@ -922,8 +1389,16 @@ def main():
             logger.error(f"No results generated for {correlation_type}")
 
     logger.info("Metric Generation Benchmark completed successfully!")
-    return 0
+    return EXIT_CODE_SUCCESS
 
 
 if __name__ == "__main__":
+    # Add custom pricing for Prometheus model (128k context)
+    litellm.model_cost["litellm_proxy/Unbabel/M-Prometheus-14B"] = {
+        "max_tokens": 128000,
+        "input_cost_per_token": 0.0,  # Free since it's our own server
+        "output_cost_per_token": 0.0,  # Free since it's our own server
+        "max_input_tokens": 120000,
+        "max_output_tokens": 8000
+    }
     sys.exit(main()) 

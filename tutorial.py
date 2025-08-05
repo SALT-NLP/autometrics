@@ -96,15 +96,30 @@ print("="*50)
 
 # Get predictions from your final metric
 final_scores = results['regression_metric'].predict(dataset)
-print(f"\nPredicted scores for first 5 examples:")
+human_scores = dataset.get_dataframe()[target_measure]
+
+print(f"\nPredicted vs Human scores for first 5 examples:")
+print("Example | Predicted | Human | Pred Rank | Human Rank")
+print("-" * 55)
+
+# Get first 5 examples
+first_5_pred = final_scores[:5]
+first_5_human = human_scores.iloc[:5]
+
 for i in range(min(5, len(final_scores))):
-    print(f"  Example {i+1}: {final_scores[i]:.3f}")
+    predicted = first_5_pred[i]
+    human = first_5_human.iloc[i]
+    
+    # Calculate ranks within these 5 examples (higher score = higher rank)
+    pred_rank = (first_5_pred > predicted).sum() + 1
+    human_rank = (first_5_human > human).sum() + 1
+    
+    print(f"  {i+1}     | {predicted:.3f}    | {human:.3f} | {pred_rank:>9} | {human_rank:>10}")
 
 # Check correlation with human scores
 import numpy as np
 from scipy.stats import pearsonr
 
-human_scores = dataset.get_dataframe()[target_measure]
 correlation, p_value = pearsonr(human_scores, final_scores)
 print(f"\nCorrelation with human scores: {correlation:.3f} (p={p_value:.3f})")
 

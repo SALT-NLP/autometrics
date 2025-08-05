@@ -4,7 +4,7 @@
 
 Autometrics automatically finds the best evaluation metrics for your NLP task by:
 1. **Generating** task-specific metrics using LLMs
-2. **Retrieving** relevant metrics from a bank of 60+ built-in metrics  
+2. **Retrieving** relevant metrics from a bank of 40+ built-in metrics  
 3. **Evaluating** all metrics on your dataset
 4. **Selecting** the top metrics using regression
 5. **Aggregating** into a single optimized metric

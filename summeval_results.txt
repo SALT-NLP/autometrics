@@ -1,4 +1,0 @@
-calculating scores...
-computing bert embedding.
-computing greedy matching.
-done in 7.59 seconds, 2320.26 sentences/sec

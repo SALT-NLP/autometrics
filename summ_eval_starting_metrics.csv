@@ -1,5 +1,0 @@
-Top 1 Metric & Value,Top 2 Metric & Value,Top 3 Metric & Value,Top 4 Metric & Value,Top 5 Metric & Value
-UniEvalSum-coherence (0.37397927159087613),UniEvalSum-relevance (0.37793127401196824),BERTScoreR_roberta-large (0.17038553807978282),BERTScoreF_roberta-large (0.23230581270850725),FKGL (0.17385294007881802)
-UniEvalSum-consistency (0.23957488000654326),UniEvalSum-coherence (0.2299655937414505),UniEvalSum-relevance (0.15839891893307076),UniEvalFact-consistency (0.22133906803256412),ROUGE-L-p (0.13987621190315333)
-UniEvalSum-coherence (0.21546399332357838),UniEvalSum-fluency (0.19612034645091278),BERTScoreR_roberta-large (0.08302860557578384),UniEvalSum-relevance (0.23724104330290605),UniEvalSum-consistency (0.22334934685338018)
-UniEvalSum-relevance (0.27039201584100114),UniEvalSum-coherence (0.2911815664852049),ROUGE-L-p (0.28640241320948917),BERTScoreR_roberta-large (0.3134130011121857),MOVERScore_distilbert-base-uncased (0.29895982044390423)

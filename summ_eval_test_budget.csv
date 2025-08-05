@@ -1,5 +1,0 @@
-Top 1 Metric & Value,Top 2 Metric & Value,Top 3 Metric & Value,Top 4 Metric & Value,Top 5 Metric & Value
-PLS_coherenceTop 10 (0.4131090640870372),Rg_coherenceTop 10 (0.38225740818527226),Rg_coherenceTop 15 (0.38225740818527226),Rg_coherenceTop 25 (0.382250456202878),Rg_coherenceTop 20 (0.381908876916168)
-RandomForest_consistencyTop 5 (0.2709390628188913),GB_consistencyTop 3 (0.2703070524826026),PLS_consistencyTop 10 (0.26763022852065177),PLS_consistencyTop 15 (0.26763022852065177),PLS_consistency (0.2669729076056729)
-RandomForest_fluencyTop 5 (0.3008741268600279),PLS_fluency (0.2744343001190007),PLS_fluencyTop 10 (0.2730474647428818),PLS_fluencyTop 15 (0.2730474647428818),PLS_fluencyTop 20 (0.27299000940837814)
-PLS_relevanceTop 20 (0.40014065431385293),Rg_relevanceTop 5 (0.39869244493054856),PLS_relevanceTop 15 (0.39861437604815925),PLS_relevance (0.39345990690436183),PLS_relevanceTop 25 (0.39242331619218085)

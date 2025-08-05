@@ -192,6 +192,12 @@ $$
         # Default: use module_type measurement for toxicity
         if load_kwargs is None:
             load_kwargs = {"module_type": "measurement"}
+        
+        # Fix for device mapping issues: always use CPU to avoid conflicts
+        # The HuggingFace evaluate library has internal device management that conflicts
+        # with our GPU allocation system, so we force CPU usage
+        load_kwargs["device"] = "cpu"
+        
         super().__init__(
             name=name,
             description=description,

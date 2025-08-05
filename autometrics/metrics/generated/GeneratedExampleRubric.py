@@ -570,6 +570,7 @@ class _ExampleRubricMetricMixin:
         code = f'''# Auto-generated Example Rubric metric file for {self.name}
 import dspy
 from autometrics.metrics.generated.GeneratedExampleRubric import {class_name}
+from typing import ClassVar
 
 DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
 
@@ -578,6 +579,9 @@ OPTIMIZED_EXAMPLES = {examples_list_str}
 
 class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
+
+    description: ClassVar[str] = {json.dumps(self.description)}
+
     def __init__(self, model: dspy.LM = DEFAULT_MODEL):
         super().__init__(
             name={json.dumps(self.name)},

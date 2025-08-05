@@ -2,12 +2,11 @@ from typing import List, Type, Optional
 from autometrics.metrics.Metric import Metric
 from autometrics.dataset.Dataset import Dataset
 from autometrics.recommend.MetricRecommender import MetricRecommender
-from autometrics.recommend.utils import metric_name_to_class
+
 
 import os
 from platformdirs import user_data_dir
 from pylate import indexes, models, retrieve
-
 
 class ColBERT(MetricRecommender):
     """Metric recommender that leverages Modern ColBERT via the PyLate package.
@@ -50,6 +49,8 @@ class ColBERT(MetricRecommender):
         # Initialize the retriever
         self.retriever = retrieve.ColBERT(index=self.index)
 
+        super().__init__(metric_classes, index_path, force_reindex)
+
     # ---------------------------------------------------------------------
     # Internal helpers
     # ---------------------------------------------------------------------
@@ -63,6 +64,8 @@ class ColBERT(MetricRecommender):
         # to keep the ordering consistent.
         metric_ids: List[str] = [mc.__name__ for mc in self.metric_classes]
         metric_docs: List[str] = [(mc.__doc__ or "") for mc in self.metric_classes]
+
+        print("[ColBERT] Metric IDs: ", metric_ids)
 
         print(
             f"Building ColBERT index at {self.index_path} for {len(metric_ids)} metrics..."
@@ -124,5 +127,9 @@ class ColBERT(MetricRecommender):
             k=k,
         )
 
+        print("[ColBERT] Scores: ", scores)
+
+        print("[ColBERT] Retrieved metrics: ", [self.metric_name_to_class(hit["id"]) for hit in scores[0]])
+
         # Extract document IDs from the first query's results
-        return [metric_name_to_class(hit["id"]) for hit in scores[0]]
+        return [self.metric_name_to_class(hit["id"]) for hit in scores[0]]

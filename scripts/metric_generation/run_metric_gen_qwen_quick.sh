@@ -3,7 +3,7 @@
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --mem=100GB
+#SBATCH --mem=340GB
 #SBATCH --open-mode=append
 #SBATCH --partition=sc-loprio
 #SBATCH --time=48:00:00

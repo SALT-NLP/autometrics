@@ -184,3 +184,4 @@ test_autometrics_cache/
 core
 /results/
 /generated_metrics/
+/full_test_metrics/

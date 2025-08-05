@@ -3,20 +3,20 @@
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:1
-#SBATCH --mem=160GB
+#SBATCH --mem=140GB
 #SBATCH --open-mode=append
 #SBATCH --partition=sc-loprio
-#SBATCH --time=36:00:00
+#SBATCH --time=48:00:00
 #SBATCH --nodes=1
-#SBATCH --job-name=metric_gen_qwen_simplification
-#SBATCH --output=scripts/metric_generation/logs/metric_gen_qwen_simplification.out
-#SBATCH --error=scripts/metric_generation/logs/metric_gen_qwen_simplification.err
+#SBATCH --job-name=metric_gen_qwen_primock
+#SBATCH --output=scripts/metric_generation/logs/metric_gen_qwen_primock.out
+#SBATCH --error=scripts/metric_generation/logs/metric_gen_qwen_primock.err
 #SBATCH --constraint=141G
 #SBATCH --requeue
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mryan0@stanford.edu
 
-# Script for Simplification datasets with Qwen3-32B
+# Script for Primock57 with Qwen3-32B
 
 . /nlp/scr/mryan0/miniconda3/etc/profile.d/conda.sh
 conda activate sglang
@@ -25,10 +25,10 @@ cd /nlp/scr2/nlp/personal-rm/autometrics
 
 # Server configuration
 model="Qwen/Qwen3-32B"
-port=7430  # Different port, 10 apart spacing
+port=7450  # Different port, 10 apart spacing
 model_nickname="qwen3_32b"
 
-echo "Starting Qwen3-32B server for Simplification metric generation..."
+echo "Starting Qwen3-32B server for remaining datasets metric generation..."
 python -m sglang.launch_server --model-path ${model} --port ${port} --host 0.0.0.0 --tp 1 --dtype bfloat16 --mem-fraction-static 0.8 --trust-remote-code > /dev/null 2>&1 &
 
 # Wait for server to be ready
@@ -52,40 +52,39 @@ echo "Server is up and running!"
 conda activate autometrics
 
 # Set environment variables for Qwen
-export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_metric_gen_qwen_simplification"
+export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_metric_gen_qwen_primock"
 export AUTOMETRICS_MODEL_DIR="/sphinx/u/salt-checkpoints/autometrics/models"
 
 # Set API base URL
 API_BASE=http://localhost:${port}/v1
 
-echo "Starting Metric Generation Benchmark with Qwen3-32B for Simplification datasets..."
+echo "Starting Metric Generation Benchmark with Qwen3-32B for Primock57..."
 echo "Using DSPY cache: $DSPY_CACHEDIR"
 echo "Model save directory: $AUTOMETRICS_MODEL_DIR"
 echo "API Base: $API_BASE"
-echo "Processing datasets: SimpDA, SimpEval"
+echo "Processing datasets: Primock57"
 echo "Seeds: 42 43 44 45 46"
 echo "Correlation: all"
 
-# Run the benchmark for Simplification datasets
+# Run the benchmark for Primock57
 python analysis/ablations/run_metric_generation_benchmark.py \
     --generator-model qwen3_32b \
     --judge-model qwen3_32b \
     --api-base $API_BASE \
     --seeds 42 43 44 45 46 \
     --correlation all \
-    --dataset SimpDA SimpEval \
+    --dataset Primock57 \
     --output-dir results/ablations/metric_generation \
     --model-save-dir $AUTOMETRICS_MODEL_DIR
 
-echo "Simplification datasets benchmark completed with Qwen3-32B!"
+echo "Primock57 benchmark completed with Qwen3-32B!"
 
 # Cleanup: Kill the server
 pkill -f "sglang.launch_server"
 
 echo ""
 echo "Summary of processed dataset-measure combinations:"
-echo "  - SimpDA: fluency, meaning, simplicity"
-echo "  - SimpEval: score"
+echo "  - Primock57: time_sec, incorrect, omissions, inc_plus_omi"
 echo ""
-echo "Total: 4 dataset-measure combinations"
+echo "Total: 4 dataset-measure combination"
 echo "Results saved to: results/ablations/metric_generation/" 

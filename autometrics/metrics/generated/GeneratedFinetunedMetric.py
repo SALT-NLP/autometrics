@@ -271,12 +271,16 @@ class _FinetunedMetricMixin:
 import os
 from pathlib import Path
 from autometrics.metrics.generated.GeneratedFinetunedMetric import {class_name}
+from typing import ClassVar
 
 # Note: This metric requires the fine-tuned model to be available at the specified path
 MODEL_PATH = r"{self.model_path}"
 
 class {self.name.replace(" ", "_").replace("-", "_")}_Finetuned({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
+
+    description: ClassVar[str] = {json.dumps(self.description)}
+
     def __init__(self, model_path: str = MODEL_PATH):
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Fine-tuned model not found at {{model_path}}. Please ensure the model is available.")

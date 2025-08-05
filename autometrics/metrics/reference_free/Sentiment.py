@@ -200,7 +200,17 @@ $$
                 torch_dtype=self.torch_dtype,
                 device_map=self.device_map,
                 trust_remote_code=True
-            ).to(self.device)
+            )
+            
+            # Fix for device mapping issues: only call .to() if not already device-mapped
+            # Check if the model has a device_map attribute (indicating it's already mapped)
+            if not hasattr(self.model, 'hf_device_map') or self.model.hf_device_map is None:
+                # Only call .to() if the model is not already on a device
+                if not hasattr(self.model, 'device') or str(self.model.device) == 'cpu':
+                    self.model.to(self.device)
+            # If device_map is set, the model is already on the correct device(s)
+            # If the model is already on a device, don't move it again
+            
             self.model.eval()
 
     def _unload_model(self):
@@ -235,8 +245,7 @@ $$
             return_tensors='pt',
             truncation=True,
             padding='max_length',
-            max_length=512,
-            truncation_strategy="longest_first"
+            max_length=512
         ).to(self.device)
         with torch.no_grad():
             logits = self.model(**inputs).logits.squeeze(0)
@@ -261,8 +270,7 @@ $$
                 return_tensors='pt',
                 truncation=True,
                 padding='max_length',
-                max_length=512,
-                truncation_strategy="longest_first"
+                max_length=512
             ).to(self.device)
             with torch.no_grad():
                 logits = self.model(**inputs_tok).logits

@@ -300,11 +300,15 @@ class _GEvalMetricMixin:
 import dspy
 import os
 from autometrics.metrics.generated.GeneratedGEvalMetric import {class_name}
+from typing import ClassVar
 
 DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
 
 class {self.name.replace(" ", "_").replace("-", "_")}_GEval({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
+
+    description: ClassVar[str] = {json.dumps(self.description)}
+
     def __init__(self, model: dspy.LM = DEFAULT_MODEL):
         super().__init__(
             name={json.dumps(self.name)},

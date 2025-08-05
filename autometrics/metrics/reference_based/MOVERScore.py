@@ -188,9 +188,19 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         """Load the model and tokenizer."""
         if self.model is None:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, do_lower_case=True)
-            self.model = AutoModel.from_pretrained(self.model_name, output_hidden_states=True, output_attentions=True)
-            self.model.eval()
-            self.model.to(self.device)
+            
+        from transformers import AutoModel
+        
+        self.model = AutoModel.from_pretrained(self.model_name, output_hidden_states=True, output_attentions=True)
+        self.model.eval()
+        
+        # Fix for device mapping issues: only call .to() if not already device-mapped
+        if not hasattr(self.model, 'hf_device_map') or self.model.hf_device_map is None:
+            if not hasattr(self.model, 'device') or str(self.model.device) == 'cpu':
+                self.model.to(self.device)
+        
+        # Ensure the model is in eval mode
+        self.model.eval()
 
     def _unload_model(self):
         """Unload model to free resources."""
@@ -253,6 +263,11 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         # Ensure tensors are always moved to the same device as the model
         if device is None:
             device = self.device
+        
+        # Get the actual device the model is on
+        if hasattr(self, 'model') and self.model is not None:
+            model_device = next(self.model.parameters()).device
+            device = model_device
         
         tokens = [["[CLS]"]+self.truncate(tokenize(a))+["[SEP]"] for a in arr]  
         arr = [numericalize(a) for a in tokens]

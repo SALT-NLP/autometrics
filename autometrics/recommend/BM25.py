@@ -7,7 +7,6 @@ from platformdirs import user_data_dir
 import json
 import subprocess
 from pyserini.search.lucene import LuceneSearcher
-from autometrics.recommend.utils import metric_name_to_class
 
 class BM25(MetricRecommender):
     def __init__(self, metric_classes: List[Type[Metric]], index_path: str = user_data_dir("autometrics", "bm25"), force_reindex: bool = False):
@@ -66,7 +65,9 @@ class BM25(MetricRecommender):
         self.searcher = LuceneSearcher(self.lucene_index_path)
         self.searcher.set_language('en')
 
+        super().__init__(metric_classes, index_path, force_reindex)
+
     def recommend(self, dataset: Dataset, target_measurement: str, k: int = 20) -> List[Type[Metric]]:
         query = f'I am looking for a metric to evaluate the following task: "{dataset.get_task_description()}"  In particular I care about "{target_measurement}".'
         hits = self.searcher.search(query, k=k)
-        return [metric_name_to_class(hit.docid) for hit in hits]
+        return [self.metric_name_to_class(hit.docid) for hit in hits]

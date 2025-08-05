@@ -10,7 +10,6 @@ from pyserini.encode import DocumentEncoder, QueryEncoder
 from autometrics.metrics.Metric import Metric
 from autometrics.dataset.Dataset import Dataset
 from autometrics.recommend.MetricRecommender import MetricRecommender
-from autometrics.recommend.utils import metric_name_to_class
 
 
 class Faiss(MetricRecommender):
@@ -61,6 +60,8 @@ class Faiss(MetricRecommender):
         # Initialise the Pyserini Faiss searcher.
         # ------------------------------------------------------------------
         self.searcher = FaissSearcher(self.index_dir, query_encoder=self.encoder_name)
+
+        super().__init__(metric_classes, index_path, force_reindex)
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -148,4 +149,4 @@ class Faiss(MetricRecommender):
         
         # Directly search with raw query string; FaissSearcher will encode internally
         hits = self.searcher.search(query, k=k)
-        return [metric_name_to_class(hit.docid) for hit in hits]
+        return [self.metric_name_to_class(hit.docid) for hit in hits]

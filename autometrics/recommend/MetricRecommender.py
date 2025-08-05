@@ -10,6 +10,7 @@ class MetricRecommender(ABC):
         self.metric_classes = metric_classes
         self.index_path = index_path
         self.force_reindex = force_reindex
+        self.metric_map = { metric_class.__name__.upper().strip(): metric_class for metric_class in self.metric_classes }
 
     @abstractmethod
     def recommend(self, dataset: Dataset, target_measurement: str, k: int = 20) -> List[Type[Metric]]:
@@ -24,3 +25,6 @@ class MetricRecommender(ABC):
             An ordered list of recommended metrics (first is most recommended)
         """
         pass
+
+    def metric_name_to_class(self, metric_name: str) -> Type[Metric]:
+        return self.metric_map.get(metric_name.upper().strip(), None)

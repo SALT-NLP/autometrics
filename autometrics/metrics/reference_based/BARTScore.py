@@ -18,13 +18,18 @@ class BARTScorer:
         self.tokenizer = BartTokenizerFast.from_pretrained(checkpoint, use_fast=True)
         self.model = BartForConditionalGeneration.from_pretrained(checkpoint)
         self.model.eval()
+        
         # Pick device
         self.device = (
             torch.device(device)
             if device is not None
             else torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         )
-        self.model.to(self.device)
+        
+        # Fix for device mapping issues: only call .to() if not already device-mapped
+        if not hasattr(self.model, 'hf_device_map') or self.model.hf_device_map is None:
+            if not hasattr(self.model, 'device') or str(self.model.device) == 'cpu':
+                self.model.to(self.device)
 
         # Cap max_length to the model's own limit
         limit = self.tokenizer.model_max_length

@@ -34,7 +34,7 @@ fi
 echo "Starting Metric Generation Benchmark with GPT-4o-mini for quick datasets..."
 echo "Using DSPY cache: $DSPY_CACHEDIR"
 echo "Model save directory: $AUTOMETRICS_MODEL_DIR"
-echo "Processing datasets: EvalGen, RealHumanEval"
+echo "Processing datasets: EvalGenMedical, EvalGenProduct"
 echo "Seeds: 42 43 44 45 46"
 echo "Correlation: all"
 
@@ -44,7 +44,7 @@ python analysis/ablations/run_metric_generation_benchmark.py \
     --judge-model gpt4o_mini \
     --seeds 42 43 44 45 46 \
     --correlation all \
-    --dataset EvalGenMedical EvalGenProduct RealHumanEval \
+    --dataset EvalGenMedical EvalGenProduct \
     --output-dir results/ablations/metric_generation \
     --model-save-dir $AUTOMETRICS_MODEL_DIR
 
@@ -54,7 +54,7 @@ echo ""
 echo "Summary of processed dataset-measure combinations:"
 echo "  - EvalGenMedical: quality"
 echo "  - EvalGenProduct: quality"
-echo "  - RealHumanEval: quality"
+# echo "  - RealHumanEval: quality"
 echo ""
 echo "Total: 3 dataset-measure combinations"
 echo "Results saved to: results/ablations/metric_generation/" 

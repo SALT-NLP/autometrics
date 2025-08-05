@@ -34,6 +34,8 @@ class PipelinedRec(MetricRecommender):
             # pad with None
             self.index_paths = self.index_paths + [None] * (len(self.recommenders) - len(self.index_paths))
 
+        super().__init__(metric_classes, index_paths[0], force_reindex)
+
     def recommend(self, dataset: Dataset, target_measurement: str, k: int = 20) -> List[Type[Metric]]:
         results = self.metric_classes
         top_ks = self.top_ks

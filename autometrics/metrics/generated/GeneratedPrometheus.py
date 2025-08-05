@@ -303,11 +303,15 @@ class _PrometheusMetricMixin:
 import os
 from prometheus_eval.litellm import LiteLLM
 from autometrics.metrics.generated.GeneratedPrometheus import {class_name}
+from typing import ClassVar
 
 DEFAULT_MODEL = {model_constructor}
 
 class {generated_class_name}({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
+
+    description: ClassVar[str] = {json.dumps(self.description)}
+    
     def __init__(self, model=DEFAULT_MODEL, judge_api_base="{actual_api_base}"):
         super().__init__(
             name={json.dumps(self.name)},

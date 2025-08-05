@@ -205,6 +205,11 @@ where $c$ is a scaling factor (default: 5), and AUC is the area under the curve 
             raise ValueError(f"Unknown aggregation method: {aggregation}")
             
         metric_name = f"{name}_{aggregation}" if name == "MAUVE" else name
+
+        # Fix for device mapping issues: always use CPU to avoid conflicts
+        # The HuggingFace evaluate library has internal device management that conflicts
+        # with our GPU allocation system, so we force CPU usage
+        load_kwargs["device"] = "cpu"
         
         # Pass parameters to parent constructor, avoiding duplicate arguments
         super().__init__(

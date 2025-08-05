@@ -1,0 +1,1154 @@
+# autometrics/autometrics.py
+from autometrics.recommend.LLMRec import LLMRec
+from autometrics.recommend.ColBERT import ColBERT
+from autometrics.recommend.BM25 import BM25
+from autometrics.recommend.PipelinedRec import PipelinedRec
+from autometrics.metrics.MetricBank import all_metric_classes
+from autometrics.aggregator.regression.Lasso import Lasso
+from autometrics.dataset.Dataset import Dataset
+from autometrics.metrics.Metric import Metric
+from autometrics.recommend.MetricRecommender import MetricRecommender
+from typing import List, Type, Optional, Dict, Any, Union
+import dspy
+import os
+import importlib.util
+import inspect
+from autometrics.metrics.MultiMetric import MultiMetric
+
+## This is the main file for the complete Autometrics pipeline.
+#
+# Pipeline Steps:
+# 1. Generate metrics using the Metric Generation Configs and augment the metric bank with the new metrics
+# 2. Retrieve the top K most relevant metrics from the metric bank using the Retriever
+# 3. Evaluate the top K metrics on the dataset
+# 4. Regress to get the top N metrics using the Regression Strategy
+# 5. Generate a report card with the top N metrics and the single regression metric
+# 6. Return the top N metrics, the single regression metric, and the report card
+
+# =============================
+# Autometrics Pipeline Scaffold
+# =============================
+
+def _detect_gpu_availability() -> bool:
+    """
+    Detect if GPU is available for use.
+    
+    Returns:
+        True if CUDA is available and functional, False otherwise
+    """
+    try:
+        # Use the existing GPU detection utility from the codebase
+        from autometrics.metrics.utils.gpu_allocation import is_cuda_available
+        return is_cuda_available()
+    except ImportError:
+        # Fallback to direct torch check if the utility is not available
+        try:
+            import torch
+            return torch.cuda.is_available()
+        except ImportError:
+            return False
+
+def _get_default_retriever_config() -> dict:
+    """
+    Get the default retriever configuration based on hardware availability.
+    
+    Returns:
+        Dictionary with retriever configuration optimized for the current hardware
+    """
+    gpu_available = _detect_gpu_availability()
+    
+    if gpu_available:
+        # Use ColBERT + LLMRec pipeline for GPU environments
+        print("[Autometrics] GPU detected - using ColBERT + LLMRec pipeline for optimal performance")
+        return {
+            "recommenders": [ColBERT, LLMRec],
+            "top_ks": [60, 30],  # ColBERT gets more, LLMRec narrows down
+            "index_paths": [None, None],  # Use default paths
+            "force_reindex": False
+        }
+    else:
+        # Use BM25 + LLMRec pipeline for CPU-only environments
+        print("[Autometrics] No GPU detected - using BM25 + LLMRec pipeline for CPU-optimized performance")
+        return {
+            "recommenders": [BM25, LLMRec],
+            "top_ks": [60, 30],  # BM25 gets more, LLMRec narrows down
+            "index_paths": [None, None],  # Use default paths
+            "force_reindex": False
+        }
+
+# Default configurations
+FULL_GENERATOR_CONFIGS = {
+    "llm_judge": {"metrics_per_trial": 10, "description": "Basic LLM Judge"},
+    "rubric_prometheus": {"metrics_per_trial": 10, "description": "Rubric Generator (Prometheus)"},
+    "rubric_dspy": {"metrics_per_trial": 10, "description": "Rubric Generator (DSPy)"},
+    "geval": {"metrics_per_trial": 10, "description": "G-Eval"},
+    "codegen": {"metrics_per_trial": 10, "description": "Code Generation"},
+    "llm_judge_optimized": {"metrics_per_trial": 1, "description": "LLM Judge (MIPROv2-Optimized)"},
+    "finetune": {"metrics_per_trial": 1, "description": "Fine-tuned ModernBERT"},
+    "llm_judge_examples": {"metrics_per_trial": 1, "description": "LLM Judge (Example-Based)"},
+}
+
+DEFAULT_GENERATOR_CONFIGS  = {
+    "llm_judge": {"metrics_per_trial": 10, "description": "Basic LLM Judge"},
+    "rubric_dspy": {"metrics_per_trial": 5, "description": "Rubric Generator (DSPy)"},
+    "llm_judge_optimized": {"metrics_per_trial": 1, "description": "LLM Judge (MIPROv2-Optimized)"},
+    "llm_judge_examples": {"metrics_per_trial": 1, "description": "LLM Judge (Example-Based)"},
+}
+
+# Dynamic default retriever configuration based on hardware
+DEFAULT_RETRIEVER_KWARGS = _get_default_retriever_config()
+
+DEFAULT_REGRESSION_KWARGS = {
+    # Empty for now - most regression strategies don't need dataset-specific kwargs
+    # but this pattern allows for future extensibility
+}
+
+class Autometrics:
+    """
+    Main Autometrics pipeline orchestrator.
+    This class ties together metric generation, retrieval, evaluation, regression, and reporting.
+    """
+    def __init__(
+        self,
+        metric_generation_configs: Optional[dict] = DEFAULT_GENERATOR_CONFIGS,
+        retriever: Type[MetricRecommender] = PipelinedRec,
+        retriever_kwargs: dict = DEFAULT_RETRIEVER_KWARGS,
+        regression_strategy: Type = Lasso,
+        regression_kwargs: dict = DEFAULT_REGRESSION_KWARGS,
+        metric_bank: Union[List[Type[Metric]], str] = all_metric_classes,
+        generated_metrics_dir: Optional[str] = None,
+        merge_generated_with_bank: bool = False,
+        seed: int = 42,
+        allowed_failed_metrics: int = 0,
+        # New parameters for metric priors (no defaults - users must explicitly set if desired)
+        metric_priors: Optional[List[Type[Metric]]] = None,
+        generated_metric_priors: Optional[Dict[str, int]] = None,
+        # Parallelization configuration
+        enable_parallel_evaluation: bool = True,
+        max_parallel_workers: int = 20,
+    ):
+        """
+        Initialize the Autometrics pipeline.
+        Args:
+            metric_generation_configs: Dict of generator configs (defaults to DEFAULT_GENERATOR_CONFIGS)
+            retriever: Retriever class to use (defaults to PipelinedRec)
+            retriever_kwargs: Keyword arguments to pass to retriever constructor (defaults to PipelinedRec defaults)
+                Note: The default retriever configuration automatically adapts to hardware:
+                - GPU environments: Uses ColBERT + LLMRec pipeline for optimal performance
+                - CPU-only environments: Uses BM25 + LLMRec pipeline for CPU-optimized performance
+            regression_strategy: Regression aggregator class (defaults to Lasso)
+            regression_kwargs: Keyword arguments to pass to regression strategy constructor (dataset is automatically added during construction)
+            metric_bank: Either:
+                - List of metric classes (e.g., [BLEU, SARI, LevenshteinDistance]) - RECOMMENDED
+                - Path to directory containing generated metric Python files (all files in the directory must be valid metrics)
+                - Defaults to all_metric_classes from MetricBank (automatically switches to reference_free if no reference columns)
+            generated_metrics_dir: Where to save generated metrics (defaults to "generated_metrics/{run_id}")
+            merge_generated_with_bank: If True, save generated metrics directly to metric_bank directory
+            seed: Random seed for reproducibility (defaults to 42)
+            allowed_failed_metrics: Maximum number of metrics that can fail evaluation before raising an exception (default: 0)
+            metric_priors: List of metric classes that should be included upfront (e.g., [LDLRewardModel, BLEU])
+                These metrics will be evaluated on the dataset before retrieval and included in the final regression
+                No defaults - users must explicitly set if desired
+            generated_metric_priors: Dict mapping generator types to number of metrics to generate as priors
+                (e.g., {"llm_judge_optimized": 1, "llm_judge_examples": 1})
+                These generated metrics will be included upfront alongside metric_priors
+                No defaults - users must explicitly set if desired
+            enable_parallel_evaluation: Whether to use parallel execution for metric evaluation (default: True)
+                This can significantly speed up evaluation for network-bound metrics (LLM-based metrics)
+            max_parallel_workers: Maximum number of parallel workers for metric evaluation (default: 20)
+                For network-bound operations, this can be higher than CPU cores
+        """
+        # Store configs with meaningful defaults (no more None antipattern!)
+        self.metric_generation_configs = metric_generation_configs
+        self.retriever = retriever
+        self.retriever_kwargs = retriever_kwargs
+        self.regression_strategy = regression_strategy
+        self.regression_kwargs = regression_kwargs
+        self.metric_bank = metric_bank
+        self.generated_metrics_dir = generated_metrics_dir
+        self.merge_generated_with_bank = merge_generated_with_bank
+        self.seed = seed
+        self.allowed_failed_metrics = allowed_failed_metrics
+        
+        # Store prior configurations (no defaults - users must explicitly set if desired)
+        self.metric_priors = metric_priors or []
+        self.generated_metric_priors = generated_metric_priors or {}
+        
+        # Store parallelization configuration
+        self.enable_parallel_evaluation = enable_parallel_evaluation
+        self.max_parallel_workers = max_parallel_workers
+
+    def run(
+        self,
+        dataset: Dataset,
+        target_measure: str,
+        generator_llm: dspy.LM,
+        judge_llm: dspy.LM,
+        num_to_retrieve: int = 30,
+        num_to_regress: int = 5,
+        regenerate_metrics: bool = False,
+        prometheus_api_base: Optional[str] = None,
+        model_save_dir: Optional[str] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Run the full Autometrics pipeline.
+        Args:
+            dataset: The dataset to evaluate on
+            target_measure: The specific target measure/column to evaluate (e.g., "helpfulness", "fluency")
+            generator_llm: LLM for metric generation
+            judge_llm: LLM for metric evaluation
+            num_to_retrieve: Number of metrics to retrieve from the bank (default: 30)
+            num_to_regress: Number of metrics to select via regression (default: 5)
+            regenerate_metrics: If True, force regeneration of metrics even if files exist
+            prometheus_api_base: API base for Prometheus models (required for rubric_prometheus)
+            model_save_dir: Directory to save fine-tuned models (defaults to "/finetunes")
+            kwargs: Additional config for generators, retrievers, etc.
+        Returns:
+            Dict with keys: 'top_metrics', 'regression_metric', 'report_card', 'all_generated_metrics', etc.
+        """
+        print(f"[Autometrics] Starting pipeline for {dataset.get_name()} - {target_measure}")
+        print(f"[Autometrics] Configuration: retrieve={num_to_retrieve}, regress={num_to_regress}, regenerate={regenerate_metrics}")
+        
+        # 0. Process metric priors (if any)
+        prior_metrics = []
+        if self.metric_priors or self.generated_metric_priors:
+            print("\n[Autometrics] Step 0: Processing Metric Priors")
+            prior_metrics = self._process_metric_priors(
+                dataset, target_measure, generator_llm, judge_llm, regenerate_metrics, prometheus_api_base, model_save_dir
+            )
+            print(f"[Autometrics] Processed {len(prior_metrics)} prior metrics")
+        
+        # 1. Generate metrics (or load from disk if available)
+        print("\n[Autometrics] Step 1: Generating/Loading Metrics")
+        generated_metrics = self._generate_or_load_metrics(
+            dataset, target_measure, generator_llm, judge_llm, regenerate_metrics, prometheus_api_base, model_save_dir
+        )
+        print(f"[Autometrics] Generated/Loaded {len(generated_metrics)} metrics")
+        
+        # 2. Load metric bank and configure retriever
+        print("\n[Autometrics] Step 2: Loading Metric Bank")
+        metric_bank = self._load_metric_bank(dataset)
+        
+        print(f"[Autometrics] Loaded {len(metric_bank)} metrics in bank")
+
+        # 2.5 Merge generated metrics with metric bank
+        print("\n[Autometrics]  Merging Generated Metrics with Metric Bank")
+        metric_bank = self._merge_generated_with_bank(metric_bank, generated_metrics)
+        
+        # Configure retriever with metric bank and model
+        print("[Autometrics] Configuring retriever...")
+        retriever_kwargs = self.retriever_kwargs.copy()
+        retriever_kwargs["metric_classes"] = metric_bank
+        retriever_kwargs["model"] = generator_llm  # Use generator LLM for LLMRec
+        
+        # Generate dynamic index paths and validate retrieval hyperparameters
+        retriever_kwargs = self._validate_and_adjust_retriever_config(retriever_kwargs, dataset, metric_bank, num_to_retrieve)
+        
+        retriever_instance = self.retriever(**retriever_kwargs)
+        
+        # Construct regression strategy with dataset-specific kwargs
+        print("[Autometrics] Configuring regression strategy...")
+        regression_kwargs = self.regression_kwargs.copy()
+        # Add dataset to kwargs since all regression classes accept dataset parameter
+        regression_kwargs["dataset"] = dataset
+        regression_instance = self.regression_strategy(**regression_kwargs)
+        
+        # 3. Retrieve top-K metrics using retriever
+        print(f"\n[Autometrics] Step 3: Retrieving Top {num_to_retrieve} Metrics")
+        retrieved_metrics = self._retrieve_top_k_metrics(dataset, target_measure, num_to_retrieve, retriever_instance, metric_bank)
+        print(f"[Autometrics] Retrieved {len(retrieved_metrics)} metrics")
+        
+        # 4. Combine priors with retrieved metrics and evaluate
+        all_metrics_to_evaluate = prior_metrics + retrieved_metrics
+        print(f"\n[Autometrics] Step 4: Evaluating {len(all_metrics_to_evaluate)} Metrics on Dataset ({len(prior_metrics)} priors + {len(retrieved_metrics)} retrieved)")
+        successful_metric_instances = self._evaluate_metrics_on_dataset(dataset, all_metrics_to_evaluate)
+        
+        # 5. Regress to get top-N metrics using regression strategy
+        print(f"\n[Autometrics] Step 5: Regression Analysis (Selecting Top {num_to_regress})")
+        regression_results = self._regress_and_select_top_n(
+            dataset, successful_metric_instances, target_measure, num_to_regress, regression_instance
+        )
+        
+        # 6. Generate a report card
+        print("\n[Autometrics] Step 6: Generating Report Card")
+        report_card = self._generate_report_card(
+            regression_results['top_metrics'],
+            regression_results['regression_metric'],
+            dataset,
+            target_measure
+        )
+        
+        # 7. Return results
+        print("\n[Autometrics] Pipeline Complete!")
+        
+        return {
+            'top_metrics': regression_results['top_metrics'],
+            'regression_metric': regression_results['regression_metric'],
+            'report_card': report_card,
+            'all_generated_metrics': generated_metrics,
+            'prior_metrics': prior_metrics,
+            'retrieved_metrics': retrieved_metrics,
+            'importance_scores': regression_results['importance_scores'],
+            'dataset': dataset,
+            'target_measure': target_measure,
+            'pipeline_config': {
+                'num_to_retrieve': num_to_retrieve,
+                'num_to_regress': num_to_regress,
+                'regenerate_metrics': regenerate_metrics,
+                'generator_configs': self.metric_generation_configs,
+                'metric_priors': [m.__name__ for m in self.metric_priors] if self.metric_priors else None,
+                'generated_metric_priors': self.generated_metric_priors
+            }
+        }
+
+    # =============================
+    # Internal Helper Methods
+    # =============================
+
+    def _load_metric_bank(self, dataset: Optional[Dataset] = None) -> List[Type[Metric]]:
+        """
+        Load metric classes from metric_bank.
+        - If metric_bank is a list: return it directly
+        - If metric_bank is a directory: load all classes from the directory (assumes all files are valid metrics)
+        - If metric_bank is None: return all_metric_classes
+        
+        If dataset is provided and has no reference columns, automatically switch to reference_free metrics
+        when using the default all_metric_classes.
+        """
+        if isinstance(self.metric_bank, list):
+            # Special case: if metric_bank is all_metric_classes and dataset has no reference columns,
+            # switch to reference_free metrics
+            if (self.metric_bank is all_metric_classes and 
+                dataset is not None and 
+                not self._dataset_has_reference_columns(dataset)):
+                print("[Autometrics] Dataset has no reference columns - switching to reference_free metrics")
+                from autometrics.metrics.MetricBank import reference_free_metric_classes
+                return reference_free_metric_classes
+            return self.metric_bank
+        elif isinstance(self.metric_bank, str):
+            return self._load_metrics_from_directory(self.metric_bank)
+        else:
+            return all_metric_classes
+
+    def _process_metric_priors(
+        self,
+        dataset: Dataset,
+        target_measure: str,
+        generator_llm: dspy.LM,
+        judge_llm: dspy.LM,
+        regenerate_metrics: bool = False,
+        prometheus_api_base: Optional[str] = None,
+        model_save_dir: Optional[str] = None
+    ) -> List[Type[Metric]]:
+        """
+        Process metric priors - both regular metrics and generated metrics.
+        Returns a list of metric classes that should be included upfront.
+        """
+        prior_metrics = []
+        
+        # Add regular metric priors
+        if self.metric_priors:
+            print(f"[Autometrics] Adding {len(self.metric_priors)} regular metric priors")
+            prior_metrics.extend(self.metric_priors)
+        
+        # Generate and add generated metric priors
+        if self.generated_metric_priors:
+            print(f"[Autometrics] Generating {sum(self.generated_metric_priors.values())} prior metrics using generators: {list(self.generated_metric_priors.keys())}")
+            
+            # Determine output directory for generated prior metrics
+            if self.merge_generated_with_bank and isinstance(self.metric_bank, str):
+                output_dir = self.metric_bank
+            else:
+                # Create a unique run ID based on dataset, target measure, and seed
+                run_id = f"{dataset.get_name()}_{target_measure}_{self.seed or 42}"
+                output_dir = self.generated_metrics_dir or f"generated_metrics/{run_id}"
+            
+            # Process each generator configuration for priors
+            for generator_type, metrics_per_trial in self.generated_metric_priors.items():
+                # Check if metrics already exist for this generator
+                safe_dataset_name = dataset.get_name().replace(" ", "_").replace("/", "_")
+                safe_measure_name = target_measure.replace(" ", "_").replace("/", "_")
+                generator_dir = os.path.join(output_dir, "generated_metrics", safe_dataset_name, safe_measure_name, f"seed_{self.seed or 42}", generator_type)
+                
+                if not regenerate_metrics and os.path.exists(generator_dir):
+                    # Try to load existing metrics
+                    try:
+                        existing_metrics = self._load_metrics_from_directory(generator_dir)
+                        if len(existing_metrics) >= metrics_per_trial:
+                            print(f"[Autometrics] Loaded {len(existing_metrics)} existing prior metrics for {generator_type}")
+                            prior_metrics.extend(existing_metrics[:metrics_per_trial])
+                            continue
+                    except Exception as e:
+                        print(f"[Autometrics] Warning: Failed to load existing prior metrics for {generator_type}: {e}")
+                
+                # Generate new prior metrics
+                print(f"[Autometrics] Generating {metrics_per_trial} prior metrics using {generator_type}...")
+                
+                # Create generator based on type
+                generator = self._create_generator(
+                    generator_type, generator_llm, judge_llm, self.seed, prometheus_api_base, model_save_dir
+                )
+                
+                # Generate metrics
+                metrics = generator.generate(
+                    dataset=dataset,
+                    target_measure=target_measure,
+                    n_metrics=metrics_per_trial
+                )
+                
+                if not metrics:
+                    print(f"[Autometrics] Warning: No prior metrics generated for {generator_type}")
+                    continue
+                
+                # Save generated metrics
+                metric_paths = self._save_generated_metrics(
+                    metrics, generator_type, dataset.get_name(), target_measure, 
+                    self.seed or 42, output_dir
+                )
+                
+                print(f"[Autometrics] Saved {len(metric_paths)} prior metrics for {generator_type}")
+                
+                # Load the saved metrics as classes
+                saved_metrics = self._load_metrics_from_directory(generator_dir)
+                prior_metrics.extend(saved_metrics[:metrics_per_trial])
+        
+        return prior_metrics
+
+    def _load_metrics_from_directory(self, directory: str) -> List[Type[Metric]]:
+        """
+        Load all metric classes from a directory.
+        Assumes all Python files in the directory are valid metric classes.
+        Uses importlib to dynamically import each .py file and collects all classes that inherit from Metric.
+        Returns a list of metric classes (not instances).
+        """
+        metric_classes = []
+        directory = os.path.abspath(directory)
+        for filename in os.listdir(directory):
+            if filename.endswith(".py") and not filename.startswith("__"):
+                module_path = os.path.join(directory, filename)
+                module_name = os.path.splitext(filename)[0]
+                spec = importlib.util.spec_from_file_location(module_name, module_path)
+                if spec is None or spec.loader is None:
+                    continue
+                module = importlib.util.module_from_spec(spec)
+                try:
+                    spec.loader.exec_module(module)
+                except Exception as e:
+                    print(f"[Autometrics] Warning: Failed to import {filename}: {e}")
+                    continue
+                for name, obj in inspect.getmembers(module, inspect.isclass):
+                    # Only include classes defined in this module (not imported ones)
+                    if obj.__module__ == module.__name__:
+                        # Only include subclasses of Metric (but not Metric itself)
+                        if issubclass(obj, Metric) and obj is not Metric:
+                            metric_classes.append(obj)
+        return metric_classes
+
+    def _merge_generated_with_bank(self, metric_bank: List[Type[Metric]], generated_metrics: List[Type[Metric]]) -> List[Type[Metric]]:
+        """
+        Merge generated metrics with the existing metric bank.
+        
+        Args:
+            metric_bank: List of existing metric classes (built-in metrics)
+            generated_metrics: List of newly generated metric classes
+            
+        Returns:
+            Combined list of metric classes with built-in metrics first, followed by generated metrics
+            
+        Note:
+            - Both inputs are lists of metric classes (not instances)
+            - Generated metrics are appended to the end of the metric bank
+            - Duplicates are handled by checking metric names (generated metrics typically have unique names)
+        """
+        if not generated_metrics:
+            # No generated metrics to merge, return metric bank as-is
+            return metric_bank
+        
+        if not metric_bank:
+            # No existing metric bank, return generated metrics
+            return generated_metrics
+        
+        # Create a set of existing metric names for duplicate checking
+        existing_metric_names = {metric.__name__ for metric in metric_bank}
+        
+        # Filter out any generated metrics that have the same name as existing metrics
+        unique_generated_metrics = []
+        for metric in generated_metrics:
+            if metric.__name__ not in existing_metric_names:
+                unique_generated_metrics.append(metric)
+            else:
+                print(f"[Autometrics] Warning: Skipping generated metric '{metric.__name__}' - name already exists in metric bank")
+        
+        # Combine metric bank with unique generated metrics
+        combined_metrics = metric_bank + unique_generated_metrics
+        
+        print(f"[Autometrics] Merged {len(unique_generated_metrics)} unique generated metrics with {len(metric_bank)} existing metrics")
+        
+        return combined_metrics
+
+    def _generate_or_load_metrics(
+        self, 
+        dataset: Dataset, 
+        target_measure: str,
+        generator_llm: dspy.LM, 
+        judge_llm: dspy.LM, 
+        regenerate_metrics: bool = False,
+        prometheus_api_base: Optional[str] = None,
+        model_save_dir: Optional[str] = None
+    ) -> List[Type[Metric]]:
+        """
+        Generate new metrics using configured generators, or load from disk if available.
+        Save generated metrics as Python files in generated_metrics_dir.
+        Return a list of metric classes (not instances).
+        """
+        
+        all_generated_metrics = []
+        
+        # Determine output directory for generated metrics
+        if self.merge_generated_with_bank and isinstance(self.metric_bank, str):
+            output_dir = self.metric_bank
+        else:
+            # Create a unique run ID based on dataset, target measure, and seed
+            run_id = f"{dataset.get_name()}_{target_measure}_{self.seed or 42}"
+            output_dir = self.generated_metrics_dir or f"generated_metrics/{run_id}"
+        
+        # Process each generator configuration
+        for generator_type, config in self.metric_generation_configs.items():
+            metrics_per_trial = config.get("metrics_per_trial", 1)
+            
+            # Check if metrics already exist for this generator
+            # Directory structure: dataset_name/measure/seed/generator_type
+            safe_dataset_name = dataset.get_name().replace(" ", "_").replace("/", "_")
+            safe_measure_name = target_measure.replace(" ", "_").replace("/", "_")
+            generator_dir = os.path.join(output_dir, "generated_metrics", safe_dataset_name, safe_measure_name, f"seed_{self.seed or 42}", generator_type)
+            
+            if not regenerate_metrics and os.path.exists(generator_dir):
+                # Try to load existing metrics
+                try:
+                    existing_metrics = self._load_metrics_from_directory(generator_dir)
+                    if len(existing_metrics) >= metrics_per_trial:
+                        print(f"[Autometrics] Loaded {len(existing_metrics)} existing metrics for {generator_type}")
+                        all_generated_metrics.extend(existing_metrics)
+                        continue
+                except Exception as e:
+                    print(f"[Autometrics] Warning: Failed to load existing metrics for {generator_type}: {e}")
+            
+            # Generate new metrics
+            print(f"[Autometrics] Generating {metrics_per_trial} metrics using {generator_type}...")
+            
+            # Create generator based on type
+            generator = self._create_generator(
+                generator_type, generator_llm, judge_llm, self.seed, prometheus_api_base, model_save_dir
+            )
+            
+            # Generate metrics
+            metrics = generator.generate(
+                dataset=dataset,
+                target_measure=target_measure,
+                n_metrics=metrics_per_trial
+            )
+            
+            if not metrics:
+                print(f"[Autometrics] Warning: No metrics generated for {generator_type}")
+                continue
+            
+            # Save generated metrics
+            metric_paths = self._save_generated_metrics(
+                metrics, generator_type, dataset.get_name(), target_measure, 
+                self.seed or 42, output_dir
+            )
+            
+            print(f"[Autometrics] Saved {len(metric_paths)} metrics for {generator_type}")
+            
+            # Load the saved metrics as classes
+            saved_metrics = self._load_metrics_from_directory(generator_dir)
+            all_generated_metrics.extend(saved_metrics)
+        
+        return all_generated_metrics
+    
+    def _create_generator(self, generator_type: str, generator_llm: dspy.LM, judge_llm: dspy.LM, seed: int, prometheus_api_base: Optional[str] = None, model_save_dir: Optional[str] = None):
+        """Create generator instance based on type."""
+        from autometrics.generator.LLMJudgeProposer import BasicLLMJudgeProposer
+        from autometrics.generator.LLMJudgeExampleProposer import LLMJudgeExampleProposer
+        from autometrics.generator.OptimizedJudgeProposer import OptimizedJudgeProposer
+        from autometrics.generator.GEvalJudgeProposer import GEvalJudgeProposer
+        from autometrics.generator.CodeGenerator import CodeGenerator
+        from autometrics.generator.RubricGenerator import RubricGenerator
+        from autometrics.generator.FinetuneGenerator import FinetuneGenerator
+        
+        if generator_type == "llm_judge":
+            return BasicLLMJudgeProposer(
+                generator_llm=generator_llm,
+                executor_kwargs={"model": judge_llm, "seed": seed},
+                seed=seed,
+            )
+        elif generator_type == "llm_judge_examples":
+            return LLMJudgeExampleProposer(
+                generator_llm=generator_llm,
+                executor_kwargs={"model": judge_llm, "seed": seed},
+                seed=seed,
+                max_optimization_samples=100
+            )
+        elif generator_type == "llm_judge_optimized":
+            return OptimizedJudgeProposer(
+                generator_llm=generator_llm,
+                executor_kwargs={"model": judge_llm, "seed": seed},
+                auto_mode="medium",
+                num_threads=16,
+                eval_function_name='inverse_distance',
+                seed=seed
+            )
+        elif generator_type == "geval":
+            return GEvalJudgeProposer(
+                generator_llm=generator_llm,
+                executor_kwargs={"model": judge_llm, "seed": seed},
+                seed=seed,
+            )
+        elif generator_type == "codegen":
+            return CodeGenerator(
+                generator_llm=generator_llm,
+                executor_kwargs={"seed": seed},
+                seed=seed,
+            )
+        elif generator_type == "rubric_prometheus":
+            # Require api_base for prometheus
+            if not prometheus_api_base:
+                raise ValueError("prometheus_api_base is required for rubric_prometheus generator")
+            
+            # Create Prometheus judge LLM
+            from prometheus_eval.litellm import LiteLLM
+            judge_llm_prometheus = LiteLLM(
+                "litellm_proxy/Unbabel/M-Prometheus-14B",
+                api_base=prometheus_api_base
+            )
+            return RubricGenerator(
+                generator_llm=generator_llm,
+                executor_kwargs={"model": judge_llm_prometheus, "seed": seed},
+                use_prometheus=True,
+                seed=seed,
+            )
+        elif generator_type == "rubric_dspy":
+            return RubricGenerator(
+                generator_llm=generator_llm,
+                executor_kwargs={"model": judge_llm, "seed": seed},
+                use_prometheus=False,
+                seed=seed,
+            )
+        elif generator_type == "finetune":
+            # Use provided model_save_dir or default
+            save_dir = model_save_dir or "/finetunes"
+            return FinetuneGenerator(
+                generator_llm=generator_llm,
+                model_save_dir=save_dir,
+                seed=seed
+            )
+        else:
+            raise ValueError(f"Unknown generator type: {generator_type}")
+    
+    def _save_generated_metrics(self, metrics: List, generator_type: str, dataset_name: str, measure: str, seed: int, output_dir: str):
+        """Save generated metrics to organized directory structure."""
+        from pathlib import Path
+        
+        # Create output directory structure: dataset_name/measure/seed/generator_type
+        safe_dataset_name = dataset_name.replace(" ", "_").replace("/", "_")
+        safe_measure_name = measure.replace(" ", "_").replace("/", "_")
+        generator_dir = Path(output_dir) / "generated_metrics" / safe_dataset_name / safe_measure_name / f"seed_{seed}" / generator_type
+        generator_dir.mkdir(parents=True, exist_ok=True)
+        
+        metric_paths = []
+        
+        for i, metric in enumerate(metrics):
+            if metric is None:
+                continue
+                
+            # Create clean filename
+            metric_filename = f"{safe_dataset_name}_{safe_measure_name}_{generator_type}_seed{seed}_metric{i+1:02d}.py"
+            
+            metric_path = generator_dir / metric_filename
+            
+            # Save metric as standalone Python file
+            metric.save_python_code(str(metric_path))
+            metric_paths.append(str(metric_path))
+        
+        return metric_paths
+
+    def _retrieve_top_k_metrics(self, dataset: Dataset, target_measure: str, k: int, retriever_instance: MetricRecommender, metric_bank: List[Type[Metric]]) -> List[Type[Metric]]:
+        """
+        Use the retriever to get the top-K most relevant metrics for the dataset and target.
+        Return a list of metric classes.
+        """
+        if not metric_bank:
+            print("[Autometrics] Warning: No metrics in metric bank")
+            return []
+        
+        print(f"[Autometrics] Retrieving top {k} metrics from {len(metric_bank)} available metrics")
+        
+        # Use the retriever to get top-K metrics
+        retrieved_metrics = retriever_instance.recommend(
+            dataset=dataset,
+            target_measurement=target_measure,
+            k=k
+        )
+        
+        # Filter out None results
+        retrieved_metrics = [m for m in retrieved_metrics if m is not None]
+        
+        print(f"[Autometrics] Retrieved {len(retrieved_metrics)} metrics")
+        for i, metric in enumerate(retrieved_metrics):
+            print(f"  {i+1}. {metric.__name__}")
+        
+        return retrieved_metrics
+
+    def _evaluate_metrics_on_dataset(self, dataset: Dataset, metric_classes: List[Type[Metric]]) -> List[Metric]:
+        """
+        Add each metric to the dataset and compute its values using parallel execution.
+        Returns the list of successfully evaluated metric instances.
+        
+        This method uses a two-phase approach to avoid race conditions:
+        1. Phase 1: Parallel execution of metric.predict() on dataset copies
+        2. Phase 2: Sequential aggregation of results back to the original dataset
+        """
+        if not metric_classes:
+            print("[Autometrics] No metrics to evaluate")
+            return []
+        
+        # Use MetricBank to properly instantiate metrics with GPU allocation and caching
+        from autometrics.metrics.MetricBank import build_metrics
+        
+        successful_metrics = []
+        failed_metrics = []
+        
+        # Build metrics with proper configuration
+        metrics = build_metrics(
+            classes=metric_classes,
+            cache_dir="./autometrics_cache",
+            seed=self.seed,
+            use_cache=True,
+            gpu_buffer_ratio=0.10
+        )
+        
+        # Filter out None metrics
+        valid_metrics = [(i, metric) for i, metric in enumerate(metrics) if metric is not None]
+        
+        if not valid_metrics:
+            print("[Autometrics] No valid metrics to evaluate")
+            return []
+        
+        # Choose execution strategy based on configuration
+        if self.enable_parallel_evaluation and len(valid_metrics) > 1:
+            print(f"[Autometrics] Evaluating {len(valid_metrics)} metrics using parallel execution...")
+            return self._evaluate_metrics_parallel(dataset, metric_classes, valid_metrics)
+        else:
+            print(f"[Autometrics] Evaluating {len(valid_metrics)} metrics using sequential execution...")
+            return self._evaluate_metrics_sequential(dataset, metric_classes, valid_metrics)
+    
+    def _evaluate_metrics_sequential(self, dataset: Dataset, metric_classes: List[Type[Metric]], valid_metrics: List[tuple]) -> List[Metric]:
+        """
+        Sequential evaluation of metrics (original implementation).
+        """
+        successful_metrics = []
+        failed_metrics = []
+        
+        for i, metric in valid_metrics:
+            try:
+                print(f"  Evaluating {i+1}/{len(valid_metrics)}: {metric.get_name()}")
+                
+                # Add metric to dataset and compute values
+                dataset.add_metric(metric, update_dataset=True)
+                
+                print(f"    ✓ {metric.get_name()} computed successfully")
+                successful_metrics.append(metric)
+                
+            except Exception as e:
+                print(f"    ✗ Error evaluating {metric.get_name()}: {e}")
+                failed_metrics.append(metric_classes[i])
+                
+                # Check if we've exceeded the allowed failed metrics threshold
+                if len(failed_metrics) > self.allowed_failed_metrics:
+                    print(f"Exceeded allowed failed metrics limit ({self.allowed_failed_metrics}). Failed metrics: {[m.__name__ for m in failed_metrics]}")
+                    raise e
+                continue
+        
+        print(f"[Autometrics] Sequential evaluation complete. Dataset now has {len(dataset.get_metrics())} metrics")
+        return successful_metrics
+    
+    def _evaluate_metrics_parallel(self, dataset: Dataset, metric_classes: List[Type[Metric]], valid_metrics: List[tuple]) -> List[Metric]:
+        """
+        Parallel evaluation of metrics using a two-phase approach.
+        """
+        import concurrent.futures
+        import threading
+        from typing import Tuple, Optional
+        
+        successful_metrics = []
+        failed_metrics = []
+        
+        # Phase 1: Parallel execution of metric.predict() on dataset copies
+        def evaluate_single_metric(metric_info: Tuple[int, Metric]) -> Tuple[int, Metric, Optional[dict], Optional[Exception]]:
+            """
+            Evaluate a single metric on a dataset copy.
+            Returns: (original_index, metric_instance, results_dict, exception_if_any)
+            """
+            original_index, metric = metric_info
+            
+            try:
+                # Create a deep copy of the dataset to avoid race conditions
+                dataset_copy = dataset.copy()
+                
+                # Execute the expensive predict operation
+                results = metric.predict(dataset_copy, update_dataset=True)
+                
+                # Extract the computed values from the dataset copy
+                metric_name = metric.get_name()
+                if isinstance(metric, MultiMetric):
+                    # For MultiMetrics, get all submetric values
+                    submetric_names = metric.get_submetric_names()
+                    results_dict = {}
+                    for submetric_name in submetric_names:
+                        if submetric_name in dataset_copy.get_dataframe().columns:
+                            results_dict[submetric_name] = dataset_copy.get_dataframe()[submetric_name].tolist()
+                else:
+                    # For regular metrics, get the single metric value
+                    if metric_name in dataset_copy.get_dataframe().columns:
+                        results_dict = {metric_name: dataset_copy.get_dataframe()[metric_name].tolist()}
+                    else:
+                        results_dict = {}
+                
+                print(f"    ✓ {metric.get_name()} computed successfully (parallel)")
+                return (original_index, metric, results_dict, None)
+                
+            except Exception as e:
+                # Enhanced error handling for GPU-related issues
+                error_msg = str(e)
+                if "meta tensor" in error_msg.lower() or "device" in error_msg.lower():
+                    print(f"    ⚠ GPU device conflict for {metric.get_name()}: {error_msg}")
+                    print(f"    🔧 This may be due to device mapping conflicts in parallel execution")
+                elif "truncation_strategy" in error_msg.lower():
+                    print(f"    ⚠ Tokenizer parameter conflict for {metric.get_name()}: {error_msg}")
+                    print(f"    🔧 This is due to deprecated tokenizer parameters")
+                else:
+                    print(f"    ✗ Error evaluating {metric.get_name()} (parallel): {error_msg}")
+                
+                return (original_index, metric, None, e)
+        
+        # Determine optimal number of workers
+        # Our GPU allocation system already handles device conflicts properly
+        max_workers = min(len(valid_metrics), self.max_parallel_workers)
+        
+        # Execute metrics in parallel
+        evaluation_results = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks
+            future_to_metric = {
+                executor.submit(evaluate_single_metric, metric_info): metric_info 
+                for metric_info in valid_metrics
+            }
+            
+            # Collect results as they complete
+            for future in concurrent.futures.as_completed(future_to_metric):
+                metric_info = future_to_metric[future]
+                try:
+                    result = future.result()
+                    evaluation_results.append(result)
+                except Exception as e:
+                    # This shouldn't happen since we handle exceptions in evaluate_single_metric
+                    print(f"    ✗ Unexpected error in parallel execution: {e}")
+                    original_index, metric = metric_info
+                    evaluation_results.append((original_index, metric, None, e))
+        
+        # Sort results by original index to maintain order
+        evaluation_results.sort(key=lambda x: x[0])
+        
+        # Phase 2: Sequential aggregation of results back to the original dataset
+        print("[Autometrics] Aggregating results back to original dataset...")
+        
+        for original_index, metric, results_dict, exception in evaluation_results:
+            if exception is not None:
+                # Metric failed during parallel execution
+                failed_metrics.append(metric_classes[original_index])
+                
+                # Check if we've exceeded the allowed failed metrics threshold
+                if len(failed_metrics) > self.allowed_failed_metrics:
+                    print(f"Exceeded allowed failed metrics limit ({self.allowed_failed_metrics}). Failed metrics: {[m.__name__ for m in failed_metrics]}")
+                    raise exception
+                continue
+            
+            try:
+                # Add metric to the original dataset (this modifies shared state, so it's sequential)
+                dataset.add_metric(metric, update_dataset=False)  # Don't trigger predict again
+                
+                # Manually update the dataframe with the computed results
+                if results_dict:
+                    df = dataset.get_dataframe()
+                    for column_name, values in results_dict.items():
+                        if len(values) == len(df):
+                            df[column_name] = values
+                        else:
+                            print(f"    ⚠ Warning: Length mismatch for {column_name} ({len(values)} vs {len(df)})")
+                    dataset.set_dataframe(df)
+                
+                successful_metrics.append(metric)
+                print(f"    ✓ {metric.get_name()} aggregated successfully")
+                
+            except Exception as e:
+                print(f"    ✗ Error aggregating {metric.get_name()}: {e}")
+                failed_metrics.append(metric_classes[original_index])
+                
+                # Check if we've exceeded the allowed failed metrics threshold
+                if len(failed_metrics) > self.allowed_failed_metrics:
+                    print(f"Exceeded allowed failed metrics limit ({self.allowed_failed_metrics}). Failed metrics: {[m.__name__ for m in failed_metrics]}")
+                    raise e
+        
+        print(f"[Autometrics] Parallel evaluation complete. Dataset now has {len(dataset.get_metrics())} metrics")
+        print(f"[Autometrics] Successfully evaluated {len(successful_metrics)} metrics, {len(failed_metrics)} failed")
+        
+        return successful_metrics
+
+    def _regress_and_select_top_n(
+        self, 
+        dataset: Dataset, 
+        metric_instances: List[Metric], 
+        target_measure: str,
+        n: int,
+        regression_instance: Any # Added regression_instance parameter
+    ) -> Dict[str, Any]:
+        """
+        Fit the regression strategy on the dataset using the given metrics.
+        Select the top-N most important metrics, refit regression, and return results.
+        
+        Uses a hybrid dataset approach:
+        - Creates a copy for safe experimentation during metric selection
+        - Adds the final regression metric to the original dataset for user access
+        
+        Returns a dict with keys: 'top_metrics', 'regression_metric', etc.
+        """
+        if not metric_instances:
+            print("[Autometrics] No metrics for regression")
+            return {
+                'top_metrics': [],
+                'regression_metric': None,
+                'importance_scores': [],
+                'final_regression_metric': None
+            }
+        
+        print(f"[Autometrics] Running regression to select top {n} metrics from {len(metric_instances)} candidates...")
+        
+        # Get metric column names from the dataset
+        metric_columns = dataset.get_metric_columns()
+        if not metric_columns:
+            print("[Autometrics] Warning: No metric columns found in dataset")
+            return {
+                'top_metrics': [],
+                'regression_metric': None,
+                'importance_scores': [],
+                'final_regression_metric': None
+            }
+        
+        # Create a copy of the dataset for regression (safe experimentation)
+        regression_dataset = dataset.copy()
+        
+        # Fit regression on all metrics to identify importance
+        print("  Fitting regression on all metrics to identify importance...")
+        regression_instance.input_metrics = metric_instances
+        regression_instance.learn(regression_dataset, target_column=target_measure)
+        
+        # Get importance scores for all metrics
+        importance_pairs = regression_instance.identify_important_metrics()
+        
+        # Sort by importance (absolute value of coefficient/importance)
+        importance_pairs.sort(key=lambda x: abs(x[0]), reverse=True)
+        
+        print("  Metric importance scores:")
+        for i, (score, metric_name) in enumerate(importance_pairs):
+            print(f"    {i+1}. {metric_name}: {score:.4f}")
+        
+        # Select top-N most important metrics
+        top_n_metric_names = [metric_name for _, metric_name in importance_pairs[:n]]
+        top_n_metrics = []
+        
+        # Find the corresponding metric instances
+        for metric_name in top_n_metric_names:
+            for metric in metric_instances:
+                # Handle both regular metrics and MultiMetrics
+                if isinstance(metric, MultiMetric):
+                    # For MultiMetrics, check if any submetric matches
+                    # The metric_name from regression might be like "TestMulti_length"
+                    # We need to check if it starts with the metric name and contains a submetric
+                    metric_base_name = metric.get_name()
+                    if metric_name.startswith(metric_base_name + "_"):
+                        submetric_name = metric_name[len(metric_base_name + "_"):]
+                        if submetric_name in metric.get_submetric_names():
+                            top_n_metrics.append(metric)
+                            break
+                    elif metric_name in metric.get_submetric_names():
+                        top_n_metrics.append(metric)
+                        break
+                else:
+                    # For regular metrics, check the metric name
+                    if metric.get_name() == metric_name:
+                        top_n_metrics.append(metric)
+                        break
+        
+        print(f"  Selected top {len(top_n_metrics)} metrics: {[m.get_name() for m in top_n_metrics]}")
+        
+        # Create final regression metric using only top-N metrics
+        print("  Creating final regression metric with top-N metrics...")
+        final_regression = type(regression_instance)(
+            name=f"Autometrics_Regression_{target_measure}",
+            description=f"Regression aggregator for {target_measure} using top {n} metrics",
+            dataset=regression_dataset,  # Pass the dataset to avoid None error
+            input_metrics=top_n_metrics  # Pass input_metrics directly to avoid dataset.get_metrics() call
+        )
+        
+        final_regression.learn(regression_dataset, target_column=target_measure)
+        
+        # Add the final regression metric to the original dataset for user access
+        # This ensures users get the final regression result in their original dataset
+        dataset.add_metric(final_regression, update_dataset=True)
+        
+        return {
+            'top_metrics': top_n_metrics,
+            'regression_metric': final_regression,
+            'importance_scores': importance_pairs,
+            'final_regression_metric': final_regression,
+            'all_metrics_importance': importance_pairs
+        }
+
+    def _generate_report_card(
+        self, 
+        top_metrics: List[Metric], 
+        regression_metric: Any, 
+        dataset: Dataset,
+        target_measure: str
+    ) -> str:
+        """
+        Generate a report card summarizing the results.
+        For now, this is a simple summary with the top metrics and their importance.
+        """
+        report = f"""
+# Autometrics Report Card
+
+## Dataset Information
+- **Dataset**: {dataset.get_name()}
+- **Target Measure**: {target_measure}
+- **Dataset Size**: {len(dataset.get_dataframe())} examples
+
+## Top Metrics Selected
+"""
+        
+        if top_metrics:
+            for i, metric in enumerate(top_metrics):
+                # Handle both regular metrics and MultiMetrics
+                if isinstance(metric, MultiMetric):
+                    # For MultiMetrics, show the metric name and submetrics
+                    submetric_names = metric.get_submetric_names()
+                    report += f"- **{i+1}.** {metric.get_name()} (MultiMetric: {', '.join(submetric_names)})\n"
+                else:
+                    # For regular metrics, show the metric name
+                    report += f"- **{i+1}.** {metric.get_name()}\n"
+        else:
+            report += "- No metrics selected\n"
+        
+        report += f"""
+## Regression Aggregator
+- **Type**: {type(regression_metric).__name__ if regression_metric else 'None'}
+- **Name**: {regression_metric.get_name() if regression_metric else 'None'}
+- **Description**: {regression_metric.get_description() if regression_metric else 'None'}
+
+## Summary
+The Autometrics pipeline successfully identified the most relevant metrics for evaluating {target_measure} on the {dataset.get_name()} dataset. The selected metrics can be used individually or combined through the regression aggregator for comprehensive evaluation.
+"""
+        
+        return report
+
+    def _validate_and_adjust_retriever_config(self, retriever_kwargs: dict, dataset: Dataset, metric_bank: List[Type[Metric]], num_to_retrieve: int) -> dict:
+        """
+        Validate and adjust retriever configuration to ensure compatibility with num_to_retrieve.
+        
+        This method:
+        1. Generates dynamic index paths based on metric bank content to avoid stale indices
+        2. Validates that top_ks are compatible with num_to_retrieve
+        3. Adjusts top_ks if necessary to ensure the final k matches num_to_retrieve
+        """
+        import hashlib
+        from platformdirs import user_data_dir
+
+        print(f"[Autometrics] Validating and adjusting retriever config for {dataset.get_name()} with {len(metric_bank)} metrics to retrieve {num_to_retrieve} metrics")
+        
+        print(metric_bank)
+        print(sorted([cls.__name__ for cls in metric_bank]))
+        print(''.join(sorted([cls.__name__ for cls in metric_bank])).encode())
+        print(hashlib.md5(''.join(sorted([cls.__name__ for cls in metric_bank])).encode()).hexdigest()[:8])
+
+        # Create a hash of the metric bank for cache busting
+        metric_names = sorted([cls.__name__ for cls in metric_bank])
+        metric_hash = hashlib.md5(''.join(metric_names).encode()).hexdigest()[:8]
+        
+        # Get dataset name for path
+        dataset_name = dataset.get_name().replace(" ", "_").replace("/", "_")
+        
+        # Handle PipelinedRec case
+        if "index_paths" in retriever_kwargs:
+            index_paths = retriever_kwargs["index_paths"]
+            recommenders = retriever_kwargs.get("recommenders", [])
+            top_ks = retriever_kwargs.get("top_ks", [])
+            
+            # Validate and adjust top_ks
+            if top_ks:
+                # Ensure the final k matches num_to_retrieve
+                if top_ks[-1] != num_to_retrieve:
+                    print(f"[Autometrics] Adjusting final top_k from {top_ks[-1]} to {num_to_retrieve} to match num_to_retrieve")
+                    top_ks[-1] = num_to_retrieve
+                
+                # Ensure all previous steps are >= final k
+                for i in range(len(top_ks) - 1):
+                    if top_ks[i] < top_ks[-1]:
+                        print(f"[Autometrics] Adjusting top_k[{i}] from {top_ks[i]} to {top_ks[-1]} to ensure pipeline compatibility")
+                        top_ks[i] = top_ks[-1]
+                
+                retriever_kwargs["top_ks"] = top_ks
+            
+            # Generate dynamic index paths
+            new_index_paths = []
+            for i, path in enumerate(index_paths):
+                # Only replace if path is explicitly None
+                if path is None and i < len(recommenders):
+                    # Get retriever type name
+                    retriever_type = recommenders[i].__name__.lower()
+                    # Generate dynamic path
+                    dynamic_path = os.path.join(
+                        user_data_dir("autometrics"),
+                        f"{retriever_type}_{dataset_name}_{metric_hash}"
+                    )
+                    new_index_paths.append(dynamic_path)
+                else:
+                    # Keep existing path (even if it's a string)
+                    new_index_paths.append(path)
+            
+            retriever_kwargs["index_paths"] = new_index_paths
+            
+        # Handle single retriever case
+        elif "index_path" in retriever_kwargs and retriever_kwargs["index_path"] is None:
+            # For single retrievers, we can get the type from self.retriever
+            retriever_type = self.retriever.__name__.lower()
+            dynamic_path = os.path.join(
+                user_data_dir("autometrics"),
+                f"{retriever_type}_{dataset_name}_{metric_hash}"
+            )
+            retriever_kwargs["index_path"] = dynamic_path
+        # If index_path is not None, keep the existing path unchanged
+        
+        return retriever_kwargs
+
+    def _dataset_has_reference_columns(self, dataset: Dataset) -> bool:
+        """
+        Helper to check if a dataset has any reference columns.
+        Returns True if the dataset has reference columns, False otherwise.
+        """
+        reference_columns = dataset.get_reference_columns()
+        return reference_columns is not None and len(reference_columns) > 0
+
+# =============================
+# End of Autometrics Pipeline Scaffold
+# ============================= 

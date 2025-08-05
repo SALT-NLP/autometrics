@@ -3,8 +3,10 @@ from sklearn.cross_decomposition import PLSRegression
 from autometrics.aggregator.regression import Regression
 
 class PLS(Regression):
-    def __init__(self, name=None, description=None, n_components=2, dataset=None, **kwargs):
-        model = PLSRegression(n_components=n_components)
+    def __init__(self, name=None, description=None, n_components=1, dataset=None, **kwargs):
+        # For single target regression, n_components must be 1
+        # We'll adjust this in the learn method based on actual target dimensionality
+        model = PLSRegression(n_components=n_components)  # Start with 1, will adjust if needed
 
         if not name:
             name = f"PLS_{n_components}"

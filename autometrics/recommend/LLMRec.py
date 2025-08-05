@@ -6,7 +6,6 @@ import litellm
 from autometrics.metrics.Metric import Metric
 from autometrics.dataset.Dataset import Dataset
 from autometrics.recommend.MetricRecommender import MetricRecommender
-from autometrics.recommend.utils import metric_name_to_class
 
 
 class LLMMetricRecommendationSignature(dspy.Signature):
@@ -94,6 +93,10 @@ class LLMRec(MetricRecommender):
         try:
             # First try to get detailed model cost info which may have input/output breakdown
             model_cost_info = litellm.model_cost.get(model_name)
+            if model_cost_info is None:
+                model_name = model_name.split("/")[-1]
+                model_cost_info = litellm.model_cost.get(model_name)
+            
             if model_cost_info:
                 # Prefer max_input_tokens if available (for models like GPT-4o-mini)
                 if 'max_input_tokens' in model_cost_info:
@@ -282,7 +285,7 @@ Please provide a ranking of the metrics from most relevant to least relevant for
                 ranking = self._recommend_batch(metric_classes, dataset, target_measurement, k)
                 print(f"Raw ranking received: {ranking}")
                 
-                results = [metric_name_to_class(metric_name) for metric_name in ranking]
+                results = [self.metric_name_to_class(metric_name) for metric_name in ranking]
                 print(f"After metric_name_to_class: {len([r for r in results if r is not None])} valid conversions")
                 
                 results = [r for r in results if r is not None]
@@ -319,7 +322,7 @@ Please provide a ranking of the metrics from most relevant to least relevant for
             
             try:
                 batch_ranking = self._recommend_batch(batch, dataset, target_measurement, batch_target)
-                batch_results = [metric_name_to_class(metric_name) for metric_name in batch_ranking]
+                batch_results = [self.metric_name_to_class(metric_name) for metric_name in batch_ranking]
                 batch_results = [r for r in batch_results if r is not None]
                 all_batch_results.extend(batch_results)
                 
@@ -341,7 +344,7 @@ Please provide a ranking of the metrics from most relevant to least relevant for
                         # Process first half
                         try:
                             ranking_1 = self._recommend_batch(batch_1, dataset, target_measurement, target_1)
-                            results_1 = [metric_name_to_class(name) for name in ranking_1]
+                            results_1 = [self.metric_name_to_class(name) for name in ranking_1]
                             results_1 = [r for r in results_1 if r is not None]
                             all_batch_results.extend(results_1)
                             print(f"  First half succeeded: {len(results_1)} recommendations")
@@ -351,7 +354,7 @@ Please provide a ranking of the metrics from most relevant to least relevant for
                         # Process second half
                         try:
                             ranking_2 = self._recommend_batch(batch_2, dataset, target_measurement, target_2)
-                            results_2 = [metric_name_to_class(name) for name in ranking_2]
+                            results_2 = [self.metric_name_to_class(name) for name in ranking_2]
                             results_2 = [r for r in results_2 if r is not None]
                             all_batch_results.extend(results_2)
                             print(f"  Second half succeeded: {len(results_2)} recommendations")
@@ -378,7 +381,7 @@ Please provide a ranking of the metrics from most relevant to least relevant for
             print(f"Performing final ranking on {len(merged_results)} candidates to fix cross-batch ordering")
             try:
                 final_ranking = self._recommend_batch(merged_results, dataset, target_measurement, k)
-                final_results = [metric_name_to_class(metric_name) for metric_name in final_ranking]
+                final_results = [self.metric_name_to_class(metric_name) for metric_name in final_ranking]
                 final_results = [r for r in final_results if r is not None]
                 return final_results[:k]
             except Exception as e:
@@ -396,5 +399,77 @@ Please provide a ranking of the metrics from most relevant to least relevant for
         """
         Recommend metrics for a given dataset and target measurement.
         Uses systematic token counting to plan batching strategy upfront.
+        Implements iterative quota-filling when LLM returns fewer than 90% of requested metrics.
         """
-        return self._recommend_with_token_planning(self.metric_classes, dataset, target_measurement, k)
+        original_k = k
+        all_recommended_metrics = []
+        remaining_metrics = self.metric_classes.copy()
+        
+        print(f"Starting iterative recommendation: requesting {k} metrics from {len(remaining_metrics)} available")
+        
+        iteration = 1
+        max_iterations = 5  # Prevent infinite loops
+        
+        while k > 0 and len(remaining_metrics) > 0 and iteration <= max_iterations:
+            print(f"\n--- Iteration {iteration} ---")
+            print(f"Requesting {k} metrics from {len(remaining_metrics)} remaining metrics")
+            
+            # Get recommendations from remaining metrics
+            try:
+                batch_results = self._recommend_with_token_planning(remaining_metrics, dataset, target_measurement, k)
+                print(f"Iteration {iteration}: LLM returned {len(batch_results)} metrics (requested {k})")
+                
+                if len(batch_results) == 0:
+                    print("No metrics returned, stopping iterations")
+                    break
+                
+                # Add new recommendations to our collection
+                all_recommended_metrics.extend(batch_results)
+                
+                # Remove recommended metrics from remaining pool
+                recommended_set = set(batch_results)
+                remaining_metrics = [metric for metric in remaining_metrics if metric not in recommended_set]
+                
+                # Check if we need to continue iterating
+                current_total = len(all_recommended_metrics)
+                quota_filled_ratio = current_total / original_k
+                
+                print(f"Total metrics so far: {current_total}/{original_k} ({quota_filled_ratio:.1%})")
+                
+                if quota_filled_ratio >= 0.9:
+                    print(f"Quota filled to {quota_filled_ratio:.1%}, stopping iterations")
+                    break
+                
+                # Calculate how many more we need
+                k = original_k - current_total
+                print(f"Need {k} more metrics, {len(remaining_metrics)} metrics remaining")
+                
+                if k <= 0:
+                    print("Quota exceeded, stopping iterations")
+                    break
+                    
+            except Exception as e:
+                print(f"Iteration {iteration} failed with error: {e}")
+                # If we have some results, return what we have
+                if all_recommended_metrics:
+                    print(f"Returning {len(all_recommended_metrics)} metrics despite error")
+                    break
+                else:
+                    # If no results at all, re-raise the error
+                    raise e
+            
+            iteration += 1
+        
+        if iteration > max_iterations:
+            print(f"Warning: Reached maximum iterations ({max_iterations}), returning current results")
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        final_results = []
+        for metric in all_recommended_metrics:
+            if metric not in seen:
+                final_results.append(metric)
+                seen.add(metric)
+        
+        print(f"\nFinal result: {len(final_results)} unique metrics (requested {original_k})")
+        return final_results[:original_k]

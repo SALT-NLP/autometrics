@@ -2,16 +2,16 @@
 
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=16
-#SBATCH --gres=gpu:2
-#SBATCH --mem=100GB
+#SBATCH --gres=gpu:1
+#SBATCH --mem=240GB
 #SBATCH --open-mode=append
-#SBATCH --partition=jag-lo
+#SBATCH --partition=sc-loprio
 #SBATCH --time=48:00:00
 #SBATCH --nodes=1
 #SBATCH --job-name=metric_gen_qwen_helpsteer2_correctness
 #SBATCH --output=scripts/metric_generation/logs/metric_gen_qwen_helpsteer2_correctness.out
 #SBATCH --error=scripts/metric_generation/logs/metric_gen_qwen_helpsteer2_correctness.err
-#SBATCH --exclude=jagupard[19-20,26-31]
+#SBATCH --constraint=141G
 #SBATCH --requeue
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mryan0@stanford.edu
@@ -26,7 +26,7 @@ port=7660
 API_BASE=http://localhost:${port}/v1
 
 echo "Starting Qwen3-32B server for HelpSteer2 (correctness)..."
-python -m sglang.launch_server --model-path ${model} --port ${port} --host 0.0.0.0 --tp 2 --dtype bfloat16 --mem-fraction-static 0.8 --trust-remote-code > /dev/null 2>&1 &
+python -m sglang.launch_server --model-path ${model} --port ${port} --host 0.0.0.0 --dtype bfloat16 --mem-fraction-static 0.8 --trust-remote-code > /dev/null 2>&1 &
 
 # Wait for server to be ready
 TIMEOUT=90

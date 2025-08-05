@@ -603,9 +603,13 @@ class _CodeMetricMixin:
         code = f"""# Auto-generated code metric file for {self.name}
 import os{imports_code}
 from autometrics.metrics.generated.GeneratedCodeMetric import {class_name}
+from typing import ClassVar
 
 class {self.name.replace(" ", "_").replace("-", "_")}_Code({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
+
+    description: ClassVar[str] = {json.dumps(self.description)}
+
     def __init__(self):
         super().__init__(
             name={json.dumps(self.name)},

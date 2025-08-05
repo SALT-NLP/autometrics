@@ -162,17 +162,39 @@ class MetricRequirement(NamedTuple):
 
 
 def _inspect_metric_class(cls: type) -> MetricRequirement:
-    """Extract GPU requirements and device argument capability for a metric class."""
-    gpu_mem_mb = getattr(cls, "gpu_mem", 0.0)
-
+    """Inspect a metric class to determine its GPU requirements and device handling capabilities."""
+    # Check if this is a HuggingFace evaluate metric (like Toxicity, MAUVE)
+    # These metrics have their own device management and shouldn't get device_map
+    is_huggingface_evaluate = (
+        hasattr(cls, '__bases__') and 
+        any('HuggingFaceReferenceFreeMetric' in str(base) for base in cls.__bases__)
+    )
+    
+    # Check if this is a HuggingFace reference-based metric (like MAUVE)
+    is_huggingface_reference_based = (
+        hasattr(cls, '__bases__') and 
+        any('HuggingFaceReferenceBasedMetric' in str(base) for base in cls.__bases__)
+    )
+    
+    # Get GPU memory requirement
+    gpu_mem = getattr(cls, "gpu_mem", 0.0)
+    
+    # Check constructor signature for device-related parameters
     sig = inspect.signature(cls.__init__)
     has_device_arg = "device" in sig.parameters
     has_device_map_arg = "device_map" in sig.parameters
-
+    has_load_kwargs_arg = "load_kwargs" in sig.parameters
+    
+    # For HuggingFace evaluate metrics, treat them as CPU-only to avoid device conflicts
+    if is_huggingface_evaluate or is_huggingface_reference_based:
+        has_device_map_arg = False
+        has_device_arg = False  # Don't allocate GPU to these metrics
+        gpu_mem = 0.0  # Force CPU-only
+    
     return MetricRequirement(
         cls=cls,
         name=cls.__name__,
-        gpu_mem_mb=float(gpu_mem_mb or 0.0),
+        gpu_mem_mb=gpu_mem,
         has_device_arg=has_device_arg,
         has_device_map_arg=has_device_map_arg,
     )
@@ -221,7 +243,15 @@ def allocate_gpus(
         cpu_allocations: AllocationResult = {}
         for req in requirements:
             if req.gpu_mem_mb > 0:  # This was a GPU metric
-                if req.has_device_arg:
+                # Check if this is a HuggingFace evaluate metric
+                is_huggingface_evaluate = (
+                    hasattr(req.cls, '__bases__') and 
+                    any('HuggingFaceReferenceFreeMetric' in str(base) for base in req.cls.__bases__)
+                )
+                
+                if is_huggingface_evaluate:
+                    cpu_allocations[req.name] = {"load_kwargs": {"device": "cpu"}}
+                elif req.has_device_arg:
                     cpu_allocations[req.name] = {"device": torch.device("cpu") if TORCH_AVAILABLE else "cpu"}
                 elif req.has_device_map_arg:
                     cpu_allocations[req.name] = {"device_map": {"": "cpu"}}
@@ -236,7 +266,15 @@ def allocate_gpus(
         cpu_allocations: AllocationResult = {}
         for req in requirements:
             if req.gpu_mem_mb > 0:  # This was a GPU metric
-                if req.has_device_arg:
+                # Check if this is a HuggingFace evaluate metric
+                is_huggingface_evaluate = (
+                    hasattr(req.cls, '__bases__') and 
+                    any('HuggingFaceReferenceFreeMetric' in str(base) for base in req.cls.__bases__)
+                )
+                
+                if is_huggingface_evaluate:
+                    cpu_allocations[req.name] = {"load_kwargs": {"device": "cpu"}}
+                elif req.has_device_arg:
                     cpu_allocations[req.name] = {"device": torch.device("cpu") if TORCH_AVAILABLE else "cpu"}
                 elif req.has_device_map_arg:
                     cpu_allocations[req.name] = {"device_map": {"": "cpu"}}
@@ -272,13 +310,22 @@ def allocate_gpus(
         if candidate_gpu is not None:
             # Single-GPU fit – update available memory and record allocation
             avail_mb[candidate_gpu] -= needed
-            if req.has_device_arg:
+            
+            # Check if this is a HuggingFace evaluate metric
+            is_huggingface_evaluate = (
+                hasattr(req.cls, '__bases__') and 
+                any('HuggingFaceReferenceFreeMetric' in str(base) for base in req.cls.__bases__)
+            )
+            
+            if is_huggingface_evaluate:
+                # For HuggingFace evaluate metrics, use load_kwargs with device
+                allocations[req.name] = {"load_kwargs": {"device": f"cuda:{candidate_gpu}"}}
+            elif req.has_device_arg:
                 allocations[req.name] = {"device": f"cuda:{candidate_gpu}"}
             elif req.has_device_map_arg:
-                # Prefer an explicit single-GPU map understood by transformers/accelerate
-                # Empty string ("") is interpreted as the *root* module and routes all
-                # sub-modules to the same device.
-                allocations[req.name] = {"device_map": {"": candidate_gpu}}
+                # Fix: Use proper device string format for device_map
+                # The device_map should use device strings, not integer indices
+                allocations[req.name] = {"device_map": {"": f"cuda:{candidate_gpu}"}}
             else:
                 # No explicit arg – assume global torch.device context; advise user
                 allocations[req.name] = {"_hint_gpu_index": candidate_gpu}
@@ -301,13 +348,23 @@ def allocate_gpus(
             warnings.warn(
                 f"[gpu_allocation] Metric {req.name} too large for single GPU; assigning to cuda:0 with potential OOM."
             )
-            allocations[req.name] = {"device": "cuda:0"}
+            allocations[req.name] = {"device_map": {"": "cuda:0"}}
         else:
             # No way to split ‑ assign to GPU 0 anyway and warn
             warnings.warn(
                 f"[gpu_allocation] Metric {req.name} requires {req.gpu_mem_mb:.1f} MB but no single GPU has enough free memory; assigning to cuda:0 which may OOM."
             )
-            if req.has_device_arg:
+            
+            # Check if this is a HuggingFace evaluate metric
+            is_huggingface_evaluate = (
+                hasattr(req.cls, '__bases__') and 
+                any('HuggingFaceReferenceFreeMetric' in str(base) for base in req.cls.__bases__)
+            )
+            
+            if is_huggingface_evaluate:
+                # For HuggingFace evaluate metrics, use load_kwargs with device
+                allocations[req.name] = {"load_kwargs": {"device": "cuda:0"}}
+            elif req.has_device_arg:
                 allocations[req.name] = {"device": "cuda:0"}
             else:
                 allocations[req.name] = {"_hint_gpu_index": 0}

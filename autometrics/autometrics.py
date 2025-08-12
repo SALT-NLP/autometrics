@@ -4,7 +4,7 @@ from autometrics.recommend.ColBERT import ColBERT
 from autometrics.recommend.BM25 import BM25
 from autometrics.recommend.PipelinedRec import PipelinedRec
 from autometrics.metrics.MetricBank import all_metric_classes
-from autometrics.aggregator.regression.Lasso import Lasso
+from autometrics.aggregator.regression.PLS import PLS
 from autometrics.dataset.Dataset import Dataset
 from autometrics.metrics.Metric import Metric
 from autometrics.recommend.MetricRecommender import MetricRecommender
@@ -76,6 +76,16 @@ def _get_default_retriever_config() -> dict:
             "force_reindex": False
         }
 
+def _get_cache_dir() -> str:
+    """
+    Get the cache directory from environment variable AUTOMETRICS_CACHE_DIR,
+    with fallback to "./autometrics_cache" if not set.
+    
+    Returns:
+        Cache directory path as string
+    """
+    return os.environ.get("AUTOMETRICS_CACHE_DIR", "./autometrics_cache")
+
 # Default configurations
 FULL_GENERATOR_CONFIGS = {
     "llm_judge": {"metrics_per_trial": 10, "description": "Basic LLM Judge"},
@@ -113,7 +123,7 @@ class Autometrics:
         metric_generation_configs: Optional[dict] = DEFAULT_GENERATOR_CONFIGS,
         retriever: Type[MetricRecommender] = PipelinedRec,
         retriever_kwargs: dict = DEFAULT_RETRIEVER_KWARGS,
-        regression_strategy: Type = Lasso,
+        regression_strategy: Type = PLS,
         regression_kwargs: dict = DEFAULT_REGRESSION_KWARGS,
         metric_bank: Union[List[Type[Metric]], str] = all_metric_classes,
         generated_metrics_dir: Optional[str] = None,
@@ -136,7 +146,7 @@ class Autometrics:
                 Note: The default retriever configuration automatically adapts to hardware:
                 - GPU environments: Uses ColBERT + LLMRec pipeline for optimal performance
                 - CPU-only environments: Uses BM25 + LLMRec pipeline for CPU-optimized performance
-            regression_strategy: Regression aggregator class (defaults to Lasso)
+            regression_strategy: Regression aggregator class (defaults to PLS)
             regression_kwargs: Keyword arguments to pass to regression strategy constructor (dataset is automatically added during construction)
             metric_bank: Either:
                 - List of metric classes (e.g., [BLEU, SARI, LevenshteinDistance]) - RECOMMENDED
@@ -720,13 +730,15 @@ class Autometrics:
         failed_metrics = []
         
         # Build metrics with proper configuration
+        print(f"[Autometrics] Building {len(metric_classes)} metrics with GPU allocation...")
         metrics = build_metrics(
             classes=metric_classes,
-            cache_dir="./autometrics_cache",
+            cache_dir=_get_cache_dir(),
             seed=self.seed,
             use_cache=True,
             gpu_buffer_ratio=0.10
         )
+        print(f"[Autometrics] Built {len([m for m in metrics if m is not None])} valid metrics")
         
         # Filter out None metrics
         valid_metrics = [(i, metric) for i, metric in enumerate(metrics) if metric is not None]
@@ -735,24 +747,62 @@ class Autometrics:
             print("[Autometrics] No valid metrics to evaluate")
             return []
         
-        # Choose execution strategy based on configuration
-        if self.enable_parallel_evaluation and len(valid_metrics) > 1:
-            print(f"[Autometrics] Evaluating {len(valid_metrics)} metrics using parallel execution...")
-            return self._evaluate_metrics_parallel(dataset, metric_classes, valid_metrics)
-        else:
-            print(f"[Autometrics] Evaluating {len(valid_metrics)} metrics using sequential execution...")
-            return self._evaluate_metrics_sequential(dataset, metric_classes, valid_metrics)
+        # Check for device_map="auto" metrics that should be forced to sequential
+        auto_device_map_metrics = []
+        for i, metric in valid_metrics:
+            # Check if this metric uses device_map="auto" by inspecting its attributes
+            if hasattr(metric, 'device_map') and metric.device_map == "auto":
+                auto_device_map_metrics.append((i, metric))
+                print(f"  🔄 {metric.get_name()} uses device_map='auto' - will be evaluated sequentially")
+            elif hasattr(metric, 'load_kwargs') and isinstance(metric.load_kwargs, dict):
+                if metric.load_kwargs.get('device_map') == "auto":
+                    auto_device_map_metrics.append((i, metric))
+                    print(f"  🔄 {metric.get_name()} uses load_kwargs device_map='auto' - will be evaluated sequentially")
+        
+        # Also check if any metrics were allocated with device_map="auto" by the GPU allocator
+        # We need to check the actual allocation that was applied during build_metrics
+        for i, metric in valid_metrics:
+            metric_name = metric.get_name()
+            # Check if this metric was allocated with device_map="auto" by looking at its actual device_map attribute
+            if hasattr(metric, 'device_map') and metric.device_map == "auto":
+                if (i, metric) not in auto_device_map_metrics:  # Avoid duplicates
+                    auto_device_map_metrics.append((i, metric))
+                    print(f"  🔄 {metric_name} was allocated with device_map='auto' by GPU allocator - will be evaluated sequentially")
+        
+        # Separate auto device_map metrics from regular metrics
+        regular_metrics = [(i, metric) for i, metric in valid_metrics if (i, metric) not in auto_device_map_metrics]
+        
+        successful_metrics = []
+        
+        # Phase 1: Evaluate regular metrics in parallel (if enabled and we have multiple)
+        if self.enable_parallel_evaluation and len(regular_metrics) > 1:
+            print(f"[Autometrics] Evaluating {len(regular_metrics)} regular metrics using parallel execution...")
+            successful_metrics.extend(self._evaluate_metrics_parallel(dataset, metric_classes, regular_metrics))
+        elif len(regular_metrics) > 0:
+            print(f"[Autometrics] Evaluating {len(regular_metrics)} regular metrics using sequential execution...")
+            successful_metrics.extend(self._evaluate_metrics_sequential(dataset, metric_classes, regular_metrics))
+        
+        # Phase 2: Evaluate device_map="auto" metrics sequentially (if any)
+        if len(auto_device_map_metrics) > 0:
+            print(f"[Autometrics] Evaluating {len(auto_device_map_metrics)} device_map='auto' metrics sequentially...")
+            print(f"[Autometrics] device_map='auto' metrics: {[metric.get_name() for _, metric in auto_device_map_metrics]}")
+            successful_metrics.extend(self._evaluate_metrics_sequential(dataset, metric_classes, auto_device_map_metrics))
+        
+        return successful_metrics
     
     def _evaluate_metrics_sequential(self, dataset: Dataset, metric_classes: List[Type[Metric]], valid_metrics: List[tuple]) -> List[Metric]:
         """
-        Sequential evaluation of metrics (original implementation).
+        Sequential evaluation of metrics with memory management.
         """
+        import gc
+        import torch
+        
         successful_metrics = []
         failed_metrics = []
         
-        for i, metric in valid_metrics:
+        for idx, (i, metric) in enumerate(valid_metrics):
             try:
-                print(f"  Evaluating {i+1}/{len(valid_metrics)}: {metric.get_name()}")
+                print(f"  Evaluating {idx+1}/{len(valid_metrics)}: {metric.get_name()}")
                 
                 # Add metric to dataset and compute values
                 dataset.add_metric(metric, update_dataset=True)
@@ -760,9 +810,45 @@ class Autometrics:
                 print(f"    ✓ {metric.get_name()} computed successfully")
                 successful_metrics.append(metric)
                 
+                # Unload the metric after successful evaluation to free GPU memory
+                # This is especially important for large models like LDLReward27B (27B params)
+                if hasattr(metric, '_unload_model') and callable(getattr(metric, '_unload_model')):
+                    metric._unload_model()
+                    print(f"    🔄 Unloaded {metric.get_name()} to free GPU memory")
+                elif hasattr(metric, '_unload_models') and callable(getattr(metric, '_unload_models')):
+                    metric._unload_models()
+                    print(f"    🔄 Unloaded {metric.get_name()} to free GPU memory")
+                else:
+                    # For metrics without explicit unload methods, clear model attributes
+                    for attr in ['model', 'tokenizer', 'qg', 'qa']:
+                        if hasattr(metric, attr):
+                            setattr(metric, attr, None)
+                    print(f"    🔄 Cleared model attributes for {metric.get_name()}")
+                
+                # Force garbage collection and CUDA cache clearing
+                gc.collect()
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                
             except Exception as e:
                 print(f"    ✗ Error evaluating {metric.get_name()}: {e}")
                 failed_metrics.append(metric_classes[i])
+                
+                # Try to unload the failed metric as well
+                try:
+                    if hasattr(metric, '_unload_model') and callable(getattr(metric, '_unload_model')):
+                        metric._unload_model()
+                    elif hasattr(metric, '_unload_models') and callable(getattr(metric, '_unload_models')):
+                        metric._unload_models()
+                    else:
+                        for attr in ['model', 'tokenizer', 'qg', 'qa']:
+                            if hasattr(metric, attr):
+                                setattr(metric, attr, None)
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                except Exception as unload_error:
+                    print(f"    ⚠ Warning: Failed to unload {metric.get_name()} after error: {unload_error}")
                 
                 # Check if we've exceeded the allowed failed metrics threshold
                 if len(failed_metrics) > self.allowed_failed_metrics:
@@ -775,14 +861,22 @@ class Autometrics:
     
     def _evaluate_metrics_parallel(self, dataset: Dataset, metric_classes: List[Type[Metric]], valid_metrics: List[tuple]) -> List[Metric]:
         """
-        Parallel evaluation of metrics using a two-phase approach.
+        Parallel evaluation of metrics using a two-phase approach with smart memory management.
+        
+        This method implements a fallback strategy for GPU memory errors:
+        1. First attempts parallel execution for all metrics
+        2. If any metric fails with GPU memory issues (CUDA OOM or CUBLAS allocation failure), adds it to a sequential queue
+        3. Runs failed metrics one at a time, unloading other metrics between runs
         """
         import concurrent.futures
         import threading
         from typing import Tuple, Optional
+        import gc
+        import torch
         
         successful_metrics = []
         failed_metrics = []
+        cuda_oom_metrics = []  # Metrics that failed due to CUDA OOM
         
         # Phase 1: Parallel execution of metric.predict() on dataset copies
         def evaluate_single_metric(metric_info: Tuple[int, Metric]) -> Tuple[int, Metric, Optional[dict], Optional[Exception]]:
@@ -793,6 +887,19 @@ class Autometrics:
             original_index, metric = metric_info
             
             try:
+                # Debug: Show metric device info before prediction
+                print(f"[Parallel] {metric.get_name()} - checking device before predict...")
+                if hasattr(metric, 'model') and metric.model is not None:
+                    try:
+                        if hasattr(metric.model, 'device'):
+                            print(f"[Parallel] {metric.get_name()} model device: {metric.model.device}")
+                        elif hasattr(metric.model, 'hf_device_map'):
+                            print(f"[Parallel] {metric.get_name()} model hf_device_map: {metric.model.hf_device_map}")
+                        else:
+                            print(f"[Parallel] {metric.get_name()} model has no device info")
+                    except Exception as e:
+                        print(f"[Parallel] {metric.get_name()} could not determine model device: {e}")
+                
                 # Create a deep copy of the dataset to avoid race conditions
                 dataset_copy = dataset.copy()
                 
@@ -827,6 +934,9 @@ class Autometrics:
                 elif "truncation_strategy" in error_msg.lower():
                     print(f"    ⚠ Tokenizer parameter conflict for {metric.get_name()}: {error_msg}")
                     print(f"    🔧 This is due to deprecated tokenizer parameters")
+                elif "cuda out of memory" in error_msg.lower() or "cublas_status_alloc_failed" in error_msg.lower():
+                    print(f"    💾 GPU memory issue for {metric.get_name()}: {error_msg}")
+                    print(f"    🔄 Will retry this metric sequentially after unloading others")
                 else:
                     print(f"    ✗ Error evaluating {metric.get_name()} (parallel): {error_msg}")
                 
@@ -865,13 +975,20 @@ class Autometrics:
         
         for original_index, metric, results_dict, exception in evaluation_results:
             if exception is not None:
-                # Metric failed during parallel execution
-                failed_metrics.append(metric_classes[original_index])
-                
-                # Check if we've exceeded the allowed failed metrics threshold
-                if len(failed_metrics) > self.allowed_failed_metrics:
-                    print(f"Exceeded allowed failed metrics limit ({self.allowed_failed_metrics}). Failed metrics: {[m.__name__ for m in failed_metrics]}")
-                    raise exception
+                # Check if this is a GPU memory error (CUDA OOM or CUBLAS allocation failure)
+                error_msg = str(exception)
+                if "cuda out of memory" in error_msg.lower() or "cublas_status_alloc_failed" in error_msg.lower():
+                    # Add to GPU memory error queue for sequential retry
+                    cuda_oom_metrics.append((original_index, metric, metric_classes[original_index]))
+                    print(f"    📋 Added {metric.get_name()} to GPU memory error retry queue")
+                else:
+                    # Other types of errors - add to failed metrics
+                    failed_metrics.append(metric_classes[original_index])
+                    
+                    # Check if we've exceeded the allowed failed metrics threshold
+                    if len(failed_metrics) > self.allowed_failed_metrics:
+                        print(f"Exceeded allowed failed metrics limit ({self.allowed_failed_metrics}). Failed metrics: {[m.__name__ for m in failed_metrics]}")
+                        raise exception
                 continue
             
             try:
@@ -900,11 +1017,79 @@ class Autometrics:
                     print(f"Exceeded allowed failed metrics limit ({self.allowed_failed_metrics}). Failed metrics: {[m.__name__ for m in failed_metrics]}")
                     raise e
         
+        # Phase 3: Sequential retry of CUDA OOM metrics
+        if cuda_oom_metrics:
+            print(f"\n[Autometrics] Retrying {len(cuda_oom_metrics)} CUDA OOM metrics sequentially...")
+            
+            # First, unload all currently loaded metrics to free up GPU memory
+            print("[Autometrics] Unloading all metrics to free GPU memory...")
+            self._unload_all_metrics(successful_metrics)
+            
+            # Now try each CUDA OOM metric one at a time
+            for original_index, metric, metric_class in cuda_oom_metrics:
+                print(f"\n[Autometrics] Retrying {metric.get_name()} sequentially...")
+                
+                try:
+                    # Create a fresh dataset copy for this metric
+                    dataset_copy = dataset.copy()
+                    
+                    # Execute the metric
+                    results = metric.predict(dataset_copy, update_dataset=True)
+                    
+                    # Extract the computed values
+                    metric_name = metric.get_name()
+                    if isinstance(metric, MultiMetric):
+                        # For MultiMetrics, get all submetric values
+                        submetric_names = metric.get_submetric_names()
+                        results_dict = {}
+                        for submetric_name in submetric_names:
+                            if submetric_name in dataset_copy.get_dataframe().columns:
+                                results_dict[submetric_name] = dataset_copy.get_dataframe()[submetric_name].tolist()
+                    else:
+                        # For regular metrics, get the single metric value
+                        if metric_name in dataset_copy.get_dataframe().columns:
+                            results_dict = {metric_name: dataset_copy.get_dataframe()[metric_name].tolist()}
+                        else:
+                            results_dict = {}
+                    
+                    # Add metric to the original dataset
+                    dataset.add_metric(metric, update_dataset=False)
+                    
+                    # Manually update the dataframe with the computed results
+                    if results_dict:
+                        df = dataset.get_dataframe()
+                        for column_name, values in results_dict.items():
+                            if len(values) == len(df):
+                                df[column_name] = values
+                            else:
+                                print(f"    ⚠ Warning: Length mismatch for {column_name} ({len(values)} vs {len(df)})")
+                        dataset.set_dataframe(df)
+                    
+                    successful_metrics.append(metric)
+                    print(f"    ✓ {metric.get_name()} retry successful!")
+                    
+                except Exception as e:
+                    print(f"    ✗ {metric.get_name()} retry failed: {e}")
+                    failed_metrics.append(metric_class)
+                    
+                    # Check if we've exceeded the allowed failed metrics threshold
+                    if len(failed_metrics) > self.allowed_failed_metrics:
+                        print(f"Exceeded allowed failed metrics limit ({self.allowed_failed_metrics}). Failed metrics: {[m.__name__ for m in failed_metrics]}")
+                        raise e
+                
+                finally:
+                    # Always unload this metric after processing to free memory for the next one
+                    self._unload_metric(metric)
+                    # Force garbage collection to free up memory
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+        
         print(f"[Autometrics] Parallel evaluation complete. Dataset now has {len(dataset.get_metrics())} metrics")
         print(f"[Autometrics] Successfully evaluated {len(successful_metrics)} metrics, {len(failed_metrics)} failed")
         
         return successful_metrics
-
+    
     def _regress_and_select_top_n(
         self, 
         dataset: Dataset, 
@@ -1084,6 +1269,9 @@ The Autometrics pipeline successfully identified the most relevant metrics for e
         # Create a hash of the metric bank for cache busting
         metric_names = sorted([cls.__name__ for cls in metric_bank])
         metric_hash = hashlib.md5(''.join(metric_names).encode()).hexdigest()[:8]
+
+        # Include document mode in index namespacing to separate description-only vs full-card indices
+        doc_mode_suffix = "desc" if retriever_kwargs.get("use_description_only", False) else "card"
         
         # Get dataset name for path
         dataset_name = dataset.get_name().replace(" ", "_").replace("/", "_")
@@ -1119,7 +1307,7 @@ The Autometrics pipeline successfully identified the most relevant metrics for e
                     # Generate dynamic path
                     dynamic_path = os.path.join(
                         user_data_dir("autometrics"),
-                        f"{retriever_type}_{dataset_name}_{metric_hash}"
+                        f"{retriever_type}_{dataset_name}_{metric_hash}_{doc_mode_suffix}"
                     )
                     new_index_paths.append(dynamic_path)
                 else:
@@ -1134,7 +1322,7 @@ The Autometrics pipeline successfully identified the most relevant metrics for e
             retriever_type = self.retriever.__name__.lower()
             dynamic_path = os.path.join(
                 user_data_dir("autometrics"),
-                f"{retriever_type}_{dataset_name}_{metric_hash}"
+                f"{retriever_type}_{dataset_name}_{metric_hash}_{doc_mode_suffix}"
             )
             retriever_kwargs["index_path"] = dynamic_path
         # If index_path is not None, keep the existing path unchanged
@@ -1148,6 +1336,48 @@ The Autometrics pipeline successfully identified the most relevant metrics for e
         """
         reference_columns = dataset.get_reference_columns()
         return reference_columns is not None and len(reference_columns) > 0
+
+    def _unload_all_metrics(self, metrics: List[Metric]):
+        """
+        Unload all metrics to free up GPU memory.
+        This is called before retrying CUDA OOM metrics sequentially.
+        """
+        print(f"[Autometrics] Unloading {len(metrics)} metrics...")
+        
+        for metric in metrics:
+            self._unload_metric(metric)
+        
+        # Force garbage collection and CUDA cache clearing
+        import gc
+        import torch
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
+        print("[Autometrics] All metrics unloaded")
+    
+    def _unload_metric(self, metric: Metric):
+        """
+        Unload a single metric to free up GPU memory.
+        Checks for _unload_model method and calls it if available.
+        """
+        try:
+            # Check if the metric has an _unload_model method
+            if hasattr(metric, '_unload_model') and callable(getattr(metric, '_unload_model')):
+                metric._unload_model()
+                print(f"    🔄 Unloaded {metric.get_name()}")
+            elif hasattr(metric, '_unload_models') and callable(getattr(metric, '_unload_models')):
+                # Some metrics use _unload_models (plural)
+                metric._unload_models()
+                print(f"    🔄 Unloaded {metric.get_name()}")
+            else:
+                # For metrics without explicit unload methods, try to clear model attributes
+                for attr in ['model', 'tokenizer', 'qg', 'qa']:
+                    if hasattr(metric, attr):
+                        setattr(metric, attr, None)
+                print(f"    🔄 Cleared model attributes for {metric.get_name()}")
+        except Exception as e:
+            print(f"    ⚠ Warning: Failed to unload {metric.get_name()}: {e}")
 
 # =============================
 # End of Autometrics Pipeline Scaffold

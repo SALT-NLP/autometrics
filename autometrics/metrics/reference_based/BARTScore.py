@@ -29,7 +29,29 @@ class BARTScorer:
         # Fix for device mapping issues: only call .to() if not already device-mapped
         if not hasattr(self.model, 'hf_device_map') or self.model.hf_device_map is None:
             if not hasattr(self.model, 'device') or str(self.model.device) == 'cpu':
-                self.model.to(self.device)
+                try:
+                    self.model.to(self.device)
+                except NotImplementedError as e:
+                    # Handle meta tensor issue
+                    if "Cannot copy out of meta tensor" in str(e):
+                        print(f"    🔧 Meta tensor issue detected for BART model, using to_empty()...")
+                        self.model = self.model.to_empty(device=self.device)
+                    else:
+                        raise e
+                except RuntimeError as e:
+                    # Handle device mismatch issues
+                    if "is not on the expected device" in str(e):
+                        print(f"    🔧 Device mismatch detected for BART model, ensuring all parameters are on {self.device}...")
+                        # Force move all parameters to the target device
+                        for param in self.model.parameters():
+                            if param.device != self.device:
+                                param.data = param.data.to(self.device)
+                        # Also move buffers
+                        for buffer in self.model.buffers():
+                            if buffer.device != self.device:
+                                buffer.data = buffer.data.to(self.device)
+                    else:
+                        raise e
 
         # Cap max_length to the model's own limit
         limit = self.tokenizer.model_max_length
@@ -87,18 +109,54 @@ class BARTScorer:
                         return_tensors="pt",
                     )
 
-                    src_ids = enc_src.input_ids.to(self.device)
-                    src_mask = enc_src.attention_mask.to(self.device)
-                    tgt_ids = enc_tgt.input_ids.to(self.device)
-                    tgt_mask = enc_tgt.attention_mask.to(self.device)
+                    # Move tensors to device, handling meta tensor issues
+                    try:
+                        src_ids = enc_src.input_ids.to(self.device)
+                        src_mask = enc_src.attention_mask.to(self.device)
+                        tgt_ids = enc_tgt.input_ids.to(self.device)
+                        tgt_mask = enc_tgt.attention_mask.to(self.device)
+                    except NotImplementedError as e:
+                        # Handle meta tensor issue by using to_empty()
+                        if "Cannot copy out of meta tensor" in str(e):
+                            print(f"    🔧 Meta tensor issue detected in BARTScore scoring, using to_empty()...")
+                            src_ids = enc_src.input_ids.to_empty(device=self.device)
+                            src_mask = enc_src.attention_mask.to_empty(device=self.device)
+                            tgt_ids = enc_tgt.input_ids.to_empty(device=self.device)
+                            tgt_mask = enc_tgt.attention_mask.to_empty(device=self.device)
+                        else:
+                            raise e
+                    
                     tgt_lens = tgt_mask.sum(dim=1)
 
-                    out = self.model(
-                        input_ids=src_ids,
-                        attention_mask=src_mask,
-                        decoder_attention_mask=tgt_mask,
-                        labels=tgt_ids,
-                    )
+                    # Ensure model is on the correct device before forward pass
+                    try:
+                        out = self.model(
+                            input_ids=src_ids,
+                            attention_mask=src_mask,
+                            decoder_attention_mask=tgt_mask,
+                            labels=tgt_ids,
+                        )
+                    except RuntimeError as e:
+                        # Handle device mismatch during forward pass
+                        if "is not on the expected device" in str(e):
+                            print(f"    🔧 Device mismatch during BART forward pass, ensuring model is on {self.device}...")
+                            # Force move all model parameters to the target device
+                            for param in self.model.parameters():
+                                if param.device != self.device:
+                                    param.data = param.data.to(self.device)
+                            # Also move buffers
+                            for buffer in self.model.buffers():
+                                if buffer.device != self.device:
+                                    buffer.data = buffer.data.to(self.device)
+                            # Try the forward pass again
+                            out = self.model(
+                                input_ids=src_ids,
+                                attention_mask=src_mask,
+                                decoder_attention_mask=tgt_mask,
+                                labels=tgt_ids,
+                            )
+                        else:
+                            raise e
 
                     logp = self.lsm(out.logits.view(-1, self.model.config.vocab_size))
                     losses = self.loss_fct(logp, tgt_ids.view(-1)).view(tgt_ids.size(0), -1)

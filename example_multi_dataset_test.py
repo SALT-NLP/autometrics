@@ -20,6 +20,13 @@ def test_multiple_datasets():
             num_to_regress=5,
             seed=42
         ),
+        ExperimentConfig(
+            dataset_name="EvalGenProduct",
+            target_measure="grade",
+            num_to_retrieve=30,
+            num_to_regress=5,
+            seed=42
+        ),
         # Example: Add more datasets here
         # ExperimentConfig(
         #     dataset_name="AnotherDataset",

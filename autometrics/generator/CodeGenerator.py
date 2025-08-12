@@ -353,6 +353,12 @@ Task context: {task_description}
             else:
                 metric_name = name_part + "_code"
 
+            # Remove commas from metric name
+            metric_name = metric_name.replace(",", "")
+
+            for char in "/ :.()[]}{":
+                metric_name = metric_name.replace(char, "_")
+
             # Generate code using appropriate signature with fallback for context length
             try:
                 # Set temperature based on seed for cache busting

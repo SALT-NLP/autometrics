@@ -33,6 +33,7 @@ from autometrics.dataset.datasets.cogym.cogym import (
     CoGym, CoGymTabularOutcome, CoGymTabularProcess, 
     CoGymTravelOutcome, CoGymTravelProcess, CoGymLessonOutcome, CoGymLessonProcess
 )
+from autometrics.dataset.datasets.airesearcher.ai_researcher import AI_Researcher
 
 
 def check_test_sets_match(dataset_name: str) -> Tuple[bool, str]:
@@ -419,6 +420,9 @@ def main():
         
         # Design2Code
         (Design2Code, "Design2Code"),
+
+        # AI_Researcher dataset
+        (AI_Researcher, "AI_Researcher"),
     ]
     
     # Process all datasets

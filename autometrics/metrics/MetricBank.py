@@ -112,6 +112,17 @@ def _instantiate_metric(cls: Type, kwargs: Dict[str, Any]):
             return None
 
 
+def _get_cache_dir() -> str:
+    """
+    Get the cache directory from environment variable AUTOMETRICS_CACHE_DIR,
+    with fallback to "./autometrics_cache" if not set.
+    
+    Returns:
+        Cache directory path as string
+    """
+    return os.environ.get("AUTOMETRICS_CACHE_DIR", "./autometrics_cache")
+
+
 def build_metrics(
     classes: List[Type],
     cache_dir: str | None = None,
@@ -122,7 +133,7 @@ def build_metrics(
 ) -> List[Any]:
     """Instantiate a list of metric classes with common kwargs and cache override."""
     common_kwargs = {
-        "cache_dir": cache_dir or "./autometrics_cache",
+        "cache_dir": cache_dir or _get_cache_dir(),
         "seed": seed,
         "use_cache": use_cache,
     }
@@ -170,6 +181,11 @@ def build_metrics(
                 continue  # user already set explicitly via overrides
             if k in sig.parameters or has_var_kw:
                 merged[k] = v
+        
+        # Debug: Show what kwargs are being passed to each metric
+        if allocation_map.get(cls.__name__):
+            print(f"[MetricBank] {cls.__name__} kwargs: {merged}")
+            print(f"[MetricBank] {cls.__name__} GPU allocation: {allocation_map.get(cls.__name__)}")
         # fill with metric defaults if still missing
         for k, v in _DEFAULT_EXTRA_KWARGS.get(cls.__name__, {}).items():
             if k in sig.parameters or has_var_kw:
@@ -178,6 +194,19 @@ def build_metrics(
         metric = _instantiate_metric(cls, merged)
         if metric is None:
             continue
+        
+        # Debug: Show what device the metric is actually using
+        if hasattr(metric, 'model') and metric.model is not None:
+            try:
+                if hasattr(metric.model, 'device'):
+                    print(f"[MetricBank] {cls.__name__} model device: {metric.model.device}")
+                elif hasattr(metric.model, 'hf_device_map'):
+                    print(f"[MetricBank] {cls.__name__} model hf_device_map: {metric.model.hf_device_map}")
+                else:
+                    print(f"[MetricBank] {cls.__name__} model has no device info")
+            except Exception as e:
+                print(f"[MetricBank] {cls.__name__} could not determine model device: {e}")
+        
         metrics.append(metric)
     return metrics
 

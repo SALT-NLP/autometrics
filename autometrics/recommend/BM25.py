@@ -9,11 +9,12 @@ import subprocess
 from pyserini.search.lucene import LuceneSearcher
 
 class BM25(MetricRecommender):
-    def __init__(self, metric_classes: List[Type[Metric]], index_path: str = user_data_dir("autometrics", "bm25"), force_reindex: bool = False):
+    def __init__(self, metric_classes: List[Type[Metric]], index_path: str = user_data_dir("autometrics", "bm25"), force_reindex: bool = False, use_description_only: bool = False):
         self.metric_classes = metric_classes
         # Root directory that will hold both collection and index
         self.root_path = index_path
         self.force_reindex = force_reindex
+        self.use_description_only = use_description_only
 
         # ------------------------------------------------------------------
         # Directory layout
@@ -37,7 +38,15 @@ class BM25(MetricRecommender):
 
             # Write docs.jsonl
             metric_names = [m.__name__ for m in metric_classes]
-            metric_docs = [m.__doc__ or "" for m in metric_classes]
+            metric_docs = []
+            for m in metric_classes:
+                if self.use_description_only:
+                    desc = getattr(m, 'description', None)
+                    if desc is None:
+                        desc = m.__doc__ or ""
+                    metric_docs.append(str(desc))
+                else:
+                    metric_docs.append(m.__doc__ or "")
 
             docs_file = os.path.join(self.collection_path, "docs.jsonl")
             with open(docs_file, "w", encoding="utf-8") as f:

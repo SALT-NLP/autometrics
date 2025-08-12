@@ -194,13 +194,17 @@ class LDLRewardModel27B(Gemma2PreTrainedModel):
         
         # Handle auto/balanced device mapping after loading additional layers
         if device_map in ("auto", "balanced"):
-            max_mem = get_balanced_memory(model, no_split_module_classes=["Gemma2DecoderLayer", "Gemma2RMSNorm"])
-            dm = infer_auto_device_map(
-                model,
-                no_split_module_classes=["Gemma2DecoderLayer", "Gemma2RMSNorm"],
-                max_memory=max_mem
-            )
-            model = dispatch_model(model, device_map=dm)
+            # Check if model is already device-mapped to avoid conflicts
+            if not hasattr(model, 'hf_device_map') or model.hf_device_map is None:
+                max_mem = get_balanced_memory(model, no_split_module_classes=["Gemma2DecoderLayer", "Gemma2RMSNorm"])
+                dm = infer_auto_device_map(
+                    model,
+                    no_split_module_classes=["Gemma2DecoderLayer", "Gemma2RMSNorm"],
+                    max_memory=max_mem
+                )
+                model = dispatch_model(model, device_map=dm)
+            else:
+                print(f"[LDLRewardModel] Model already device-mapped: {model.hf_device_map}")
         
         return model
 

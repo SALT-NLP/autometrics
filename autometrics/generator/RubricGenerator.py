@@ -260,7 +260,7 @@ class RubricGenerator(Generator):
             futures = []
 
             for i, axis in enumerate(axes):
-                metric_title = axis.split(":")[0].replace("*", "").strip()
+                metric_title = axis.split(":")[0].replace("*", "").replace(",", "").strip()
                 metric_description = axis
                 print(f"DEBUG: Submitting rubric generation task {i+1}/{len(axes)} for '{metric_title}'")
 
@@ -316,6 +316,9 @@ class RubricGenerator(Generator):
                                          .replace(")", "")      # Remove parentheses
                                          .replace("/", " ")     # Replace slashes with spaces
                                          .strip())
+
+                    for char in "/ :.()[]}{":
+                        metric_title_clean = metric_title_clean.replace(char, "_")
                     
                     # If it's still too long, take only the first few meaningful words
                     words = metric_title_clean.split()

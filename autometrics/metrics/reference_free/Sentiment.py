@@ -195,21 +195,51 @@ $$
             # truncation=True works as expected instead of silently skipping.
             self.tokenizer.model_max_length = 512
             self.config = AutoConfig.from_pretrained(self.model_name)
-            self.model = AutoModelForSequenceClassification.from_pretrained(
-                self.model_name,
-                torch_dtype=self.torch_dtype,
-                device_map=self.device_map,
-                trust_remote_code=True
-            )
             
-            # Fix for device mapping issues: only call .to() if not already device-mapped
-            # Check if the model has a device_map attribute (indicating it's already mapped)
+            try:
+                # Try loading with device_map first
+                self.model = AutoModelForSequenceClassification.from_pretrained(
+                    self.model_name,
+                    torch_dtype=self.torch_dtype,
+                    device_map=self.device_map,
+                    trust_remote_code=True
+                )
+            except NotImplementedError as e:
+                # Handle meta tensor issue
+                if "Cannot copy out of meta tensor" in str(e):
+                    print(f"    🔧 Meta tensor issue detected for {self.model_name}, using to_empty()...")
+                    # Load model without device_map first, then use to_empty()
+                    self.model = AutoModelForSequenceClassification.from_pretrained(
+                        self.model_name,
+                        torch_dtype=self.torch_dtype,
+                        device_map=None,  # Don't use device_map initially
+                        trust_remote_code=True
+                    )
+                    # Use to_empty() to properly move from meta to device
+                    if self.device_map is not None:
+                        # If device_map was specified, use to_empty() to move to the target device
+                        if isinstance(self.device_map, dict) and "" in self.device_map:
+                            target_device = self.device_map[""]
+                            self.model = self.model.to_empty(device=target_device)
+                        elif isinstance(self.device_map, str) and self.device_map == "auto":
+                            # For auto device mapping, use to_empty() with the default device
+                            self.model = self.model.to_empty(device=self.device)
+                    else:
+                        # No device_map specified, use to_empty() to move to default device
+                        self.model = self.model.to_empty(device=self.device)
+                else:
+                    raise e
+            
+            # Ensure model is on the correct device
             if not hasattr(self.model, 'hf_device_map') or self.model.hf_device_map is None:
-                # Only call .to() if the model is not already on a device
-                if not hasattr(self.model, 'device') or str(self.model.device) == 'cpu':
-                    self.model.to(self.device)
-            # If device_map is set, the model is already on the correct device(s)
-            # If the model is already on a device, don't move it again
+                # Model is not device-mapped, ensure it's on the correct device
+                if hasattr(self.model, 'device'):
+                    current_device = str(self.model.device)
+                    if current_device == 'cpu' and torch.cuda.is_available():
+                        self.model = self.model.to(self.device)
+                else:
+                    # Model doesn't have device attribute, move it
+                    self.model = self.model.to(self.device)
             
             self.model.eval()
 
@@ -239,6 +269,14 @@ $$
         """Compute sentiment regression for a single text."""
         if self.model is None:
             self._load_model()
+        
+        # Ensure model is on the correct device
+        if hasattr(self.model, 'device'):
+            model_device = self.model.device
+        else:
+            # Fallback: assume model is on the same device as the first parameter
+            model_device = next(self.model.parameters()).device
+        
         text = self._preprocess(output)
         inputs = self.tokenizer(
             text,
@@ -246,13 +284,15 @@ $$
             truncation=True,
             padding='max_length',
             max_length=512
-        ).to(self.device)
+        ).to(model_device)
+        
         with torch.no_grad():
             logits = self.model(**inputs).logits.squeeze(0)
             probs = F.softmax(logits, dim=-1)
         neg = probs[0].item()
         pos = probs[2].item()
         score = (pos - neg) / 2.0
+        
         if not self.persistent:
             self._unload_model()
         return score
@@ -261,6 +301,14 @@ $$
         """Compute sentiment regression for batches of texts."""
         if self.model is None:
             self._load_model()
+        
+        # Ensure model is on the correct device
+        if hasattr(self.model, 'device'):
+            model_device = self.model.device
+        else:
+            # Fallback: assume model is on the same device as the first parameter
+            model_device = next(self.model.parameters()).device
+        
         all_scores: List[float] = []
         for i in range(0, len(outputs), self.batch_size):
             batch_texts = outputs[i:i+self.batch_size]
@@ -271,12 +319,14 @@ $$
                 truncation=True,
                 padding='max_length',
                 max_length=512
-            ).to(self.device)
+            ).to(model_device)
+            
             with torch.no_grad():
                 logits = self.model(**inputs_tok).logits
                 probs = F.softmax(logits, dim=-1)
             batch_scores = ((probs[:, 2] - probs[:, 0]) / 2.0).cpu().tolist()
             all_scores.extend(batch_scores)
+        
         if not self.persistent:
             self._unload_model()
         return all_scores 

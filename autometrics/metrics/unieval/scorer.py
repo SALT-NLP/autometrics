@@ -13,11 +13,24 @@ class UniEvaluator:
 
         self.config = AutoConfig.from_pretrained(model_name_or_path, cache_dir=cache_dir)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, cache_dir=cache_dir)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, config=self.config,
-                                                           cache_dir=cache_dir)
-
-        self.model.eval()
-        self.model.to(device)
+        
+        try:
+            self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, config=self.config,
+                                                               cache_dir=cache_dir)
+            self.model.eval()
+            self.model.to(device)
+        except NotImplementedError as e:
+            # Handle meta tensor issue
+            if "Cannot copy out of meta tensor" in str(e):
+                print(f"    🔧 Meta tensor issue detected for {model_name_or_path}, using to_empty()...")
+                # Load model without device specification first, then use to_empty()
+                self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, config=self.config,
+                                                                   cache_dir=cache_dir)
+                self.model.eval()
+                # Use to_empty() to properly move from meta to device
+                self.model = self.model.to_empty(device=device)
+            else:
+                raise e
 
         self.softmax = nn.Softmax(dim=1)
 

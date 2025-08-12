@@ -5,6 +5,16 @@ from diskcache import Cache
 from functools import wraps
 from typing import Any, List, Optional, Union, Tuple, Dict
 
+def _get_cache_dir() -> str:
+    """
+    Get the cache directory from environment variable AUTOMETRICS_CACHE_DIR,
+    with fallback to "./autometrics_cache" if not set.
+    
+    Returns:
+        Cache directory path as string
+    """
+    return os.environ.get("AUTOMETRICS_CACHE_DIR", "./autometrics_cache")
+
 class Metric(ABC):
     """
     Abstract class for metrics
@@ -12,7 +22,7 @@ class Metric(ABC):
     # Class-level default that subclasses can override
     DEFAULT_USE_CACHE = True
     
-    def __init__(self, name, description, use_cache=None, seed=None, cache_dir="./autometrics_cache", 
+    def __init__(self, name, description, use_cache=None, seed=None, cache_dir=None, 
                  cache_size_limit=None, cache_ttl=None, force_cache=False, **kwargs):
         self.name = name
         self.description = description
@@ -20,6 +30,10 @@ class Metric(ABC):
         # Use the class-specific default if use_cache is not explicitly provided
         if use_cache is None:
             use_cache = self.DEFAULT_USE_CACHE
+        
+        # Use environment variable or default for cache_dir if not provided
+        if cache_dir is None:
+            cache_dir = _get_cache_dir()
         
         self.use_cache = use_cache
         self.seed = seed

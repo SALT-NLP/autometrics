@@ -7,6 +7,10 @@ from autometrics.recommend.MetricRecommender import MetricRecommender
 import os
 from platformdirs import user_data_dir
 from pylate import indexes, models, retrieve
+try:
+    import torch
+except Exception:
+    torch = None
 
 class ColBERT(MetricRecommender):
     """Metric recommender that leverages Modern ColBERT via the PyLate package.
@@ -21,6 +25,7 @@ class ColBERT(MetricRecommender):
         metric_classes: List[Type[Metric]],
         index_path: Optional[str] = user_data_dir("autometrics", "colbert"),
         force_reindex: bool = False,
+        use_description_only: bool = False,
     ) -> None:
         # Store the metric classes that will be indexed/searched
         self.metric_classes: List[Type[Metric]] = metric_classes
@@ -28,6 +33,7 @@ class ColBERT(MetricRecommender):
         self.index_path: str = index_path
         self.force_reindex: bool = force_reindex
         self.index_name: str = "colbert_index" # Causes too many issues when this is a parameter.  Just use the index path to determine the index name.
+        self.use_description_only: bool = use_description_only
 
         # Initialize the ColBERT model
         self.model = models.ColBERT(
@@ -59,11 +65,20 @@ class ColBERT(MetricRecommender):
         # Make sure the parent directory exists
         os.makedirs(os.path.dirname(self.index_path), exist_ok=True)
 
-        # Prepare the documents: one document per metric class consisting of its
-        # docstring.  If a docstring is missing we fall back to an empty string
-        # to keep the ordering consistent.
+        # Prepare the documents: one document per metric class.
+        # If use_description_only is True, prefer class-level description if available; otherwise use docstring.
+        # If neither is available, fall back to empty string to keep ordering consistent.
         metric_ids: List[str] = [mc.__name__ for mc in self.metric_classes]
-        metric_docs: List[str] = [(mc.__doc__ or "") for mc in self.metric_classes]
+        metric_docs: List[str] = []
+        for mc in self.metric_classes:
+            if self.use_description_only:
+                # Prefer class attribute 'description' if present (many metrics define it as ClassVar)
+                desc = getattr(mc, 'description', None)
+                if desc is None:
+                    desc = mc.__doc__ or ""
+                metric_docs.append(str(desc))
+            else:
+                metric_docs.append(mc.__doc__ or "")
 
         print("[ColBERT] Metric IDs: ", metric_ids)
 
@@ -121,11 +136,43 @@ class ColBERT(MetricRecommender):
             show_progress_bar=False,
         )
 
-        # Retrieve results
-        scores = self.retriever.retrieve(
-            queries_embeddings=query_embeddings,
-            k=k,
-        )
+        # Retrieve results with recovery for broken index on GPU machines
+        def _has_gpu() -> bool:
+            try:
+                return torch is not None and torch.cuda.is_available()
+            except Exception:
+                return False
+
+        try:
+            scores = self.retriever.retrieve(
+                queries_embeddings=query_embeddings,
+                k=k,
+            )
+        except Exception as e:
+            message = str(e)
+            if "NoneType" in message and "has no attribute 'search'" in message:
+                # Likely a broken PLAID index; rebuild if a GPU is available
+                if _has_gpu():
+                    print("[ColBERT] Detected broken index during retrieval. Rebuilding index on GPU...")
+                    self._build_index()
+                    # Reinitialize index and retriever after rebuild
+                    self.index = indexes.PLAID(
+                        index_folder=self.index_path,
+                        index_name=self.index_name,
+                        override=False,
+                    )
+                    self.retriever = retrieve.ColBERT(index=self.index)
+                    # Retry once
+                    scores = self.retriever.retrieve(
+                        queries_embeddings=query_embeddings,
+                        k=k,
+                    )
+                else:
+                    # CPU-only machine: re-raise as before
+                    raise e
+            else:
+                # Other errors bubble up
+                raise e
 
         print("[ColBERT] Scores: ", scores)
 

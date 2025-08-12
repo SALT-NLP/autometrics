@@ -40,9 +40,11 @@ def calculate_correlation(dataset: Dataset, group_by: str = None, correlation=sp
         metric_columns = [col for col in df.columns if col not in ignore_columns and col not in target_columns]
     else:
         metric_columns = dataset.get_metric_columns()
+        if metric_columns is None:
+            metric_columns = [col for col in df.columns if col not in ignore_columns and col not in target_columns]
 
-    if metric_columns is None:
-        metric_columns = [col for col in df.columns if col not in ignore_columns and col not in target_columns]
+    # Filter to only columns that actually exist in the DataFrame to avoid KeyError
+    metric_columns = [col for col in metric_columns if col in df.columns]
 
     if group_by:
         # group by the column 'group_by' and calculate the average spearman correlation for each target_column and metric_column.

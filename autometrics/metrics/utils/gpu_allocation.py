@@ -33,6 +33,7 @@ When CUDA is unavailable, all GPU allocations automatically fall back to CPU.
 from typing import List, Dict, Any, NamedTuple, Optional
 import inspect
 import warnings
+import os
 
 try:
     import torch
@@ -138,15 +139,65 @@ def _query_gpu_info_torch() -> List[GPUInfo]:
     return infos
 
 
+def _parse_cuda_visible_devices_env() -> Optional[List[int]]:
+    """Parse CUDA_VISIBLE_DEVICES into a list of physical GPU indices if possible.
+
+    Returns None when env var is unset/empty, or when it contains non-numeric
+    identifiers (e.g., UUIDs), in which case we prefer torch-based discovery.
+    """
+    env_val = os.environ.get("CUDA_VISIBLE_DEVICES", "").strip()
+    if not env_val:
+        return None
+    parts = [p.strip() for p in env_val.split(",") if p.strip() != ""]
+    try:
+        indices = [int(p) for p in parts]
+        return indices
+    except ValueError:
+        # Non-numeric (UUIDs). We'll rely on torch which already respects visibility.
+        return None
+
+
+def _remap_infos_to_visible_ordinals(all_infos: List[GPUInfo], visible_phys: List[int]) -> List[GPUInfo]:
+    """Filter and reorder `all_infos` to the physical indices specified in
+    `visible_phys`, and reindex them to contiguous visible ordinals [0..n-1]."""
+    phys_to_info: Dict[int, GPUInfo] = {info.index: info for info in all_infos}
+    remapped: List[GPUInfo] = []
+    for vis_idx, phys_idx in enumerate(visible_phys):
+        info = phys_to_info.get(phys_idx)
+        if info is None:
+            # If a specified physical index doesn't exist, skip it silently
+            # (better than crashing) – torch will error later if nothing is visible.
+            continue
+        remapped.append(GPUInfo(index=vis_idx, name=info.name, total_mb=info.total_mb, free_mb=info.free_mb))
+    return remapped
+
+
 def get_gpu_info() -> List[GPUInfo]:
     """Return a list of `GPUInfo` for all visible GPUs.
 
     NVML is preferred for accurate free memory; fall back to torch when NVML
     is unavailable.  If neither mechanism works we return an empty list.
     """
+    # If CUDA visibility is numerically specified, filter NVML results to those
+    # physical indices and remap to visible ordinals. Otherwise, prefer torch.
+    visible_phys = _parse_cuda_visible_devices_env()
+    env_val = os.environ.get("CUDA_VISIBLE_DEVICES", "").strip()
+
     infos = _query_gpu_info_pynvml()
     if infos:
-        return infos
+        if visible_phys is not None:
+            # Respect numeric visibility; remap to visible ordinals
+            remapped = _remap_infos_to_visible_ordinals(infos, visible_phys)
+            if remapped:
+                return remapped
+            # If remap failed (e.g., bad indices), fall back to torch
+        else:
+            # If env isn't set at all, NVML full list is fine.
+            # If env is set but non-numeric (e.g., UUIDs), prefer torch which respects visibility.
+            if not env_val:
+                return infos
+
+    # Torch already respects CUDA visibility (including UUID-based). Indices are visible ordinals.
     return _query_gpu_info_torch()
 
 # ---------------------------------------------------------------------------
@@ -186,6 +237,7 @@ def _inspect_metric_class(cls: type) -> MetricRequirement:
     has_load_kwargs_arg = "load_kwargs" in sig.parameters
     
     # For HuggingFace evaluate metrics, treat them as CPU-only to avoid device conflicts
+    # These metrics have internal device management that conflicts with our GPU allocation
     if is_huggingface_evaluate or is_huggingface_reference_based:
         has_device_map_arg = False
         has_device_arg = False  # Don't allocate GPU to these metrics
@@ -279,6 +331,31 @@ def allocate_gpus(
                 elif req.has_device_map_arg:
                     cpu_allocations[req.name] = {"device_map": {"": "cpu"}}
         return cpu_allocations
+    
+    # Debug: Show what GPUs are available
+    print(f"[GPU Allocation] Found {len(gpu_infos)} GPU(s):")
+    for info in gpu_infos:
+        print(f"  GPU {info.index}: {info.name} - {info.total_mb:.1f}MB total, {info.free_mb:.1f}MB free")
+
+    # Show CUDA visibility mapping, if applicable
+    cuda_visible = os.environ.get('CUDA_VISIBLE_DEVICES', '').strip()
+    parsed_visible = _parse_cuda_visible_devices_env()
+    if cuda_visible:
+        if parsed_visible is not None:
+            mapping_pairs = ", ".join([f"{phys}->#{vis}" for vis, phys in enumerate(parsed_visible)])
+            print(f"[GPU Allocation] CUDA_VISIBLE_DEVICES={cuda_visible} (physical->visible mapping: {mapping_pairs})")
+        else:
+            print(f"[GPU Allocation] CUDA_VISIBLE_DEVICES set (non-numeric). Using torch-visible ordinals 0..{max(0, len(gpu_infos)-1)}")
+    
+    # Debug: Show PyTorch CUDA device info
+    if TORCH_AVAILABLE and torch.cuda.is_available():
+        print(f"[GPU Allocation] PyTorch CUDA info:")
+        print(f"  torch.cuda.device_count(): {torch.cuda.device_count()}")
+        print(f"  torch.cuda.current_device(): {torch.cuda.current_device()}")
+        for i in range(torch.cuda.device_count()):
+            device_name = torch.cuda.get_device_name(i)
+            device_memory = torch.cuda.get_device_properties(i).total_memory / 1024**3  # GB
+            print(f"  Device {i}: {device_name} ({device_memory:.1f}GB)")
 
     # Working copy of available memory (apply buffer)
     avail_mb = {
@@ -288,6 +365,10 @@ def allocate_gpus(
     requirements = collect_metric_requirements(metric_classes)
     # Consider only GPU-using metrics (gpu_mem > 0)
     gpu_metrics = [r for r in requirements if r.gpu_mem_mb > 0]
+    
+    print(f"[GPU Allocation] Found {len(gpu_metrics)} GPU-requiring metrics:")
+    for req in gpu_metrics:
+        print(f"  {req.name}: {req.gpu_mem_mb:.1f}MB, device_arg={req.has_device_arg}, device_map_arg={req.has_device_map_arg}")
 
     # Sort by descending memory requirement (best-fit decreasing)
     gpu_metrics.sort(key=lambda r: r.gpu_mem_mb, reverse=True)
@@ -319,22 +400,29 @@ def allocate_gpus(
             
             if is_huggingface_evaluate:
                 # For HuggingFace evaluate metrics, use load_kwargs with device
-                allocations[req.name] = {"load_kwargs": {"device": f"cuda:{candidate_gpu}"}}
+                allocation = {"load_kwargs": {"device": f"cuda:{candidate_gpu}"}}
+                print(f"[GPU Allocation] {req.name} -> GPU {candidate_gpu} (HuggingFace evaluate, load_kwargs)")
             elif req.has_device_arg:
-                allocations[req.name] = {"device": f"cuda:{candidate_gpu}"}
+                allocation = {"device": f"cuda:{candidate_gpu}"}
+                print(f"[GPU Allocation] {req.name} -> GPU {candidate_gpu} (device arg)")
             elif req.has_device_map_arg:
                 # Fix: Use proper device string format for device_map
                 # The device_map should use device strings, not integer indices
-                allocations[req.name] = {"device_map": {"": f"cuda:{candidate_gpu}"}}
+                allocation = {"device_map": {"": f"cuda:{candidate_gpu}"}}
+                print(f"[GPU Allocation] {req.name} -> GPU {candidate_gpu} (device_map)")
             else:
                 # No explicit arg – assume global torch.device context; advise user
-                allocations[req.name] = {"_hint_gpu_index": candidate_gpu}
+                allocation = {"_hint_gpu_index": candidate_gpu}
+                print(f"[GPU Allocation] {req.name} -> GPU {candidate_gpu} (hint only)")
+            
+            allocations[req.name] = allocation
             continue
 
         # Cannot fit on a single GPU
         if req.has_device_map_arg and len(avail_mb) > 1:
             # Let transformers/accelerate handle splitting across GPUs
             allocations[req.name] = {"device_map": "auto"}
+            print(f"[GPU Allocation] {req.name} -> device_map='auto' (multi-GPU split required)")
 
             # Rough bookkeeping: assume balanced split across all GPUs so we
             # reduce each GPU's available memory proportionally.  This is a

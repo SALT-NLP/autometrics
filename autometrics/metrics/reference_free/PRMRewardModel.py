@@ -172,6 +172,17 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
             # prevents inadvertent CPU placement when CUDA is available.
             if self.device_map is None:
                 self.model.to(self.device)
+            
+            # Store the model's dtype for input tensor compatibility
+            if hasattr(self.model, 'dtype'):
+                self.model_dtype = self.model.dtype
+            else:
+                # Try to get dtype from first parameter
+                try:
+                    first_param = next(self.model.parameters())
+                    self.model_dtype = first_param.dtype
+                except:
+                    self.model_dtype = torch.bfloat16  # fallback
 
     def _unload_model(self):
         if self.model is not None:
@@ -220,6 +231,7 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
         model_device = get_model_device(self.model, fallback_device=self.device)
         
         # Tokenize and ensure tensor is on the model's device
+        # NOTE: input_ids must remain as int64 (Long) for the embedding layer
         input_ids = self.tokenizer.encode(conv_str, return_tensors="pt")
         input_ids = ensure_tensor_on_device(input_ids, model_device)
         

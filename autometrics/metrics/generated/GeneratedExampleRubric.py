@@ -103,6 +103,7 @@ class _ExampleRubricMetricMixin:
         examples_per_range: int = 2,
         eval_function_name: str = 'inverse_distance',
         custom_eval_function: Optional[Any] = None,
+        debug_mode: bool = False,  # Enable verbose debug output for troubleshooting
         **kwargs,
     ):
         # Store core attributes
@@ -116,6 +117,7 @@ class _ExampleRubricMetricMixin:
         self.seed = seed
         self.max_workers = max_workers
         self.is_reference_based = kwargs.get("is_reference_based", is_reference_based)
+        self.debug_mode = debug_mode
         
         # Store optimization metadata for metric card generation (even though optimization was done in Generator)
         self.attempts = attempts
@@ -123,6 +125,12 @@ class _ExampleRubricMetricMixin:
         self.eval_function_name = eval_function_name
         self.optimize = False  # Should always be False for Executor
         self.optimized_examples = optimized_examples or []  # Store the original examples
+        
+        # Helper method for debug printing
+        def debug_print(*args, **kwargs):
+            if self.debug_mode:
+                print(*args, **kwargs)
+        self.debug_print = debug_print
         
         # Add eval_function for backward compatibility with tests
         if custom_eval_function is not None:
@@ -145,28 +153,28 @@ class _ExampleRubricMetricMixin:
         self.program = LLMAsAJudge()
         
         # Debug: Verify the program was created correctly
-        print(f"🔍 Example Judge program created: {type(self.program)}")
-        print(f"🔍 Example Judge program attributes: {[attr for attr in dir(self.program) if not attr.startswith('_')]}")
+        self.debug_print(f"🔍 Example Judge program created: {type(self.program)}")
+        self.debug_print(f"🔍 Example Judge program attributes: {[attr for attr in dir(self.program) if not attr.startswith('_')]}")
         
         if hasattr(self.program, 'generate_score'):
-            print(f"🔍 Example Judge program.generate_score: {type(self.program.generate_score)}")
+            self.debug_print(f"🔍 Example Judge program.generate_score: {type(self.program.generate_score)}")
             if hasattr(self.program.generate_score, 'predict'):
-                print(f"🔍 Example Judge program.generate_score.predict: {type(self.program.generate_score.predict)}")
+                self.debug_print(f"🔍 Example Judge program.generate_score.predict: {type(self.program.generate_score.predict)}")
                 initial_demos = getattr(self.program.generate_score.predict, 'demos', [])
-                print(f"🔍 Example Judge initial demo count: {len(initial_demos)}")
+                self.debug_print(f"🔍 Example Judge initial demo count: {len(initial_demos)}")
             else:
-                print("❌ Example Judge program.generate_score missing predict attribute")
+                self.debug_print("❌ Example Judge program.generate_score missing predict attribute")
         else:
-            print("❌ Example Judge program missing generate_score attribute")
+            self.debug_print("❌ Example Judge program missing generate_score attribute")
 
         # Load pre-optimized examples or load from prompt
         if load_prompt is not None:
             self.program.load(load_prompt)
-            print(f"Loaded program from {load_prompt}")
+            self.debug_print(f"Loaded program from {load_prompt}")
         elif optimized_examples:
             # Load optimized examples if provided (from Generator)
             self._load_optimized_examples(optimized_examples)
-            print(f"Loaded {len(optimized_examples)} pre-optimized examples from Generator")
+            self.debug_print(f"Loaded {len(optimized_examples)} pre-optimized examples from Generator")
 
         # Remove optimization-related parameters from kwargs before passing to parent
         parent_kwargs = {k: v for k, v in kwargs.items() if k not in ['attempts', 'examples_per_range', 'eval_function_name']}
@@ -196,47 +204,47 @@ class _ExampleRubricMetricMixin:
     def _load_optimized_examples(self, optimized_examples):
         """Load pre-optimized examples into the DSPy program."""
         if not optimized_examples:
-            print("No optimized examples provided")
+            self.debug_print("No optimized examples provided")
             return
             
         try:
-            print(f"Loading {len(optimized_examples)} optimized examples...")
-            print(f"Example data type: {type(optimized_examples)}")
+            self.debug_print(f"Loading {len(optimized_examples)} optimized examples...")
+            self.debug_print(f"Example data type: {type(optimized_examples)}")
             if optimized_examples:
-                print(f"First example type: {type(optimized_examples[0])}")
+                self.debug_print(f"First example type: {type(optimized_examples[0])}")
                 
                 # With the fixed serialization, these should all be proper DSPy Example objects
                 first_example = optimized_examples[0]
                 if hasattr(first_example, '_store'):
-                    print(f"✅ First example is a proper DSPy Example with _store attribute")
-                    print(f"✅ Example fields: {list(first_example._store.keys())}")
+                    self.debug_print(f"✅ First example is a proper DSPy Example with _store attribute")
+                    self.debug_print(f"✅ Example fields: {list(first_example._store.keys())}")
                 elif hasattr(first_example, '__dict__'):
-                    print(f"✅ First example has __dict__: {first_example.__dict__.keys()}")
+                    self.debug_print(f"✅ First example has __dict__: {first_example.__dict__.keys()}")
                 else:
-                    print(f"❌ First example type not recognized: {type(first_example)}")
+                    self.debug_print(f"❌ First example type not recognized: {type(first_example)}")
                     
             # Directly assign the examples to the DSPy program
             # Since they should now be properly constructed DSPy Example objects
             self.program.generate_score.predict.demos = optimized_examples
             
-            print(f"✅ Successfully loaded {len(optimized_examples)} optimized examples into DSPy program")
-            print(f"✅ Verification: {len(self.program.generate_score.predict.demos)} examples now in program.generate_score.predict.demos")
+            self.debug_print(f"✅ Successfully loaded {len(optimized_examples)} optimized examples into DSPy program")
+            self.debug_print(f"✅ Verification: {len(self.program.generate_score.predict.demos)} examples now in program.generate_score.predict.demos")
             
             if optimized_examples:
                 first_demo = self.program.generate_score.predict.demos[0]
-                print(f"🔍 First demo type: {type(first_demo)}")
+                self.debug_print(f"🔍 First demo type: {type(first_demo)}")
                 if hasattr(first_demo, '_store'):
-                    print(f"🔍 First demo fields: {list(first_demo._store.keys())}")
+                    self.debug_print(f"🔍 First demo fields: {list(first_demo._store.keys())}")
                 elif hasattr(first_demo, '__dict__'):
-                    print(f"🔍 First demo attributes: {list(first_demo.__dict__.keys())}")
+                    self.debug_print(f"🔍 First demo attributes: {list(first_demo.__dict__.keys())}")
                     
-            print("Loaded optimized examples from Generator")
+            self.debug_print("Loaded optimized examples from Generator")
             
         except Exception as e:
-            print(f"❌ Error loading optimized examples: {e}")
+            self.debug_print(f"❌ Error loading optimized examples: {e}")
             import traceback
             traceback.print_exc()
-            print("Continuing without optimized examples")
+            self.debug_print("Continuing without optimized examples")
 
     def _format_examples_as_markdown(self, max_examples: int = 3) -> List[str]:
         """Format the first few examples as a markdown table."""
@@ -295,12 +303,12 @@ class _ExampleRubricMetricMixin:
             else:
                 references = str(references)
         
-        print(f"🔍 Example Judge Debug - Processing:")
-        print(f"   Input: {input_text[:100]}...")
-        print(f"   Output: {output_text[:100]}...")
-        print(f"   References: {references}")
-        print(f"   Axis: {self.axis}")
-        print(f"   Program type: {type(self.program)}")
+        self.debug_print(f"🔍 Example Judge Debug - Processing:")
+        self.debug_print(f"   Input: {input_text[:100]}...")
+        self.debug_print(f"   Output: {output_text[:100]}...")
+        self.debug_print(f"   References: {references}")
+        self.debug_print(f"   Axis: {self.axis}")
+        self.debug_print(f"   Program type: {type(self.program)}")
         
         # For example-based metrics, we format the full text using the dataset's formatter
         if self.train_dataset:
@@ -331,12 +339,12 @@ class _ExampleRubricMetricMixin:
             else:
                 formatted_text = f"Input: {input_text}\nOutput: {output_text}"
 
-        print(f"🔍 Example Judge Formatted text: {formatted_text[:200]}...")
+        self.debug_print(f"🔍 Example Judge Formatted text: {formatted_text[:200]}...")
 
         # Set temperature based on seed for cache busting
         temperature = 0.0001 * self.seed
         
-        print(f"🔍 Example Judge calling DSPy program with temperature: {temperature}")
+        self.debug_print(f"🔍 Example Judge calling DSPy program with temperature: {temperature}")
 
         # --- Begin context length error handling logic ---
         import copy
@@ -356,52 +364,52 @@ class _ExampleRubricMetricMixin:
                 if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
                     program.generate_score.predict.demos = demos
                     demos_count = len(demos)
-                    print(f"🔍 Example Judge program has {demos_count} demos loaded ({'deepcopy' if deepcopied else 'shallow'})")
+                    self.debug_print(f"🔍 Example Judge program has {demos_count} demos loaded ({'deepcopy' if deepcopied else 'shallow'})")
                     if demos_count == 0:
-                        print("⚠️  Example Judge WARNING: No demos loaded - this will likely cause poor scoring!")
+                        self.debug_print("⚠️  Example Judge WARNING: No demos loaded - this will likely cause poor scoring!")
                 else:
-                    print(f"❌ Example Judge program missing demos attribute ({'deepcopy' if deepcopied else 'shallow'})")
+                    self.debug_print(f"❌ Example Judge program missing demos attribute ({'deepcopy' if deepcopied else 'shallow'})")
                 
                 with dspy.settings.context(lm=self.model, temperature=temperature):
-                    print(f"🔍 Example Judge DSPy context set with model: {self.model}")
-                    print(f"🔍 Example Judge current DSPy settings LM: {dspy.settings.lm}")
+                    self.debug_print(f"🔍 Example Judge DSPy context set with model: {self.model}")
+                    self.debug_print(f"🔍 Example Judge current DSPy settings LM: {dspy.settings.lm}")
                     result = program(
                         text=formatted_text,
                         measure=self.axis,
                         suggested_range=self.suggested_range,
                         task_description=self.task_description
                     )
-                print(f"🔍 Example Judge DSPy result: {result}")
-                print(f"🔍 Example Judge result type: {type(result)}")
+                self.debug_print(f"🔍 Example Judge DSPy result: {result}")
+                self.debug_print(f"🔍 Example Judge result type: {type(result)}")
                 if hasattr(result, 'score'):
-                    print(f"🔍 Example Judge result.score: {result.score}")
-                    print(f"🔍 Example Judge result.score type: {type(result.score)}")
+                    self.debug_print(f"🔍 Example Judge result.score: {result.score}")
+                    self.debug_print(f"🔍 Example Judge result.score type: {type(result.score)}")
                     score_value = float(result.score)
-                    print(f"🔍 Example Judge final score: {score_value}")
+                    self.debug_print(f"🔍 Example Judge final score: {score_value}")
                     # Check model history to verify LLM was actually called
                     if hasattr(self.model, 'history') and score_value == 0.0:
                         history_len = len(self.model.history)
-                        print(f"⚠️  Example Judge Model history length: {history_len}")
+                        self.debug_print(f"⚠️  Example Judge Model history length: {history_len}")
                         if history_len == 0:
-                            print("🚨 CRITICAL: Model history is empty - LLM was never called!")
+                            self.debug_print("🚨 CRITICAL: Model history is empty - LLM was never called!")
                         else:
-                            print(f"🔍 Example Judge Last call: {self.model.history[-1]}")
+                            self.debug_print(f"🔍 Example Judge Last call: {self.model.history[-1]}")
                     return score_value
                 else:
-                    print(f"❌ Example Judge result has no 'score' attribute")
-                    print(f"❌ Example Judge result attributes: {[attr for attr in dir(result) if not attr.startswith('_')]}")
+                    self.debug_print(f"❌ Example Judge result has no 'score' attribute")
+                    self.debug_print(f"❌ Example Judge result attributes: {[attr for attr in dir(result) if not attr.startswith('_')]}")
                     raise ValueError(f"DSPy result missing score attribute: {result}")
             except Exception as e:
                 error_str = str(e)
                 # Check for context length error (robust to different error types)
                 if "ContextWindowExceededError" in error_str or "context length" in error_str or "input is longer than the model's context length" in error_str:
-                    print(f"⚠️  Context length error detected: {e}")
+                    self.debug_print(f"⚠️  Context length error detected: {e}")
                     if len(demos) == 0:
-                        print("🚨 No demos left to drop, cannot proceed.")
+                        self.debug_print("🚨 No demos left to drop, cannot proceed.")
                         raise
                     # On first context error, switch to a deepcopy of the program and demos
                     if not deepcopied:
-                        print("⚠️  Switching to deepcopy of program and demos due to context error.")
+                        self.debug_print("⚠️  Switching to deepcopy of program and demos due to context error.")
                         program = copy.deepcopy(self.program)
                         if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
                             demos = list(program.generate_score.predict.demos)
@@ -418,15 +426,15 @@ class _ExampleRubricMetricMixin:
                         else:
                             return len(str(demo))
                     longest_idx = max(range(len(demos)), key=lambda i: demo_length(demos[i]))
-                    print(f"⚠️  Dropping demo #{longest_idx} (length={demo_length(demos[longest_idx])}) and retrying...")
+                    self.debug_print(f"⚠️  Dropping demo #{longest_idx} (length={demo_length(demos[longest_idx])}) and retrying...")
                     demos.pop(longest_idx)
                     continue
                 else:
-                    print(f"🚨 CRITICAL EXCEPTION in Example Judge DSPy call:")
-                    print(f"   Exception: {e}")
-                    print(f"   Exception Type: {type(e).__name__}")
-                    print(f"   Program: {program}")
-                    print(f"   Model: {self.model}")
+                    self.debug_print(f"🚨 CRITICAL EXCEPTION in Example Judge DSPy call:")
+                    self.debug_print(f"   Exception: {e}")
+                    self.debug_print(f"   Exception Type: {type(e).__name__}")
+                    self.debug_print(f"   Program: {program}")
+                    self.debug_print(f"   Model: {self.model}")
                     import traceback
                     traceback.print_exc()
                     raise
@@ -571,6 +579,7 @@ class _ExampleRubricMetricMixin:
 import dspy
 from autometrics.metrics.generated.GeneratedExampleRubric import {class_name}
 from typing import ClassVar
+import os
 
 DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
 
@@ -628,6 +637,7 @@ class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}
             "metric_card": self.metric_card,
             "max_workers": self.max_workers,
             "is_reference_based": self.is_reference_based,
+            "debug_mode": self.debug_mode,
             # Optimization metadata
             "attempts": self.attempts,
             "examples_per_range": self.examples_per_range,
@@ -644,7 +654,8 @@ class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}
         
         # Extract examples data
         examples_data = data.pop("examples_data", [])
-        print(f"Deserializing with {len(examples_data)} examples_data")
+        # Note: We can't use debug_print here since the instance isn't created yet
+        # We'll use regular print for deserialization messages
         
         # Create the instance
         instance = cls(**data)
@@ -652,33 +663,33 @@ class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}
         # Load the examples if available
         if examples_data:
             try:
-                print(f"Loading {len(examples_data)} examples during deserialization...")
-                print(f"Examples data type: {type(examples_data)}")
+                instance.debug_print(f"Loading {len(examples_data)} examples during deserialization...")
+                instance.debug_print(f"Examples data type: {type(examples_data)}")
                 
                 # Ensure we have a program with the right structure
                 if not hasattr(instance.program, 'generate_score'):
-                    print("Warning: deserialized program does not have generate_score attribute")
+                    instance.debug_print("Warning: deserialized program does not have generate_score attribute")
                     return instance
                     
                 if not hasattr(instance.program.generate_score, 'predict'):
-                    print("Warning: deserialized program.generate_score does not have predict attribute")
+                    instance.debug_print("Warning: deserialized program.generate_score does not have predict attribute")
                     return instance
                 
                 # Use the correct DSPy path we discovered through testing
                 instance.program.generate_score.predict.demos = examples_data
-                print(f"✅ Successfully loaded {len(examples_data)} examples during deserialization")
+                instance.debug_print(f"✅ Successfully loaded {len(examples_data)} examples during deserialization")
                 
                 # Verify the examples were loaded
                 loaded_demos = getattr(instance.program.generate_score.predict, 'demos', [])
-                print(f"✅ Verification: {len(loaded_demos)} examples now in deserialized program")
+                instance.debug_print(f"✅ Verification: {len(loaded_demos)} examples now in deserialized program")
                 
             except Exception as e:
-                print(f"❌ Error: Could not load examples during deserialization: {e}")
-                print(f"❌ Exception type: {type(e)}")
+                instance.debug_print(f"❌ Error: Could not load examples during deserialization: {e}")
+                instance.debug_print(f"❌ Exception type: {type(e)}")
                 import traceback
                 traceback.print_exc()
         else:
-            print("No examples_data to load during deserialization")
+            instance.debug_print("No examples_data to load during deserialization")
         
         return instance
     

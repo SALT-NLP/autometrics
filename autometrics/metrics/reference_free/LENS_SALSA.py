@@ -185,7 +185,40 @@ The model is trained using human-annotated quality scores from simplification co
         """Download SALSA checkpoint and load the LENS_SALSA model."""
         if self.model is None:
             ckpt_path = download_model(self.model_id)
-            self.model = _LENS_SALSA_Model(ckpt_path)
+            
+            try:
+                self.model = _LENS_SALSA_Model(ckpt_path)
+            except NotImplementedError as e:
+                # Handle meta tensor issue
+                if "Cannot copy out of meta tensor" in str(e):
+                    print(f"    🔧 Meta tensor issue detected for {self.model_id}, using to_empty()...")
+                    # Patch torch.nn.Module.to to handle meta tensors globally
+                    import torch.nn.modules.module
+                    original_to = torch.nn.modules.module.Module.to
+                    
+                    def patched_to(self, *args, **kwargs):
+                        """Patched to() method that uses to_empty() for meta tensors."""
+                        try:
+                            return original_to(self, *args, **kwargs)
+                        except NotImplementedError as e:
+                            if "Cannot copy out of meta tensor" in str(e):
+                                # Use to_empty() instead
+                                return self.to_empty(*args, **kwargs)
+                            else:
+                                raise e
+                    
+                    # Apply the patch
+                    torch.nn.modules.module.Module.to = patched_to
+                    
+                    try:
+                        # Try loading again with the patched method
+                        self.model = _LENS_SALSA_Model(ckpt_path)
+                    finally:
+                        # Restore the original method
+                        torch.nn.modules.module.Module.to = original_to
+                else:
+                    raise e
+            
             # Update column names to match what the model expects
             self.input_column = self.model.source_column
             self.output_column = self.model.target_column
@@ -209,6 +242,8 @@ The model is trained using human-annotated quality scores from simplification co
                 token sequences themselves and prevents the negative-padding
                 assertion that crashes evaluation jobs on long inputs.
                 """
+                import torch  # Import torch inside the function scope
+                
                 if tensor.shape[0] > length:
                     # Truncate rather than assert – this keeps span masks and
                     # token sequences aligned after the upstream truncation

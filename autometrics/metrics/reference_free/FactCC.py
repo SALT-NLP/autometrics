@@ -160,9 +160,23 @@ where $f$ is the classification function learned by the model, trained on synthe
     def _load_model(self):
         if self.model is None:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-            self.model = AutoModelForSequenceClassification.from_pretrained(
-                self.model_name
-            ).to(self.device).eval()
+            
+            try:
+                self.model = AutoModelForSequenceClassification.from_pretrained(
+                    self.model_name
+                ).to(self.device).eval()
+            except NotImplementedError as e:
+                # Handle meta tensor issue
+                if "Cannot copy out of meta tensor" in str(e):
+                    print(f"    🔧 Meta tensor issue detected for {self.model_name}, using to_empty()...")
+                    # Load model without device specification first, then use to_empty()
+                    self.model = AutoModelForSequenceClassification.from_pretrained(
+                        self.model_name
+                    )
+                    # Use to_empty() to properly move from meta to device
+                    self.model = self.model.to_empty(device=self.device).eval()
+                else:
+                    raise e
 
     def _unload_model(self):
         if self.model is not None:

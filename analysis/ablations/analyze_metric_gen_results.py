@@ -501,6 +501,8 @@ if __name__ == "__main__":
 #   --results_path results/ablations/metric_generation/qwen3_32b/sub_results \
 #   --corr_type kendall \
 #   --out_root results/ablations/metric_generation_analysis
+#
+# python analysis/ablations/analyze_metric_gen_results.py --results_path results/ablations/metric_generation/qwen3_32b/sub_results --corr_type kendall --out_root results/ablations/metric_generation_analysis
 # 
 # Output files will be:
 # - combined_kendall_qwen.csv

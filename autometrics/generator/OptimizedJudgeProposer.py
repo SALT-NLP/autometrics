@@ -426,7 +426,10 @@ class OptimizedJudgeProposer(Generator):
 
         if not formatter:
             formatter = self._get_formatter(dataset)
-        
+
+        # Track whether the caller explicitly requested a target.
+        explicit_target_requested = target_measure is not None
+
         if not target_measure:
             target_measure = dataset.get_target_columns()[0]
         
@@ -439,47 +442,64 @@ class OptimizedJudgeProposer(Generator):
         # Step-2: Generate metrics for target measure(s) -----------------------------
         new_metrics = []
         target_columns = dataset.get_target_columns()
-        
-        # Create up to n_metrics optimized metrics from available target columns
-        for i in range(min(n_metrics, len(target_columns))):
-            current_target = target_columns[i] if i < len(target_columns) else target_columns[0]
-            
+
+        # Validate explicit target and build the list of targets to generate for
+        if explicit_target_requested and target_measure not in target_columns:
+            raise ValueError(
+                f"target_measure '{target_measure}' not found in dataset target columns: {target_columns}"
+            )
+
+        if explicit_target_requested:
+            targets_to_generate = [target_measure] * n_metrics
+        else:
+            targets_to_generate = target_columns[: min(n_metrics, len(target_columns))]
+
+        for i, current_target in enumerate(targets_to_generate):
             print(f"\n🎯 Optimizing metric for target: {current_target}")
-            
+
             # Optimize prompt for this target measure
             print(f"🚀 Calling _optimize_prompt_for_target with:")
             print(f"  - target_column: {current_target}")
             print(f"  - dataset: {dataset.get_name()}")
             print(f"  - task_description: {task_description[:100]}...")
-            
+
             optimization_result = self._optimize_prompt_for_target(
                 target_column=current_target,
                 dataset=dataset,
                 task_description=task_description,
-                formatter=formatter
+                formatter=formatter,
             )
-            
+
             print(f"📊 Optimization result type: {type(optimization_result)}")
             print(f"📊 Optimization result: {optimization_result}")
-            
+
             # Create metric name with dataset name to avoid collisions
             dataset_name = getattr(dataset, 'name', 'UnknownDataset')
             seed_suffix = f"_seed{self.seed}" if self.seed is not None else ""
-            metric_name = f"{dataset_name}_{current_target}_{self.judge_model_name}_optimized{seed_suffix}"
+            base_metric_name = f"{dataset_name}_{current_target}_{self.judge_model_name}_optimized{seed_suffix}"
+            # Add index suffix only when explicitly generating multiple for the same target
+            metric_name = (
+                f"{base_metric_name}_{i+1}" if explicit_target_requested and n_metrics > 1 else base_metric_name
+            )
 
             # Create a descriptive axis for the target column
-            axis_description = f"Evaluate the output on the '{current_target}' criterion (may or may not be super descriptive). Rate from around {optimization_result['suggested_range'][0]} to {optimization_result['suggested_range'][1]}."
-            
+            axis_description = (
+                f"Evaluate the output on the '{current_target}' criterion (may or may not be super descriptive). "
+                f"Rate from around {optimization_result['suggested_range'][0]} to {optimization_result['suggested_range'][1]}."
+            )
+
             # Validate and reconcile seed values
             executor_kwargs = self.executor_kwargs.copy()
             if self.seed is not None:
                 if 'seed' in executor_kwargs and executor_kwargs['seed'] != self.seed:
-                    print(f"Warning: Seed mismatch detected. Proposer seed ({self.seed}) differs from executor_kwargs seed ({executor_kwargs['seed']}). Using proposer seed.")
+                    print(
+                        f"Warning: Seed mismatch detected. Proposer seed ({self.seed}) differs from executor_kwargs seed ({executor_kwargs['seed']}). Using proposer seed."
+                    )
                 executor_kwargs['seed'] = self.seed
             elif 'seed' not in executor_kwargs:
                 # No seed provided anywhere, that's fine
                 pass
-            
+
             new_metrics.append(
                 dynamic_executor_class(
                     name=metric_name,
@@ -492,7 +512,7 @@ class OptimizedJudgeProposer(Generator):
                     **executor_kwargs,
                 )
             )
-            
+
             print(f"✅ Created optimized metric: {metric_name}")
 
         print(f"\n🎉 Generated {len(new_metrics)} optimized LLM judge metrics!")

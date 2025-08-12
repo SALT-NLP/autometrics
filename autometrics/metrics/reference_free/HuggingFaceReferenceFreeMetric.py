@@ -1,5 +1,6 @@
 from evaluate import load
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
+import torch
 
 class HuggingFaceReferenceFreeMetric(ReferenceFreeMetric):
     """
@@ -33,7 +34,36 @@ class HuggingFaceReferenceFreeMetric(ReferenceFreeMetric):
 
     def _load_metric(self):
         if self.metric is None:
-            self.metric = load(self.metric_id, **self.load_kwargs)
+            try:
+                # First attempt: try loading with provided kwargs
+                self.metric = load(self.metric_id, **self.load_kwargs)
+            except NotImplementedError as e:
+                # Handle meta tensor issue
+                if "Cannot copy out of meta tensor" in str(e):
+                    print(f"    🔧 Meta tensor issue detected for {self.metric_id}, trying CPU fallback...")
+                    # Force CPU usage and try again
+                    cpu_kwargs = self.load_kwargs.copy()
+                    cpu_kwargs["device"] = "cpu"
+                    try:
+                        self.metric = load(self.metric_id, **cpu_kwargs)
+                        print(f"    ✅ Successfully loaded {self.metric_id} on CPU")
+                    except Exception as e2:
+                        print(f"    ❌ Failed to load {self.metric_id} even on CPU: {e2}")
+                        # Try one more time with no device specification at all
+                        try:
+                            no_device_kwargs = self.load_kwargs.copy()
+                            if "device" in no_device_kwargs:
+                                del no_device_kwargs["device"]
+                            self.metric = load(self.metric_id, **no_device_kwargs)
+                            print(f"    ✅ Successfully loaded {self.metric_id} without device specification")
+                        except Exception as e3:
+                            print(f"    ❌ Failed to load {self.metric_id} without device specification: {e3}")
+                            raise e3
+                else:
+                    raise e
+            except Exception as e:
+                print(f"    ❌ Failed to load {self.metric_id}: {e}")
+                raise e
 
     def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs) -> float:
         self._load_metric()

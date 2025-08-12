@@ -18,26 +18,32 @@ class Aggregator(ABC):
         """
         Ensure that the input metrics are present in the dataset
         """
-        if self.input_metrics:
-            for metric in self.input_metrics:
-                if isinstance(metric, MultiMetric):
-                    for submetric in metric.get_submetric_names():
-                        if submetric not in dataset.get_metric_columns():
-                            metric.predict(dataset)
-                elif metric.get_name() not in dataset.get_metric_columns():
-                    metric.predict(dataset)
+        if not self.input_metrics:
+            return
 
-                df = dataset.get_dataframe()
+        # Work off the actual DataFrame columns to avoid stale metadata in metric_columns
+        df = dataset.get_dataframe()
+        for metric in self.input_metrics:
+            if isinstance(metric, MultiMetric):
+                submetric_names = metric.get_submetric_names()
+                # If any expected submetric column is missing from the DataFrame, (re)compute
+                missing = [name for name in submetric_names if name not in df.columns]
+                if missing:
+                    metric.predict(dataset, update_dataset=True)
+                    df = dataset.get_dataframe()
 
-                for i, row in df.iterrows():
-                    if isinstance(metric, MultiMetric):
-                        for submetric in metric.get_submetric_names():
-                            if submetric not in row:
-                                metric.calculate_row(row, dataset, update_dataset=True)
-                    elif metric.get_name() not in row:
-                        metric.calculate_row(row, dataset, update_dataset=True)
+                # Ensure dataset.metric_columns metadata is synced
+                for name in submetric_names:
+                    if name not in dataset.get_metric_columns():
+                        dataset.get_metric_columns().append(name)
+            else:
+                metric_name = metric.get_name()
+                if metric_name not in df.columns:
+                    metric.predict(dataset, update_dataset=True)
+                    df = dataset.get_dataframe()
 
-                dataset.set_dataframe(df)
+                if metric_name not in dataset.get_metric_columns():
+                    dataset.get_metric_columns().append(metric_name)
 
     def get_input_columns(self):
         """

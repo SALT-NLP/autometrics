@@ -1,5 +1,5 @@
 import dspy
-from typing import List, Type
+from typing import List, Type, Optional
 import math
 import litellm
 
@@ -48,10 +48,13 @@ class LLMRec(MetricRecommender):
     A metric recommender that uses a LLM to recommend metrics.
     Uses systematic token counting to plan batching strategy upfront.
     """
-    def __init__(self, metric_classes: List[Type[Metric]], index_path: str = None, force_reindex: bool = False, model: dspy.LM = None):
+    def __init__(self, metric_classes: List[Type[Metric]], index_path: str = None, force_reindex: bool = False, model: dspy.LM = None, use_description_only: bool = False):
         super().__init__(metric_classes, index_path, force_reindex)
         self.model = model
         self.recommender = LLMMetricRecommendation()
+        self.use_description_only = use_description_only
+        # If upstream proxy reports a smaller effective input limit, cache it here
+        self._override_max_input_tokens: Optional[int] = None
         
         # Token budget constants - being more conservative based on actual failures
         self.DSPY_OVERHEAD_TOKENS = 4096  # Reserve for DSPy system prompts, reasoning, etc. (increased)
@@ -87,6 +90,9 @@ class LLMRec(MetricRecommender):
     
     def _get_max_context_tokens(self, model_name: str = None) -> int:
         """Get max context window for model, preferring input tokens over general max."""
+        # Honor detected effective limit from previous errors if present
+        if self._override_max_input_tokens is not None:
+            return self._override_max_input_tokens
         if model_name is None:
             model_name = self._get_model_name()
             
@@ -120,6 +126,54 @@ class LLMRec(MetricRecommender):
         except Exception as e:
             print(f"Warning: litellm token limit lookup failed with {e}, using default 40960")
             return 40960
+
+    def _compute_available_tokens(self, max_context: int) -> int:
+        """Compute available prompt tokens with dynamic budgeting for small contexts."""
+        # Adapt reserves for small contexts (e.g., 8k) to avoid negative budgets
+        dynamic_dspy_overhead = min(self.DSPY_OVERHEAD_TOKENS, int(max_context * 0.20))
+        dynamic_output_tokens = min(self.OUTPUT_TOKENS, int(max_context * 0.20))
+        dynamic_safety_margin = min(self.SAFETY_MARGIN, int(max_context * 0.10))
+        available_tokens = max_context - dynamic_dspy_overhead - dynamic_output_tokens - dynamic_safety_margin
+        # Ensure a minimal usable budget
+        return max(512, available_tokens)
+
+    def _is_context_error(self, e: Exception) -> bool:
+        msg = str(e)
+        return any(p in msg for p in [
+            'ContextWindowExceededError',
+            'BadRequestError',
+            'context length',
+            'maximum context length',
+            'maximum allowed length',
+            'exceeds the maximum',
+            'Input length',
+            '--allow-auto-truncate'
+        ])
+
+    def _extract_max_allowed_from_error(self, e: Exception) -> Optional[int]:
+        """Extract effective max input tokens from upstream proxy error messages."""
+        import re
+        msg = str(e)
+        m = re.search(r"maximum allowed length \((\d+)\)", msg)
+        if m:
+            try:
+                return int(m.group(1))
+            except Exception:
+                return None
+        m2 = re.search(r"maximum context length\s*:?\s*(\d+)", msg)
+        if m2:
+            try:
+                return int(m2.group(1))
+            except Exception:
+                return None
+        return None
+
+    def _handle_context_error(self, e: Exception) -> None:
+        inferred = self._extract_max_allowed_from_error(e)
+        if inferred is not None:
+            if self._override_max_input_tokens != inferred:
+                print(f"Detected effective max input tokens from error: {inferred}")
+            self._override_max_input_tokens = inferred
     
     def _estimate_prompt_tokens(self, task_description: str, target_measurement: str, num_metrics: int, avg_metric_doc_tokens: int) -> int:
         """Estimate total prompt tokens for a given batch size."""
@@ -189,6 +243,8 @@ Please provide a ranking of the metrics from most relevant to least relevant for
         
         print(f"Model: {model_name}")
         print(f"Max context: {max_context}")
+        # Allow dynamic budgeting (honors small contexts like 8k from proxies)
+        available_tokens = self._compute_available_tokens(max_context)
         print(f"Available for prompt: {available_tokens}")
         
         # Get task description and estimate base prompt tokens
@@ -239,8 +295,19 @@ Please provide a ranking of the metrics from most relevant to least relevant for
         Returns the raw ranking (list of metric names) rather than metric classes.
         """
         task_description = dataset.get_task_description()
-        metric_documentation = [f"«METRIC NAME: {metric.__name__}\nMETRIC DOCUMENTATION: {metric.__doc__}»" for metric in metric_classes]
+        docs = []
+        for metric in metric_classes:
+            if self.use_description_only:
+                desc = getattr(metric, 'description', None)
+                if desc is None:
+                    desc = metric.__doc__
+                docs.append(f"«METRIC NAME: {metric.__name__}\nMETRIC DOCUMENTATION: {desc}»")
+            else:
+                docs.append(f"«METRIC NAME: {metric.__name__}\nMETRIC DOCUMENTATION: {metric.__doc__}»")
+        metric_documentation = docs
 
+        # Never request more than we provide to avoid hallucinated extras
+        k = min(k, len(metric_classes))
         print(f"  _recommend_batch: {len(metric_classes)} metrics -> requesting {k} recommendations")
         
         if self.model is not None:
@@ -251,6 +318,40 @@ Please provide a ranking of the metrics from most relevant to least relevant for
         
         print(f"  _recommend_batch: LLM returned {len(ranking)} recommendations")
         return ranking
+
+    def _process_split_batch(self, batch: List[Type[Metric]], dataset: Dataset, target_measurement: str, batch_target: int) -> List[Type[Metric]]:
+        """Recursively split a batch until it fits; collect up to batch_target results."""
+        if batch_target <= 0 or not batch:
+            return []
+        try:
+            ranking = self._recommend_batch(batch, dataset, target_measurement, batch_target)
+            results = [self.metric_name_to_class(name) for name in ranking]
+            results = [r for r in results if r is not None]
+            return results[:batch_target]
+        except Exception as e:
+            if self._is_context_error(e):
+                print(f"  Batch of size {len(batch)} failed with context error; splitting. Error: {e}")
+                self._handle_context_error(e)
+                if len(batch) == 1:
+                    # Try with k=1; if still fails, give up on this item
+                    try:
+                        ranking = self._recommend_batch(batch, dataset, target_measurement, 1)
+                        results = [self.metric_name_to_class(name) for name in ranking]
+                        return [r for r in results if r is not None][:1]
+                    except Exception:
+                        return []
+                mid = max(1, len(batch) // 2)
+                left, right = batch[:mid], batch[mid:]
+                # Proportionally distribute targets; ensure non-negative and not exceeding sub-batch sizes
+                left_target = min(max(1, int(round(batch_target * len(left) / len(batch)))), len(left)) if batch_target > 1 else 1
+                right_target = max(0, batch_target - left_target)
+                right_target = min(right_target, len(right))
+                left_results = self._process_split_batch(left, dataset, target_measurement, left_target)
+                remaining = max(0, batch_target - len(left_results))
+                right_results = self._process_split_batch(right, dataset, target_measurement, remaining)
+                return (left_results + right_results)[:batch_target]
+            else:
+                raise e
 
     def _split_metrics_into_batches(self, metric_classes: List[Type[Metric]], max_per_batch: int) -> List[List[Type[Metric]]]:
         """Split metric classes into batches with maximum size.""" 
@@ -282,7 +383,7 @@ Please provide a ranking of the metrics from most relevant to least relevant for
         if len(metric_classes) <= max_per_batch:
             print("All metrics fit in one batch, recommending directly")
             try:
-                ranking = self._recommend_batch(metric_classes, dataset, target_measurement, k)
+                ranking = self._recommend_batch(metric_classes, dataset, target_measurement, min(k, len(metric_classes)))
                 print(f"Raw ranking received: {ranking}")
                 
                 results = [self.metric_name_to_class(metric_name) for metric_name in ranking]
@@ -296,12 +397,11 @@ Please provide a ranking of the metrics from most relevant to least relevant for
                 print(f"Returning {len(final_results)} metrics (requested {k})")
                 return final_results
             except Exception as e:
-                if any(error_phrase in str(e) for error_phrase in ['ContextWindowExceededError', 'BadRequestError', 'context length']):
+                if self._is_context_error(e):
                     print(f"Context window exceeded even with token planning. Error: {e}")
-                    # Fall back to smaller batch
-                    if len(metric_classes) > 3:
-                        smaller_batch = metric_classes[:len(metric_classes)//2]
-                        return self._recommend_with_token_planning(smaller_batch, dataset, target_measurement, min(k, len(smaller_batch)))
+                    self._handle_context_error(e)
+                    # Recursively split until it fits
+                    return self._process_split_batch(metric_classes, dataset, target_measurement, min(k, len(metric_classes)))
                 raise e
         
         # Multiple batches needed
@@ -317,53 +417,11 @@ Please provide a ranking of the metrics from most relevant to least relevant for
         for i, batch in enumerate(batches):
             # Calculate target recommendations for this batch
             batch_target = max(1, min(int(len(batch) * recommendation_ratio), max_recommend_per_batch))
-            
+            batch_target = min(batch_target, len(batch))
             print(f"Processing batch {i+1}/{len(batches)}: {len(batch)} metrics -> {batch_target} recommendations")
-            
-            try:
-                batch_ranking = self._recommend_batch(batch, dataset, target_measurement, batch_target)
-                batch_results = [self.metric_name_to_class(metric_name) for metric_name in batch_ranking]
-                batch_results = [r for r in batch_results if r is not None]
-                all_batch_results.extend(batch_results)
-                
-            except Exception as e:
-                if any(error_phrase in str(e) for error_phrase in ['ContextWindowExceededError', 'BadRequestError', 'context length']):
-                    print(f"Batch {i+1} exceeded context window despite planning. Splitting batch and processing both halves...")
-                    # Split the batch in half and process both halves
-                    if len(batch) > 1:
-                        mid = len(batch) // 2
-                        batch_1 = batch[:mid]
-                        batch_2 = batch[mid:]
-                        
-                        # Split the target proportionally
-                        target_1 = max(1, int(batch_target * len(batch_1) / len(batch)))
-                        target_2 = max(1, int(batch_target * len(batch_2) / len(batch)))
-                        
-                        print(f"  Split into: {len(batch_1)} metrics -> {target_1} recs, {len(batch_2)} metrics -> {target_2} recs")
-                        
-                        # Process first half
-                        try:
-                            ranking_1 = self._recommend_batch(batch_1, dataset, target_measurement, target_1)
-                            results_1 = [self.metric_name_to_class(name) for name in ranking_1]
-                            results_1 = [r for r in results_1 if r is not None]
-                            all_batch_results.extend(results_1)
-                            print(f"  First half succeeded: {len(results_1)} recommendations")
-                        except Exception as e1:
-                            print(f"  First half failed: {e1}")
-                        
-                        # Process second half
-                        try:
-                            ranking_2 = self._recommend_batch(batch_2, dataset, target_measurement, target_2)
-                            results_2 = [self.metric_name_to_class(name) for name in ranking_2]
-                            results_2 = [r for r in results_2 if r is not None]
-                            all_batch_results.extend(results_2)
-                            print(f"  Second half succeeded: {len(results_2)} recommendations")
-                        except Exception as e2:
-                            print(f"  Second half failed: {e2}")
-                    else:
-                        print(f"  Single metric batch failed, skipping")
-                else:
-                    raise e
+            results = self._process_split_batch(batch, dataset, target_measurement, batch_target)
+            if results:
+                all_batch_results.extend(results)
         
         # Remove duplicates while preserving order
         seen = set()
@@ -377,15 +435,15 @@ Please provide a ranking of the metrics from most relevant to least relevant for
         
         # If we used multiple batches, do a final ranking pass to get proper global ordering
         # (but only if it's feasible - don't attempt if we have too many results to fit in context)
-        if len(batches) > 1 and len(merged_results) <= max_per_batch:
+        if len(batches) > 1 and len(merged_results) <= max_per_batch and len(merged_results) > 0:
             print(f"Performing final ranking on {len(merged_results)} candidates to fix cross-batch ordering")
             try:
-                final_ranking = self._recommend_batch(merged_results, dataset, target_measurement, k)
+                final_ranking = self._recommend_batch(merged_results, dataset, target_measurement, min(k, len(merged_results)))
                 final_results = [self.metric_name_to_class(metric_name) for metric_name in final_ranking]
                 final_results = [r for r in final_results if r is not None]
                 return final_results[:k]
             except Exception as e:
-                if any(error_phrase in str(e) for error_phrase in ['ContextWindowExceededError', 'BadRequestError', 'context length']):
+                if self._is_context_error(e):
                     print(f"Final ranking exceeded context window, returning merged results: {e}")
                     return merged_results[:k]
                 else:

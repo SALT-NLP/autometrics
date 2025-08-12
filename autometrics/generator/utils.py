@@ -49,6 +49,10 @@ def is_context_length_error(error_str: str) -> bool:
         "too many tokens",
         "token limit",
         "exceeds maximum",
+        "exceeds the maximum",
+        "maximum allowed length",
+        "input length",
+        "allow-auto-truncate",
         "input is too long",
         "context_length_exceeded"
     ]

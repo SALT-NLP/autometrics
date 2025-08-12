@@ -179,9 +179,13 @@ test_autometrics_cache/
 
 *.err
 *.out
+.tmp/
+temp_alpha/
 
 /bm25/
 core
 /results/
 /generated_metrics/
 /full_test_metrics/
+/generated_metrics_*
+/autometrics_cache_*

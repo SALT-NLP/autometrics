@@ -98,15 +98,19 @@ class RegressionStrategyTester:
         print(f"   Validation: {len(val_dataset.get_dataframe())} examples")
         print(f"   Test: {len(test_dataset.get_dataframe())} examples")
         
-        # Create Autometrics with default settings
-        print(f"\n🚀 Creating Autometrics with default settings...")
+        # Create Autometrics with dataset-specific generated metrics directory
+        safe_dataset_name = self.config.dataset_name.replace(" ", "_").replace("/", "_")
+        generated_metrics_dir = f"generated_metrics_{safe_dataset_name}"
+        
+        print(f"\n🚀 Creating Autometrics with dataset-specific metrics directory: {generated_metrics_dir}")
         autometrics = Autometrics(
             regression_strategy=Lasso,  # Default, will be overridden
             retriever_kwargs={
                 "recommenders": [ColBERT, LLMRec],
                 "top_ks": [60, 30],  # Default Autometrics settings
                 "index_paths": [None, None]
-            }
+            },
+            generated_metrics_dir=generated_metrics_dir
         )
         
         # Run pipeline up to evaluation step
@@ -151,9 +155,14 @@ class RegressionStrategyTester:
         
         # Step 6: Evaluate same metrics on validation set
         print(f"\n[Realistic] Step 6: Evaluating {len(successful_metric_instances)} Metrics on Validation Dataset")
-        for metric in successful_metric_instances:
-            val_dataset.add_metric(metric, update_dataset=True)
-        print(f"[Realistic] Added {len(successful_metric_instances)} metrics to validation dataset")
+        
+        # Use the same smart parallelization logic as _evaluate_metrics_on_dataset
+        # but with already-built metric instances
+        successful_val_metrics = self._evaluate_built_metrics_on_dataset(
+            autometrics, val_dataset, successful_metric_instances
+        )
+        
+        print(f"[Realistic] Successfully evaluated {len(successful_val_metrics)} metrics on validation dataset")
         
         pipeline_time = time.time() - start_time
         print(f"\n⏱️  Pipeline setup completed in {pipeline_time:.2f}s")
@@ -270,6 +279,58 @@ class RegressionStrategyTester:
         self._print_comprehensive_analysis(results, pipeline_time)
         
         return results
+    
+    def _evaluate_built_metrics_on_dataset(self, autometrics, dataset, metric_instances):
+        """
+        Evaluate already-built metric instances on a dataset using the same smart parallelization
+        logic as _evaluate_metrics_on_dataset.
+        
+        This method implements the same device_map="auto" detection and parallelization
+        decision logic but works with already-built metric instances instead of classes.
+        """
+        if not metric_instances:
+            print("[Realistic] No metrics to evaluate")
+            return []
+        
+        # Convert to the format expected by the sequential/parallel methods
+        metric_classes = [type(metric) for metric in metric_instances]
+        valid_metrics = [(i, metric) for i, metric in enumerate(metric_instances)]
+        
+        # Check for device_map="auto" metrics that should be forced to sequential
+        auto_device_map_metrics = []
+        regular_metrics = []
+        
+        for i, metric in enumerate(metric_instances):
+            # Check if this metric uses device_map="auto" by inspecting its attributes
+            if hasattr(metric, 'device_map') and metric.device_map == "auto":
+                auto_device_map_metrics.append((i, metric))
+                print(f"  🔄 {metric.get_name()} uses device_map='auto' - will be evaluated sequentially")
+            elif hasattr(metric, 'load_kwargs') and isinstance(metric.load_kwargs, dict):
+                if metric.load_kwargs.get('device_map') == "auto":
+                    auto_device_map_metrics.append((i, metric))
+                    print(f"  🔄 {metric.get_name()} uses load_kwargs device_map='auto' - will be evaluated sequentially")
+            else:
+                regular_metrics.append((i, metric))
+        
+        successful_metrics = []
+        
+        # Phase 1: Evaluate regular metrics in parallel (if enabled and we have multiple)
+        if autometrics.enable_parallel_evaluation and len(regular_metrics) > 1:
+            print(f"[Realistic] Evaluating {len(regular_metrics)} regular metrics using parallel execution...")
+            successful_metrics.extend(autometrics._evaluate_metrics_parallel(dataset, metric_classes, regular_metrics))
+        elif len(regular_metrics) > 0:
+            print(f"[Realistic] Evaluating {len(regular_metrics)} regular metrics using sequential execution...")
+            successful_metrics.extend(autometrics._evaluate_metrics_sequential(dataset, metric_classes, regular_metrics))
+        
+        # Phase 2: Evaluate device_map="auto" metrics sequentially (if any)
+        if len(auto_device_map_metrics) > 0:
+            print(f"[Realistic] Evaluating {len(auto_device_map_metrics)} device_map='auto' metrics sequentially...")
+            print(f"[Realistic] device_map='auto' metrics: {[metric.get_name() for _, metric in auto_device_map_metrics]}")
+            successful_metrics.extend(autometrics._evaluate_metrics_sequential(dataset, metric_classes, auto_device_map_metrics))
+        
+        return successful_metrics
+    
+
     
     def _print_comprehensive_analysis(self, results: Dict[str, Any], pipeline_time: float):
         """Print comprehensive analysis of results."""

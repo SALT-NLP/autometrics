@@ -134,6 +134,11 @@ class GEvalJudgeProposer(Generator):
             else:
                 metric_name = name_part + "_" + self.judge_model_name + "_geval"
 
+            # Remove commas from metric name
+            metric_name = metric_name.replace(",", "")
+            for char in "/ :.()[]}{":
+                metric_name = metric_name.replace(char, "_")
+
             # Validate and reconcile seed values
             executor_kwargs = self.executor_kwargs.copy()
             if self.seed is not None:

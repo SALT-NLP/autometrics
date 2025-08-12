@@ -432,6 +432,12 @@ class LLMJudgeExampleProposer(Generator):
             **executor_kwargs,
         )
 
+        # TODO:  THIS IS IMPORTANT!!  RIGHT NOW WE ARE RETURNING A DUPLICATE METRIC TO ACHIEVE N_METRICS.  WE NEED TO FIX THIS IF A USER EVER WANTS TO GENERATE MORE THAN ONE METRIC.
+        if n_metrics > 1:
+            print("--------------------------------")
+            print(f"WARNING!!!  GENERATOR {self.name} ONLY RETURNS DUPLICATES OF THE SAME METRIC.  THIS IS NOT A PROBLEM IF YOU ARE ONLY GENERATING ONE METRIC.  IF YOU ARE GENERATING MORE THAN ONE METRIC, THIS IS CURRENTLY NOT SUPPORTED.")
+            print("--------------------------------")
+
         # Return list with one metric (or multiple if n_metrics > 1)
         # For now, we return the same metric since example-based optimization
         # works on the target measure directly

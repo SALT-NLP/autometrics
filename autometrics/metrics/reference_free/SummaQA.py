@@ -38,12 +38,9 @@ class QA_Bert:
     BERT-based QA model (SQuAD) to answer cloze questions.
     """
     def __init__(self, device=None):
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        self.model = BertForQuestionAnswering.from_pretrained(
-            'bert-large-uncased-whole-word-masking-finetuned-squad'
-        )
-        self.sep_id = self.tokenizer.encode('[SEP]', add_special_tokens=False)[0]
-        self.model.eval()
+        # Use the same model name for both tokenizer and model to ensure compatibility
+        model_name = 'bert-large-uncased-whole-word-masking-finetuned-squad'
+        self.tokenizer = BertTokenizer.from_pretrained(model_name)
         
         # Set device (use GPU if available by default)
         if device is None:
@@ -51,8 +48,41 @@ class QA_Bert:
         else:
             self.device = torch.device(device)
         
-        self.model = self.model.to(self.device)
+        try:
+            # Try to load the model directly to the target device
+            self.model = BertForQuestionAnswering.from_pretrained(
+                model_name,
+                device_map=None  # Don't use device_map initially
+            )
+            # Move to target device
+            self.model = self.model.to(self.device)
+        except Exception as e:
+            # Handle meta tensor issue or other device-related errors
+            if "meta" in str(e).lower() or "Cannot copy out of meta tensor" in str(e):
+                print(f"    🔧 Meta tensor issue detected for BERT QA model, using to_empty()...")
+                # Load model without device specification first, then use to_empty()
+                self.model = BertForQuestionAnswering.from_pretrained(
+                    model_name,
+                    device_map=None  # Don't use device_map initially
+                )
+                # Use to_empty() to properly move from meta to device
+                self.model = self.model.to_empty(device=self.device)
+            else:
+                # For other errors, try loading to CPU first then moving
+                print(f"    🔧 Device loading error, trying CPU first: {e}")
+                self.model = BertForQuestionAnswering.from_pretrained(
+                    model_name,
+                    device_map=None
+                )
+                self.model = self.model.to(self.device)
+        
+        self.sep_id = self.tokenizer.encode('[SEP]', add_special_tokens=False)[0]
+        self.model.eval()
         self.max_seq_length = 512  # BERT's maximum sequence length
+        
+        # Debug: Print device information
+        print(f"    🔧 SummaQA QA_Bert initialized on device: {self.device}")
+        print(f"    🔧 Model device: {next(self.model.parameters()).device}")
 
     def predict(self, question: str, text: str) -> Tuple[str, float]:
         """
@@ -84,9 +114,13 @@ class QA_Bert:
             input_ids = encoded_dict['input_ids']
             token_type_ids = encoded_dict['token_type_ids']
             
-            # Move to correct device
+            # Ensure tensors are on the correct device
             input_ids = input_ids.to(self.device)
             token_type_ids = token_type_ids.to(self.device)
+            
+            # Debug: Check tensor devices
+            if input_ids.device != self.device or token_type_ids.device != self.device:
+                print(f"    🔧 Device mismatch detected: input_ids.device={input_ids.device}, token_type_ids.device={token_type_ids.device}, expected={self.device}")
             
             with torch.no_grad():
                 # Get model outputs

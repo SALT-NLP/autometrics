@@ -480,7 +480,7 @@ autometrics = Autometrics(metric_bank=custom_bank)
 2. **Check GPU Requirements**: Some metrics need significant GPU memory
 3. **Use Appropriate LLMs**: GPT-4o-mini works well, larger models for complex tasks
 4. **Validate Results**: Check correlation with human scores
-5. **Cache Results**: Metrics cache automatically in `./autometrics_cache/`
+5. **Cache Results**: Metrics cache automatically in `./autometrics_cache/` (configurable via `AUTOMETRICS_CACHE_DIR` environment variable)
 
 ```python
 # Quick validation

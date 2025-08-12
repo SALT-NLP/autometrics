@@ -71,7 +71,7 @@ For a more in depth introduction it would be useful to check out `simpda_dspy.ip
 
 The library implements disk caching for all metrics to improve performance when running scripts multiple times. Key features:
 
-- All metrics cache results by default in the `./autometrics_cache` directory
+- All metrics cache results by default in the `./autometrics_cache` directory (configurable via `AUTOMETRICS_CACHE_DIR` environment variable)
 - Cache keys are generated based on:
   - Input/output/references passed to the metric
   - All initialization parameters (automatically included by default)

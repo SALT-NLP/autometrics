@@ -10,13 +10,14 @@ class PipelinedRec(MetricRecommender):
     """
     A metric recommender that uses a pipeline of recommenders to recommend metrics.
     """
-    def __init__(self, metric_classes: List[Type[Metric]], recommenders: List[Type[MetricRecommender]], top_ks: List[int], index_paths: List[str], force_reindex: bool = False, model: dspy.LM = None):
+    def __init__(self, metric_classes: List[Type[Metric]], recommenders: List[Type[MetricRecommender]], top_ks: List[int], index_paths: List[str], force_reindex: bool = False, model: dspy.LM = None, use_description_only: bool = False):
         super().__init__(metric_classes, index_paths[0], force_reindex)
         self.recommenders = recommenders
         self.top_ks = top_ks
         self.index_paths = index_paths
         self.force_reindex = force_reindex
         self.model = model
+        self.use_description_only = use_description_only
 
         if len(self.recommenders) != len(self.top_ks):
             if len(self.top_ks) == 1:
@@ -59,14 +60,14 @@ class PipelinedRec(MetricRecommender):
         for recommender_cls, top_k, index_path in zip(self.recommenders, top_ks, self.index_paths):
             if recommender_cls is LLMRec:
                 if index_path is None:
-                    recommender = recommender_cls(metric_classes=results, force_reindex=self.force_reindex, model=self.model)
+                    recommender = recommender_cls(metric_classes=results, force_reindex=self.force_reindex, model=self.model, use_description_only=self.use_description_only)
                 else:
-                    recommender = recommender_cls(metric_classes=results, index_path=index_path, force_reindex=self.force_reindex, model=self.model)
+                    recommender = recommender_cls(metric_classes=results, index_path=index_path, force_reindex=self.force_reindex, model=self.model, use_description_only=self.use_description_only)
             else:
                 if index_path is None:
-                    recommender = recommender_cls(metric_classes=results, force_reindex=self.force_reindex)
+                    recommender = recommender_cls(metric_classes=results, force_reindex=self.force_reindex, use_description_only=self.use_description_only)
                 else:
-                    recommender = recommender_cls(metric_classes=results, index_path=index_path, force_reindex=self.force_reindex)
+                    recommender = recommender_cls(metric_classes=results, index_path=index_path, force_reindex=self.force_reindex, use_description_only=self.use_description_only)
             results = recommender.recommend(dataset, target_measurement, top_k)
             # drop any "None"s from results
             results = [r for r in results if r is not None]

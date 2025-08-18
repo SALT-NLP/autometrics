@@ -2,8 +2,8 @@
 
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=16
-#SBATCH --gres=gpu:1
-#SBATCH --mem=120G
+#SBATCH --mem=200G
+#SBATCH --gres=gpu:4
 #SBATCH --open-mode=append
 #SBATCH --partition=jag-lo
 #SBATCH --time=48:00:00
@@ -15,6 +15,11 @@
 #SBATCH --requeue
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mryan0@stanford.edu
+
+# Add this later
+#### #SBATCH --mem=40G
+#### #SBATCH --gres=gpu:1
+#### #SBATCH -x jagupard[19-20,26-31]
 
 # Run ablations on jagupard-grade GPUs pointing to a separately-hosted Qwen server.
 # This script DOES NOT start or stop the Qwen server.
@@ -125,11 +130,12 @@ PY_ARGS=(
 )
 
 if [ -n "$K" ]; then PY_ARGS+=( --k "$K" ); fi
-if [ -n "$N" ]; then PY_ARGS+=( --n "$N" ); fi
+# Pass --n if N is provided (integer). No 'auto' mode anymore.
+if [[ -n "$N" && "$N" =~ ^[0-9]+$ ]]; then PY_ARGS+=( --n "$N" ); fi
 if [ "$NO_METRIC_CARDS" = "true" ]; then PY_ARGS+=( --no-metric-cards ); fi
 if [ "$FORCE_REINDEX" = "true" ]; then PY_ARGS+=( --force-reindex ); fi
 
-python "${PY_ARGS[@]}"
+COLBERT_LOAD_TORCH_EXTENSION_VERBOSE=True python "${PY_ARGS[@]}"
 STATUS=$?
 
 if [ $STATUS -eq 0 ]; then

@@ -5,6 +5,7 @@ from autometrics.recommend.BM25 import BM25
 from autometrics.recommend.PipelinedRec import PipelinedRec
 from autometrics.metrics.MetricBank import all_metric_classes
 from autometrics.aggregator.regression.PLS import PLS
+from autometrics.aggregator.regression.HotellingPLS import HotellingPLS
 from autometrics.dataset.Dataset import Dataset
 from autometrics.metrics.Metric import Metric
 from autometrics.recommend.MetricRecommender import MetricRecommender
@@ -109,8 +110,6 @@ DEFAULT_GENERATOR_CONFIGS  = {
 DEFAULT_RETRIEVER_KWARGS = _get_default_retriever_config()
 
 DEFAULT_REGRESSION_KWARGS = {
-    # Empty for now - most regression strategies don't need dataset-specific kwargs
-    # but this pattern allows for future extensibility
 }
 
 class Autometrics:
@@ -146,7 +145,7 @@ class Autometrics:
                 Note: The default retriever configuration automatically adapts to hardware:
                 - GPU environments: Uses ColBERT + LLMRec pipeline for optimal performance
                 - CPU-only environments: Uses BM25 + LLMRec pipeline for CPU-optimized performance
-            regression_strategy: Regression aggregator class (defaults to PLS)
+            regression_strategy: Regression aggregator class (defaults to HotellingPLS: PLS with Hotelling T² auto variable selection)
             regression_kwargs: Keyword arguments to pass to regression strategy constructor (dataset is automatically added during construction)
             metric_bank: Either:
                 - List of metric classes (e.g., [BLEU, SARI, LevenshteinDistance]) - RECOMMENDED
@@ -195,7 +194,7 @@ class Autometrics:
         generator_llm: dspy.LM,
         judge_llm: dspy.LM,
         num_to_retrieve: int = 30,
-        num_to_regress: int = 5,
+        num_to_regress: Union[int, str] = 5,
         regenerate_metrics: bool = False,
         prometheus_api_base: Optional[str] = None,
         model_save_dir: Optional[str] = None,
@@ -260,6 +259,16 @@ class Autometrics:
         # Construct regression strategy with dataset-specific kwargs
         print("[Autometrics] Configuring regression strategy...")
         regression_kwargs = self.regression_kwargs.copy()
+        
+        # Route selection behavior for HotellingPLS based on num_to_regress (only when explicitly used)
+        if self.regression_strategy == HotellingPLS:
+            regression_kwargs["random_state"] = self.seed
+            if isinstance(num_to_regress, int) and num_to_regress > 0:
+                regression_kwargs["selection_mode"] = "top_n"
+                regression_kwargs["top_n"] = num_to_regress
+            else:
+                regression_kwargs["selection_mode"] = "alpha"
+                regression_kwargs.pop("top_n", None)
         # Add dataset to kwargs since all regression classes accept dataset parameter
         regression_kwargs["dataset"] = dataset
         regression_instance = self.regression_strategy(**regression_kwargs)
@@ -275,10 +284,31 @@ class Autometrics:
         successful_metric_instances = self._evaluate_metrics_on_dataset(dataset, all_metrics_to_evaluate)
         
         # 5. Regress to get top-N metrics using regression strategy
-        print(f"\n[Autometrics] Step 5: Regression Analysis (Selecting Top {num_to_regress})")
+        if self.regression_strategy == HotellingPLS:
+            if regression_kwargs.get("selection_mode") == "alpha":
+                print(f"\n[Autometrics] Step 5: Regression Analysis (Auto variable selection via Hotelling T²)")
+            else:
+                print(f"\n[Autometrics] Step 5: Regression Analysis (Selecting Top {num_to_regress} via Hotelling T²)")
+        else:
+            print(f"\n[Autometrics] Step 5: Regression Analysis (Selecting Top {num_to_regress} via {self.regression_strategy.__name__})")
         regression_results = self._regress_and_select_top_n(
             dataset, successful_metric_instances, target_measure, num_to_regress, regression_instance
         )
+
+        print(f"[Autometrics] Found top {len(regression_results['top_metrics'])} metrics.")
+        try:
+            top_metric_names = []
+            for metric in regression_results['top_metrics']:
+                if hasattr(metric, '__name__'):
+                    top_metric_names.append(metric.__name__)
+                elif hasattr(metric, 'get_name') and callable(getattr(metric, 'get_name')):
+                    top_metric_names.append(metric.get_name())
+                else:
+                    top_metric_names.append(type(metric).__name__)
+            print(f"[Autometrics] Top metrics: {top_metric_names}")
+        except Exception:
+            # Fallback to safe repr if anything unexpected happens
+            print(f"[Autometrics] Top metrics: {[type(m).__name__ for m in regression_results['top_metrics']]}")
         
         # 6. Generate a report card
         print("\n[Autometrics] Step 6: Generating Report Card")
@@ -1095,7 +1125,7 @@ class Autometrics:
         dataset: Dataset, 
         metric_instances: List[Metric], 
         target_measure: str,
-        n: int,
+        n: Union[int, str],
         regression_instance: Any # Added regression_instance parameter
     ) -> Dict[str, Any]:
         """
@@ -1117,6 +1147,55 @@ class Autometrics:
                 'final_regression_metric': None
             }
         
+        # HotellingPLS fast-path: train once, use selected columns, and return trained instance
+        if hasattr(regression_instance, "get_selected_columns"):
+            regression_dataset = dataset.copy()
+            regression_instance.input_metrics = metric_instances
+            regression_instance.learn(regression_dataset, target_column=target_measure)
+
+            selected_cols = set(regression_instance.get_selected_columns())
+
+            # Normalize importance pairs to (score, name)
+            raw_pairs = regression_instance.identify_important_metrics() or []
+            importance_pairs = []
+            for a, b in raw_pairs:
+                if isinstance(a, (int, float)) and not isinstance(b, (int, float)):
+                    importance_pairs.append((float(a), b))
+                elif isinstance(b, (int, float)) and not isinstance(a, (int, float)):
+                    importance_pairs.append((float(b), a))
+                else:
+                    try:
+                        importance_pairs.append((float(a), str(b)))
+                    except Exception:
+                        try:
+                            importance_pairs.append((float(b), str(a)))
+                        except Exception:
+                            continue
+
+            # Map selected columns back to metric instances
+            top_metrics = []
+            for metric in metric_instances:
+                if isinstance(metric, MultiMetric):
+                    if any(sub in selected_cols for sub in metric.get_submetric_names()):
+                        top_metrics.append(metric)
+                else:
+                    if metric.get_name() in selected_cols:
+                        top_metrics.append(metric)
+
+            # Add the trained regression metric to the original dataset
+            dataset.add_metric(regression_instance, update_dataset=True)
+
+            return {
+                'top_metrics': top_metrics,
+                'regression_metric': regression_instance,
+                'importance_scores': importance_pairs,
+                'final_regression_metric': regression_instance,
+                'all_metrics_importance': importance_pairs
+            }
+
+        # Legacy path (e.g., plain PLS): ensure n is a positive int
+        if not isinstance(n, int) or n <= 0:
+            n = 5
         print(f"[Autometrics] Running regression to select top {n} metrics from {len(metric_instances)} candidates...")
         
         # Get metric column names from the dataset
@@ -1244,6 +1323,25 @@ class Autometrics:
 ## Summary
 The Autometrics pipeline successfully identified the most relevant metrics for evaluating {target_measure} on the {dataset.get_name()} dataset. The selected metrics can be used individually or combined through the regression aggregator for comprehensive evaluation.
 """
+
+        #  Enrich report with Hotelling T² selection details
+        if regression_metric and hasattr(regression_metric, "get_selected_columns"):
+            try:
+                selected_vars = len(getattr(regression_metric, "get_selected_columns")())
+            except Exception:
+                selected_vars = None
+            report += "\n## Hotelling T² Selection\n"
+            if selected_vars is not None:
+                report += f"- Selected variables: {selected_vars}\n"
+            if hasattr(regression_metric, "A_star_"):
+                report += f"- A*: {getattr(regression_metric, 'A_star_', None)}\n"
+            if hasattr(regression_metric, "alpha_star_"):
+                report += f"- alpha*: {getattr(regression_metric, 'alpha_star_', None)}\n"
+            if hasattr(regression_metric, "t2_cutoff_") and getattr(regression_metric, "t2_cutoff_", None) is not None:
+                try:
+                    report += f"- T² cutoff: {float(getattr(regression_metric, 't2_cutoff_', 0.0)):.4f}\n"
+                except Exception:
+                    pass
         
         return report
 

@@ -3,9 +3,9 @@
 #SBATCH --job-name=gpt4omini_autometrics
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=16
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:6
 #SBATCH --mem=200G
-#SBATCH --partition=jag-lo
+#SBATCH --partition=jag-standard
 #SBATCH --time=48:00:00
 #SBATCH --nodes=1
 #SBATCH --open-mode=append
@@ -67,7 +67,7 @@ for seed in $SEEDS; do
   export AUTOMETRICS_CACHE_DIR="/nlp/scr3/nlp/20questions/autometrics_cache/gpt4omini_${DATASET_NAME}_${TARGET_MEASURE}_seed${seed}"
 
   # Run
-  python analysis/main_experiments/run_main_autometrics.py \
+  COLBERT_LOAD_TORCH_EXTENSION_VERBOSE=True python analysis/main_experiments/run_main_autometrics.py \
     "$DATASET_NAME" \
     "$TARGET_MEASURE" \
     "$seed" \

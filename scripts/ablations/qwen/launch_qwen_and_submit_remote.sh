@@ -191,7 +191,7 @@ if [ "${FULL_SUITE:-false}" = "true" ]; then
     for k in 30 20 10 5; do
       submit_one "$s" "full" "$k" "" "false" "false"; done
     # Regression n with k fixed at 30: 10,5,3,1
-    for n in 10 5 3 1; do
+    for n in 20 10 5 3 1; do
       submit_one "$s" "full" "30" "$n" "false" "false"; done
     # No Metric Cards with k=20 (force reindex)
     submit_one "$s" "full" "20" "" "true" "true"

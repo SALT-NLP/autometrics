@@ -18,7 +18,7 @@ import json
 import dspy
 import numpy as np
 import argparse
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 
 # Add autometrics to path
 sys.path.append('/nlp/scr2/nlp/personal-rm/autometrics')
@@ -67,11 +67,12 @@ def load_dataset(dataset_name: str) -> Dataset:
         elif dataset_name == "CoGymLessonProcess":
             return CoGymLessonProcess()
     elif dataset_name.startswith("EvalGen"):
-        from autometrics.dataset.datasets.evalgen.evalgen import EvalGen
+        # Use specific subclasses to preserve task descriptions and clear naming
+        from autometrics.dataset.datasets.evalgen.evalgen import EvalGenProduct, EvalGenMedical
         if dataset_name == "EvalGenMedical":
-            return EvalGen('./autometrics/dataset/datasets/evalgen/medical.csv')
+            return EvalGenMedical()
         elif dataset_name == "EvalGenProduct":
-            return EvalGen('./autometrics/dataset/datasets/evalgen/product.csv')
+            return EvalGenProduct()
     elif dataset_name == "RealHumanEval":
         from autometrics.dataset.datasets.realhumaneval.realhumaneval import RealHumanEval
         return RealHumanEval()
@@ -81,6 +82,9 @@ def load_dataset(dataset_name: str) -> Dataset:
     elif dataset_name == "AI_Researcher":
         from autometrics.dataset.datasets.airesearcher.ai_researcher import AI_Researcher
         return AI_Researcher()
+    elif dataset_name == "ICLR":
+        from autometrics.dataset.datasets.iclr.iclr import ICLR
+        return ICLR()
     
     raise ValueError(f"Unknown dataset: {dataset_name}")
 
@@ -127,37 +131,64 @@ def get_unique_directories(dataset_name: str, target_name: str, seed: int) -> tu
     return cache_dir, generated_metrics_dir
 
 
-def evaluate_regression_on_test(regression_metric, test_dataset: Dataset, target_measure: str, successful_metric_instances) -> Dict[str, float]:
-    """Evaluate regression metric on test set and return correlation scores for all types."""
+def evaluate_regression_on_test(regression_metric, test_dataset: Dataset, target_measure: str, successful_metric_instances) -> Tuple[Dict[str, float], Dict[str, Optional[float]]]:
+    """Evaluate regression metric on test set and return correlation scores for all types.
+
+    Also computes corresponding p-values for each correlation type, which the caller can log.
+    Returns a tuple: (correlations: Dict[str, float], p_values: Dict[str, float]).
+    """
     # Simply use predict() which will handle all dependencies automatically
     print(f"📈 Evaluating regression metric on test set...")
     regression_metric.predict(test_dataset, update_dataset=True)
-    
-    # Use the existing calculate_correlation method from the codebase
-    from autometrics.evaluate.correlation import calculate_correlation
-    from scipy.stats import pearsonr, spearmanr, kendalltau
-    
-    correlations = {}
-    
-    # Calculate each correlation type using the existing method
+
+    # Debug: validate data availability for correlation
     try:
-        # Pearson correlation
-        pearson_results = calculate_correlation(test_dataset, correlation=pearsonr)
-        correlations['pearson'] = pearson_results[target_measure][regression_metric.get_name()]
-        
-        # Spearman correlation
-        spearman_results = calculate_correlation(test_dataset, correlation=spearmanr)
-        correlations['spearman'] = spearman_results[target_measure][regression_metric.get_name()]
-        
-        # Kendall correlation
-        kendall_results = calculate_correlation(test_dataset, correlation=kendalltau)
-        correlations['kendall'] = kendall_results[target_measure][regression_metric.get_name()]
-        
-    except Exception as e:
-        print(f"⚠️ Warning: Error computing correlations: {e}")
-        correlations = {'pearson': 0.0, 'spearman': 0.0, 'kendall': 0.0}
+        df = test_dataset.get_dataframe()
+        metric_name = regression_metric.get_name()
+        total_rows = len(df)
+        missing_target = target_measure not in df.columns
+        missing_metric = metric_name not in df.columns
+        if missing_target or missing_metric:
+            print(f"⚠️ Correlation debug: missing columns -> target_present={not missing_target}, metric_present={not missing_metric}")
+            print(f"   Available columns sample: {list(df.columns)[:10]}{'...' if len(df.columns) > 10 else ''}")
+            # Fall back to zeros if we cannot compute correlations
+            return {'pearson': 0.0, 'spearman': 0.0, 'kendall': 0.0}, {'pearson': None, 'spearman': None, 'kendall': None}
+
+        # Count valid pairs for this specific (target, metric)
+        pair_df = df[[target_measure, metric_name]].dropna()
+        valid_pairs = len(pair_df)
+        target_nans = int(df[target_measure].isna().sum())
+        metric_nans = int(df[metric_name].isna().sum())
+        print(f"🔎 Correlation debug: rows={total_rows}, valid_pairs={valid_pairs} for metric='{metric_name}' vs target='{target_measure}' (NaNs: target={target_nans}, metric={metric_nans})")
+        if valid_pairs < 2:
+            print("⚠️ Not enough valid pairs (<2). Skipping scipy correlation and returning zeros.")
+            return {'pearson': 0.0, 'spearman': 0.0, 'kendall': 0.0}, {'pearson': None, 'spearman': None, 'kendall': None}
+    except Exception as dbg_e:
+        print(f"⚠️ Correlation debug: pre-check failed: {dbg_e}. Proceeding with guarded computation.")
     
-    return correlations
+    # Compute correlations directly between the target and the regression metric only
+    from scipy.stats import pearsonr, spearmanr, kendalltau
+    try:
+        df = test_dataset.get_dataframe()
+        metric_name = regression_metric.get_name()
+        pair_df = df[[target_measure, metric_name]].dropna()
+        if len(pair_df) < 2:
+            print("⚠️ Not enough valid pairs (<2) after dropna for target vs regression. Returning zeros.")
+            return {'pearson': 0.0, 'spearman': 0.0, 'kendall': 0.0}, {'pearson': None, 'spearman': None, 'kendall': None}
+        # Quick sanity: report variance
+        try:
+            tgt_std = float(pair_df[target_measure].std())
+            pred_std = float(pair_df[metric_name].std())
+            print(f"🔎 Correlation debug: std(target)={tgt_std:.6f}, std(pred)={pred_std:.6f}")
+        except Exception:
+            pass
+        pr, pp = pearsonr(pair_df[target_measure], pair_df[metric_name])
+        sr, sp = spearmanr(pair_df[target_measure], pair_df[metric_name])
+        kr, kp = kendalltau(pair_df[target_measure], pair_df[metric_name])
+        return {'pearson': float(pr), 'spearman': float(sr), 'kendall': float(kr)}, {'pearson': float(pp), 'spearman': float(sp), 'kendall': float(kp)}
+    except Exception as e:
+        print(f"⚠️ Warning: Error computing direct correlations: {e}")
+        return {'pearson': 0.0, 'spearman': 0.0, 'kendall': 0.0}, {'pearson': None, 'spearman': None, 'kendall': None}
 
 
 def run_autometrics_experiment(
@@ -273,7 +304,13 @@ def run_autometrics_experiment(
         
         # Evaluate on test set
         print(f"📈 Evaluating regression metric on test set...")
-        test_scores = evaluate_regression_on_test(regression_metric, test_dataset, target_name, results['top_metrics'])
+        # Ensure constituent top metrics are computed on the test split before regression prediction
+        try:
+            for metric in results['top_metrics']:
+                test_dataset.add_metric(metric, update_dataset=True)
+        except Exception as _e:
+            print(f"⚠️ Warning: failed to precompute top metrics on test: {_e}")
+        test_scores, test_p_values = evaluate_regression_on_test(regression_metric, test_dataset, target_name, results['top_metrics'])
         
         print(f"✅ Test correlations:")
         for corr_type, score in test_scores.items():
@@ -300,6 +337,7 @@ def run_autometrics_experiment(
                 "test": len(test_dataset.get_dataframe()),
             },
             "test_scores": test_scores,
+            "test_p_values": test_p_values,
             "report_card": results['report_card'],
             "top_metrics": [m.get_name() for m in results['top_metrics']],
             "importance_scores": [(float(score), name) for score, name in results['importance_scores'][:10]],

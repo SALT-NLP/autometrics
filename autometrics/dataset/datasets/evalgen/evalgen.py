@@ -19,7 +19,15 @@ class EvalGen(Dataset):
         ignore_columns = ["grading_feedback", "Metavar: split", "Metavar: id", "LLM", "Prompt", "Response"]
         metric_columns = []
 
-        name = name if name else "evalgen"
+        # Infer a variant-aware name by default to avoid collisions in permanent splits
+        inferred_name = None
+        lower_path = (path or '').lower()
+        if 'product' in lower_path:
+            inferred_name = 'evalgen_product'
+        elif 'medical' in lower_path:
+            inferred_name = 'evalgen_medical'
+        name = name if name else (inferred_name or "evalgen")
+        # Keep task_description unchanged here; subclasses provide variant-specific descriptions
         task_description = task_description if task_description else None
 
         data_id_column = "Metavar: id"

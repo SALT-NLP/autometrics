@@ -5,12 +5,13 @@
 #SBATCH --gres=gpu:4
 #SBATCH --mem=200GB
 #SBATCH --open-mode=append
-#SBATCH --partition=jag-lo
+#SBATCH --partition=jag-standard
 #SBATCH --time=72:00:00
 #SBATCH --nodes=1
 #SBATCH --job-name=qwen_orchestrator_jag4
 #SBATCH --output=logs/qwen_orchestrator_jag4_%j.out
 #SBATCH --error=logs/qwen_orchestrator_jag4_%j.err
+#SBATCH -x jagupard[19-20,26-31]
 #SBATCH --requeue
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mryan0@stanford.edu
@@ -170,9 +171,21 @@ submit_one() {
   if [ "${no_cards}" = "true" ]; then envs=",${envs},NO_METRIC_CARDS=true"; fi
   if [ "${force_reidx}" = "true" ]; then envs=",${envs},FORCE_REINDEX=true"; fi
 
+  # Construct a descriptive job name: {dataset}_qwen_{ablation_settings}
+  local abla_tag="${mb_mode}"
+  if [ -n "${k_val}" ]; then abla_tag="${abla_tag}_k${k_val}"; fi
+  if [ -n "${n_val}" ]; then abla_tag="${abla_tag}_n${n_val}"; fi
+  if [ "${no_cards}" = "true" ]; then abla_tag="${abla_tag}_desc"; fi
+  local job_name="${DATASET_NAME}_qwen_${abla_tag}"
+
   # Submit and capture job id
-  jid=$(sbatch --export=${envs} scripts/ablations/qwen/run_ablation_qwen_remote.sh | awk '{print $4}')
-  echo "[Orchestrator] Submitted seed=${seed} mode=${mb_mode} k=${k_val:-default} n=${n_val:-default} desc=${no_cards} reindex=${force_reidx} => job ${jid}"
+  jid=$(sbatch \
+    --job-name="${job_name}" \
+    --output="logs/${job_name}_%j.out" \
+    --error="logs/${job_name}_%j.err" \
+    --export=${envs} \
+    scripts/ablations/qwen/run_ablation_qwen_remote.sh | awk '{print $4}')
+  echo "[Orchestrator] Submitted job_name=${job_name} seed=${seed} mode=${mb_mode} k=${k_val:-default} n=${n_val:-default} desc=${no_cards} reindex=${force_reidx} => job ${jid}"
 }
 
 JOBS=()
@@ -181,7 +194,7 @@ if [ "${FULL_SUITE:-false}" = "true" ]; then
   for s in ${SEEDS}; do
     for k in 30 20 10 5; do
       submit_one "$s" "full" "$k" "" "false" "false"; done
-    for n in 10 5 3 1; do
+    for n in 20 10 5 3 1; do
       submit_one "$s" "full" "30" "$n" "false" "false"; done
     submit_one "$s" "full" "20" "" "true" "true"
     submit_one "$s" "generated_only" "" "" "false" "true"

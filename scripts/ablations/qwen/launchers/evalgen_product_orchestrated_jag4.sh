@@ -9,7 +9,7 @@ set -euo pipefail
 cd /nlp/scr2/nlp/personal-rm/autometrics/scripts/ablations/qwen/
 
 # Core experiment setup
-DATASET_NAME=${DATASET_NAME:-"EvalGenProduct"}
+DATASET_NAME="EvalGenProduct"
 TARGET_MEASURE=${TARGET_MEASURE:-"grade"}
 SEEDS=${SEEDS:-"42 43 44 45 46"}
 

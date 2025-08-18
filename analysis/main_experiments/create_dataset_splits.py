@@ -24,7 +24,7 @@ from autometrics.dataset.PairwiseDataset import PairwiseDataset
 # Import all available datasets
 from autometrics.dataset.datasets.primock57.primock57 import Primock57
 from autometrics.dataset.datasets.helpsteer.helpsteer import HelpSteer, HelpSteer2
-from autometrics.dataset.datasets.evalgen.evalgen import EvalGen
+from autometrics.dataset.datasets.evalgen.evalgen import EvalGen, EvalGenProduct, EvalGenMedical
 from autometrics.dataset.datasets.design2code.design2code import Design2Code
 from autometrics.dataset.datasets.realhumaneval.realhumaneval import RealHumanEval
 from autometrics.dataset.datasets.simplification.simplification import SimpDA, SimpEval
@@ -34,7 +34,7 @@ from autometrics.dataset.datasets.cogym.cogym import (
     CoGymTravelOutcome, CoGymTravelProcess, CoGymLessonOutcome, CoGymLessonProcess
 )
 from autometrics.dataset.datasets.airesearcher.ai_researcher import AI_Researcher
-
+from autometrics.dataset.datasets.iclr.iclr import ICLR
 
 def check_test_sets_match(dataset_name: str) -> Tuple[bool, str]:
     """
@@ -393,9 +393,9 @@ def main():
     
     # Define all datasets to process
     datasets_to_process = [
-        # EvalGen datasets
-        (lambda: EvalGen('./autometrics/dataset/datasets/evalgen/product.csv'), "EvalGenProduct"),
-        (lambda: EvalGen('./autometrics/dataset/datasets/evalgen/medical.csv'), "EvalGenMedical"),
+        # EvalGen datasets (use explicit subclasses to ensure unique names and correct task descriptions)
+        (EvalGenProduct, "EvalGenProduct"),
+        (EvalGenMedical, "EvalGenMedical"),
         
         # Regular datasets (starting with smaller/simpler ones first)
         (SimpEval, "SimpEval"),
@@ -423,6 +423,9 @@ def main():
 
         # AI_Researcher dataset
         (AI_Researcher, "AI_Researcher"),
+
+        # ICLR dataset
+        (ICLR, "ICLR"),
     ]
     
     # Process all datasets
@@ -500,3 +503,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Example Usage
+# python analysis/main_experiments/create_dataset_splits.py 

@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 from autometrics.metrics.MultiMetric import MultiMetric
+from typing import List
+
+from autometrics.util.metric_eval_utils import evaluate_metric_instances
 
 class Aggregator(ABC):
     """
@@ -23,26 +26,50 @@ class Aggregator(ABC):
 
         # Work off the actual DataFrame columns to avoid stale metadata in metric_columns
         df = dataset.get_dataframe()
+
+        # Collect metrics that are missing and require computation
+        metrics_to_compute: List = []
         for metric in self.input_metrics:
             if isinstance(metric, MultiMetric):
                 submetric_names = metric.get_submetric_names()
-                # If any expected submetric column is missing from the DataFrame, (re)compute
                 missing = [name for name in submetric_names if name not in df.columns]
                 if missing:
-                    metric.predict(dataset, update_dataset=True)
-                    df = dataset.get_dataframe()
-
-                # Ensure dataset.metric_columns metadata is synced
-                for name in submetric_names:
-                    if name not in dataset.get_metric_columns():
-                        dataset.get_metric_columns().append(name)
+                    metrics_to_compute.append(metric)
             else:
                 metric_name = metric.get_name()
                 if metric_name not in df.columns:
-                    metric.predict(dataset, update_dataset=True)
-                    df = dataset.get_dataframe()
+                    metrics_to_compute.append(metric)
 
-                if metric_name not in dataset.get_metric_columns():
+        # If nothing to compute, just ensure metadata is synced
+        if not metrics_to_compute:
+            for metric in self.input_metrics:
+                if isinstance(metric, MultiMetric):
+                    for name in metric.get_submetric_names():
+                        if name not in dataset.get_metric_columns():
+                            dataset.get_metric_columns().append(name)
+                else:
+                    metric_name = metric.get_name()
+                    if metric_name not in dataset.get_metric_columns():
+                        dataset.get_metric_columns().append(metric_name)
+            return
+
+        evaluated = evaluate_metric_instances(
+            dataset=dataset,
+            metric_instances=metrics_to_compute,
+            enable_parallel=True,
+            max_parallel_workers=20,
+            allowed_failed_metrics=0,
+        )
+        # Sync metadata for evaluated metrics
+        df = dataset.get_dataframe()
+        for metric in evaluated:
+            if isinstance(metric, MultiMetric):
+                for name in metric.get_submetric_names():
+                    if name in df.columns and name not in dataset.get_metric_columns():
+                        dataset.get_metric_columns().append(name)
+            else:
+                metric_name = metric.get_name()
+                if metric_name in df.columns and metric_name not in dataset.get_metric_columns():
                     dataset.get_metric_columns().append(metric_name)
 
     def get_input_columns(self):

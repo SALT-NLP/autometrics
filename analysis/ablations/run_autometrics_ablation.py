@@ -75,11 +75,12 @@ def load_dataset(dataset_name: str) -> Dataset:
         elif dataset_name == "CoGymLessonProcess":
             return CoGymLessonProcess()
     elif dataset_name.startswith("EvalGen"):
-        from autometrics.dataset.datasets.evalgen.evalgen import EvalGen
+        # Use specific subclasses to preserve task descriptions and clear naming
+        from autometrics.dataset.datasets.evalgen.evalgen import EvalGenProduct, EvalGenMedical
         if dataset_name == "EvalGenMedical":
-            return EvalGen('./autometrics/dataset/datasets/evalgen/medical.csv')
+            return EvalGenMedical()
         elif dataset_name == "EvalGenProduct":
-            return EvalGen('./autometrics/dataset/datasets/evalgen/product.csv')
+            return EvalGenProduct()
     elif dataset_name == "RealHumanEval":
         from autometrics.dataset.datasets.realhumaneval.realhumaneval import RealHumanEval
         return RealHumanEval()
@@ -129,23 +130,36 @@ def get_unique_dirs(dataset_name: str, target_name: str, seed: int, k: Optional[
     return cache_dir, gen_dir
 
 
-def evaluate_on_validation(regression_metric, val_dataset: Dataset, target_measure: str) -> Dict[str, float]:
-    from autometrics.evaluate.correlation import calculate_correlation
+def evaluate_on_validation(regression_metric, val_dataset: Dataset, target_measure: str):
     from scipy.stats import pearsonr, spearmanr, kendalltau
     print("📈 Evaluating regression metric on validation set…")
+    # Ensure constituent top metrics may be present; regression will compute its own output
     regression_metric.predict(val_dataset, update_dataset=True)
+    # Direct correlation: only target vs regression metric
     try:
-        pearson_results = calculate_correlation(val_dataset, correlation=pearsonr)
-        spearman_results = calculate_correlation(val_dataset, correlation=spearmanr)
-        kendall_results = calculate_correlation(val_dataset, correlation=kendalltau)
-        return {
-            'pearson': pearson_results[target_measure][regression_metric.get_name()],
-            'spearman': spearman_results[target_measure][regression_metric.get_name()],
-            'kendall': kendall_results[target_measure][regression_metric.get_name()],
-        }
+        df = val_dataset.get_dataframe()
+        metric_name = regression_metric.get_name()
+        total_rows = len(df)
+        if target_measure not in df.columns or metric_name not in df.columns:
+            print(f"⚠️ Correlation debug (val): missing columns. target_present={target_measure in df.columns}, metric_present={metric_name in df.columns}")
+            return ({'pearson': 0.0, 'spearman': 0.0, 'kendall': 0.0},
+                    {'pearson': None, 'spearman': None, 'kendall': None})
+        pair_df = df[[target_measure, metric_name]].dropna()
+        print(f"🔎 Correlation debug (val): rows={total_rows}, valid_pairs={len(pair_df)} for metric='{metric_name}' vs target='{target_measure}'")
+        if len(pair_df) < 2:
+            print("⚠️ Not enough valid pairs (<2) on val. Returning zeros.")
+            return ({'pearson': 0.0, 'spearman': 0.0, 'kendall': 0.0},
+                    {'pearson': None, 'spearman': None, 'kendall': None})
+        pr, pp = pearsonr(pair_df[target_measure], pair_df[metric_name])
+        sr, sp = spearmanr(pair_df[target_measure], pair_df[metric_name])
+        kr, kp = kendalltau(pair_df[target_measure], pair_df[metric_name])
+        scores = {'pearson': float(pr), 'spearman': float(sr), 'kendall': float(kr)}
+        p_values = {'pearson': float(pp), 'spearman': float(sp), 'kendall': float(kp)}
+        return scores, p_values
     except Exception as e:
-        print(f"⚠️ Warning: Error computing correlations: {e}")
-        return {'pearson': 0.0, 'spearman': 0.0, 'kendall': 0.0}
+        print(f"⚠️ Warning: Error computing direct correlations (val): {e}")
+        return ({'pearson': 0.0, 'spearman': 0.0, 'kendall': 0.0},
+                {'pearson': None, 'spearman': None, 'kendall': None})
 
 
 def run_ablation(
@@ -284,7 +298,7 @@ def run_ablation(
         raise ValueError("No regression metric generated")
 
     print("📈 Evaluating on validation split…")
-    val_scores = evaluate_on_validation(regression_metric, val_dataset, target_name)
+    val_scores, val_p_values = evaluate_on_validation(regression_metric, val_dataset, target_name)
 
     print("✅ Validation correlations:")
     for corr_type, score in val_scores.items():
@@ -307,6 +321,7 @@ def run_ablation(
             "test": len(test_dataset.get_dataframe()),
         },
         "val_scores": val_scores,
+        "val_p_values": val_p_values,
         "report_card": results['report_card'],
         "top_metrics": [m.get_name() for m in results['top_metrics']],
         "importance_scores": [(float(score), name) for score, name in results['importance_scores'][:10]],

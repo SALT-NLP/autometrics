@@ -129,6 +129,14 @@ class LDLRewardModel27B(Gemma2PreTrainedModel):
         idx = torch.arange(batch_size, device=token_states.device)
         hidden = token_states[idx, seq_lens]
         # compute distributions and score
+        # Ensure aux layers live on same device as hidden
+        try:
+            if next(self.regression_layer.parameters()).device != hidden.device:
+                self.regression_layer = self.regression_layer.to(hidden.device)
+            if next(self.gating_layer.parameters()).device != hidden.device:
+                self.gating_layer = self.gating_layer.to(hidden.device)
+        except StopIteration:
+            pass
         with torch.autocast(device_type=hidden.device.type, dtype=torch.float32):
             rewards = self.regression_layer(hidden)
             weights = self.gating_layer(hidden).unsqueeze(1)
@@ -157,55 +165,75 @@ class LDLRewardModel27B(Gemma2PreTrainedModel):
         *model_args,
         **kwargs
     ):
+        # Ensure a consistent dtype is used across the model to avoid matmul dtype mismatches
+        if 'torch_dtype' not in kwargs or kwargs['torch_dtype'] is None:
+            if torch.cuda.is_available():
+                if torch.cuda.is_bf16_supported():
+                    kwargs['torch_dtype'] = torch.bfloat16
+                else:
+                    kwargs['torch_dtype'] = torch.float16
+            else:
+                kwargs['torch_dtype'] = torch.float32
         if not os.path.exists(load_directory):
             cached_dir = snapshot_download(repo_id=load_directory)
         else:
             cached_dir = load_directory
-        
-        # Pass device_map to parent's from_pretrained if provided
-        if device_map is not None:
-            kwargs['device_map'] = device_map
-            
-        model = super().from_pretrained(cached_dir, *model_args, **kwargs)
-        
-        # Determine target device for additional layers based on device_map
-        target_device = "cpu"  # default
-        if device_map is not None:
-            if isinstance(device_map, dict):
-                # Handle dict device maps like {'': 0}
-                if '' in device_map:
-                    target_device = f"cuda:{device_map['']}" if isinstance(device_map[''], int) else device_map['']
-                else:
-                    # Use first available device from device map
-                    first_device = next(iter(device_map.values()))
-                    target_device = f"cuda:{first_device}" if isinstance(first_device, int) else first_device
-            elif device_map in ("auto", "balanced"):
-                # For auto/balanced, let accelerate handle it below
-                target_device = "cuda" if torch.cuda.is_available() else "cpu"
-            else:
-                # Handle string device specifications like "cuda:0"
-                target_device = device_map
-        
-        # Load additional layers to the same device as the main model
+
+        # 1) Load the model on CPU first. Do NOT pass device_map here to avoid meta tensors.
+        base_kwargs = dict(kwargs)
+        if 'device_map' in base_kwargs:
+            base_kwargs.pop('device_map')
+        model = super().from_pretrained(cached_dir, *model_args, **base_kwargs)
+
+        # 2) Load additional layers with real weights on CPU first
         reg_path = os.path.join(cached_dir, "regression_layer.pt")
         gate_path = os.path.join(cached_dir, "gating_layer.pt")
-        model.regression_layer.load_state_dict(torch.load(reg_path, map_location=target_device))
-        model.gating_layer.load_state_dict(torch.load(gate_path, map_location=target_device))
-        
-        # Handle auto/balanced device mapping after loading additional layers
-        if device_map in ("auto", "balanced"):
-            # Check if model is already device-mapped to avoid conflicts
+        # Materialize custom heads if they were created on meta device
+        try:
+            if any(p.is_meta for p in model.regression_layer.parameters()):
+                model.regression_layer = model.regression_layer.to_empty(device='cpu')
+            if any(p.is_meta for p in model.gating_layer.parameters()):
+                model.gating_layer = model.gating_layer.to_empty(device='cpu')
+        except Exception:
+            # Fallback: move modules to CPU; if meta, this will be a no-op but load_state_dict with assign may still work on newer torch
+            try:
+                model.regression_layer = model.regression_layer.to('cpu')
+                model.gating_layer = model.gating_layer.to('cpu')
+            except Exception:
+                pass
+        # Now load actual weights for custom heads
+        sd_reg = torch.load(reg_path, map_location='cpu')
+        sd_gate = torch.load(gate_path, map_location='cpu')
+        try:
+            model.regression_layer.load_state_dict(sd_reg)
+            model.gating_layer.load_state_dict(sd_gate)
+        except Exception:
+            # Try non-strict as a last resort
+            model.regression_layer.load_state_dict(sd_reg, strict=False)
+            model.gating_layer.load_state_dict(sd_gate, strict=False)
+
+        # 3) If a device_map is requested, dispatch after all weights are materialized
+        if device_map is not None:
             if not hasattr(model, 'hf_device_map') or model.hf_device_map is None:
-                max_mem = get_balanced_memory(model, no_split_module_classes=["Gemma2DecoderLayer", "Gemma2RMSNorm"])
-                dm = infer_auto_device_map(
-                    model,
-                    no_split_module_classes=["Gemma2DecoderLayer", "Gemma2RMSNorm"],
-                    max_memory=max_mem
-                )
-                model = dispatch_model(model, device_map=dm)
+                if isinstance(device_map, (str,)) and device_map in ("auto", "balanced"):
+                    max_mem = get_balanced_memory(model, no_split_module_classes=["Gemma2DecoderLayer", "Gemma2RMSNorm"])
+                    dm = infer_auto_device_map(
+                        model,
+                        no_split_module_classes=["Gemma2DecoderLayer", "Gemma2RMSNorm"],
+                        max_memory=max_mem
+                    )
+                    model = dispatch_model(model, device_map=dm)
+                elif isinstance(device_map, dict):
+                    model = dispatch_model(model, device_map=device_map)
+                else:
+                    # Handle explicit single-device strings like "cuda:0"
+                    try:
+                        model = model.to(device_map)
+                    except Exception:
+                        pass
             else:
                 print(f"[LDLRewardModel] Model already device-mapped: {model.hf_device_map}")
-        
+
         return model
 
 

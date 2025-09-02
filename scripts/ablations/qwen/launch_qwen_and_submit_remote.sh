@@ -171,34 +171,37 @@ submit_one() {
   local n_val="$1"; shift
   local no_cards="$1"; shift
   local force_reidx="$1"; shift
+  local resized="$1"; shift
 
   local envs="ALL,DATASET_NAME=${DATASET_NAME},TARGET_MEASURE=${TARGET_MEASURE},SEED=${seed},MODEL_NAME=${MODEL_PATH},QWEN_API_BASE=${API_BASE},OPENAI_API_KEY=${DOWNSTREAM_OPENAI_API_KEY},METRICBANK_MODE=${mb_mode},OUTPUT_ROOT=${OUTPUT_ROOT}"
   if [ -n "${k_val}" ]; then envs=",${envs},K=${k_val}"; fi
   if [ -n "${n_val}" ]; then envs=",${envs},N=${n_val}"; fi
   if [ "${no_cards}" = "true" ]; then envs=",${envs},NO_METRIC_CARDS=true"; fi
   if [ "${force_reidx}" = "true" ]; then envs=",${envs},FORCE_REINDEX=true"; fi
+  if [ "${resized}" = "true" ]; then envs=",${envs},RESIZED=true"; fi
 
   # Submit and capture job id
   jid=$(sbatch --export=${envs} scripts/ablations/qwen/run_ablation_qwen_remote.sh | awk '{print $4}')
-  echo "[Orchestrator] Submitted seed=${seed} mode=${mb_mode} k=${k_val:-default} n=${n_val:-default} desc=${no_cards} reindex=${force_reidx} => job ${jid}"
+  echo "[Orchestrator] Submitted seed=${seed} mode=${mb_mode} k=${k_val:-default} n=${n_val:-default} desc=${no_cards} reindex=${force_reidx} resized=${resized} => job ${jid}"
 }
 
 JOBS=()
+resized=${RESIZED:-"false"}
 
 if [ "${FULL_SUITE:-false}" = "true" ]; then
   for s in ${SEEDS}; do
     # Retrieval k: 30,20,10,5
     for k in 30 20 10 5; do
-      submit_one "$s" "full" "$k" "" "false" "false"; done
+      submit_one "$s" "full" "$k" "" "false" "false" "${resized}"; done
     # Regression n with k fixed at 30: 10,5,3,1
     for n in 20 10 5 3 1; do
-      submit_one "$s" "full" "30" "$n" "false" "false"; done
+      submit_one "$s" "full" "30" "$n" "false" "false" "${resized}"; done
     # No Metric Cards with k=20 (force reindex)
-    submit_one "$s" "full" "20" "" "true" "true"
+    submit_one "$s" "full" "20" "" "true" "true" "${resized}";
     # Generated only (force reindex)
-    submit_one "$s" "generated_only" "" "" "false" "true"
+    submit_one "$s" "generated_only" "" "" "false" "true" "${resized}";
     # Existing only (force reindex)
-    submit_one "$s" "existing_only" "" "" "false" "true"
+    submit_one "$s" "existing_only" "" "" "false" "true" "${resized}";
   done
 else
   # Single config run(s) for provided K/N/etc.
@@ -208,7 +211,7 @@ else
   no_cards=${NO_METRIC_CARDS:-"false"}
   force_reidx=${FORCE_REINDEX:-"false"}
   for s in ${SEEDS}; do
-    submit_one "$s" "$mb_mode" "$k_val" "$n_val" "$no_cards" "$force_reidx"
+    submit_one "$s" "$mb_mode" "$k_val" "$n_val" "$no_cards" "$force_reidx" "${resized}";
   done
 fi
 

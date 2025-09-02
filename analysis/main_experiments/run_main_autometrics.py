@@ -25,6 +25,7 @@ sys.path.append('/nlp/scr2/nlp/personal-rm/autometrics')
 
 from autometrics.autometrics import Autometrics
 from autometrics.dataset.Dataset import Dataset
+from autometrics.autometrics import DEFAULT_GENERATOR_CONFIGS
 
 
 def load_dataset(dataset_name: str) -> Dataset:
@@ -117,16 +118,16 @@ def check_experiment_completed(output_dir: str, seed: int) -> Optional[Dict[str,
         return None
 
 
-def get_unique_directories(dataset_name: str, target_name: str, seed: int) -> tuple[str, str]:
+def get_unique_directories(model_name: str, dataset_name: str, target_name: str, seed: int) -> tuple[str, str]:
     """Get unique cache and generated metrics directories for this experiment."""
     # Create unique identifiers
-    experiment_id = f"{dataset_name}_{target_name}_{seed}"
+    experiment_id = f"{model_name}_{dataset_name}_{target_name}_{seed}"
     
     # Unique cache directory
-    cache_dir = f"./autometrics_cache_{experiment_id}"
+    cache_dir = f"./autometrics_cache_main/autometrics_cache_{experiment_id}"
     
     # Unique generated metrics directory
-    generated_metrics_dir = f"./generated_metrics_{experiment_id}"
+    generated_metrics_dir = f"./generated_metrics_main/generated_metrics_{experiment_id}"
     
     return cache_dir, generated_metrics_dir
 
@@ -199,6 +200,7 @@ def run_autometrics_experiment(
     generator_model_name: Optional[str] = None,
     judge_model_name: Optional[str] = None,
     api_base: Optional[str] = None,
+    skip_mipro: bool = False,
 ) -> Dict[str, float]:
     """Run a single autometrics experiment."""
     
@@ -215,12 +217,6 @@ def run_autometrics_experiment(
     
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
-    
-    # Get unique directories for this experiment
-    cache_dir, generated_metrics_dir = get_unique_directories(dataset_name, target_name, seed)
-    
-    # Set environment variables for unique cache
-    os.environ["AUTOMETRICS_CACHE_DIR"] = cache_dir
     
     try:
         # Load dataset with persistent splits
@@ -261,6 +257,12 @@ def run_autometrics_experiment(
         
         generator_model_id = format_model_name(generator_model_name_base)
         judge_model_id = format_model_name(judge_model_name_base)
+
+        # Get unique directories for this experiment
+        cache_dir, generated_metrics_dir = get_unique_directories(generator_model_id, dataset_name, target_name, seed)
+        
+        # Set environment variables for unique cache
+        os.environ["AUTOMETRICS_CACHE_DIR"] = cache_dir
         
         print(f"   Generator LM: {generator_model_id}")
         print(f"   Judge LM: {judge_model_id}")
@@ -280,11 +282,21 @@ def run_autometrics_experiment(
             judge_llm = dspy.LM(judge_model_id, api_key=api_key, max_tokens=8192)
         else:
             judge_llm = dspy.LM(judge_model_id, api_key=api_key)
+
+        generator_configs = DEFAULT_GENERATOR_CONFIGS
+
+        if skip_mipro:
+            generator_configs = {
+                "llm_judge": {"metrics_per_trial": 10, "description": "Basic LLM Judge"},
+                "rubric_dspy": {"metrics_per_trial": 5, "description": "Rubric Generator (DSPy)"},
+                "llm_judge_examples": {"metrics_per_trial": 1, "description": "LLM Judge (Example-Based)"},
+            }
         
         # Create autometrics with unique directories
         print(f"🔧 Creating autometrics pipeline...")
         autometrics = Autometrics(
             generated_metrics_dir=generated_metrics_dir,
+            metric_generation_configs=generator_configs,
             seed=seed
         )
         
@@ -315,6 +327,33 @@ def run_autometrics_experiment(
         print(f"✅ Test correlations:")
         for corr_type, score in test_scores.items():
             print(f"   {corr_type.capitalize()}: {score:.4f}")
+        
+        # Save scatter plot of predicted vs human scores (no recomputation)
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            df = test_dataset.get_dataframe()
+            metric_name = regression_metric.get_name()
+            pair_df = df[[target_name, metric_name]].dropna()
+            if len(pair_df) >= 2:
+                plt.figure(figsize=(6, 6))
+                plt.scatter(pair_df[metric_name], pair_df[target_name], s=10, alpha=0.6)
+                plt.xlabel(metric_name)
+                plt.ylabel(target_name)
+                plt.title(f"Predicted vs Human ({dataset_name}, seed={seed})")
+                vmin = float(min(pair_df[metric_name].min(), pair_df[target_name].min()))
+                vmax = float(max(pair_df[metric_name].max(), pair_df[target_name].max()))
+                plt.plot([vmin, vmax], [vmin, vmax], 'r--', linewidth=1)
+                plt.tight_layout()
+                plot_path = os.path.join(output_dir, f"scatter_pred_vs_target_{seed}.png")
+                plt.savefig(plot_path, dpi=150)
+                plt.close()
+                print(f"📊 Saved scatter plot to {plot_path}")
+            else:
+                print("⚠️ Not enough data to plot scatter.")
+        except Exception as _pe:
+            print(f"⚠️ Failed to save scatter plot: {_pe}")
         
         # Save results
         print(f"💾 Saving results...")
@@ -366,6 +405,7 @@ def main():
     parser.add_argument("output_dir", type=str, help="Output directory")
     parser.add_argument("--model-name", dest="model_name", type=str, default=None, help="LLM model name (e.g., openai/gpt-5-mini)")
     parser.add_argument("--api-base", dest="api_base", type=str, default=None, help="API base URL for OpenAI-compatible endpoints")
+    parser.add_argument("--skip-mipro", action="store_true", help="Skip Mipro (typically used because MIPRO changes the lm temperature and new openai models do not support it)")
     args = parser.parse_args()
 
     # Check for API key
@@ -383,6 +423,7 @@ def main():
             generator_model_name=args.model_name,
             judge_model_name=args.model_name,
             api_base=args.api_base,
+            skip_mipro=args.skip_mipro,
         )
         print(f"\n🎉 Final test correlations:")
         for corr_type, score in scores.items():

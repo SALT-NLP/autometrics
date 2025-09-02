@@ -176,7 +176,14 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
         """Load the UniEval model if not already loaded."""
         if self.evaluator is None:
             from autometrics.metrics.unieval.evaluator import get_evaluator
-            self.evaluator = get_evaluator(self.task, device=self.device)
+            try:
+                self.evaluator = get_evaluator(self.task, device=self.device)
+            except RuntimeError as e:
+                # If CUDA asserts or device issues, retry on CPU
+                if 'device-side assert' in str(e).lower() or 'cuda' in str(e).lower():
+                    self.evaluator = get_evaluator(self.task, device='cpu')
+                else:
+                    raise
             
     def _unload_model(self):
         """Unload model to free resources."""
@@ -200,7 +207,18 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
         data = convert_to_json(output_list=[output], src_list=[input])
 
         # Get multi-dimensional evaluation scores
-        eval_scores = self.evaluator.evaluate(data)
+        try:
+            eval_scores = self.evaluator.evaluate(data)
+        except RuntimeError as e:
+            # Fallback to CPU execution if GPU path fails during evaluation
+            if 'device-side assert' in str(e).lower() or 'expected device meta' in str(e).lower():
+                # Recreate evaluator on CPU and retry once
+                self._unload_model()
+                from autometrics.metrics.unieval.evaluator import get_evaluator
+                self.evaluator = get_evaluator(self.task, device='cpu')
+                eval_scores = self.evaluator.evaluate(data)
+            else:
+                raise
         
         result = self._parse_unieval(eval_scores[0])
         
@@ -220,7 +238,16 @@ This prompt is tokenized and passed into the **UniEvalFact** model, which then p
         data = convert_to_json(output_list=outputs, src_list=inputs)
 
         # Get multi-dimensional evaluation scores
-        eval_scores = self.evaluator.evaluate(data)
+        try:
+            eval_scores = self.evaluator.evaluate(data)
+        except RuntimeError as e:
+            if 'device-side assert' in str(e).lower() or 'expected device meta' in str(e).lower():
+                self._unload_model()
+                from autometrics.metrics.unieval.evaluator import get_evaluator
+                self.evaluator = get_evaluator(self.task, device='cpu')
+                eval_scores = self.evaluator.evaluate(data)
+            else:
+                raise
         
         results = [self._parse_unieval(eval_score) for eval_score in eval_scores]
 

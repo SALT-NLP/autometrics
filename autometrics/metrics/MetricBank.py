@@ -132,6 +132,16 @@ def build_metrics(
     gpu_buffer_ratio: float = 0.10,
 ) -> List[Any]:
     """Instantiate a list of metric classes with common kwargs and cache override."""
+    # Ensure global meta-tensor safe patch is applied exactly once for all models
+    try:
+        from autometrics.metrics.utils.device_utils import (
+            apply_meta_tensor_safe_module_to_patch,
+            apply_roberta_token_type_guard,
+        )
+        apply_meta_tensor_safe_module_to_patch()
+        apply_roberta_token_type_guard()
+    except Exception as _patch_err:
+        print(f"[MetricBank] Warning: failed to apply meta-tensor safe Module.to patch: {_patch_err}")
     common_kwargs = {
         "cache_dir": cache_dir or _get_cache_dir(),
         "seed": seed,

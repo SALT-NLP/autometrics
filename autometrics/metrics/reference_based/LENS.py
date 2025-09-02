@@ -1,5 +1,6 @@
 import torch
 from typing import List, Union, ClassVar
+import warnings
 from lens import download_model
 from lens import LENS as LENS_original
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
@@ -167,7 +168,25 @@ where $f_k$ is the $k$-th expert head's output.
         """Download checkpoint and load the LENS model."""
         if self.model is None:
             ckpt_path = download_model(self.model_id)
-            self.model = LENS_original(ckpt_path, rescale=self.rescale)
+            try:
+                self.model = LENS_original(ckpt_path, rescale=self.rescale)
+            except RuntimeError as e:
+                # Guard against device-side assertions during checkpoint load
+                if 'device-side assert' in str(e).lower():
+                    warnings.warn("[LENS] CUDA device-side assert during checkpoint load; retrying with CPU map_location.")
+                    # Monkeypatch torch.load to force CPU map_location just for this load
+                    import torch as _torch
+                    orig_load = _torch.load
+                    def _forced_cpu_load(*args, **kwargs):
+                        kwargs.setdefault('map_location', 'cpu')
+                        return orig_load(*args, **kwargs)
+                    _torch.load = _forced_cpu_load
+                    try:
+                        self.model = LENS_original(ckpt_path, rescale=self.rescale)
+                    finally:
+                        _torch.load = orig_load
+                else:
+                    raise
 
     def _unload_model(self):
         """Unload model to free resources."""
@@ -183,11 +202,27 @@ where $f_k$ is the $k$-th expert head's output.
         if self.model is None:
             self._load_model()
         # wrap inputs for single sample
-        score = self.model.score(
-            [input], [output], [references],
-            batch_size=self.batch_size,
-            devices=self.devices
-        )
+        try:
+            score = self.model.score(
+                [input], [output], [references],
+                batch_size=self.batch_size,
+                devices=self.devices
+            )
+        except RuntimeError as e:
+            if 'device-side assert' in str(e).lower():
+                warnings.warn("[LENS] CUDA device-side assert during scoring; retrying with batch_size=1 and default devices.")
+                # Retry with smaller batch and default device handling
+                try:
+                    score = self.model.score(
+                        [input], [output], [references],
+                        batch_size=1,
+                        devices=None
+                    )
+                except RuntimeError:
+                    warnings.warn("[LENS] Fallback scoring also failed; propagating error.")
+                    raise
+            else:
+                raise
         result = float(score[0])
         if not self.persistent:
             self._unload_model()
@@ -205,11 +240,26 @@ where $f_k$ is the $k$-th expert head's output.
         """
         if self.model is None:
             self._load_model()
-        scores = self.model.score(
-            inputs, outputs, references,
-            batch_size=self.batch_size,
-            devices=self.devices
-        )
+        try:
+            scores = self.model.score(
+                inputs, outputs, references,
+                batch_size=self.batch_size,
+                devices=self.devices
+            )
+        except RuntimeError as e:
+            if 'device-side assert' in str(e).lower():
+                warnings.warn("[LENS] CUDA device-side assert during batched scoring; retrying with batch_size=1 and default devices.")
+                try:
+                    scores = self.model.score(
+                        inputs, outputs, references,
+                        batch_size=1,
+                        devices=None
+                    )
+                except RuntimeError:
+                    warnings.warn("[LENS] Batched fallback also failed; propagating error.")
+                    raise
+            else:
+                raise
         results = [float(s) for s in scores]
         if not self.persistent:
             self._unload_model()

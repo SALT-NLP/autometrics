@@ -2,6 +2,8 @@ import nltk
 import torch
 import torch.nn.functional as F
 from transformers import AutoModel, AutoTokenizer
+from accelerate import infer_auto_device_map, dispatch_model
+from accelerate.utils import get_balanced_memory
 from autometrics.metrics.reference_free.ReferenceFreeMultiMetric import ReferenceFreeMultiMetric
 from autometrics.metrics.utils.device_utils import get_model_device, ensure_tensor_on_device
 from typing import Tuple, List, ClassVar
@@ -150,39 +152,72 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
         self.model = None
 
         self.exclude_from_cache_key('device_map', 'persistent')
+        # Classes that must not be split across devices when sharding
+        self.no_split_module_classes = [
+            "Qwen2DecoderLayer", "Qwen2RMSNorm", "Qwen2SdpaAttention", "Qwen2MLP"
+        ]
 
     def _load_model(self):
         if self.model is None:
             # Download sentence tokenizer if needed
             nltk.download('punkt', quiet=True)
-            # Load tokenizer and model with remote code
+            # Load tokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(
                 self.model_name,
                 trust_remote_code=True
             )
+            # CPU-first model load to avoid meta tensors
             self.model = AutoModel.from_pretrained(
                 self.model_name,
-                device_map=self.device_map,
+                trust_remote_code=True,
                 torch_dtype=torch.bfloat16,
-                trust_remote_code=True
-            ).eval()
-            # If no explicit device mapping was supplied, move the entire model
-            # to the default device (GPU if available, otherwise CPU). This
-            # ensures that the model tensors reside on the intended device and
-            # prevents inadvertent CPU placement when CUDA is available.
-            if self.device_map is None:
-                self.model.to(self.device)
-            
+            )
+            # Apply device mapping after weights are materialized
+            if self.device_map is not None:
+                try:
+                    if isinstance(self.device_map, (str,)) and self.device_map in ("auto", "balanced"):
+                        try:
+                            max_mem = get_balanced_memory(self.model, no_split_module_classes=self.no_split_module_classes)
+                            dm = infer_auto_device_map(
+                                self.model,
+                                max_memory=max_mem,
+                                no_split_module_classes=self.no_split_module_classes,
+                            )
+                        except Exception:
+                            dm = infer_auto_device_map(
+                                self.model,
+                                no_split_module_classes=self.no_split_module_classes,
+                            )
+                        self.model = dispatch_model(self.model, device_map=dm)
+                    elif isinstance(self.device_map, dict):
+                        # Ensure caller-provided map respects no-split boundaries
+                        self.model = dispatch_model(self.model, device_map=self.device_map)
+                    else:
+                        # explicit device string like 'cuda:0'
+                        self.model = self.model.to(self.device_map)
+                except Exception:
+                    # Fallback: move to default device
+                    self.model = self.model.to(self.device)
+            else:
+                # No mapping requested: move entire model to preferred device
+                self.model = self.model.to(self.device)
+            # Disable cache to avoid cross-device PKV issues in sharded forward
+            try:
+                if hasattr(self.model, "config") and getattr(self.model.config, "use_cache", None) is not None:
+                    self.model.config.use_cache = False
+            except Exception:
+                pass
+            self.model = self.model.eval()
+
             # Store the model's dtype for input tensor compatibility
             if hasattr(self.model, 'dtype'):
                 self.model_dtype = self.model.dtype
             else:
-                # Try to get dtype from first parameter
                 try:
                     first_param = next(self.model.parameters())
                     self.model_dtype = first_param.dtype
-                except:
-                    self.model_dtype = torch.bfloat16  # fallback
+                except Exception:
+                    self.model_dtype = torch.bfloat16
 
     def _unload_model(self):
         if self.model is not None:
@@ -191,6 +226,40 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
             torch.cuda.empty_cache()
             self.model = None
             self.tokenizer = None
+
+    def _redispatch_sharded_model(self):
+        """Recompute and apply a safe device map with no-split classes.
+        Assumes the model is already loaded on CPU or a single device.
+        """
+        if self.model is None:
+            self._load_model()
+            return
+        if self.device_map is None:
+            return
+        try:
+            max_mem = None
+            try:
+                max_mem = get_balanced_memory(self.model, no_split_module_classes=self.no_split_module_classes)
+            except Exception:
+                pass
+            if isinstance(self.device_map, dict):
+                dm = self.device_map
+            else:
+                dm = infer_auto_device_map(
+                    self.model,
+                    max_memory=max_mem,
+                    no_split_module_classes=self.no_split_module_classes,
+                )
+            self.model = dispatch_model(self.model, device_map=dm)
+            try:
+                if hasattr(self.model, "config") and getattr(self.model.config, "use_cache", None) is not None:
+                    self.model.config.use_cache = False
+            except Exception:
+                pass
+            self.model = self.model.eval()
+        except Exception:
+            # Best-effort redispatch; leave model as-is if this fails
+            pass
 
     def _make_step_rewards(self, logits: torch.Tensor, token_masks: torch.Tensor) -> List[List[float]]:
         """Compute positive-class probability for each <extra_0> step in a single forward pass."""
@@ -227,16 +296,31 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
             messages, tokenize=False, add_generation_prompt=False
         )
         
-        # Get the model's device and ensure tensors are on that device
+        # Decide where to place inputs: for device-mapped models, keep inputs on CPU
+        # so accelerate can shard/move as needed per-module. Otherwise, place on model device.
         model_device = get_model_device(self.model, fallback_device=self.device)
-        
-        # Tokenize and ensure tensor is on the model's device
-        # NOTE: input_ids must remain as int64 (Long) for the embedding layer
+        keep_on_cpu = hasattr(self.model, 'hf_device_map') and getattr(self.model, 'hf_device_map') is not None
+        # Tokenize
         input_ids = self.tokenizer.encode(conv_str, return_tensors="pt")
-        input_ids = ensure_tensor_on_device(input_ids, model_device)
+        if keep_on_cpu:
+            # leave on CPU intentionally
+            pass
+        else:
+            input_ids = ensure_tensor_on_device(input_ids, model_device)
+        # Build attention_mask on CPU (valid for both CPU and model-sharded execution)
+        attention_mask = torch.ones_like(input_ids, dtype=torch.long)
         
-        # Single forward pass
-        outputs = self.model(input_ids=input_ids)
+        # Single forward pass (do NOT pass position_ids; let the model create them on the correct device)
+        try:
+            outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, use_cache=False)
+        except RuntimeError as e:
+            msg = str(e).lower()
+            if ("same device" in msg or "different devices" in msg or "cuda:" in msg) and hasattr(self.model, 'hf_device_map') and getattr(self.model, 'hf_device_map') is not None:
+                # Attempt to redispatch with stricter no-split and retry once
+                self._redispatch_sharded_model()
+                outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, use_cache=False)
+            else:
+                raise
         logits = outputs.logits if hasattr(outputs, 'logits') else outputs[0]
         # Identify step separators and compute masks
         sep_id = self.tokenizer.encode("<extra_0>")[0]

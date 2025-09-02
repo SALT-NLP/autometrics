@@ -177,6 +177,7 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         self.persistent = persistent
         self.model = None
         self.tokenizer = None
+        self._cpu_model_cache = None
 
         name = "MOVERScore_" + model_name
         description = "MoverScore is a semantic similarity metric for evaluating generated text, leveraging contextualized embeddings (such as BERT) and Earth Mover's Distance (EMD) to measure the alignment between system outputs and reference texts. It is designed to capture semantic similarity beyond lexical overlap and has been shown to achieve a high correlation with human judgments across tasks like machine translation, summarization, image captioning, and data-to-text generation."
@@ -185,21 +186,25 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
         self.exclude_from_cache_key("device", "persistent")
 
     def _load_model(self):
-        """Load the model and tokenizer."""
+        """Load the model and tokenizer safely on CPU first, then move."""
         if self.model is None:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, do_lower_case=True)
-            
-        from transformers import AutoModel
-        
-        self.model = AutoModel.from_pretrained(self.model_name, output_hidden_states=True, output_attentions=True)
-        self.model.eval()
-        
-        # Fix for device mapping issues: only call .to() if not already device-mapped
-        if not hasattr(self.model, 'hf_device_map') or self.model.hf_device_map is None:
-            if not hasattr(self.model, 'device') or str(self.model.device) == 'cpu':
-                self.model.to(self.device)
-        
-        # Ensure the model is in eval mode
+            if self.tokenizer is None:
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, do_lower_case=True)
+            # Always load on CPU to avoid meta/device issues; move after
+            self.model = AutoModel.from_pretrained(
+                self.model_name,
+                output_hidden_states=True,
+                output_attentions=True,
+            )
+            # Try to move to requested device; if it fails, keep CPU
+            try:
+                desired_device = torch.device(self.device) if (isinstance(self.device, str) or isinstance(self.device, torch.device)) else torch.device('cpu')
+                # Only move when CUDA is available and desired device is CUDA
+                if str(desired_device).startswith('cuda') and torch.cuda.is_available():
+                    self.model = self.model.to(desired_device)
+            except Exception as e:
+                print(f"    🔧 MOVERScore: keeping model on CPU due to device move error: {e}")
+        # Ensure eval mode
         self.model.eval()
 
     def _unload_model(self):
@@ -210,6 +215,7 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
             torch.cuda.empty_cache()
             self.model = None
             self.tokenizer = None
+            self._cpu_model_cache = None
 
     def truncate(self, tokens):
         if len(tokens) > self.tokenizer.model_max_length - 2:
@@ -247,8 +253,32 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
 
     def bert_encode(self, model, x, attention_mask):
         model.eval()
+        # Ensure inputs are on the same device as the model parameters
+        try:
+            target_device = next(model.parameters()).device
+        except StopIteration:
+            target_device = torch.device(self.device)
+        x = x.to(target_device, non_blocking=True)
+        # HF accepts bool/long/float mask; we keep long, but ensure device aligns
+        attention_mask = attention_mask.to(target_device, non_blocking=True)
         with torch.no_grad():
-            result = model(x, attention_mask = attention_mask)
+            try:
+                result = model(x, attention_mask=attention_mask)
+            except RuntimeError as e:
+                msg = str(e).lower()
+                if 'expected `value` to be on same device' in msg or 'device-side assert' in msg or 'expected device meta' in msg:
+                    # Fallback: run on a fresh CPU model to avoid meta tensors
+                    print("    🔧 MOVERScore device conflict; retrying encode on CPU with fresh model…")
+                    if self._cpu_model_cache is None:
+                        self._cpu_model_cache = AutoModel.from_pretrained(
+                            self.model_name,
+                            output_hidden_states=True,
+                            output_attentions=True,
+                        )
+                        self._cpu_model_cache.eval()
+                    result = self._cpu_model_cache(x.cpu(), attention_mask=attention_mask.cpu())
+                else:
+                    raise
         if self.model_name == 'distilbert-base-uncased':
             return result[1] 
         else:
@@ -278,9 +308,11 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
 
         padded, lens, mask = self.padding(arr, pad_token, dtype=torch.long)
         padded_idf, _, _ = self.padding(idf_weights, pad_token, dtype=torch.float)
+        # Ensure all relevant tensors share the same device
         padded = padded.to(device=device)
         mask = mask.to(device=device)
         lens = lens.to(device=device)
+        padded_idf = padded_idf.to(device=device)
 
         return padded, padded_idf, lens, mask, tokens
 
@@ -360,10 +392,13 @@ MoverScore supports multiple variations, including **Word Mover Distance (WMD) o
             distance_matrix = self.batched_cdist_l2(raw, raw).double().cpu().numpy()
                     
             for i in range(batch_size):  
+                # Convert IDF weights to CPU numpy arrays for EMD
+                ref_idf_i = ref_idf[i].detach().float().cpu().numpy()
+                hyp_idf_i = hyp_idf[i].detach().float().cpu().numpy()
                 c1 = np.zeros(raw.shape[1], dtype=float)
                 c2 = np.zeros(raw.shape[1], dtype=float)
-                c1[:len(ref_idf[i])] = ref_idf[i]
-                c2[len(ref_idf[i]):] = hyp_idf[i]
+                c1[:len(ref_idf_i)] = ref_idf_i
+                c2[len(ref_idf_i):] = hyp_idf_i
                 
                 c1 = self._safe_divide(c1, np.sum(c1))
                 c2 = self._safe_divide(c2, np.sum(c2))

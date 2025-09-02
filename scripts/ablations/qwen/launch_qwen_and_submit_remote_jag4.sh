@@ -164,18 +164,21 @@ submit_one() {
   local n_val="$1"; shift
   local no_cards="$1"; shift
   local force_reidx="$1"; shift
+  local resized="$1"; shift
 
   local envs="ALL,DATASET_NAME=${DATASET_NAME},TARGET_MEASURE=${TARGET_MEASURE},SEED=${seed},MODEL_NAME=${MODEL_PATH},QWEN_API_BASE=${API_BASE},OPENAI_API_KEY=${DOWNSTREAM_OPENAI_API_KEY},METRICBANK_MODE=${mb_mode},OUTPUT_ROOT=${OUTPUT_ROOT}"
   if [ -n "${k_val}" ]; then envs=",${envs},K=${k_val}"; fi
   if [ -n "${n_val}" ]; then envs=",${envs},N=${n_val}"; fi
   if [ "${no_cards}" = "true" ]; then envs=",${envs},NO_METRIC_CARDS=true"; fi
   if [ "${force_reidx}" = "true" ]; then envs=",${envs},FORCE_REINDEX=true"; fi
+  if [ "${resized}" = "true" ]; then envs=",${envs},RESIZED=true"; fi
 
   # Construct a descriptive job name: {dataset}_qwen_{ablation_settings}
   local abla_tag="${mb_mode}"
   if [ -n "${k_val}" ]; then abla_tag="${abla_tag}_k${k_val}"; fi
   if [ -n "${n_val}" ]; then abla_tag="${abla_tag}_n${n_val}"; fi
   if [ "${no_cards}" = "true" ]; then abla_tag="${abla_tag}_desc"; fi
+  if [ "${resized}" = "true" ]; then abla_tag="${abla_tag}_resized"; fi
   local job_name="${DATASET_NAME}_qwen_${abla_tag}"
 
   # Submit and capture job id
@@ -185,20 +188,22 @@ submit_one() {
     --error="logs/${job_name}_%j.err" \
     --export=${envs} \
     scripts/ablations/qwen/run_ablation_qwen_remote.sh | awk '{print $4}')
-  echo "[Orchestrator] Submitted job_name=${job_name} seed=${seed} mode=${mb_mode} k=${k_val:-default} n=${n_val:-default} desc=${no_cards} reindex=${force_reidx} => job ${jid}"
+  echo "[Orchestrator] Submitted job_name=${job_name} seed=${seed} mode=${mb_mode} k=${k_val:-default} n=${n_val:-default} desc=${no_cards} reindex=${force_reidx} resized=${resized} => job ${jid}"
 }
 
 JOBS=()
 
+resized=${RESIZED:-"false"}
+
 if [ "${FULL_SUITE:-false}" = "true" ]; then
   for s in ${SEEDS}; do
     for k in 30 20 10 5; do
-      submit_one "$s" "full" "$k" "" "false" "false"; done
+      submit_one "$s" "full" "$k" "" "false" "false" "${resized}"; done
     for n in 20 10 5 3 1; do
-      submit_one "$s" "full" "30" "$n" "false" "false"; done
-    submit_one "$s" "full" "20" "" "true" "true"
-    submit_one "$s" "generated_only" "" "" "false" "true"
-    submit_one "$s" "existing_only" "" "" "false" "true"
+      submit_one "$s" "full" "30" "$n" "false" "false" "${resized}"; done
+    submit_one "$s" "full" "20" "" "true" "true" "${resized}";
+    submit_one "$s" "generated_only" "" "" "false" "true" "${resized}";
+    submit_one "$s" "existing_only" "" "" "false" "true" "${resized}";
   done
 else
   mb_mode=${METRICBANK_MODE:-"full"}
@@ -207,7 +212,7 @@ else
   no_cards=${NO_METRIC_CARDS:-"false"}
   force_reidx=${FORCE_REINDEX:-"false"}
   for s in ${SEEDS}; do
-    submit_one "$s" "$mb_mode" "$k_val" "$n_val" "$no_cards" "$force_reidx"
+    submit_one "$s" "$mb_mode" "$k_val" "$n_val" "$no_cards" "$force_reidx" "${resized}"
   done
 fi
 

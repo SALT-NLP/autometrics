@@ -22,10 +22,11 @@ K=${K:-""}
 N=${N:-""}
 NO_METRIC_CARDS=${NO_METRIC_CARDS:-"false"}
 FORCE_REINDEX=${FORCE_REINDEX:-"false"}
+RESIZED=${RESIZED:-"false"}                  # true | false
 
 # Qwen server options (jagupard node)
 MODEL_PATH=${MODEL_PATH:-"Qwen/Qwen3-32B"}
-PORT=${PORT:-8123}
+PORT=${PORT:-8867}
 TP=${TP:-4}
 DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
@@ -54,4 +55,5 @@ DTYPE="${DTYPE}" \
 MEM_FRACTION="${MEM_FRACTION}" \
 OUTPUT_ROOT="${OUTPUT_ROOT}" \
 OPENAI_API_KEY="${OPENAI_API_KEY}" \
+RESIZED="${RESIZED}" \
 sbatch --export=ALL launch_qwen_and_submit_remote_jag4.sh | tee /dev/fd/2

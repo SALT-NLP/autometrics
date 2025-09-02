@@ -2,7 +2,7 @@
 
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=40G
+#SBATCH --mem=25G
 #SBATCH --gres=gpu:0
 #SBATCH --open-mode=append
 #SBATCH --partition=john-lo
@@ -21,7 +21,7 @@
 # Required env vars:
 #   DATASET_NAME, TARGET_MEASURE, SEED, QWEN_API_BASE
 # Optional env vars:
-#   METRICBANK_MODE, K, N, NO_METRIC_CARDS, FORCE_REINDEX, OUTPUT_ROOT
+#   METRICBANK_MODE, K, N, NO_METRIC_CARDS, FORCE_REINDEX, OUTPUT_ROOT, RESIZED
 
 set -euo pipefail
 
@@ -46,6 +46,7 @@ NO_METRIC_CARDS=${NO_METRIC_CARDS:-"false"}
 FORCE_REINDEX=${FORCE_REINDEX:-"false"}
 OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/main_ablations/qwen"}
 HOST=${HOST:-$(hostname -f)}
+RESIZED=${RESIZED:-"false"}
 
 mkdir -p logs
 
@@ -81,8 +82,15 @@ ABLA_TAG="${METRICBANK_MODE}"
 if [ -n "$K" ]; then ABLA_TAG="${ABLA_TAG}_k${K}"; fi
 if [ -n "$N" ]; then ABLA_TAG="${ABLA_TAG}_n${N}"; fi
 if [ "$NO_METRIC_CARDS" = "true" ]; then ABLA_TAG="${ABLA_TAG}_desc"; fi
+# if [ "$RESIZED" = "true" ]; then ABLA_TAG="${ABLA_TAG}_resized"; fi # Removed to keep the same cache dirs for resized datasets
 
-OUT_DIR="${OUTPUT_ROOT}/${DATASET_NAME}_${TARGET_MEASURE}/${ABLA_TAG}"
+
+if [ "$RESIZED" = "true" ]; 
+then 
+  OUT_DIR="${OUTPUT_ROOT}/${DATASET_NAME}_${TARGET_MEASURE}_resized/${ABLA_TAG}"
+else 
+  OUT_DIR="${OUTPUT_ROOT}/${DATASET_NAME}_${TARGET_MEASURE}/${ABLA_TAG}"
+fi
 mkdir -p "$OUT_DIR"
 
 echo "Running Qwen remote ablation"
@@ -94,6 +102,7 @@ echo "k:       ${K:-default}"
 echo "n:       ${N:-default}"
 echo "desc:    $NO_METRIC_CARDS"
 echo "reindex: $FORCE_REINDEX"
+echo "resized: $RESIZED"
 echo "Model:   $MODEL_NAME"
 echo "API:     $QWEN_API_BASE"
 echo "Out:     $OUT_DIR"
@@ -128,6 +137,7 @@ if [ -n "$K" ]; then PY_ARGS+=( --k "$K" ); fi
 if [[ -n "$N" && "$N" =~ ^[0-9]+$ ]]; then PY_ARGS+=( --n "$N" ); fi
 if [ "$NO_METRIC_CARDS" = "true" ]; then PY_ARGS+=( --no-metric-cards ); fi
 if [ "$FORCE_REINDEX" = "true" ]; then PY_ARGS+=( --force-reindex ); fi
+if [ "$RESIZED" = "true" ]; then PY_ARGS+=( --resized ); fi
 
 COLBERT_LOAD_TORCH_EXTENSION_VERBOSE=True python "${PY_ARGS[@]}"
 STATUS=$?

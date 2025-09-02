@@ -20,7 +20,7 @@ Usage:
         [--model-name MODEL] [--api-base API_BASE] \
         [--metricbank {full,existing_only,generated_only}] \
         [--k NUM_TO_RETRIEVE] [--n NUM_TO_REGRESS] \
-        [--no-metric-cards] [--force-reindex]
+        [--no-metric-cards] [--force-reindex] [--resized]
 """
 
 import os
@@ -113,7 +113,7 @@ def check_experiment_completed(output_dir: str, seed: int) -> Optional[Dict[str,
         return None
 
 
-def get_unique_dirs(dataset_name: str, target_name: str, seed: int, k: Optional[int], n: Optional[int], metricbank_mode: str, no_metric_cards: bool) -> tuple[str, str]:
+def get_unique_dirs(dataset_name: str, target_name: str, seed: int, k: Optional[int], n: Optional[int], metricbank_mode: str, no_metric_cards: bool, resized: bool = False) -> tuple[str, str]:
     ablation_bits = []
     if k is not None:
         ablation_bits.append(f"k{k}")
@@ -126,7 +126,7 @@ def get_unique_dirs(dataset_name: str, target_name: str, seed: int, k: Optional[
     ablation_tag = "_".join(ablation_bits) if ablation_bits else "default"
     run_id = f"{dataset_name}_{target_name}_seed{seed}_{ablation_tag}"
     cache_dir = f"./autometrics_cache_ablations/autometrics_cache_{run_id}"
-    gen_dir = f"./generated_metrics_ablations/generated_metrics_{run_id}"
+    gen_dir = f"./generated_metrics_ablations/generated_metrics_{run_id}{'_resized' if resized else ''}"
     return cache_dir, gen_dir
 
 
@@ -175,6 +175,7 @@ def run_ablation(
     n: Optional[int] = None,
     no_metric_cards: bool = False,
     force_reindex: bool = False,
+    resized: bool = False,
 ) -> Dict[str, float]:
     existing = check_experiment_completed(output_dir, seed)
     if existing is not None:
@@ -193,12 +194,12 @@ def run_ablation(
 
     os.makedirs(output_dir, exist_ok=True)
 
-    cache_dir, generated_metrics_dir = get_unique_dirs(dataset_name, target_name, seed, k, n, metricbank_mode, no_metric_cards)
+    cache_dir, generated_metrics_dir = get_unique_dirs(dataset_name, target_name, seed, k, n, metricbank_mode, no_metric_cards, resized)
     os.environ["AUTOMETRICS_CACHE_DIR"] = cache_dir
 
     print("📊 Loading dataset…")
     dataset = load_dataset(dataset_name)
-    train_dataset, val_dataset, test_dataset = dataset.load_permanent_splits()
+    train_dataset, val_dataset, test_dataset = dataset.load_permanent_splits(resized=resized)
     print(f"   Train: {len(train_dataset.get_dataframe())}")
     print(f"   Val:   {len(val_dataset.get_dataframe())}")
     print(f"   Test:  {len(test_dataset.get_dataframe())}")
@@ -357,6 +358,7 @@ def main():
     parser.add_argument("--n", dest="n", type=int, default=None)
     parser.add_argument("--no-metric-cards", action="store_true", help="Use description-only documents for retrieval and reranking (separate indices)")
     parser.add_argument("--force-reindex", action="store_true", help="Force retriever reindex (avoid cached indices)")
+    parser.add_argument("--resized", action="store_true", help="Use resized dataset (for train and val splits of EvalGenProduct and CoGymTravelOutcome)")
 
     args = parser.parse_args()
 
@@ -379,6 +381,7 @@ def main():
             n=args.n,
             no_metric_cards=args.no_metric_cards,
             force_reindex=args.force_reindex,
+            resized=args.resized,
         )
         print("\n🎉 Final validation correlations:")
         for corr_type, score in scores.items():

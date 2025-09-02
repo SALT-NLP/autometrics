@@ -168,26 +168,44 @@ class _OptimizedJudgeMetricMixin:
         else:
             reference_text = None
             
-        with dspy.settings.context(lm=self.model):
-            if self.is_reference_based and reference_text is not None:
-                score = self._optimized_module(
-                    task_description=self.task_description,
-                    axis=self.axis,
-                    input_text=input_text,
-                    reference_text=reference_text,
-                    output_text=output_text,
-                    suggested_range=self.suggested_range,
-                ).score
-            else:
-                score = self._optimized_module(
-                    task_description=self.task_description,
-                    axis=self.axis,
-                    input_text=input_text,
-                    output_text=output_text,
-                    suggested_range=self.suggested_range,
-                ).score
+        def _invoke(task_desc: str):
+            with dspy.settings.context(lm=self.model):
+                if self.is_reference_based and reference_text is not None:
+                    return self._optimized_module(
+                        task_description=task_desc,
+                        axis=self.axis,
+                        input_text=input_text,
+                        reference_text=reference_text,
+                        output_text=output_text,
+                        suggested_range=self.suggested_range,
+                    ).score
+                else:
+                    return self._optimized_module(
+                        task_description=task_desc,
+                        axis=self.axis,
+                        input_text=input_text,
+                        output_text=output_text,
+                        suggested_range=self.suggested_range,
+                    ).score
 
         # Convert score to float, handling various string formats
+        # First attempt
+        try:
+            score = _invoke(self.task_description)
+        except Exception as e:
+            msg = str(e)
+            needs_retry = (
+                'Adapter JSONAdapter failed to parse' in msg
+                or 'ContextWindowExceededError' in msg
+                or 'response was truncated' in msg
+                or 'exceeding max_tokens' in msg
+            )
+            if not needs_retry:
+                raise
+            retry_task_desc = (self.task_description or "") + " "
+            score = _invoke(retry_task_desc)
+
+        # Normalize score
         try:
             if isinstance(score, str):
                 # Handle newlines and extra text
@@ -204,6 +222,9 @@ class _OptimizedJudgeMetricMixin:
             score = 0.0
 
         return score
+
+        
+        
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         del kwargs  # pragma: no cover

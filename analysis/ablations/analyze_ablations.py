@@ -81,17 +81,17 @@ ABLATION_GROUPS: List[Tuple[str, List[Tuple[str, List[str]]]]] = [
         [
             ("Existing Metrics Only", ["existing_only"]),
             ("Generated Metrics Only", ["generated_only"]),
-            ("Full MetricBank", ["full_k30"]),
+            ("Full MetricBank", ["full_k30", "full_k30_n5"]),
         ],
     ),
     (
         "Retrieval Ablations",
         [
-            ("No Metric Cards (k=20)", ["full_k20_desc"]),
             ("Retrieve k=5", ["full_k5"]),
             ("Retrieve k=10", ["full_k10"]),
+            ("No Metric Cards (k=20)", ["full_k20_desc"]),
             ("Retrieve k=20", ["full_k20"]),
-            ("Retrieve k=30", ["full_k30"]),
+            ("Retrieve k=30", ["full_k30", "full_k30_n5"]),
         ],
     ),
     (
@@ -99,7 +99,7 @@ ABLATION_GROUPS: List[Tuple[str, List[Tuple[str, List[str]]]]] = [
         [
             ("No Regression (n=1)", ["full_k30_n1"]),
             ("Regress n=3", ["full_k30_n3"]),
-            ("Regress n=5", ["full_k30_n5"]),
+            ("Regress n=5", ["full_k30_n5", "full_k30"]),
             ("Regress n=10", ["full_k30_n10"]),
             ("Regress n=20", ["full_k30_n20"]),
         ],

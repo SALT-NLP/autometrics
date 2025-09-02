@@ -22,10 +22,11 @@ K=${K:-""}
 N=${N:-""}
 NO_METRIC_CARDS=${NO_METRIC_CARDS:-"false"}
 FORCE_REINDEX=${FORCE_REINDEX:-"false"}
+RESIZED=${RESIZED:-"false"}                  # true | false
 
 # Qwen server options (jagupard node)
 MODEL_PATH=${MODEL_PATH:-"Qwen/Qwen3-32B"}
-PORT=${PORT:-8123}
+PORT=${PORT:-8997}
 TP=${TP:-4}
 DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
@@ -36,7 +37,7 @@ OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/qwen_remote"}
 # OPENAI_API_KEY is required by downstream scripts; server ignores the key value
 OPENAI_API_KEY=${OPENAI_API_KEY:-"None"}
 
-echo "Submitting orchestrator for EvalGenProduct (SEEDS=[$SEEDS], FULL_SUITE=$FULL_SUITE) on jagupard TP=${TP}"
+echo "Submitting orchestrator for HelpSteer2 (SEEDS=[$SEEDS], FULL_SUITE=$FULL_SUITE) on jagupard TP=${TP}"
 
 DATASET_NAME="${DATASET_NAME}" \
 TARGET_MEASURE="${TARGET_MEASURE}" \
@@ -54,6 +55,7 @@ DTYPE="${DTYPE}" \
 MEM_FRACTION="${MEM_FRACTION}" \
 OUTPUT_ROOT="${OUTPUT_ROOT}" \
 OPENAI_API_KEY="${OPENAI_API_KEY}" \
+RESIZED="${RESIZED}" \
 sbatch --export=ALL launch_qwen_and_submit_remote_jag4.sh | tee /dev/fd/2
 
 

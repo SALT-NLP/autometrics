@@ -1,6 +1,7 @@
 import spacy
 import torch
-from transformers import BertTokenizer, BertForQuestionAnswering
+import warnings
+from transformers import BertTokenizerFast, BertForQuestionAnswering
 from collections import Counter
 import re, string
 from autometrics.metrics.reference_free.ReferenceFreeMultiMetric import ReferenceFreeMultiMetric
@@ -40,7 +41,11 @@ class QA_Bert:
     def __init__(self, device=None):
         # Use the same model name for both tokenizer and model to ensure compatibility
         model_name = 'bert-large-uncased-whole-word-masking-finetuned-squad'
-        self.tokenizer = BertTokenizer.from_pretrained(model_name)
+        # Suppress tokenizer overflow warnings which are expected with truncation
+        warnings.filterwarnings('ignore', message='.*overflowing tokens.*')
+        warnings.filterwarnings('ignore', category=UserWarning, message='.*truncate.*longest_first.*')
+        # Use fast tokenizer for offsets and robust decoding
+        self.tokenizer = BertTokenizerFast.from_pretrained(model_name)
         
         # Set device (use GPU if available by default)
         if device is None:
@@ -48,35 +53,10 @@ class QA_Bert:
         else:
             self.device = torch.device(device)
         
-        try:
-            # Try to load the model directly to the target device
-            self.model = BertForQuestionAnswering.from_pretrained(
-                model_name,
-                device_map=None  # Don't use device_map initially
-            )
-            # Move to target device
-            self.model = self.model.to(self.device)
-        except Exception as e:
-            # Handle meta tensor issue or other device-related errors
-            if "meta" in str(e).lower() or "Cannot copy out of meta tensor" in str(e):
-                print(f"    🔧 Meta tensor issue detected for BERT QA model, using to_empty()...")
-                # Load model without device specification first, then use to_empty()
-                self.model = BertForQuestionAnswering.from_pretrained(
-                    model_name,
-                    device_map=None  # Don't use device_map initially
-                )
-                # Use to_empty() to properly move from meta to device
-                self.model = self.model.to_empty(device=self.device)
-            else:
-                # For other errors, try loading to CPU first then moving
-                print(f"    🔧 Device loading error, trying CPU first: {e}")
-                self.model = BertForQuestionAnswering.from_pretrained(
-                    model_name,
-                    device_map=None
-                )
-                self.model = self.model.to(self.device)
+        # Load on CPU first to avoid meta/cuda init issues, then move
+        self.model = BertForQuestionAnswering.from_pretrained(model_name)
+        self.model = self.model.to(self.device)
         
-        self.sep_id = self.tokenizer.encode('[SEP]', add_special_tokens=False)[0]
         self.model.eval()
         self.max_seq_length = 512  # BERT's maximum sequence length
         
@@ -89,80 +69,86 @@ class QA_Bert:
         Return the predicted answer string and its probability.
         Handles long sequences by truncating to fit BERT's max length.
         """
-        try:
-            # Build input: [CLS] question [SEP] text [SEP]
-            input_text = f"[CLS] {question} [SEP] {text} [SEP]"
-            
-            # Tokenize and enforce hard truncation so the combined sequence never exceeds BERT's
-            # maximum. ``truncation=True`` lets the tokenizer shorten whichever sequence is
-            # necessary (preferring to keep the *question* intact but falling back to longest-first
-            # once the context is exhausted).  This guarantees that the produced ``input_ids`` and
-            # ``token_type_ids`` are always of length ``self.max_seq_length`` (512 for BERT),
-            # preventing downstream size-mismatch errors.
-            encoded_dict = self.tokenizer(
-                question,
-                text,
-                add_special_tokens=True,
-                max_length=self.max_seq_length,
-                padding='max_length',  # Pad up to max length after truncation
-                truncation=True,        # Hard truncate to ``max_length`` (longest_first strategy)
-                return_tensors='pt',
-                return_token_type_ids=True,
-            )
-            
-            # Get input IDs and token type IDs
-            input_ids = encoded_dict['input_ids']
-            token_type_ids = encoded_dict['token_type_ids']
-            
-            # Ensure tensors are on the correct device
-            input_ids = input_ids.to(self.device)
-            token_type_ids = token_type_ids.to(self.device)
-            
-            # Debug: Check tensor devices
-            if input_ids.device != self.device or token_type_ids.device != self.device:
-                print(f"    🔧 Device mismatch detected: input_ids.device={input_ids.device}, token_type_ids.device={token_type_ids.device}, expected={self.device}")
-            
-            with torch.no_grad():
-                # Get model outputs
-                outputs = self.model(input_ids, token_type_ids=token_type_ids)
-                
-                # Extract start and end logits
-                start_scores = outputs.start_logits
-                end_scores = outputs.end_logits
-                
-                # Build a mask that is 1 only for *real* context tokens (token_type_id == 1
-                # AND attention_mask == 1).  This prevents padded positions from being
-                # selected as valid answer spans.
-                attention_mask = encoded_dict['attention_mask'].to(self.device).float()
-                context_mask = (token_type_ids == 1).float() * attention_mask
+        def _predict_impl(device: torch.device) -> Tuple[str, float]:
+            # Pair encode; prefer truncating the context (second sequence) only, with safe fallback
+            try:
+                encoded_dict = self.tokenizer(
+                    question,
+                    text,
+                    add_special_tokens=True,
+                    max_length=self.max_seq_length,
+                    padding='max_length',
+                    truncation='only_second',
+                    return_tensors='pt',
+                    return_token_type_ids=True,
+                    return_offsets_mapping=True,
+                )
+            except Exception as e:
+                msg = str(e).lower()
+                if 'truncation error' in msg or 'too short to respect the provided max_length' in msg:
+                    warnings.warn("[SummaQA] Falling back to longest_first truncation due to tokenizer truncation edge case.")
+                    encoded_dict = self.tokenizer(
+                        question,
+                        text,
+                        add_special_tokens=True,
+                        max_length=self.max_seq_length,
+                        padding='max_length',
+                        truncation='longest_first',
+                        return_tensors='pt',
+                        return_token_type_ids=True,
+                        return_offsets_mapping=True,
+                    )
+                else:
+                    raise
 
-                # Apply softmax to get probabilities then zero-out everything outside the
-                # context (including question tokens and padding).
-                start_probs = torch.softmax(start_scores, dim=-1) * context_mask
-                end_probs = torch.softmax(end_scores, dim=-1) * context_mask
-            
-            # Get best start and end indices
-            start_index = torch.argmax(start_probs).item()
-            end_index = torch.argmax(end_probs).item()
-            
-            # Check indices are valid and end comes after start
+            input_ids = encoded_dict['input_ids'].to(device, non_blocking=True)
+            token_type_ids = encoded_dict['token_type_ids'].to(device, non_blocking=True)
+            attention_mask = encoded_dict['attention_mask'].to(device, non_blocking=True)
+
+            with torch.inference_mode():
+                outputs = self.model(
+                    input_ids,
+                    token_type_ids=token_type_ids,
+                    attention_mask=attention_mask,
+                )
+                start_logits = outputs.start_logits
+                end_logits = outputs.end_logits
+
+                # Valid context positions: segment_id == 1 and attention_mask == 1
+                # Ensure shapes align with logits (batch, seq_len)
+                context_mask = (token_type_ids == 1) & (attention_mask == 1)
+                if context_mask.sum().item() == 0:
+                    return "", 0.0
+
+                # Mask invalid positions with large negative before softmax
+                very_neg = torch.finfo(start_logits.dtype).min if start_logits.dtype.is_floating_point else -1e9
+                context_mask_float = context_mask.to(dtype=start_logits.dtype)
+                start_logits = start_logits.masked_fill(~context_mask, very_neg)
+                end_logits = end_logits.masked_fill(~context_mask, very_neg)
+
+                start_probs = torch.softmax(start_logits, dim=-1)
+                end_probs = torch.softmax(end_logits, dim=-1)
+
+            start_index = int(torch.argmax(start_probs[0]).item())
+            end_index = int(torch.argmax(end_probs[0]).item())
             if end_index < start_index:
                 end_index = start_index
-                
-            # Get the tokens and convert to text
-            all_tokens = self.tokenizer.convert_ids_to_tokens(input_ids[0])
-            answer = ' '.join(all_tokens[start_index:end_index + 1])
-            
-            # Extract probabilities for best indices
+
+            # Decode span cleanly
+            span_ids = input_ids[0, start_index:end_index + 1].tolist()
+            answer = self.tokenizer.decode(span_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True)
             prob = float(start_probs[0, start_index] * end_probs[0, end_index])
-            
             return answer, prob
-        
-        except Exception as e:
-            # Log the error (in a real application, you might want to use a proper logger)
-            print(f"Error in QA_Bert.predict: {e}")
-            # Return empty answer and 0 probability on error
-            return "", 0.0
+
+        try:
+            return _predict_impl(self.device)
+        except RuntimeError as e:
+            if 'device-side assert triggered' in str(e) or 'indexSelectLargeIndex' in str(e):
+                print("Error in QA_Bert.predict on GPU; retrying on CPU due to CUDA assert...")
+                
+                cpu_device = torch.device('cpu')
+                self.model = self.model.to(cpu_device)
+                return _predict_impl(cpu_device)
 
 
 class QG_masked:

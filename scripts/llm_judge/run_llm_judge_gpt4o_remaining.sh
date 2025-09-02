@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=40GB
 #SBATCH --open-mode=append
-#SBATCH --partition=john-lo
+#SBATCH --partition=john
 #SBATCH --time=16:00:00
 #SBATCH --nodes=1
 #SBATCH --job-name=llm_judge_gpt4o_remaining

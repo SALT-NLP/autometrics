@@ -357,7 +357,11 @@ class _ExampleRubricMetricMixin:
         else:
             orig_demos = []
         deepcopied = False  # Track if we've switched to a deepcopy
+        # Preserve original task description and use a local variable for cache-busting
+        original_task_desc = self.task_description
+        attempt_task_desc = original_task_desc
         
+        attempts_left = 2  # first try + one retry
         while True:
             try:
                 # Set the current demos for this attempt (on the current program)
@@ -377,7 +381,7 @@ class _ExampleRubricMetricMixin:
                         text=formatted_text,
                         measure=self.axis,
                         suggested_range=self.suggested_range,
-                        task_description=self.task_description
+                        task_description=attempt_task_desc
                     )
                 self.debug_print(f"🔍 Example Judge DSPy result: {result}")
                 self.debug_print(f"🔍 Example Judge result type: {type(result)}")
@@ -428,6 +432,23 @@ class _ExampleRubricMetricMixin:
                     longest_idx = max(range(len(demos)), key=lambda i: demo_length(demos[i]))
                     self.debug_print(f"⚠️  Dropping demo #{longest_idx} (length={demo_length(demos[longest_idx])}) and retrying...")
                     demos.pop(longest_idx)
+                    continue
+                # Handle truncation/adapter parse failures by retrying once with a cache-bust
+                elif (
+                    'Adapter JSONAdapter failed to parse' in error_str
+                    or 'response was truncated' in error_str
+                    or 'exceeding max_tokens' in error_str
+                ) and attempts_left > 1:
+                    attempts_left -= 1
+                    self.debug_print("⚠️  Truncation/parse issue detected. Retrying once with cache-busting space in task_description...")
+                    # Cache-bust by appending a space to task_description for this call
+                    import copy as _copy
+                    program = _copy.deepcopy(program) if not deepcopied else program
+                    deepcopied = True
+                    if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
+                        program.generate_score.predict.demos = demos
+                    # Temporarily modify local attempt_task_desc (do not mutate self)
+                    attempt_task_desc = (original_task_desc or "") + " "
                     continue
                 else:
                     self.debug_print(f"🚨 CRITICAL EXCEPTION in Example Judge DSPy call:")
@@ -587,7 +608,7 @@ DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
 OPTIMIZED_EXAMPLES = {examples_list_str}
 
 class {self.name.replace(" ", "_").replace("-", "_")}_ExampleRubric({class_name}):
-    \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
+    \"\"\"{self.metric_card.replace('"""', '\\"\\"\\"') if include_metric_card else ""}\"\"\"
 
     description: ClassVar[str] = {json.dumps(self.description)}
 

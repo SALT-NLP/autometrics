@@ -136,24 +136,42 @@ class _LLMJudgeMetricMixin:
         else:
             reference_text = None
             
-        with dspy.settings.context(lm=self.model):
-            if self.is_reference_based and reference_text is not None:
-                score = self._judge_module(
-                    task_description=self.task_description,
-                    axis=self.axis,
-                    input_text=input_text,
-                    reference_text=reference_text,
-                    output_text=output_text,
-                ).score
-            else:
-                score = self._judge_module(
-                    task_description=self.task_description,
-                    axis=self.axis,
-                    input_text=input_text,
-                    output_text=output_text,
-                ).score
+        def _invoke(task_desc: str):
+            with dspy.settings.context(lm=self.model):
+                if self.is_reference_based and reference_text is not None:
+                    return self._judge_module(
+                        task_description=task_desc,
+                        axis=self.axis,
+                        input_text=input_text,
+                        reference_text=reference_text,
+                        output_text=output_text,
+                    ).score
+                else:
+                    return self._judge_module(
+                        task_description=task_desc,
+                        axis=self.axis,
+                        input_text=input_text,
+                        output_text=output_text,
+                    ).score
 
-        return float(score)
+        # First attempt
+        try:
+            score = _invoke(self.task_description)
+            return float(score)
+        except Exception as e:
+            msg = str(e)
+            needs_retry = (
+                'Adapter JSONAdapter failed to parse' in msg
+                or 'ContextWindowExceededError' in msg
+                or 'response was truncated' in msg
+                or "exceeding max_tokens" in msg
+            )
+            if not needs_retry:
+                raise
+            # Retry once with a cheap cache-bust: append a space to task_description
+            retry_task_desc = (self.task_description or "") + " "
+            score = _invoke(retry_task_desc)
+            return float(score)
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         del kwargs  # pragma: no cover

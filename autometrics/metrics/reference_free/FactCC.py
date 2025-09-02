@@ -177,6 +177,16 @@ where $f$ is the classification function learned by the model, trained on synthe
                     self.model = self.model.to_empty(device=self.device).eval()
                 else:
                     raise e
+            # Normalize model dtype to float32 to avoid BF16/FP32 matmul issues
+            try:
+                for p in self.model.parameters():
+                    if p.dtype.is_floating_point:
+                        p.data = p.data.float()
+                for b_name, b in list(self.model.named_buffers(recurse=True)):
+                    if hasattr(b, 'dtype') and b.dtype.is_floating_point:
+                        self.model._buffers[b_name] = b.float()  # type: ignore[index]
+            except Exception:
+                pass
 
     def _unload_model(self):
         if self.model is not None:
@@ -193,17 +203,32 @@ where $f$ is the classification function learned by the model, trained on synthe
         input_text = str(input_text) if input_text is not None else ""
         output = str(output) if output is not None else ""
         # Encode text-summary pair
-        inputs = self.tokenizer(
+        encoded = self.tokenizer(
             input_text,
             output,
             max_length=512,
             padding="longest",
             truncation="longest_first",
             return_tensors="pt"
-        ).to(self.device)
+        )
+        # Ensure inputs are float32-compatible and on the right device
+        encoded = {k: (v.to(self.device) if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
         with torch.no_grad():
-            logits = self.model(**inputs).logits
-            probs = F.softmax(logits, dim=-1)
+            try:
+                logits = self.model(**encoded).logits.float()
+                probs = F.softmax(logits, dim=-1)
+            except RuntimeError as e:
+                # Handle rare GPU matmul/cublas failures by retrying on CPU
+                if 'CUBLAS_STATUS_EXECUTION_FAILED' in str(e) or 'cublas' in str(e).lower():
+                    cpu_inputs = {k: (v.cpu() if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
+                    cpu_model = self.model.to('cpu')
+                    logits = cpu_model(**cpu_inputs).logits.float()
+                    probs = F.softmax(logits, dim=-1)
+                    # Move model back if persistent and GPU available
+                    if self.persistent and torch.cuda.is_available():
+                        self.model = self.model.to(self.device)
+                else:
+                    raise
         # Probability of CORRECT label
         label2id = self.model.config.label2id  # e.g. {'INCORRECT':0, 'CORRECT':1}
         correct_id = label2id.get("CORRECT", 1)
@@ -230,10 +255,23 @@ where $f$ is the classification function learned by the model, trained on synthe
                 padding="longest",
                 truncation="longest_first",
                 return_tensors="pt"
-            ).to(self.device)
+            )
+            # Ensure inputs are on the correct device
+            encoded = {k: (v.to(self.device) if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
             with torch.no_grad():
-                logits = self.model(**encoded).logits
-                probs = F.softmax(logits, dim=-1).cpu()
+                try:
+                    logits = self.model(**encoded).logits.float()
+                    probs = F.softmax(logits, dim=-1).cpu()
+                except RuntimeError as e:
+                    if 'CUBLAS_STATUS_EXECUTION_FAILED' in str(e) or 'cublas' in str(e).lower():
+                        cpu_inputs = {k: (v.cpu() if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
+                        cpu_model = self.model.to('cpu')
+                        logits = cpu_model(**cpu_inputs).logits.float()
+                        probs = F.softmax(logits, dim=-1).cpu()
+                        if self.persistent and torch.cuda.is_available():
+                            self.model = self.model.to(self.device)
+                    else:
+                        raise
             label2id = self.model.config.label2id
             correct_id = label2id.get("CORRECT", 1)
             batch_scores = probs[:, correct_id].tolist()

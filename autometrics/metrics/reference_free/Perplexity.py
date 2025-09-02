@@ -113,15 +113,26 @@ def compute_per_document_perplexities(grouped, model, tokenizer, device, batch_s
 
                 padded_inputs = padded_inputs.to(device)
                 target_ids = target_ids.to(device)
-                outputs = model(padded_inputs, labels=None)
+                # Derive attention mask to avoid attending over pad tokens
+                attention_mask = (padded_inputs != tokenizer.pad_token_id).long().to(device)
+                outputs = model(padded_inputs, attention_mask=attention_mask, labels=None)
                 logits = outputs.logits
                 # Shift logits and targets for computing cross-entropy loss.
                 shifted_logits = logits[:, :-1, :].contiguous()
                 shifted_targets = target_ids[:, 1:].contiguous()
+                # Sanitize targets: any id >= vocab_size is invalid => mark as ignore_index
+                vocab_size = shifted_logits.size(-1)
+                flat_targets = shifted_targets.view(-1)
+                invalid_mask = (flat_targets >= vocab_size) & (flat_targets != -100)
+                if invalid_mask.any():
+                    flat_targets = flat_targets.masked_fill(invalid_mask, -100)
+                    shifted_targets = flat_targets.view_as(shifted_targets)
+                # Use ignore_index to safely skip masked/invalid targets (-100)
                 loss_tensor = F.cross_entropy(
-                    shifted_logits.view(-1, shifted_logits.size(-1)),
+                    shifted_logits.view(-1, vocab_size),
                     shifted_targets.view(-1),
-                    reduction='none'
+                    reduction='none',
+                    ignore_index=-100,
                 )
                 loss_tensor = loss_tensor.view(shifted_targets.size())
                 # For each example in the batch, sum the loss over valid tokens.
@@ -334,7 +345,8 @@ This method provides a **more realistic** evaluation of model fluency while effi
         self.persistent = persistent
 
         device, _, _ = get_backend()
-        self.device = device
+        # Prefer CPU for robustness unless explicitly CUDA
+        self.device = device if str(device).startswith('cuda') and torch.cuda.is_available() else torch.device('cpu')
         
         self.model = None
         self.tokenizer = None
@@ -347,7 +359,14 @@ This method provides a **more realistic** evaluation of model fluency while effi
     def _load_model(self):
         """Load model and tokenizer if not already loaded."""
         if self.model is None:
-            self.model = GPT2LMHeadModel.from_pretrained(self.model_name).to(self.device)
+            # Load on CPU first, then move to target device if CUDA and safe
+            self.model = GPT2LMHeadModel.from_pretrained(self.model_name)
+            if str(self.device).startswith('cuda') and torch.cuda.is_available():
+                try:
+                    self.model = self.model.to(self.device)
+                except Exception:
+                    # Keep on CPU if move fails
+                    self.device = torch.device('cpu')
             self.tokenizer = GPT2TokenizerFast.from_pretrained(self.model_name)
             if self.tokenizer.pad_token is None:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
@@ -394,15 +413,33 @@ This method provides a **more realistic** evaluation of model fluency while effi
         if self.model is None:
             self._load_model()
 
-        results = calculate_perplexities(
-            outputs,
-            self.model,
-            self.tokenizer,
-            self.device,
-            batch_size=self.batch_size,
-            stride=self.stride,
-            progress_bar=self.progress_bar
-        )
+        try:
+            results = calculate_perplexities(
+                outputs,
+                self.model,
+                self.tokenizer,
+                self.device,
+                batch_size=self.batch_size,
+                stride=self.stride,
+                progress_bar=self.progress_bar
+            )
+        except RuntimeError as e:
+            # Retry on CPU for device-side assert / CUDA issues
+            msg = str(e).lower()
+            if 'device-side assert' in msg or 'cuda' in msg or 'cublas' in msg:
+                cpu_device = torch.device('cpu')
+                self.model = self.model.to(cpu_device)
+                results = calculate_perplexities(
+                    outputs,
+                    self.model,
+                    self.tokenizer,
+                    cpu_device,
+                    batch_size=self.batch_size,
+                    stride=self.stride,
+                    progress_bar=self.progress_bar
+                )
+            else:
+                raise
         
         if not self.persistent:
             self._unload_model()

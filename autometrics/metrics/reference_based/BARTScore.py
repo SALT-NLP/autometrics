@@ -14,6 +14,7 @@ class BARTScorer:
         max_length: int = None,
         checkpoint: str = "facebook/bart-large-cnn"
     ):
+        self.checkpoint = checkpoint
         # Use the fast tokenizer to get correct model_max_length
         self.tokenizer = BartTokenizerFast.from_pretrained(checkpoint, use_fast=True)
         self.model = BartForConditionalGeneration.from_pretrained(checkpoint)
@@ -26,32 +27,12 @@ class BARTScorer:
             else torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         )
         
-        # Fix for device mapping issues: only call .to() if not already device-mapped
-        if not hasattr(self.model, 'hf_device_map') or self.model.hf_device_map is None:
-            if not hasattr(self.model, 'device') or str(self.model.device) == 'cpu':
-                try:
-                    self.model.to(self.device)
-                except NotImplementedError as e:
-                    # Handle meta tensor issue
-                    if "Cannot copy out of meta tensor" in str(e):
-                        print(f"    🔧 Meta tensor issue detected for BART model, using to_empty()...")
-                        self.model = self.model.to_empty(device=self.device)
-                    else:
-                        raise e
-                except RuntimeError as e:
-                    # Handle device mismatch issues
-                    if "is not on the expected device" in str(e):
-                        print(f"    🔧 Device mismatch detected for BART model, ensuring all parameters are on {self.device}...")
-                        # Force move all parameters to the target device
-                        for param in self.model.parameters():
-                            if param.device != self.device:
-                                param.data = param.data.to(self.device)
-                        # Also move buffers
-                        for buffer in self.model.buffers():
-                            if buffer.device != self.device:
-                                buffer.data = buffer.data.to(self.device)
-                    else:
-                        raise e
+        # Load on CPU first (HF default), then move safely to desired device if possible
+        try:
+            if str(self.device).startswith('cuda') and torch.cuda.is_available():
+                self.model = self.model.to(self.device)
+        except Exception as e:
+            print(f"    🔧 BARTScore: keeping model on CPU due to device move error: {e}")
 
         # Cap max_length to the model's own limit
         limit = self.tokenizer.model_max_length
@@ -65,6 +46,23 @@ class BARTScorer:
             reduction="none", ignore_index=self.tokenizer.pad_token_id
         )
         self.lsm = nn.LogSoftmax(dim=-1)
+
+    def _rebuild_model_on(self, device: torch.device):
+        """Recreate the model cleanly on the requested device, avoiding meta tensors."""
+        try:
+            # Load fresh on CPU first to avoid meta
+            fresh = BartForConditionalGeneration.from_pretrained(self.checkpoint)
+            fresh.eval()
+            # Move to target device with meta-safe fallback
+            if isinstance(device, str):
+                device = torch.device(device)
+            if str(device).startswith('cuda') and torch.cuda.is_available():
+                fresh = fresh.to(device)
+            self.model = fresh
+            self.device = device
+        except Exception as e:
+            print(f"    ❌ Failed to rebuild BART model on {device}: {e}")
+            raise
 
     # -------------------------------------------------
     # helpers
@@ -109,58 +107,150 @@ class BARTScorer:
                         return_tensors="pt",
                     )
 
-                    # Move tensors to device, handling meta tensor issues
+                    # Move tensors to device; on failure, we will run this batch on CPU
+                    batch_on_cpu = False
                     try:
-                        src_ids = enc_src.input_ids.to(self.device)
-                        src_mask = enc_src.attention_mask.to(self.device)
-                        tgt_ids = enc_tgt.input_ids.to(self.device)
-                        tgt_mask = enc_tgt.attention_mask.to(self.device)
-                    except NotImplementedError as e:
-                        # Handle meta tensor issue by using to_empty()
-                        if "Cannot copy out of meta tensor" in str(e):
-                            print(f"    🔧 Meta tensor issue detected in BARTScore scoring, using to_empty()...")
-                            src_ids = enc_src.input_ids.to_empty(device=self.device)
-                            src_mask = enc_src.attention_mask.to_empty(device=self.device)
-                            tgt_ids = enc_tgt.input_ids.to_empty(device=self.device)
-                            tgt_mask = enc_tgt.attention_mask.to_empty(device=self.device)
-                        else:
-                            raise e
+                        src_ids = enc_src.input_ids.to(self.device, non_blocking=True)
+                        src_mask = enc_src.attention_mask.to(self.device, non_blocking=True)
+                        tgt_ids = enc_tgt.input_ids.to(self.device, non_blocking=True)
+                        tgt_mask = enc_tgt.attention_mask.to(self.device, non_blocking=True)
+                    except Exception:
+                        # Fall back to CPU tensors
+                        src_ids = enc_src.input_ids.cpu()
+                        src_mask = enc_src.attention_mask.cpu()
+                        tgt_ids = enc_tgt.input_ids.cpu()
+                        tgt_mask = enc_tgt.attention_mask.cpu()
+                        batch_on_cpu = True
                     
                     tgt_lens = tgt_mask.sum(dim=1)
 
                     # Ensure model is on the correct device before forward pass
                     try:
-                        out = self.model(
-                            input_ids=src_ids,
-                            attention_mask=src_mask,
-                            decoder_attention_mask=tgt_mask,
-                            labels=tgt_ids,
-                        )
-                    except RuntimeError as e:
-                        # Handle device mismatch during forward pass
-                        if "is not on the expected device" in str(e):
-                            print(f"    🔧 Device mismatch during BART forward pass, ensuring model is on {self.device}...")
-                            # Force move all model parameters to the target device
-                            for param in self.model.parameters():
-                                if param.device != self.device:
-                                    param.data = param.data.to(self.device)
-                            # Also move buffers
-                            for buffer in self.model.buffers():
-                                if buffer.device != self.device:
-                                    buffer.data = buffer.data.to(self.device)
-                            # Try the forward pass again
+                        # If batch tensors are on CPU but model is on CUDA, run this batch on CPU
+                        if batch_on_cpu:
+                            model_device = next(self.model.parameters()).device
+                            if str(model_device).startswith('cuda'):
+                                cpu_model = self.model.to('cpu')
+                                out = cpu_model(
+                                    input_ids=src_ids,
+                                    attention_mask=src_mask,
+                                    decoder_attention_mask=tgt_mask,
+                                    labels=tgt_ids,
+                                )
+                                # Optionally move back for next batch
+                                if torch.cuda.is_available() and str(self.device).startswith('cuda'):
+                                    try:
+                                        self.model = self.model.to(self.device)
+                                    except Exception:
+                                        pass
+                            else:
+                                out = self.model(
+                                    input_ids=src_ids,
+                                    attention_mask=src_mask,
+                                    decoder_attention_mask=tgt_mask,
+                                    labels=tgt_ids,
+                                )
+                        else:
                             out = self.model(
                                 input_ids=src_ids,
                                 attention_mask=src_mask,
                                 decoder_attention_mask=tgt_mask,
                                 labels=tgt_ids,
                             )
+                    except Exception as e:
+                        msg = str(e).lower()
+                        # Rebuild fresh on CPU and run this batch on CPU for all device/meta/assert issues
+                        if (
+                            'expected device meta' in msg
+                            or 'meta tensor' in msg
+                            or 'device-side assert' in msg
+                            or 'is not on the expected device' in msg
+                            or 'expected all tensors to be on the same device' in msg
+                        ):
+                            print("    🔧 BARTScore device/meta issue; rebuilding on CPU and retrying batch…")
+                            self._rebuild_model_on(torch.device('cpu'))
+                            out = self.model(
+                                input_ids=src_ids.cpu(),
+                                attention_mask=src_mask.cpu(),
+                                decoder_attention_mask=tgt_mask.cpu(),
+                                labels=tgt_ids.cpu(),
+                            )
+                            # Optionally rebuild back on original device for subsequent batches
+                            if torch.cuda.is_available() and str(self.device).startswith('cuda'):
+                                try:
+                                    self._rebuild_model_on(self.device)
+                                except Exception:
+                                    pass
                         else:
-                            raise e
+                            raise
 
-                    logp = self.lsm(out.logits.view(-1, self.model.config.vocab_size))
-                    losses = self.loss_fct(logp, tgt_ids.view(-1)).view(tgt_ids.size(0), -1)
-                    scores.extend([-(l.sum().item() / ln.item()) for l, ln in zip(losses, tgt_lens)])
+                    # Compute per-example scores using manual gather to avoid NLLLoss/meta issues
+                    try:
+                        logits = out.logits
+                        # Guard: if logits are on meta device (fake tensors), force CPU path
+                        if str(logits.device).startswith('meta') or getattr(logits, 'is_meta', False):
+                            raise RuntimeError('logits_on_meta_device')
+                        shift_logits = logits[:, :-1, :].contiguous()
+                        shift_labels = tgt_ids[:, 1:].contiguous()
+                        pad_id = self.tokenizer.pad_token_id
+                        # Mask out padding positions
+                        valid_mask = (shift_labels != pad_id)
+                        # Replace invalid labels with zero to allow safe gather
+                        safe_labels = shift_labels.masked_fill(~valid_mask, 0)
+                        log_probs = self.lsm(shift_logits)
+                        gathered = log_probs.gather(dim=-1, index=safe_labels.unsqueeze(-1)).squeeze(-1)
+                        # Zero-out invalid positions
+                        gathered = gathered * valid_mask.to(gathered.dtype)
+                        token_counts = valid_mask.sum(dim=1).clamp_min(1)
+                        per_ex_loss = -gathered.sum(dim=1) / token_counts
+                        scores.extend([float(x.item()) * -1.0 for x in per_ex_loss])
+                    except Exception:
+                        # Full CPU fallback: re-tokenize and forward on CPU, then compute gather on CPU
+                        try:
+                            self._rebuild_model_on(torch.device('cpu'))
+                            enc_src_cpu = self.tokenizer(
+                                sb,
+                                max_length=self.max_length,
+                                truncation=True,
+                                padding=True,
+                                return_tensors="pt",
+                            )
+                            enc_tgt_cpu = self.tokenizer(
+                                tb,
+                                max_length=self.max_length,
+                                truncation=True,
+                                padding=True,
+                                return_tensors="pt",
+                            )
+                            src_ids_cpu = enc_src_cpu.input_ids
+                            src_mask_cpu = enc_src_cpu.attention_mask
+                            tgt_ids_cpu = enc_tgt_cpu.input_ids
+                            tgt_mask_cpu = enc_tgt_cpu.attention_mask
+                            with torch.no_grad():
+                                out_cpu = self.model(
+                                    input_ids=src_ids_cpu,
+                                    attention_mask=src_mask_cpu,
+                                    decoder_attention_mask=tgt_mask_cpu,
+                                    labels=tgt_ids_cpu,
+                                )
+                            logits_cpu = out_cpu.logits[:, :-1, :].contiguous()
+                            labels_cpu = tgt_ids_cpu[:, 1:].contiguous()
+                            pad_id = self.tokenizer.pad_token_id
+                            valid_mask = (labels_cpu != pad_id)
+                            safe_labels = labels_cpu.masked_fill(~valid_mask, 0)
+                            log_probs = nn.LogSoftmax(dim=-1)(logits_cpu)
+                            gathered = log_probs.gather(dim=-1, index=safe_labels.unsqueeze(-1)).squeeze(-1)
+                            gathered = gathered * valid_mask.to(gathered.dtype)
+                            token_counts = valid_mask.sum(dim=1).clamp_min(1)
+                            per_ex_loss = -gathered.sum(dim=1) / token_counts
+                            scores.extend([float(x.item()) * -1.0 for x in per_ex_loss])
+                        finally:
+                            # Try to rebuild back on original device for subsequent batches (best-effort)
+                            if torch.cuda.is_available() and str(self.device).startswith('cuda'):
+                                try:
+                                    self._rebuild_model_on(self.device)
+                                except Exception:
+                                    pass
 
             except (RuntimeError, OverflowError) as e:
                 traceback.print_exc()

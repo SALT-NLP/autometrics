@@ -27,6 +27,7 @@ K=${K:-""}                                   # 5 | 10 | 20 | 30
 N=${N:-""}                                   # 1 | 3 | 5 | 10
 NO_METRIC_CARDS=${NO_METRIC_CARDS:-"false"}  # true | false
 FORCE_REINDEX=${FORCE_REINDEX:-"false"}      # true | false
+RESIZED=${RESIZED:-"true"}                  # true | false
 
 # Qwen server options (jagupard node, TP=4) — ensure different port from EvalGen (8123)
 MODEL_PATH=${MODEL_PATH:-"Qwen/Qwen3-32B"}
@@ -60,6 +61,7 @@ DTYPE="${DTYPE}" \
 MEM_FRACTION="${MEM_FRACTION}" \
 OUTPUT_ROOT="${OUTPUT_ROOT}" \
 OPENAI_API_KEY="${OPENAI_API_KEY}" \
+RESIZED="${RESIZED}" \
 sbatch --export=ALL launch_qwen_and_submit_remote_jag4.sh | tee /dev/fd/2
 
 

@@ -5,12 +5,13 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:4
 #SBATCH --mem=200G
-#SBATCH --partition=jag-lo
+#SBATCH --partition=jag-standard
 #SBATCH --time=48:00:00
 #SBATCH --nodes=1
 #SBATCH --open-mode=append
 #SBATCH --output=logs/gpt5mini_autometrics_%j.out
 #SBATCH --error=logs/gpt5mini_autometrics_%j.err
+#SBATCH -x jagupard[19-20,26-31]
 #SBATCH --requeue
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mryan0@stanford.edu
@@ -67,15 +68,26 @@ for seed in $SEEDS; do
   # Seed-specific caches (distinct namespace)
   export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_gpt5mini_${DATASET_NAME}_${TARGET_MEASURE}_seed${seed}"
   export AUTOMETRICS_CACHE_DIR="/nlp/scr3/nlp/20questions/autometrics_cache/gpt5mini_${DATASET_NAME}_${TARGET_MEASURE}_seed${seed}"
+  export TORCH_EXTENSIONS_DIR="/nlp/scr3/nlp/20questions/torch_extensions_cache/gpt5mini_${DATASET_NAME}_${TARGET_MEASURE}_seed${seed}"
+  export TRITON_CACHE_DIR="/nlp/scr3/nlp/20questions/triton_cache/gpt5mini_${DATASET_NAME}_${TARGET_MEASURE}_seed${seed}"
+
+  # Clear Torch cache and Triton cache if they exist
+  if [ -d "$TORCH_EXTENSIONS_DIR" ]; then
+    rm -rf "$TORCH_EXTENSIONS_DIR"
+  fi
+  if [ -d "$TRITON_CACHE_DIR" ]; then
+    rm -rf "$TRITON_CACHE_DIR"
+  fi
 
   # Run
-  python analysis/main_experiments/run_main_autometrics.py \
+  COLBERT_LOAD_TORCH_EXTENSION_VERBOSE=True python analysis/main_experiments/run_main_autometrics.py \
     "$DATASET_NAME" \
     "$TARGET_MEASURE" \
     "$seed" \
     "$BASE_RESULTS_DIR" \
     --model-name "$MODEL_NAME" \
-    --api-base "$API_BASE"
+    --api-base "$API_BASE" \
+    --skip-mipro
 
   STATUS=$?
   if [ $STATUS -eq 0 ]; then
@@ -85,7 +97,17 @@ for seed in $SEEDS; do
     echo "❌ Seed $seed failed with status $STATUS"
     FAILED_SEEDS+=("$seed")
   fi
+
+  # Clear Torch cache and Triton cache if they exist
+  if [ -d "$TORCH_EXTENSIONS_DIR" ]; then
+    rm -rf "$TORCH_EXTENSIONS_DIR"
+  fi
+  if [ -d "$TRITON_CACHE_DIR" ]; then
+    rm -rf "$TRITON_CACHE_DIR"
+  fi
 done
+
+
 
 echo "\n======= SUMMARY (GPT-5-mini) ======="
 echo "Dataset: $DATASET_NAME"

@@ -1,5 +1,6 @@
 import torch
 from typing import List, Union, ClassVar
+import warnings
 from bleurt_pytorch import BleurtConfig, BleurtForSequenceClassification, BleurtTokenizer
 from autometrics.metrics.reference_based.ReferenceBasedMetric import ReferenceBasedMetric
 
@@ -169,23 +170,47 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         self.torch_dtype = torch.float32 if torch_dtype == "float32" else torch.float16 if torch_dtype == "float16" else torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32
         self.batch_size = batch_size
         self.persistent = persistent
+        # Prefer CPU-first for robustness under parallel loads
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.config = None
         self.tokenizer = None
         self.model = None
+        self._force_cpu = False
         
         # Exclude parameters that don't affect results from cache key
         self.exclude_from_cache_key('persistent', 'batch_size', 'device')
+
+    def _forward_no_compile(self, inputs):
+        """Run model forward while explicitly disabling torch._dynamo capture to avoid meta-device fake tensors."""
+        try:
+            # torch._dynamo is not guaranteed to exist on older PyTorch versions
+            import torch._dynamo as dynamo  # type: ignore[attr-defined]
+
+            @dynamo.disable  # type: ignore[misc]
+            def _run(mod, kwargs):
+                return mod(**kwargs)
+
+            return _run(self.model, inputs)
+        except Exception:
+            # Fallback: just run normally
+            return self.model(**inputs)
 
     def _load_model(self):
         """Load BLEURT tokenizer and model."""
         if self.model is None:
             self.config = BleurtConfig.from_pretrained(self.model_name)
             self.tokenizer = BleurtTokenizer.from_pretrained(self.model_name)
+            # Load on CPU first, then move to device if CUDA is safe
             self.model = BleurtForSequenceClassification.from_pretrained(
                 self.model_name,
                 config=self.config
-            ).to(self.device)
+            )
+            # Honor force-CPU if a previous fallback occurred
+            if not self._force_cpu and str(self.device).startswith('cuda') and torch.cuda.is_available():
+                try:
+                    self.model = self.model.to(self.device)
+                except Exception:
+                    self.device = torch.device('cpu')
             self.model.eval()
 
     def _unload_model(self):
@@ -213,23 +238,69 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         ref = references[0] if isinstance(references, (list, tuple)) and references else (
             references if isinstance(references, str) else ""
         )
+        # Use tokenizer's max if available; cap to 512 for safety with BLEURT checkpoints
+        tok_max_len = getattr(self.tokenizer, 'model_max_length', 512)
+        if tok_max_len is None or tok_max_len > 512:
+            tok_max_len = 512
         # tokenize single pair with explicit max_length to prevent position embedding issues
         inputs = self.tokenizer(
             [ref], 
             [output], 
             padding='longest', 
             truncation=True,
-            max_length=512,  # Explicitly set max_length to avoid position embedding errors
+            max_length=tok_max_len,
             return_tensors='pt'
         )
         
         # Move tensors to the correct device
         for key in inputs:
             if isinstance(inputs[key], torch.Tensor):
-                inputs[key] = inputs[key].to(self.device)
+                try:
+                    inputs[key] = inputs[key].to(self.device, non_blocking=True)
+                except Exception:
+                    inputs[key] = inputs[key].cpu()
         
-        with torch.no_grad():
-            logits = self.model(**inputs).logits.flatten()
+        # Validate token ids are within embedding range to avoid CUDA indexing asserts
+        try:
+            num_embeddings = self.model.get_input_embeddings().num_embeddings  # type: ignore[attr-defined]
+            max_id = int(inputs['input_ids'].max())
+            min_id = int(inputs['input_ids'].min())
+            if max_id >= num_embeddings or min_id < 0:
+                warnings.warn(f"[BLEURT] Detected token id out of range (min={min_id}, max={max_id}, vocab={num_embeddings}). Clamping to valid range to avoid device-side asserts.")
+                inputs['input_ids'] = inputs['input_ids'].clamp(min=0, max=num_embeddings - 1)
+        except Exception:
+            # If anything goes wrong with validation, proceed normally
+            pass
+
+        # Forward with robust CPU fallback that re-tokenizes to avoid sticky CUDA errors
+        try:
+            with torch.no_grad():
+                outputs = self._forward_no_compile(inputs)
+                logits = outputs.logits.flatten()
+        except RuntimeError as e:
+            msg = str(e).lower()
+            if (
+                'device-side assert' in msg
+                or 'cublas' in msg
+                or 'cuda' in msg
+                or 'expected device meta' in msg
+                or 'device meta' in msg
+                or 'meta tensor' in msg
+            ):
+                warnings.warn("[BLEURT] CUDA/meta issue; forcing BLEURT to CPU and retrying.")
+                # Force subsequent calls to remain on CPU
+                self._force_cpu = True
+                self.device = torch.device('cpu')
+                # Re-tokenize cleanly on CPU (avoid moving existing tensors)
+                inputs_cpu = self.tokenizer(
+                    [ref], [output], padding='longest', truncation=True, max_length=tok_max_len, return_tensors='pt'
+                )
+                self.model = self.model.to('cpu')
+                with torch.no_grad():
+                    outputs = self._forward_no_compile(inputs_cpu)
+                    logits = outputs.logits.flatten()
+            else:
+                raise
         score = logits[0].cpu().item()
         if not self.persistent:
             self._unload_model()
@@ -260,22 +331,68 @@ where $f_\theta$ is a regression model (typically based on BERT or RemBERT) fine
         for i in range(0, len(outputs_list), self.batch_size):
             chunk_refs = refs_flat[i:i+self.batch_size]
             chunk_outs = outputs_list[i:i+self.batch_size]
+            # Use tokenizer's max if available; cap to 512 for safety
+            tok_max_len = getattr(self.tokenizer, 'model_max_length', 512)
+            if tok_max_len is None or tok_max_len > 512:
+                tok_max_len = 512
             inputs = self.tokenizer(
                 chunk_refs, 
                 chunk_outs, 
                 padding='longest', 
                 truncation=True,
-                max_length=512,  # Explicitly set max_length to avoid position embedding errors
+                max_length=tok_max_len,
                 return_tensors='pt'
             )
             
             # Move tensors to the correct device
             for key in inputs:
                 if isinstance(inputs[key], torch.Tensor):
-                    inputs[key] = inputs[key].to(self.device)
+                    try:
+                        inputs[key] = inputs[key].to(self.device, non_blocking=True)
+                    except Exception:
+                        inputs[key] = inputs[key].cpu()
             
-            with torch.no_grad():
-                logits = self.model(**inputs).logits.flatten().cpu().tolist()
+            # Validate token ids in batch
+            try:
+                num_embeddings = self.model.get_input_embeddings().num_embeddings  # type: ignore[attr-defined]
+                max_id = int(inputs['input_ids'].max())
+                min_id = int(inputs['input_ids'].min())
+                if max_id >= num_embeddings or min_id < 0:
+                    warnings.warn(f"[BLEURT] (batch) Token id out of range (min={min_id}, max={max_id}, vocab={num_embeddings}). Clamping.")
+                    inputs['input_ids'] = inputs['input_ids'].clamp(min=0, max=num_embeddings - 1)
+            except Exception:
+                pass
+
+            # Forward with fallback
+            try:
+                with torch.no_grad():
+                    outputs = self._forward_no_compile(inputs)
+                    logits_tensor = outputs.logits.flatten()
+                    logits = logits_tensor.cpu().tolist()
+            except RuntimeError as e:
+                msg = str(e).lower()
+                if (
+                    'device-side assert' in msg
+                    or 'cublas' in msg
+                    or 'cuda' in msg
+                    or 'expected device meta' in msg
+                    or 'device meta' in msg
+                    or 'meta tensor' in msg
+                ):
+                    warnings.warn("[BLEURT] CUDA/meta issue in batch; forcing CPU and retokenizing this chunk.")
+                    self._force_cpu = True
+                    self.device = torch.device('cpu')
+                    # Re-tokenize on CPU to avoid copying from GPU tensors
+                    inputs_cpu = self.tokenizer(
+                        chunk_refs, chunk_outs, padding='longest', truncation=True, max_length=tok_max_len, return_tensors='pt'
+                    )
+                    self.model = self.model.to('cpu')
+                    with torch.no_grad():
+                        outputs = self._forward_no_compile(inputs_cpu)
+                        logits_tensor = outputs.logits.flatten()
+                        logits = logits_tensor.cpu().tolist()
+                else:
+                    raise
             # flatten to list
             if isinstance(logits, float):
                 all_scores.append(logits)

@@ -186,7 +186,9 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
         self.submetrics = ["fluency", "coherence", "consistency", "relevance"]
 
         self.task = 'summarization'
+        # Prefer CPU-first to avoid rare CUDA asserts; will fall back to CPU automatically on error
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self._force_cpu = False
         self.persistent = persistent
         self.evaluator = None
         
@@ -199,7 +201,14 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
         """Load the UniEval model if not already loaded."""
         if self.evaluator is None:
             from autometrics.metrics.unieval.evaluator import get_evaluator
-            self.evaluator = get_evaluator(self.task, device=self.device)
+            # Honor force-CPU flag
+            actual_device = torch.device('cpu') if self._force_cpu else self.device
+            try:
+                self.evaluator = get_evaluator(self.task, device=actual_device)
+            except RuntimeError as e:
+                # Rare CUDA init issues -> force CPU
+                self._force_cpu = True
+                self.evaluator = get_evaluator(self.task, device=torch.device('cpu'))
             
     def _unload_model(self):
         """Unload model to free resources."""
@@ -228,8 +237,19 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
         # Prepare data for pre-trained evaluators
         data = convert_to_json(output_list=[output], src_list=[input], ref_list=references)
 
-        # Get multi-dimensional evaluation scores
-        eval_scores = self.evaluator.evaluate(data)
+        # Get multi-dimensional evaluation scores with CPU fallback
+        try:
+            eval_scores = self.evaluator.evaluate(data)
+        except RuntimeError as e:
+            msg = str(e).lower()
+            if 'cuda' in msg or 'device-side assert' in msg or 'meta' in msg:
+                # Rebuild evaluator on CPU and retry once
+                self._unload_model()
+                self._force_cpu = True
+                self._load_model()
+                eval_scores = self.evaluator.evaluate(data)
+            else:
+                raise
         
         result = self._parse_unieval(eval_scores[0])
         
@@ -249,10 +269,22 @@ These prompts are tokenized and passed into the **UniEvalSum** model, which then
             references = [[] for _ in range(len(inputs))]
 
         # Prepare data for pre-trained evaluators
-        data = convert_to_json(output_list=outputs, src_list=inputs, ref_list=[reference[0] for reference in references])
+        # Safely pick first reference or empty string if missing
+        flat_refs = [reference[0] if (isinstance(reference, list) and reference) else "" for reference in references]
+        data = convert_to_json(output_list=outputs, src_list=inputs, ref_list=flat_refs)
 
-        # Get multi-dimensional evaluation scores
-        eval_scores = self.evaluator.evaluate(data)
+        # Get multi-dimensional evaluation scores with CPU fallback
+        try:
+            eval_scores = self.evaluator.evaluate(data)
+        except RuntimeError as e:
+            msg = str(e).lower()
+            if 'cuda' in msg or 'device-side assert' in msg or 'meta' in msg:
+                self._unload_model()
+                self._force_cpu = True
+                self._load_model()
+                eval_scores = self.evaluator.evaluate(data)
+            else:
+                raise
         
         results = [self._parse_unieval(eval_score) for eval_score in eval_scores]
 

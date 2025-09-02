@@ -1236,22 +1236,31 @@ class Autometrics:
             for metric in metric_instances:
                 # Handle both regular metrics and MultiMetrics
                 if isinstance(metric, MultiMetric):
-                    # For MultiMetrics, check if any submetric matches
-                    # The metric_name from regression might be like "TestMulti_length"
-                    # We need to check if it starts with the metric name and contains a submetric
+                    # Prefer exact submetric name match first (e.g., "SARI_F" in ["SARI_P", "SARI_F"]) and
+                    # then fallback to stripped-name match when the prefix is the metric base name (e.g., "F" in ["F", "P"]).
                     metric_base_name = metric.get_name()
-                    if metric_name.startswith(metric_base_name + "_"):
-                        submetric_name = metric_name[len(metric_base_name + "_"):]
-                        if submetric_name in metric.get_submetric_names():
+                    submetric_names = set(metric.get_submetric_names() or [])
+
+                    matched = False
+                    # Full-name match
+                    if metric_name in submetric_names:
+                        matched = True
+                    else:
+                        # Prefixed name -> bare submetric fallback
+                        if metric_name.startswith(metric_base_name + "_"):
+                            submetric_name = metric_name[len(metric_base_name) + 1:]
+                            if submetric_name in submetric_names:
+                                matched = True
+
+                    if matched:
+                        if metric not in top_n_metrics:
                             top_n_metrics.append(metric)
-                            break
-                    elif metric_name in metric.get_submetric_names():
-                        top_n_metrics.append(metric)
                         break
                 else:
                     # For regular metrics, check the metric name
                     if metric.get_name() == metric_name:
-                        top_n_metrics.append(metric)
+                        if metric not in top_n_metrics:
+                            top_n_metrics.append(metric)
                         break
         
         print(f"  Selected top {len(top_n_metrics)} metrics: {[m.get_name() for m in top_n_metrics]}")

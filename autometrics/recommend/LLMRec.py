@@ -31,15 +31,40 @@ class LLMMetricRecommendation(dspy.Module):
     """
     A module that recommends metrics for a given task and target.
     """
-    def __init__(self):
+    def __init__(self, model: dspy.LM = None):
         super().__init__()
-        self.recommender = dspy.ChainOfThought(LLMMetricRecommendationSignature, max_tokens=4096)
+        if model is None:
+            self.recommender = dspy.ChainOfThought(LLMMetricRecommendationSignature, max_tokens=4096)
+        elif getattr(model, 'model', None) is not None and "gpt-5" in getattr(model, 'model', None):
+            self.recommender = dspy.ChainOfThought(LLMMetricRecommendationSignature)
+        else:
+            self.recommender = dspy.ChainOfThought(LLMMetricRecommendationSignature, max_tokens=4096)
 
     def forward(self, task_description: str, target: str, num_metrics_to_recommend: int, metric_documentation: List[str]) -> List[str]:
         results = self.recommender(task_description=task_description, target=target, num_metrics_to_recommend=num_metrics_to_recommend, metric_documentation=metric_documentation)
 
-        # Remove the numbers from the ranking, accounting for the fact that there may be no numbers in the ranking
-        results.ranking = [rank.split(".")[1].strip() if "." in rank else rank.strip() for rank in results.ranking]
+        # Normalize ranking entries:
+        # 1) Remove common numeric prefixes like "1.", "1)", "1 -", "1:"
+        # 2) Strip stray quotes/backticks and trailing punctuation (handles cases like: MetricName')
+        cleaned_ranking = []
+        for rank in results.ranking:
+            text = str(rank).strip()
+            try:
+                import re
+                # Remove a leading optional quote, digits, optional spaces and a punctuation separator
+                # Examples handled: "1. Name", "1) Name", "1 - Name", "1: Name"
+                text = re.sub(r"^\s*['\"`]?\s*\d+\s*[\.)\-:]\s*", "", text)
+            except Exception:
+                # Fallback to previous simple split behavior
+                if "." in text:
+                    parts = text.split(".", 1)
+                    if parts[0].strip().isdigit():
+                        text = parts[1].strip()
+            # Strip wrapping quotes/backticks and common trailing punctuation
+            text = text.strip(" `\'\"“”‘’.,;:-")
+            cleaned_ranking.append(text)
+
+        results.ranking = cleaned_ranking
         
         return results.ranking
     
@@ -51,7 +76,7 @@ class LLMRec(MetricRecommender):
     def __init__(self, metric_classes: List[Type[Metric]], index_path: str = None, force_reindex: bool = False, model: dspy.LM = None, use_description_only: bool = False):
         super().__init__(metric_classes, index_path, force_reindex)
         self.model = model
-        self.recommender = LLMMetricRecommendation()
+        self.recommender = LLMMetricRecommendation(model=model)
         self.use_description_only = use_description_only
         # If upstream proxy reports a smaller effective input limit, cache it here
         self._override_max_input_tokens: Optional[int] = None

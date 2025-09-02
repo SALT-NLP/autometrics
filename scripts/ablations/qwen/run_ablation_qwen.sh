@@ -24,6 +24,7 @@
 #   K, N
 #   NO_METRIC_CARDS (true|false), FORCE_REINDEX (true|false)
 #   OUTPUT_ROOT (default results/ablations/qwen)
+#   RESIZED (true|false)
 
 . /nlp/scr/mryan0/miniconda3/etc/profile.d/conda.sh
 conda activate sglang
@@ -51,6 +52,7 @@ K=${K:-""}
 N=${N:-""}
 NO_METRIC_CARDS=${NO_METRIC_CARDS:-"false"}
 FORCE_REINDEX=${FORCE_REINDEX:-"false"}
+RESIZED=${RESIZED:-"false"}
 OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/main_ablations/qwen"}
 
 mkdir -p logs
@@ -61,8 +63,10 @@ ABLA_TAG="${METRICBANK_MODE}"
 if [ -n "$K" ]; then ABLA_TAG="${ABLA_TAG}_k${K}"; fi
 if [ -n "$N" ]; then ABLA_TAG="${ABLA_TAG}_n${N}"; fi
 if [ "$NO_METRIC_CARDS" = "true" ]; then ABLA_TAG="${ABLA_TAG}_desc"; fi
+# if [ "$RESIZED" = "true" ]; then ABLA_TAG="${ABLA_TAG}_resized"; fi # Removed to keep the same cache dirs for resized datasets
 
 OUT_DIR="${OUTPUT_ROOT}/${DATASET_NAME}_${TARGET_MEASURE}/${ABLA_TAG}"
+if [ "$RESIZED" = "true" ]; then OUT_DIR="${OUT_DIR}_resized"; fi
 mkdir -p "$OUT_DIR"
 
 echo "Starting Qwen server on port $port…"
@@ -107,6 +111,7 @@ if [ -n "$K" ]; then PY_ARGS+=( --k "$K" ); fi
 if [ -n "$N" ]; then PY_ARGS+=( --n "$N" ); fi
 if [ "$NO_METRIC_CARDS" = "true" ]; then PY_ARGS+=( --no-metric-cards ); fi
 if [ "$FORCE_REINDEX" = "true" ]; then PY_ARGS+=( --force-reindex ); fi
+if [ "$RESIZED" = "true" ]; then PY_ARGS+=( --resized ); fi
 
 python "${PY_ARGS[@]}"
 STATUS=$?

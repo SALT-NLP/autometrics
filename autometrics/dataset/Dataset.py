@@ -474,12 +474,12 @@ class Dataset():
 
         return train_dataset, val_dataset, test_dataset
     
-    def load_permanent_splits(self, directory: Optional[str] = None):
+    def load_permanent_splits(self, directory: Optional[str] = None, resized: bool = False):
         if directory is None:
             directory = f"{user_data_dir()}/autometrics/datasets/{self.name}"
 
-        train_dataset = self.load_from_file(f"{directory}/train.csv")
-        val_dataset = self.load_from_file(f"{directory}/val.csv")
+        train_dataset = self.load_from_file(f"{directory}/train{'_resized' if resized else ''}.csv")
+        val_dataset = self.load_from_file(f"{directory}/val{'_resized' if resized else ''}.csv")
         test_dataset = self.load_from_file(f"{directory}/test.csv")
         return train_dataset, val_dataset, test_dataset
     

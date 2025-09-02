@@ -6,6 +6,8 @@ from transformers import LlamaPreTrainedModel, LlamaModel, PreTrainedTokenizerFa
 from transformers.modeling_outputs import SequenceClassifierOutputWithPast
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 from autometrics.metrics.utils.device_utils import get_model_device, ensure_tensor_on_device
+from accelerate import infer_auto_device_map, dispatch_model
+from accelerate.utils import get_balanced_memory
 
 
 class INFORMForSequenceClassification(LlamaPreTrainedModel):
@@ -226,16 +228,77 @@ where:
         self.tokenizer: Optional[PreTrainedTokenizerFast] = None
 
         self.exclude_from_cache_key('model_name', 'device_map', 'attn_implementation', 'batch_size', 'persistent')
+        # Avoid splitting these across devices when sharding
+        self.no_split_module_classes = [
+            "LlamaDecoderLayer", "LlamaRMSNorm", "LlamaSdpaAttention", "LlamaMLP"
+        ]
 
     def _load_model(self):
         if self.model is None:
-            self.model = INFORMForSequenceClassification.from_pretrained(
-                self.model_name,
-                torch_dtype=self.torch_dtype,
-                device_map=self.device_map,
-                attn_implementation=self.attn_implementation,
-                num_labels=self.num_labels
-            )
+            fast_path_ok = False
+            # Fast path: try direct sharded load without CPU materialization
+            if self.device_map is not None:
+                try:
+                    self.model = INFORMForSequenceClassification.from_pretrained(
+                        self.model_name,
+                        torch_dtype=self.torch_dtype,
+                        device_map=self.device_map,
+                        attn_implementation=self.attn_implementation,
+                        num_labels=self.num_labels,
+                        low_cpu_mem_usage=True,
+                    )
+                    # Disable cache to avoid cross-device PKV on sharded inference
+                    try:
+                        if hasattr(self.model, "config") and getattr(self.model.config, "use_cache", None) is not None:
+                            self.model.config.use_cache = False
+                    except Exception:
+                        pass
+                    fast_path_ok = True
+                except Exception:
+                    fast_path_ok = False
+
+            if not fast_path_ok:
+                # CPU-first load to materialize weights; avoid meta tensors, then dispatch
+                self.model = INFORMForSequenceClassification.from_pretrained(
+                    self.model_name,
+                    torch_dtype=self.torch_dtype,
+                    attn_implementation=self.attn_implementation,
+                    num_labels=self.num_labels
+                )
+
+                # Disable cache to avoid cross-device PKV on sharded inference
+                try:
+                    if hasattr(self.model, "config") and getattr(self.model.config, "use_cache", None) is not None:
+                        self.model.config.use_cache = False
+                except Exception:
+                    pass
+
+                # Apply device mapping after weights are materialized
+                if self.device_map is not None:
+                    try:
+                        if isinstance(self.device_map, (str,)) and self.device_map in ("auto", "balanced"):
+                            try:
+                                max_mem = get_balanced_memory(self.model, no_split_module_classes=self.no_split_module_classes)
+                                dm = infer_auto_device_map(
+                                    self.model,
+                                    max_memory=max_mem,
+                                    no_split_module_classes=self.no_split_module_classes,
+                                )
+                            except Exception:
+                                dm = infer_auto_device_map(
+                                    self.model,
+                                    no_split_module_classes=self.no_split_module_classes,
+                                )
+                            self.model = dispatch_model(self.model, device_map=dm)
+                        elif isinstance(self.device_map, dict):
+                            self.model = dispatch_model(self.model, device_map=self.device_map)
+                        else:
+                            self.model = self.model.to(self.device_map)
+                    except Exception:
+                        self.model = self.model.to(self.device)
+                else:
+                    self.model = self.model.to(self.device)
+
             self.model.eval()
             self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.model_name)
 
@@ -247,6 +310,76 @@ where:
             self.model = None
             self.tokenizer = None
 
+    def _rebuild_model_on(self, device_map: Union[str, dict]):
+        # Fully unload then rebuild on requested map without attempting in-place .to() moves
+        self._unload_model()
+        try:
+            if device_map is not None:
+                # Prefer direct sharded load to avoid CPU materialization when possible
+                self.model = INFORMForSequenceClassification.from_pretrained(
+                    self.model_name,
+                    torch_dtype=self.torch_dtype,
+                    device_map=device_map,
+                    attn_implementation=self.attn_implementation if device_map != 'cpu' else 'eager',
+                    num_labels=self.num_labels,
+                    low_cpu_mem_usage=True,
+                )
+            else:
+                # Single-device case
+                self.model = INFORMForSequenceClassification.from_pretrained(
+                    self.model_name,
+                    torch_dtype=self.torch_dtype,
+                    attn_implementation=self.attn_implementation,
+                    num_labels=self.num_labels,
+                ).to(self.device)
+        except Exception:
+            # As a last resort, force a standard CPU load
+            self.model = INFORMForSequenceClassification.from_pretrained(
+                self.model_name,
+                torch_dtype=self.torch_dtype,
+                attn_implementation='eager',
+                num_labels=self.num_labels,
+            ).to('cpu')
+
+        try:
+            if hasattr(self.model, "config") and getattr(self.model.config, "use_cache", None) is not None:
+                self.model.config.use_cache = False
+        except Exception:
+            pass
+        self.model.eval()
+        if self.tokenizer is None:
+            self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.model_name)
+
+    def _redispatch_sharded_model(self):
+        if self.model is None:
+            self._load_model()
+            return
+        if self.device_map is None:
+            return
+        try:
+            max_mem = None
+            try:
+                max_mem = get_balanced_memory(self.model, no_split_module_classes=self.no_split_module_classes)
+            except Exception:
+                pass
+            if isinstance(self.device_map, dict):
+                dm = self.device_map
+            else:
+                dm = infer_auto_device_map(
+                    self.model,
+                    max_memory=max_mem,
+                    no_split_module_classes=self.no_split_module_classes,
+                )
+            self.model = dispatch_model(self.model, device_map=dm)
+            try:
+                if hasattr(self.model, "config") and getattr(self.model.config, "use_cache", None) is not None:
+                    self.model.config.use_cache = False
+            except Exception:
+                pass
+            self.model = self.model.eval()
+        except Exception:
+            pass
+
     def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
         # ensure model & tokenizer loaded
         if self.model is None:
@@ -254,6 +387,7 @@ where:
 
         # Get model device for proper tensor placement
         model_device = get_model_device(self.model, fallback_device=self.device)
+        keep_on_cpu = hasattr(self.model, 'hf_device_map') and getattr(self.model, 'hf_device_map') is not None
 
         # wrap into chat history
         conv = [
@@ -264,7 +398,11 @@ where:
         # Get tokenized input_ids
         input_ids = self.tokenizer.apply_chat_template(
             conv, tokenize=True, return_tensors="pt"
-        ).to(model_device)
+        )
+        if keep_on_cpu:
+            input_ids = input_ids.cpu()
+        else:
+            input_ids = input_ids.to(model_device)
         
         # Create proper input dict for model
         model_inputs = {'input_ids': input_ids}
@@ -275,7 +413,22 @@ where:
             model_inputs['attention_mask'] = attention_mask
 
         with torch.no_grad():
-            out = self.model(**model_inputs).logits
+            try:
+                out = self.model(**model_inputs, use_cache=False).logits
+            except RuntimeError as e:
+                msg = str(e).lower()
+                if 'meta' in msg or 'same device' in msg or 'cuda' in msg or 'out of memory' in msg:
+                    # Try to redispatch and retry
+                    self._redispatch_sharded_model()
+                    try:
+                        out = self.model(**model_inputs, use_cache=False).logits
+                    except Exception:
+                        # Last resort: rebuild model on CPU for this call
+                        self._rebuild_model_on('cpu')
+                        model_inputs = {k: (v.cpu() if isinstance(v, torch.Tensor) else v) for k, v in model_inputs.items()}
+                        out = self.model(**model_inputs, use_cache=False).logits
+                else:
+                    raise
             score = out.squeeze().cpu().item()
 
         if not self.persistent:
@@ -289,6 +442,7 @@ where:
 
         # Get model device for proper tensor placement
         model_device = get_model_device(self.model, fallback_device=self.device)
+        keep_on_cpu = hasattr(self.model, 'hf_device_map') and getattr(self.model, 'hf_device_map') is not None
 
         all_scores: List[float] = []
         # process in chunks
@@ -304,7 +458,11 @@ where:
                 # Get tokenized input_ids
                 input_ids = self.tokenizer.apply_chat_template(
                     conv, tokenize=True, return_tensors="pt"
-                ).to(model_device)
+                )
+                if keep_on_cpu:
+                    input_ids = input_ids.cpu()
+                else:
+                    input_ids = input_ids.to(model_device)
                 
                 # Create proper input dict for model
                 model_inputs = {'input_ids': input_ids}
@@ -315,7 +473,20 @@ where:
                     model_inputs['attention_mask'] = attention_mask
                 
                 with torch.no_grad():
-                    sco = self.model(**model_inputs).logits.squeeze().cpu().item()
+                    try:
+                        sco = self.model(**model_inputs, use_cache=False).logits.squeeze().cpu().item()
+                    except RuntimeError as e:
+                        msg = str(e).lower()
+                        if 'meta' in msg or 'same device' in msg or 'cuda' in msg or 'out of memory' in msg:
+                            self._redispatch_sharded_model()
+                            try:
+                                sco = self.model(**model_inputs, use_cache=False).logits.squeeze().cpu().item()
+                            except Exception:
+                                self._rebuild_model_on('cpu')
+                                model_inputs = {k: (v.cpu() if isinstance(v, torch.Tensor) else v) for k, v in model_inputs.items()}
+                                sco = self.model(**model_inputs, use_cache=False).logits.squeeze().cpu().item()
+                        else:
+                            raise
                 all_scores.append(sco)
 
         if not self.persistent:

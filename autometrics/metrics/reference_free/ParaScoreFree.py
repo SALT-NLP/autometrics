@@ -2,6 +2,7 @@ from parascore import ParaScorer
 from autometrics.metrics.reference_free.ReferenceFreeMetric import ReferenceFreeMetric
 import torch
 from typing import ClassVar
+import os
 
 class ParaScoreFree(ReferenceFreeMetric):
     """---
@@ -161,6 +162,7 @@ where:
         name: str = "ParaScoreFree",
         description: str = "ParaScoreFree is a reference-free evaluation metric designed for paraphrase generation. It evaluates candidate paraphrases based on semantic similarity to the input source while encouraging lexical diversity. ParaScoreFree outputs a scalar quality score that combines BERT-based semantic similarity and normalized edit distance, offering a balance between meaning preservation and surface-level rewriting. It enables paraphrase evaluation without the need for gold reference texts, making it suitable for low-resource or open-domain settings.",
         seed: int = 42,
+        device: str | None = None,
         **scorer_kwargs
     ):
         if "lang" not in scorer_kwargs:
@@ -169,24 +171,57 @@ where:
         if "model_type" not in scorer_kwargs:
             scorer_kwargs["model_type"] = "bert-base-uncased"
 
-        super().__init__(name, description, seed=seed, **scorer_kwargs)
+        # Decide device preference (default to CPU for robustness)
+        if device is None:
+            device = 'cpu'
+
+        super().__init__(name, description, seed=seed, device=device, **scorer_kwargs)
 
         # remove the following from scorer_kwargs:
         scorer_kwargs.pop("cache_dir", None)
         scorer_kwargs.pop("seed", None)
         scorer_kwargs.pop("use_cache", None)
-        scorer_kwargs.pop("device", None)
+        # Keep a copy of ctor kwargs for safe re-instantiation
+        self._scorer_ctor_kwargs = dict(scorer_kwargs)
         scorer_kwargs.pop("cache_size_limit", None)
         scorer_kwargs.pop("cache_ttl", None)
         scorer_kwargs.pop("force_cache", None)
         scorer_kwargs.pop("_hint_gpu_index", None)
 
-        self.scorer = ParaScorer(**scorer_kwargs)
+        # Try to create the scorer; avoid passing unknown device kwargs
+        try:
+            self.scorer = ParaScorer(**self._scorer_ctor_kwargs)
+        except RuntimeError as e:
+            if 'CUBLAS_STATUS_EXECUTION_FAILED' in str(e) or 'cublas' in str(e).lower() or 'device-side assert' in str(e).lower():
+                # Reconstruct on CPU if supported, else hide CUDA
+                try:
+                    cpu_kwargs = dict(self._scorer_ctor_kwargs)
+                    cpu_kwargs['device'] = 'cpu'
+                    self.scorer = ParaScorer(**cpu_kwargs)
+                except Exception:
+                    os.environ['CUDA_VISIBLE_DEVICES'] = ''
+                    self.scorer = ParaScorer(**self._scorer_ctor_kwargs)
+            else:
+                raise
 
     def _calculate_impl(self, input, output, references=None, **kwargs):
         cands = [str(output)]
         srcs = [str(input)]
-        result = self.scorer.free_score(cands, srcs, **kwargs)
+        try:
+            result = self.scorer.free_score(cands, srcs, **kwargs)
+        except RuntimeError as e:
+            msg = str(e).lower()
+            if 'cublas_status_execution_failed' in msg or 'device-side assert' in msg or 'cublas' in msg:
+                # Recreate scorer on CPU and retry once
+                try:
+                    cpu_kwargs = dict(self._scorer_ctor_kwargs)
+                    cpu_kwargs['device'] = 'cpu'
+                    self.scorer = ParaScorer(**cpu_kwargs)
+                    result = self.scorer.free_score(cands, srcs, **kwargs)
+                except Exception:
+                    raise
+            else:
+                raise
 
         # ParaScorer.free_score might return a list of torch.Tensors or a list of
         # python floats depending on the version.  Handle both gracefully.
@@ -204,7 +239,21 @@ where:
         # Ensure string casting for all elements before passing to scorer
         outputs = [str(o) for o in outputs]
         inputs = [str(i) for i in inputs]
-        results = self.scorer.free_score(outputs, inputs, **kwargs)
+        try:
+            results = self.scorer.free_score(outputs, inputs, **kwargs)
+        except RuntimeError as e:
+            msg = str(e).lower()
+            if 'cublas_status_execution_failed' in msg or 'device-side assert' in msg or 'cublas' in msg:
+                # Retry on CPU with a fresh scorer if necessary
+                try:
+                    cpu_kwargs = dict(self._scorer_ctor_kwargs)
+                    cpu_kwargs['device'] = 'cpu'
+                    self.scorer = ParaScorer(**cpu_kwargs)
+                    results = self.scorer.free_score(outputs, inputs, **kwargs)
+                except Exception:
+                    raise
+            else:
+                raise
 
         # Newer versions of parascore return a plain python list. Older versions
         # may return a torch.Tensor.  Normalize to a list of floats.

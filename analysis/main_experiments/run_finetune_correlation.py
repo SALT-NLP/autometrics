@@ -146,11 +146,11 @@ def load_dataset(dataset_name: str) -> Dataset:
         elif dataset_name == "CoGymLessonProcess":
             return CoGymLessonProcess()
     elif dataset_name.startswith("EvalGen"):
-        from autometrics.dataset.datasets.evalgen.evalgen import EvalGen
+        from autometrics.dataset.datasets.evalgen.evalgen import EvalGenProduct, EvalGenMedical
         if dataset_name == "EvalGenMedical":
-            return EvalGen('./autometrics/dataset/datasets/evalgen/medical.csv')
+            return EvalGenMedical()
         elif dataset_name == "EvalGenProduct":
-            return EvalGen('./autometrics/dataset/datasets/evalgen/product.csv')
+            return EvalGenProduct()
     elif dataset_name == "RealHumanEval":
         from autometrics.dataset.datasets.realhumaneval.realhumaneval import RealHumanEval
         return RealHumanEval()

@@ -1,4 +1,6 @@
 import bert_score
+import torch
+import warnings
 from typing import ClassVar
 from autometrics.metrics.reference_based.ReferenceBasedMultiMetric import ReferenceBasedMultiMetric
 
@@ -11,12 +13,32 @@ def compute_bertscore(original, output, references, model="roberta-large", type=
             all_cands.append(hyp.lower())
             all_origs.append(orig.lower())
 
-    if compare_to_original:
-        (P, R, F), _ = bert_score.score(all_cands, all_origs, lang="en", return_hash=True, verbose=False, idf=False,
-                                        model_type=model)
-    else:
-        (P, R, F), _ = bert_score.score(all_cands, all_refs, lang="en", return_hash=True, verbose=False, idf=False,
-                                    model_type=model)
+    def _score(cands, refs):
+        return bert_score.score(
+            cands, refs, lang="en", return_hash=True, verbose=False, idf=False, model_type=model
+        )
+
+    try:
+        if compare_to_original:
+            (P, R, F), _ = _score(all_cands, all_origs)
+        else:
+            (P, R, F), _ = _score(all_cands, all_refs)
+    except RuntimeError as e:
+        if 'device-side assert' in str(e).lower():
+            warnings.warn("[BERTScore] CUDA device-side assert; retrying BERTScore on CPU.")
+            # Best-effort CPU fallback by temporarily disabling CUDA
+            prior = torch.cuda.is_available()
+            try:
+                if prior:
+                    torch.cuda.empty_cache()
+                if compare_to_original:
+                    (P, R, F), _ = _score(all_cands, all_origs)
+                else:
+                    (P, R, F), _ = _score(all_cands, all_refs)
+            except Exception:
+                raise
+        else:
+            raise
 
     ind = 0
     pscores = []

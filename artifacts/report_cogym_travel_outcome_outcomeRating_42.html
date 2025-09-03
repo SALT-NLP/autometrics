@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Outcomerating AutoMetric Report Card</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.0.8/fh-4.0.1/r-3.0.2/datatables.min.css">
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  
+  <style>
+    body.dark-mode { background-color: #121212; color: #e0e0e0; }
+    body.dark-mode .card { background-color: #1e1e1e; border-color: #333; color: #e0e0e0; }
+    body.dark-mode .table, body-dark-mode .table td { background-color: #1e1e1e; color: #e0e0e0; border-color: #333; }
+  </style>
+  <script>const RC_CORR = {}; const RC_RUNTIME = {}; const RC_ROB = {"available": false};</script>
+</head>
+<body>
+  <div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Outcomerating AutoMetric Report Card</h1>
+      <div class="d-flex align-items-center">
+        <div class="form-check form-switch me-3">
+          <input class="form-check-input" type="checkbox" id="darkModeToggle">
+          <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+        </div>
+        <button class="btn btn-primary" onclick="window.print()">Export to PDF</button>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Regression Coefficients</h2>
+          <table class="table table-striped"><thead><tr><th>Metric</th><th>Coeff.</th></tr></thead>
+            <tbody><tr><td>GRMRewardModel</td><td>0.7613</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Correlation</h2>
+          <div id="correlation-chart" style="height:420px;"></div>
+          <div id="correlation-stats" class="mt-2" style="text-align:center; font-size: 1rem; font-weight: 600;"></div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Robustness <sup><span class="robust-tip text-primary" data-tip-id="robustness-tip-template" style="cursor:pointer; text-decoration: underline; font-size: 0.9rem;">?</span></sup></h2>
+          <div id="robustness-sens" style="height:240px;"></div>
+          <div id="robustness-stab" style="height:240px;"></div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Run Time Distribution</h2>
+          <div id="runtime-chart" style="height:300px;"></div>
+          <p id="runtime-info" class="mt-2"></p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Metric Details</h2>
+          <div class="accordion" id="metricDetails">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="descHeader"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#descPanel">Descriptions</button></h2>
+              <div id="descPanel" class="accordion-collapse collapse"><div class="accordion-body"><ul><li><strong>GRMRewardModel:</strong><div class="mt-2"><pre style="white-space: pre-wrap; background:#f8f9fa; padding:8px; border-radius:6px;">The GRMRewardModel is a transformer-based reward model that assigns scalar scores to LLM responses based on their alignment with human preferences. Its main innovation lies in *Hidden State Regularization (HSR)*, a method that regularizes the representation space of hidden states across different examples to improve generalization. Unlike most reward models that rely solely on output logits or fine-tune only the final layer, GRM constrains intermediate hidden states using contrastive learning objectives, enabling more robust preference modeling.
+
+This particular instantiation, `Ray2333/GRM-Llama3.2-3B-rewardmodel-ft`, is based on the Llama-3.2-3B-Instruct model and fine-tuned on the Skywork preference dataset using pairwise comparisons of completions. Given a message (prompt + response), the model outputs a scalar reward score indicating the desirability of the response.
+
+- **Metric Type:** Reference-Free  
+- **Range:** Unbounded (typically scaled to [−5, 5] depending on implementation)  
+- **Higher is Better?:** Yes  
+- **Reference-Based?:** No  
+- **Input-Required?:** Yes</pre></div></li></ul></div></div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="usageHeader"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#usagePanel">Usage</button></h2>
+              <div id="usagePanel" class="accordion-collapse collapse"><div class="accordion-body"><ul><li><strong>GRMRewardModel:</strong><div class="mt-2"><pre style="white-space: pre-wrap; background:#f8f9fa; padding:8px; border-radius:6px;">### Domains and Tasks
+
+- **Domain:** Text Generation  
+- **Tasks:** Dialogue Generation, Response Generation, Safety Evaluation
+
+### Applicability and Limitations
+
+- **Best Suited For:**  
+  Evaluating response quality and safety in conversational agents, especially in RLHF or reranking pipelines where pairwise preferences are available.
+
+- **Not Recommended For:**  
+  Evaluating creative generation (e.g., poetry or storytelling) or tasks that require ground-truth references (e.g., translation, summarization).</pre></div></li></ul></div></div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="limitsHeader"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#limitsPanel">Limitations</button></h2>
+              <div id="limitsPanel" class="accordion-collapse collapse"><div class="accordion-body"><ul><li><strong>GRMRewardModel:</strong><div class="mt-2"><pre style="white-space: pre-wrap; background:#f8f9fa; padding:8px; border-radius:6px;">- **Biases:**  
+  Depends on the biases of the preference data (Skywork dataset), which may reflect annotator or cultural preferences.  
+  Sensitivity to prompt formatting may affect score stability.
+
+- **Task Misalignment Risks:**  
+  Since it is trained on generic preference data, it may not align with task-specific criteria or specialized user needs.
+
+- **Failure Cases:**  
+  May output high reward scores for fluent but factually incorrect or manipulative responses, especially outside the training distribution.  
+  Does not explicitly verify factual correctness or consistency.</pre></div></li></ul></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <h2>Compute Requirements</h2>
+          <table class="table table-striped"><thead><tr><th>Metric</th><th>GPU RAM (MB)</th><th>CPU RAM (MB)</th></tr></thead>
+            <tbody><tr><td>GRMRewardModel</td><td>6160.84033203125</td><td>2003.9375</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-5 card p-3">
+      <h3>Metric Summary</h3>
+      <p>The `outcomeRating` metric aggregates multiple signals to evaluate travel plan quality, with a strong emphasis on human-preference alignment via the GRMRewardModel (76% weight). This model rewards responses that are fluent, safe, and contextually appropriate but does not validate factual accuracy or budget feasibility. Supporting metrics like Feasibility_and_Realism (4.0/5.0 scale) ensure plans are realistic and budget-conscious, while components like Cultural_and_Local_Insights add depth. Strengths include robustness to stylistic variations and alignment with conversational norms, but limitations include potential biases in preference data and neglect of factual errors (e.g., incorrect restaurant addresses). Overreliance on GRMRewardModel may lead to overfitting to training data, prioritizing smoothness over correctness. The metric is best suited for evaluating user satisfaction in dialogue-driven planning but requires supplementary checks for factual rigor.</p>
+    </div>
+
+    <div class="mt-4 card p-3">
+      <h3>Examples</h3>
+      
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/v/bs5/dt-2.0.8/fh-4.0.1/r-3.0.2/datatables.min.js"></script>
+  <script>
+    function getThemeLayout() {
+      const color = getComputedStyle(document.body).color;
+      return { paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: { color } };
+    }
+    document.getElementById('darkModeToggle').addEventListener('change',e=>{document.body.classList.toggle('dark-mode',e.target.checked); drawAll();});
+    // Enable tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (el) {
+      const tip = new bootstrap.Tooltip(el, {trigger: 'hover focus', delay: {show: 0, hide: 50}, placement: 'right'});
+      el.addEventListener('shown.bs.tooltip', function () {
+        try { if (window.MathJax && MathJax.typesetPromise) { MathJax.typesetPromise(); } } catch(_) {}
+      });
+      return tip;
+    });
+
+    // Initialize tooltips; use template content for robustness
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.robust-tip').forEach(function (el) {
+        const id = el.getAttribute('data-tip-id');
+        let titleHtml = '';
+        if (id) {
+          const tpl = document.getElementById(id);
+          if (tpl) titleHtml = tpl.innerHTML;
+        }
+        if (!titleHtml) {
+          titleHtml = '<div style="max-width: 320px">Robustness tooltip unavailable.</div>';
+        }
+        const tip = new bootstrap.Tooltip(el, {
+          trigger: 'hover focus',
+          delay: {show: 0, hide: 50},
+          placement: 'right',
+          html: true,
+          title: titleHtml
+        });
+      });
+    });
+
+    function drawCorrelation() {
+      const layout = Object.assign({xaxis:{title:'Metric Score (normalized to target scale)'}, yaxis:{title:'Ground Truth'}}, getThemeLayout());
+      layout.legend = layout.legend || {}; layout.legend.font = { size: 9 }; layout.margin = {l:40,r:10,t:30,b:40};
+      const traces = [];
+      if (RC_CORR.metrics) {
+        // Determine top 3 metrics by absolute coefficient if available
+        let topNames = [];
+        try {
+          const coeffPairs = ([["GRMRewardModel", 0.7613173000670798], ["(intercept)", 3.7857142857142856]]);
+          const sorted = coeffPairs.filter(p=>p[0] !== '(intercept)').sort((a,b)=>Math.abs(b[1]) - Math.abs(a[1]));
+          topNames = sorted.slice(0,3).map(p=>p[0]);
+        } catch (e) { topNames = []; }
+        for (const m of RC_CORR.metrics) {
+          const rlab = (m.r!=null ? (m.r.toFixed ? m.r.toFixed(2) : m.r) : 'NA');
+          const tlab = (m.tau!=null ? (m.tau.toFixed ? m.tau.toFixed(2) : m.tau) : 'NA');
+          const visible = (topNames.includes(m.name)) ? true : 'legendonly';
+          traces.push({ x: m.x_norm || m.x || [], y: m.y || [], mode: 'markers', name: (m.name || '') + ' (r=' + rlab + ', τ=' + tlab + ')', visible });
+        }
+      }
+      if (RC_CORR.regression) {
+        const rlab = (RC_CORR.regression.r!=null ? (RC_CORR.regression.r.toFixed ? RC_CORR.regression.r.toFixed(2) : RC_CORR.regression.r) : 'NA');
+        const tlab = (RC_CORR.regression.tau!=null ? (RC_CORR.regression.tau.toFixed ? RC_CORR.regression.tau.toFixed(2) : RC_CORR.regression.tau) : 'NA');
+        traces.push({ x: RC_CORR.regression.x_norm || RC_CORR.regression.x || [], y: RC_CORR.regression.y || [], mode: 'markers', name: (RC_CORR.regression.name || 'Aggregate') + ' (r=' + rlab + ', τ=' + tlab + ')', marker: { size: 8, color: 'black' } });
+        document.getElementById('correlation-stats').innerText = 'Aggregate metric: r=' + rlab + ', τ=' + tlab;
+      }
+      Plotly.newPlot('correlation-chart', traces, layout, {displayModeBar: false});
+    }
+
+    function drawRuntime() {
+      const layout = Object.assign({yaxis:{title:'Time per Sample (s)'}}, getThemeLayout());
+      const boxes = [];
+      if (RC_RUNTIME.per_metric) {
+        for (const [name, arr] of Object.entries(RC_RUNTIME.per_metric)) {
+          boxes.push({ y: arr, type: 'box', name });
+        }
+      }
+      Plotly.newPlot('runtime-chart', boxes, layout);
+      if (RC_RUNTIME.aggregate) {
+        const agg = RC_RUNTIME.aggregate;
+        var seq = (agg.sequence_mean||0);
+        if (typeof seq === 'number' && seq.toFixed) { seq = seq.toFixed(2); }
+        var par = (agg.parallel_mean||0);
+        if (typeof par === 'number' && par.toFixed) { par = par.toFixed(2); }
+        var seqCI = (agg.sequence_ci||0);
+        if (typeof seqCI === 'number' && seqCI.toFixed) { seqCI = seqCI.toFixed(2); }
+        var parCI = (agg.parallel_ci||0);
+        if (typeof parCI === 'number' && parCI.toFixed) { parCI = parCI.toFixed(2); }
+        document.getElementById('runtime-info').innerHTML = 'Avg time/sample (sequence): ' + seq + 's ± ' + seqCI + 's' + '<br/>' + 'Avg time/sample (parallel): ' + par + 's ± ' + parCI + 's (95% CI)';
+      }
+    }
+
+    function drawRobustness() {
+      if (!RC_ROB.available || !RC_ROB.scores) {
+        document.getElementById('robustness-sens').innerHTML = '<em>Robustness not available.</em>';
+        document.getElementById('robustness-stab').innerHTML = '';
+        return;
+      }
+      const names = Object.keys(RC_ROB.scores);
+      const sens = names.map(n => (RC_ROB.scores[n] && RC_ROB.scores[n].sensitivity) || 0);
+      const stab = names.map(n => (RC_ROB.scores[n] && RC_ROB.scores[n].stability) || 0);
+      Plotly.newPlot('robustness-sens', [{x: names, y: sens, type:'bar', name:'Sensitivity'}], Object.assign({yaxis:{title:'Sensitivity'}}, getThemeLayout()));
+      Plotly.newPlot('robustness-stab', [{x: names, y: stab, type:'bar', name:'Stability'}], Object.assign({yaxis:{title:'Stability'}}, getThemeLayout()));
+    }
+
+    function drawAll() { drawCorrelation(); drawRuntime(); drawRobustness(); }
+    drawAll();
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const tbl = document.getElementById('examples-table');
+      if (tbl && typeof DataTable !== 'undefined') {
+        new DataTable(tbl, {
+          scrollX: true,
+          fixedHeader: true,
+          paging: true,
+          pageLength: 5,
+          ordering: true,
+          responsive: true
+        });
+      }
+    });
+  </script>
+  <div id="robustness-tip-template" class="d-none">
+    <div style="max-width: 360px">
+      <strong>What do these mean?</strong><br/><br/>
+      <strong>Per-sample pairing</strong>: for each example, we compare the metric on the original output to the metric on its perturbed versions and aggregate those per-example differences.
+      <br/><br/>
+      <strong>Sensitivity</strong> (worse_obvious): how much the metric tends to drop when the output is intentionally degraded. For each example, we measure the relative drop from the original to the average worse_obvious score, clip negative values to 0 (no drop), and then average across examples.
+      <br/><br/>
+      <strong>Stability</strong> (same_obvious): how consistent the metric stays under neutral edits that should not change meaning. For each example, we measure how close the original is to the average same_obvious score (scaled by the original magnitude), clip below 0, and then average across examples. Higher means more stable.
+      <br/><br/>
+      <em>Interpretation</em>: higher is better for both; 0 means either the metric didn’t drop on worse outputs (bad sign) or it changed too much on neutral edits (unstable).
+    </div>
+  </div>
+</body>
+</html>

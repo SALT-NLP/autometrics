@@ -493,6 +493,22 @@ def scan_results(results_root: Path, corr_type: str) -> List[ResultRecord]:
             # CSVs may contain multiple corr columns; include and let parser pick the right column
             paths.append(p)
 
+    # Enforce resized-only directories for specific dataset/target pairs by excluding
+    # files under the non-resized directories. This ensures we pull from *_resized only.
+    # Targets:
+    # - EvalGenProduct_grade -> include only EvalGenProduct_grade_resized
+    # - CoGymTravelOutcome_outcomeRating -> include only CoGymTravelOutcome_outcomeRating_resized
+    exclude_non_resized_dirs = {"evalgenproduct_grade", "cogymtraveloutcome_outcomerating"}
+    if exclude_non_resized_dirs:
+        filtered_paths: List[Path] = []
+        for p in paths:
+            parts = {part.lower() for part in p.parts}
+            # Drop any file that lives under a non-resized directory name
+            if any(dir_name in parts for dir_name in exclude_non_resized_dirs):
+                continue
+            filtered_paths.append(p)
+        paths = filtered_paths
+
     logging.info(f"Scanning {len(paths)} files under {results_root}")
     all_records: List[ResultRecord] = []
     for p in paths:
@@ -595,15 +611,55 @@ def make_main_table(main_aggr: Dict[str, Dict[Tuple[str, str], List[float]]], co
     # Render groups and their rows in declared order.
     for group_index, (group_name, rows) in enumerate(ABLATION_GROUPS):
         lines.append(rf"        \rowcolor[gray]{{0.85}} \multicolumn{{7}}{{l}}{{\textbf{{{group_name}}}}} \\")
+        # Compute per-column top and second-best within this section
+        group_methods = [method_row_name for method_row_name, _ in rows]
+        main_ds_pairs: List[Tuple[str, str]] = [
+            ("SimpEval", "score"),
+            ("Primock57", "time_sec"),
+            ("HelpSteer2", "helpfulness"),
+            ("EvalGenProduct", "grade"),
+            ("RealHumanEval", "accepted"),
+            ("CoGymTravel", "outcomeRating"),
+        ]
+
+        # Map each column to sets of top and second-best methods (handle ties)
+        column_ranks: Dict[Tuple[str, str], Tuple[set, set]] = {}
+        for ds_tg in main_ds_pairs:
+            means_by_method: Dict[str, float] = {}
+            for m in group_methods:
+                vals = main_aggr.get(m, {}).get(ds_tg, [])
+                mean, _ci = compute_mean_ci(vals)
+                if not math.isnan(mean):
+                    means_by_method[m] = mean
+            if not means_by_method:
+                column_ranks[ds_tg] = (set(), set())
+                continue
+            unique_means_desc = sorted(set(means_by_method.values()), reverse=True)
+            top_val = unique_means_desc[0]
+            top_set = {m for m, v in means_by_method.items() if v == top_val}
+            second_set = set()
+            if len(unique_means_desc) > 1:
+                second_val = unique_means_desc[1]
+                second_set = {m for m, v in means_by_method.items() if v == second_val}
+            column_ranks[ds_tg] = (top_set, second_set)
+
         for method_row_name, _ in rows:
             cells: List[str] = []
             # The display columns must follow MAIN_COLUMNS order, but we display short dataset names in the header; here only values.
-            d1 = get_cell(method_row_name, ("SimpEval", "score"))
-            d2 = get_cell(method_row_name, ("Primock57", "time_sec"))
-            d3 = get_cell(method_row_name, ("HelpSteer2", "helpfulness"))
-            d4 = get_cell(method_row_name, ("EvalGenProduct", "grade"))
-            d5 = get_cell(method_row_name, ("RealHumanEval", "accepted"))
-            d6 = get_cell(method_row_name, ("CoGymTravel", "outcomeRating"))
+            def style_cell(value: str, ds_tg: Tuple[str, str]) -> str:
+                top_set, second_set = column_ranks.get(ds_tg, (set(), set()))
+                if method_row_name in top_set:
+                    return f"\\textbf{{{value}}}"
+                if method_row_name in second_set:
+                    return f"\\underline{{{value}}}"
+                return value
+
+            d1 = style_cell(get_cell(method_row_name, ("SimpEval", "score")), ("SimpEval", "score"))
+            d2 = style_cell(get_cell(method_row_name, ("Primock57", "time_sec")), ("Primock57", "time_sec"))
+            d3 = style_cell(get_cell(method_row_name, ("HelpSteer2", "helpfulness")), ("HelpSteer2", "helpfulness"))
+            d4 = style_cell(get_cell(method_row_name, ("EvalGenProduct", "grade")), ("EvalGenProduct", "grade"))
+            d5 = style_cell(get_cell(method_row_name, ("RealHumanEval", "accepted")), ("RealHumanEval", "accepted"))
+            d6 = style_cell(get_cell(method_row_name, ("CoGymTravel", "outcomeRating")), ("CoGymTravel", "outcomeRating"))
             cells.extend([d1, d2, d3, d4, d5, d6])
             line = f"        {method_row_name:<30} & " + " & ".join(cells) + " \\\\"
             lines.append(line)

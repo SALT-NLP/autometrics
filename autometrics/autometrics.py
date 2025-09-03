@@ -198,6 +198,9 @@ class Autometrics:
         regenerate_metrics: bool = False,
         prometheus_api_base: Optional[str] = None,
         model_save_dir: Optional[str] = None,
+        eval_dataset: Optional[Dataset] = None,
+        report_output_path: Optional[str] = None,
+        verbose: bool = True,
         **kwargs
     ) -> Dict[str, Any]:
         """
@@ -318,6 +321,38 @@ class Autometrics:
             dataset,
             target_measure
         )
+
+        # 6b. Generate HTML report card artifact
+        try:
+            from autometrics.util.report_card import generate_metric_report_card
+            html_artifacts = generate_metric_report_card(
+                regression_metric=regression_results['regression_metric'],
+                metrics=regression_results['top_metrics'],
+                target_measure=target_measure,
+                eval_dataset=eval_dataset,
+                train_dataset=dataset,
+                lm=generator_llm,
+                output_path=report_output_path or os.path.join("artifacts", f"report_{dataset.get_name().replace(' ', '_')}_{target_measure.replace(' ', '_')}_{self.seed}.html"),
+                verbose=verbose,
+            )
+            report_card_html = html_artifacts.get('html', '')
+            report_card_path = html_artifacts.get('path')
+            # Pull Kendall tau and Pearson r for regression if available
+            regression_kendall_tau = None
+            regression_pearson_r = None
+            try:
+                arts = html_artifacts.get('artifacts') or {}
+                regression_kendall_tau = arts.get('kendall_tau_regression')
+                regression_pearson_r = arts.get('pearson_r_regression')
+            except Exception:
+                pass
+            print(f"[Autometrics] Report card HTML generated{f' at {report_card_path}' if report_card_path else ''}")
+        except Exception as e:
+            print(f"[Autometrics] Warning: Failed to generate HTML report card: {e}")
+            report_card_html = ""
+            report_card_path = None
+            regression_kendall_tau = None
+            regression_pearson_r = None
         
         # 7. Return results
         print("\n[Autometrics] Pipeline Complete!")
@@ -326,6 +361,10 @@ class Autometrics:
             'top_metrics': regression_results['top_metrics'],
             'regression_metric': regression_results['regression_metric'],
             'report_card': report_card,
+            'report_card_html': report_card_html,
+            'report_card_path': report_card_path,
+            'regression_kendall_tau_eval': regression_kendall_tau,
+            'regression_pearson_r_eval': regression_pearson_r,
             'all_generated_metrics': generated_metrics,
             'prior_metrics': prior_metrics,
             'retrieved_metrics': retrieved_metrics,

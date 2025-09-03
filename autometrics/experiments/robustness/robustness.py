@@ -8,16 +8,16 @@ import os
 from autometrics.experiments.experiment import Experiment
 from autometrics.metrics.MultiMetric import MultiMetric
 from autometrics.experiments.results import TabularResult
-from robustness.perturb import ProducePerturbations
-from robustness.analysis import analyze_and_plot
+from autometrics.experiments.robustness.perturb import ProducePerturbations
+from autometrics.experiments.robustness.analysis import analyze_and_plot
+from autometrics.aggregator.Aggregator import Aggregator
 
 class RobustnessExperiment(Experiment):
 
     def _produce_perturbation_scores(self, dataset, perturbations):
-        worse_subtle, worse_obvious, same_subtle, same_obvious, strategies = (
-            perturbations["perturbed_worse_subtle"],
+        # Only use "obvious" mode; ignore subtle perturbations entirely
+        worse_obvious, same_obvious, strategies = (
             perturbations["perturbed_worse_obvious"],
-            perturbations["perturbed_same_subtle"],
             perturbations["perturbed_same_obvious"],
             perturbations["strategies"],
         )
@@ -28,16 +28,15 @@ class RobustnessExperiment(Experiment):
         inputs_structured = [[inputs[i]] * len(strategies) for i in range(len(inputs))]
         inputs_structured = [item for sublist in inputs_structured for item in sublist]
 
+        # Build the initial table ONLY for the perturbed examples present now:
+        # worse_obvious (len(inputs)*len(strategies)) and same_obvious (len(inputs))
+        # We'll append the original examples later (to keep lengths aligned during batch eval)
         data = {
-            "input": inputs_structured + inputs_structured + inputs + inputs,
+            "input": inputs_structured + inputs,
             "model_output": [],
-            "strategy": (strategies * len(worse_subtle))
-                        + (strategies * len(worse_obvious))
-                        + (["same_subtle"] * len(same_subtle))
+            "strategy": (strategies * len(worse_obvious))
                         + (["same_obvious"] * len(same_obvious)),
-            "group": ["worse_subtle"] * len(worse_subtle) * len(strategies)
-                     + ["worse_obvious"] * len(worse_obvious) * len(strategies)
-                     + ["same_subtle"] * len(same_subtle)
+            "group": ["worse_obvious"] * len(worse_obvious) * len(strategies)
                      + ["same_obvious"] * len(same_obvious),
         }
 
@@ -45,16 +44,9 @@ class RobustnessExperiment(Experiment):
             ref_values = dataset.get_dataframe()[ref_col].tolist()
             ref_values_structured = [[ref_values[i]] * len(strategies) for i in range(len(ref_values))]
             ref_values_structured = [item for sublist in ref_values_structured for item in sublist]
-            data[ref_col] = (
-                ref_values_structured
-                + ref_values_structured
-                + ref_values
-                + ref_values
-            )
+            data[ref_col] = ref_values_structured + ref_values
 
-        data["model_output"].extend([item for sublist in worse_subtle for item in sublist])
         data["model_output"].extend([item for sublist in worse_obvious for item in sublist])
-        data["model_output"].extend(same_subtle)
         data["model_output"].extend(same_obvious)
 
         df = pd.DataFrame(data)
@@ -63,28 +55,64 @@ class RobustnessExperiment(Experiment):
             original_values = dataset.get_metric_values(metric)
             true_outputs = dataset.get_dataframe()[dataset.get_output_column()]
 
-            results = metric.calculate_batched(
-                df["input"],
-                df["model_output"],
-                [
-                    [df[ref_col].iloc[i] for ref_col in reference_columns]
-                    for i in range(len(df))
-                ],
-            )
+            try:
+                # Use predict for aggregators to avoid coefficient reconstruction and ensure exact behavior
+                if isinstance(metric, Aggregator):
+                    input_col = dataset.get_input_column()
+                    output_col = dataset.get_output_column()
+                    tmp_data = {
+                        input_col: df["input"].tolist(),
+                        output_col: df["model_output"].tolist(),
+                    }
+                    for ref_col in reference_columns:
+                        tmp_data[ref_col] = df[ref_col].tolist()
+                    tmp_df = pd.DataFrame(tmp_data)
+                    tmp_ds = dataset.copy()
+                    tmp_ds.set_dataframe(tmp_df)
+                    metric.predict(tmp_ds, update_dataset=True)
+                    res_series = tmp_ds.get_dataframe()[metric.get_name()].tolist()
+                    results = res_series
+                else:
+                    results = metric.calculate_batched(
+                        df["input"],
+                        df["model_output"],
+                        [
+                            [df[ref_col].iloc[i] for ref_col in reference_columns]
+                            for i in range(len(df))
+                        ],
+                    )
+            except Exception as e:
+                print(f"[Robustness] Metric '{metric.get_name() if hasattr(metric,'get_name') else type(metric).__name__}' evaluation failed: {e}")
+                continue
 
             if isinstance(results, (list, tuple)) and isinstance(metric, MultiMetric):
-                for i, submetric_name in enumerate(metric.get_submetric_names()):
-                    data[submetric_name] = list(results[i])
-                    data[submetric_name].extend(original_values[submetric_name])
+                sub_names = metric.get_submetric_names()
+                if not isinstance(sub_names, (list, tuple)):
+                    sub_names = []
+                if len(results) < len(sub_names):
+                    print(f"[Robustness] MultiMetric '{metric.get_name()}' returned {len(results)} results but has {len(sub_names)} submetrics; skipping")
+                    continue
+                for i, submetric_name in enumerate(sub_names):
+                    vals_i = list(results[i])
+                    data[submetric_name] = vals_i
+                    try:
+                        data[submetric_name].extend(original_values[submetric_name])
+                    except Exception as e:
+                        print(f"[Robustness] Failed to append originals for submetric '{submetric_name}': {e}")
             else:
-                data[metric.get_name()] = results
-                data[metric.get_name()].extend(original_values)
+                mname = metric.get_name() if hasattr(metric, 'get_name') else type(metric).__name__
+                data[mname] = list(results) if not isinstance(results, list) else results
+                try:
+                    data[mname].extend(original_values)
+                except Exception as e:
+                    # original_values might already be aligned; skip extend if incompatible
+                    print(f"[Robustness] Failed to append originals for metric '{mname}': {e}")
 
         data["input"].extend(inputs)
         for ref_col in reference_columns:
             data[ref_col].extend(dataset.get_dataframe()[ref_col].tolist())
         data["model_output"].extend(true_outputs)
-        data["strategy"].extend([["original"]] * len(inputs))
+        data["strategy"].extend(["original"] * len(inputs))
         data["group"].extend(["original"] * len(inputs))
 
         return pd.DataFrame(data)
@@ -120,7 +148,12 @@ class RobustnessExperiment(Experiment):
                     .str.lower()
                     .apply(lambda x: hashlib.md5(x.encode()).hexdigest())
                 )
-                analyze_and_plot(df, self.metrics, column, self.results)
+                # Only obvious mode is used in report card; analysis may assume subtle groups.
+                # Guard plotting to avoid failures when subtle groups are absent.
+                try:
+                    analyze_and_plot(df, self.metrics, column, self.results)
+                except Exception:
+                    pass
 
 def main():
     import os

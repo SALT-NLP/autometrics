@@ -306,7 +306,11 @@ def run_autometrics_experiment(
             dataset=train_dataset,
             target_measure=target_name,
             generator_llm=generator_llm,
-            judge_llm=judge_llm
+            judge_llm=judge_llm,
+            # Provide test set for report card sections and set HTML output path
+            eval_dataset=test_dataset,
+            report_output_path=os.path.join(output_dir, f"report_{dataset_name}_{target_name}_{seed}.html"),
+            verbose=True,
         )
         
         # Get regression metric

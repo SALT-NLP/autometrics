@@ -292,6 +292,10 @@ def run_ablation(
         judge_llm=judge_llm,
         num_to_retrieve=(k if k is not None else 30),
         num_to_regress=(n if n is not None else 5),
+        # Provide validation set for report card sections and set HTML output path
+        eval_dataset=val_dataset,
+        report_output_path=os.path.join(output_dir, f"report_{dataset_name}_{target_name}_{seed}.html"),
+        verbose=True,
     )
 
     regression_metric = results['regression_metric']

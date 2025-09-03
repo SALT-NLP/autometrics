@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from autometrics.metrics.MultiMetric import MultiMetric
 from typing import List
+import pandas as pd
 
 from autometrics.util.metric_eval_utils import evaluate_metric_instances
 

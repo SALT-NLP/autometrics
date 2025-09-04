@@ -59,6 +59,16 @@ class _LLMJudgeMetricMixin:
         self.axis = axis
         self.task_description = task_description or "None"
         self.model = model
+        try:
+            print(f"[LLMJudge.__init__] name={name} axis={axis} model_type={type(model)} model.model={getattr(model,'model',None)} model.kwargs={getattr(model,'kwargs',None)}")
+        except Exception:
+            pass
+        # Capture reconstructable model constructor code for later export, before any cleanup
+        try:
+            from autometrics.metrics.generated.utils.utils import generate_llm_constructor_code as _gen_llm_code
+            self._model_ctor_code = _gen_llm_code(model) if model is not None else None
+        except Exception:
+            self._model_ctor_code = None
         self.model_str = str(getattr(model, "model", model))
         self.max_workers = max_workers
         self.is_reference_based = kwargs.get("is_reference_based", is_reference_based)
@@ -145,6 +155,7 @@ class _LLMJudgeMetricMixin:
                         input_text=input_text,
                         reference_text=reference_text,
                         output_text=output_text,
+                        lm=self.model,
                     ).score
                 else:
                     return self._judge_module(
@@ -152,6 +163,7 @@ class _LLMJudgeMetricMixin:
                         axis=self.axis,
                         input_text=input_text,
                         output_text=output_text,
+                        lm=self.model,
                     ).score
 
         # First attempt
@@ -198,13 +210,17 @@ class _LLMJudgeMetricMixin:
     def _generate_python_code(self, include_metric_card: bool = True) -> str:
         """Export a standalone python file that re-creates this metric."""
         class_name = "GeneratedRefBasedLLMJudgeMetric" if self.is_reference_based else "GeneratedRefFreeLLMJudgeMetric"
+        
+
+        _default_model_code = generate_llm_constructor_code(self.model)
+
         code = f"""# Auto-generated metric file for {self.name}
 import dspy
 import os
 from autometrics.metrics.generated.GeneratedLLMJudgeMetric import {class_name}
 from typing import ClassVar
 
-DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
+DEFAULT_MODEL = {_default_model_code}
 
 class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"

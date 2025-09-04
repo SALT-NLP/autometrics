@@ -17,10 +17,10 @@ class LLMAsAJudge(dspy.Module):
         super(LLMAsAJudge, self).__init__()
         self.generate_score = dspy.ChainOfThought(LLMAsAJudgeSignature)
 
-    def forward(self, text, metric, task_description=None):
+    def forward(self, text, metric, task_description=None, lm=None):
         if task_description is None:
             task_description = "None"
-        score = self.generate_score(task_description=task_description, text=text, metric=metric).score
+        score = self.generate_score(task_description=task_description, text=text, metric=metric, lm=lm).score
         # Convert the string score to a float by stripping any additional text and converting to a float
         if '\n' in score:
             score = score.split('\n')[0]
@@ -38,7 +38,7 @@ class LLMAsAJudge(dspy.Module):
 def grade_row(row, axis, llm, formatter, task_description):
     '''Helper function to grade a single row'''
     with dspy.settings.context(lm=llm):
-        return LLMAsAJudge()(formatter(row), axis, task_description).score
+        return LLMAsAJudge()(formatter(row), axis, task_description, lm=llm).score
     
 class LLMJudge(Metric):
     def __init__(self, name, description, model, dataset, evaluation_axis, formatter=None, task_description=None):

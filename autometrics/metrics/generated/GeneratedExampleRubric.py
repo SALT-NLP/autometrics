@@ -46,16 +46,26 @@ class LLMAsAJudge(dspy.Module):
         super(LLMAsAJudge, self).__init__()
         self.generate_score = dspy.ChainOfThought(LLMAsAJudgeSignature)
 
-    def forward(self, text, measure, suggested_range=(1,5), task_description=None):
+    def forward(self, text, measure, suggested_range=(1,5), task_description=None, lm=None, temperature=None):
         if task_description is None:
             task_description = "None"
         suggested_range_str = f"{suggested_range[0]} to {suggested_range[1]}"
-        score = self.generate_score(
-            task_description=task_description,
-            text=text,
-            measure=measure,
-            suggested_range=suggested_range_str
-        ).score
+
+        # Compute effective LM (prefer explicit arg, fallback to global)
+        effective_lm = lm or dspy.settings.lm
+
+        ctx_kwargs = { 'temperature': temperature }
+        if effective_lm is not None:
+            ctx_kwargs['lm'] = effective_lm
+
+        with dspy.settings.context(**ctx_kwargs):
+            score = self.generate_score(
+                task_description=task_description,
+                text=text,
+                measure=measure,
+                suggested_range=suggested_range_str,
+                lm=effective_lm
+            ).score
         
         # Convert the string score to a float by stripping any additional text and converting to a float
         if '\n' in score:
@@ -68,10 +78,13 @@ class LLMAsAJudge(dspy.Module):
         return dspy.Prediction(text=text, measure=measure, score=score)
 
 
-def grade_row(row, axis, llm, formatter, task_description, program, suggested_range=(1,5)):
+def grade_row(row, axis, llm, formatter, task_description, program, suggested_range=(1,5), temperature=None):
     """Helper function to grade a single row"""
-    with dspy.settings.context(lm=llm):
-        return program(formatter(row), axis, suggested_range=suggested_range, task_description=task_description).score
+    if llm is None:
+        llm = dspy.settings.lm
+
+    with dspy.settings.context(lm=llm, temperature=temperature):
+        return program(formatter(row), axis, suggested_range=suggested_range, task_description=task_description, lm=llm, temperature=temperature).score
 
 
 # Base mixin for shared Example Rubric functionality
@@ -151,6 +164,12 @@ class _ExampleRubricMetricMixin:
 
         # Initialize the DSPy program
         self.program = LLMAsAJudge()
+        # Capture reconstructable model constructor code for later export, before any cleanup
+        try:
+            from autometrics.metrics.generated.utils.utils import generate_llm_constructor_code as _gen_llm_code
+            self._model_ctor_code = _gen_llm_code(model) if model is not None else None
+        except Exception:
+            self._model_ctor_code = None
         
         # Debug: Verify the program was created correctly
         self.debug_print(f"🔍 Example Judge program created: {type(self.program)}")
@@ -362,103 +381,113 @@ class _ExampleRubricMetricMixin:
         attempt_task_desc = original_task_desc
         
         attempts_left = 2  # first try + one retry
-        while True:
-            try:
-                # Set the current demos for this attempt (on the current program)
-                if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
-                    program.generate_score.predict.demos = demos
-                    demos_count = len(demos)
-                    self.debug_print(f"🔍 Example Judge program has {demos_count} demos loaded ({'deepcopy' if deepcopied else 'shallow'})")
-                    if demos_count == 0:
-                        self.debug_print("⚠️  Example Judge WARNING: No demos loaded - this will likely cause poor scoring!")
-                else:
-                    self.debug_print(f"❌ Example Judge program missing demos attribute ({'deepcopy' if deepcopied else 'shallow'})")
-                
-                with dspy.settings.context(lm=self.model, temperature=temperature):
-                    self.debug_print(f"🔍 Example Judge DSPy context set with model: {self.model}")
-                    self.debug_print(f"🔍 Example Judge current DSPy settings LM: {dspy.settings.lm}")
-                    result = program(
-                        text=formatted_text,
-                        measure=self.axis,
-                        suggested_range=self.suggested_range,
-                        task_description=attempt_task_desc
-                    )
-                self.debug_print(f"🔍 Example Judge DSPy result: {result}")
-                self.debug_print(f"🔍 Example Judge result type: {type(result)}")
-                if hasattr(result, 'score'):
-                    self.debug_print(f"🔍 Example Judge result.score: {result.score}")
-                    self.debug_print(f"🔍 Example Judge result.score type: {type(result.score)}")
-                    score_value = float(result.score)
-                    self.debug_print(f"🔍 Example Judge final score: {score_value}")
-                    # Check model history to verify LLM was actually called
-                    if hasattr(self.model, 'history') and score_value == 0.0:
-                        history_len = len(self.model.history)
-                        self.debug_print(f"⚠️  Example Judge Model history length: {history_len}")
-                        if history_len == 0:
-                            self.debug_print("🚨 CRITICAL: Model history is empty - LLM was never called!")
-                        else:
-                            self.debug_print(f"🔍 Example Judge Last call: {self.model.history[-1]}")
-                    return score_value
-                else:
-                    self.debug_print(f"❌ Example Judge result has no 'score' attribute")
-                    self.debug_print(f"❌ Example Judge result attributes: {[attr for attr in dir(result) if not attr.startswith('_')]}")
-                    raise ValueError(f"DSPy result missing score attribute: {result}")
-            except Exception as e:
-                error_str = str(e)
-                # Check for context length error (robust to different error types)
-                if "ContextWindowExceededError" in error_str or "context length" in error_str or "input is longer than the model's context length" in error_str:
-                    self.debug_print(f"⚠️  Context length error detected: {e}")
-                    if len(demos) == 0:
-                        self.debug_print("🚨 No demos left to drop, cannot proceed.")
-                        raise
-                    # On first context error, switch to a deepcopy of the program and demos
-                    if not deepcopied:
-                        self.debug_print("⚠️  Switching to deepcopy of program and demos due to context error.")
-                        program = copy.deepcopy(self.program)
-                        if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
-                            demos = list(program.generate_score.predict.demos)
-                        else:
-                            demos = []
-                        deepcopied = True
-                    # Find the longest demo (by text length)
-                    def demo_length(demo):
-                        # Try to get the 'text' field, fallback to str
-                        if hasattr(demo, 'get'):
-                            return len(str(demo.get('text', demo)))
-                        elif hasattr(demo, 'text'):
-                            return len(str(demo.text))
-                        else:
-                            return len(str(demo))
-                    longest_idx = max(range(len(demos)), key=lambda i: demo_length(demos[i]))
-                    self.debug_print(f"⚠️  Dropping demo #{longest_idx} (length={demo_length(demos[longest_idx])}) and retrying...")
-                    demos.pop(longest_idx)
-                    continue
-                # Handle truncation/adapter parse failures by retrying once with a cache-bust
-                elif (
-                    'Adapter JSONAdapter failed to parse' in error_str
-                    or 'response was truncated' in error_str
-                    or 'exceeding max_tokens' in error_str
-                ) and attempts_left > 1:
-                    attempts_left -= 1
-                    self.debug_print("⚠️  Truncation/parse issue detected. Retrying once with cache-busting space in task_description...")
-                    # Cache-bust by appending a space to task_description for this call
-                    import copy as _copy
-                    program = _copy.deepcopy(program) if not deepcopied else program
-                    deepcopied = True
+        # Compute effective LM for this call
+        _eff_lm = self.model or dspy.settings.lm
+        _ctx_kwargs = { 'temperature': temperature }
+        if _eff_lm is not None:
+            _ctx_kwargs['lm'] = _eff_lm
+
+        with dspy.settings.context(**_ctx_kwargs):
+            while True:
+                try:
+                    # Set the current demos for this attempt (on the current program)
                     if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
                         program.generate_score.predict.demos = demos
-                    # Temporarily modify local attempt_task_desc (do not mutate self)
-                    attempt_task_desc = (original_task_desc or "") + " "
-                    continue
-                else:
-                    self.debug_print(f"🚨 CRITICAL EXCEPTION in Example Judge DSPy call:")
-                    self.debug_print(f"   Exception: {e}")
-                    self.debug_print(f"   Exception Type: {type(e).__name__}")
-                    self.debug_print(f"   Program: {program}")
-                    self.debug_print(f"   Model: {self.model}")
-                    import traceback
-                    traceback.print_exc()
-                    raise
+                        demos_count = len(demos)
+                        self.debug_print(f"🔍 Example Judge program has {demos_count} demos loaded ({'deepcopy' if deepcopied else 'shallow'})")
+                        if demos_count == 0:
+                            self.debug_print("⚠️  Example Judge WARNING: No demos loaded - this will likely cause poor scoring!")
+                    else:
+                        self.debug_print(f"❌ Example Judge program missing demos attribute ({'deepcopy' if deepcopied else 'shallow'})")
+                    
+                    # Keep the same effective LM within nested context
+                    with dspy.settings.context(**_ctx_kwargs):
+                        self.debug_print(f"🔍 Example Judge DSPy context set with model: {self.model}")
+                        self.debug_print(f"🔍 Example Judge current DSPy settings LM: {dspy.settings.lm}")
+                        result = program(
+                            text=formatted_text,
+                            measure=self.axis,
+                            suggested_range=self.suggested_range,
+                            task_description=attempt_task_desc,
+                            lm=_eff_lm,
+                            temperature=temperature,
+                        )
+                    self.debug_print(f"🔍 Example Judge DSPy result: {result}")
+                    self.debug_print(f"🔍 Example Judge result type: {type(result)}")
+                    if hasattr(result, 'score'):
+                        self.debug_print(f"🔍 Example Judge result.score: {result.score}")
+                        self.debug_print(f"🔍 Example Judge result.score type: {type(result.score)}")
+                        score_value = float(result.score)
+                        self.debug_print(f"🔍 Example Judge final score: {score_value}")
+                        # Check model history to verify LLM was actually called
+                        if hasattr(self.model, 'history') and score_value == 0.0:
+                            history_len = len(self.model.history)
+                            self.debug_print(f"⚠️  Example Judge Model history length: {history_len}")
+                            if history_len == 0:
+                                self.debug_print("🚨 CRITICAL: Model history is empty - LLM was never called!")
+                            else:
+                                self.debug_print(f"🔍 Example Judge Last call: {self.model.history[-1]}")
+                        return score_value
+                    else:
+                        self.debug_print(f"❌ Example Judge result has no 'score' attribute")
+                        self.debug_print(f"❌ Example Judge result attributes: {[attr for attr in dir(result) if not attr.startswith('_')]}")
+                        raise ValueError(f"DSPy result missing score attribute: {result}")
+                except Exception as e:
+                    error_str = str(e)
+                    # Check for context length error (robust to different error types)
+                    if "ContextWindowExceededError" in error_str or "context length" in error_str or "input is longer than the model's context length" in error_str:
+                        self.debug_print(f"⚠️  Context length error detected: {e}")
+                        if len(demos) == 0:
+                            self.debug_print("🚨 No demos left to drop, cannot proceed.")
+                            raise
+                        # On first context error, switch to a deepcopy of the program and demos
+                        if not deepcopied:
+                            self.debug_print("⚠️  Switching to deepcopy of program and demos due to context error.")
+                            program = copy.deepcopy(self.program)
+                            if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
+                                demos = list(program.generate_score.predict.demos)
+                            else:
+                                demos = []
+                            deepcopied = True
+                        # Find the longest demo (by text length)
+                        def demo_length(demo):
+                            # Try to get the 'text' field, fallback to str
+                            if hasattr(demo, 'get'):
+                                return len(str(demo.get('text', demo)))
+                            elif hasattr(demo, 'text'):
+                                return len(str(demo.text))
+                            else:
+                                return len(str(demo))
+                        longest_idx = max(range(len(demos)), key=lambda i: demo_length(demos[i]))
+                        self.debug_print(f"⚠️  Dropping demo #{longest_idx} (length={demo_length(demos[longest_idx])}) and retrying...")
+                        demos.pop(longest_idx)
+                        continue
+                    # Handle truncation/adapter parse failures by retrying once with a cache-bust
+                    elif (
+                        'Adapter JSONAdapter failed to parse' in error_str
+                        or 'response was truncated' in error_str
+                        or 'exceeding max_tokens' in error_str
+                    ) and attempts_left > 1:
+                        attempts_left -= 1
+                        self.debug_print("⚠️  Truncation/parse issue detected. Retrying once with cache-busting space in task_description...")
+                        # Cache-bust by appending a space to task_description for this call
+                        import copy as _copy
+                        program = _copy.deepcopy(program) if not deepcopied else program
+                        deepcopied = True
+                        if hasattr(program, 'generate_score') and hasattr(program.generate_score, 'predict'):
+                            program.generate_score.predict.demos = demos
+                        # Temporarily modify local attempt_task_desc (do not mutate self)
+                        attempt_task_desc = (original_task_desc or "") + " "
+                        continue
+                    else:
+                        self.debug_print(f"🚨 CRITICAL EXCEPTION in Example Judge DSPy call:")
+                        self.debug_print(f"   Exception: {e}")
+                        self.debug_print(f"   Exception Type: {type(e).__name__}")
+                        self.debug_print(f"   Program: {program}")
+                        self.debug_print(f"   Model: {self.model}")
+                        import traceback
+                        traceback.print_exc()
+                        raise
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         del kwargs  # pragma: no cover
@@ -532,29 +561,34 @@ class _ExampleRubricMetricMixin:
                     example_dict = None
                     input_keys = []
                     
-                    if hasattr(example, '__dict__'):
-                        # DSPy Example object
-                        print(f"🔍 DEBUG: Example {i} is DSPy Example object")
-                        example_dict = {}
-                        for key, value in example.__dict__.items():
-                            if not key.startswith('_'):  # Skip private attributes
-                                example_dict[key] = value
-                        
-                        # Get input keys from the example
+                    # Preferred: DSPy Example object stores fields in _store
+                    if hasattr(example, '_store') and isinstance(getattr(example, '_store', None), dict):
+                        print(f"🔍 DEBUG: Example {i} has _store; extracting fields")
+                        example_dict = dict(example._store)
+                        # Known input fields for this signature
+                        preferred_inputs = ["task_description", "text", "measure", "suggested_range"]
+                        input_keys = [k for k in preferred_inputs if k in example_dict]
+                        if not input_keys:
+                            # Fallback to any non-output keys
+                            input_keys = [k for k in example_dict.keys() if k != 'score']
+                    elif hasattr(example, '__dict__'):
+                        # DSPy Example object (may have limited public attrs)
+                        print(f"🔍 DEBUG: Example {i} is DSPy Example object (no _store)")
+                        example_dict = {k: v for k, v in example.__dict__.items() if not k.startswith('_')}
                         if hasattr(example, '_input_keys'):
                             input_keys = list(example._input_keys)
                         elif hasattr(example, 'inputs'):
-                            input_keys = list(example.inputs())
+                            try:
+                                input_keys = list(example.inputs())
+                            except Exception:
+                                input_keys = [k for k in example_dict.keys() if k != 'score']
                         else:
                             input_keys = [k for k in example_dict.keys() if k != 'score']
-                    
                     elif isinstance(example, dict):
                         # Plain dictionary
                         print(f"🔍 DEBUG: Example {i} is dictionary")
-                        example_dict = dict(example)  # Make a copy
-                        # Infer input keys - all keys except score
+                        example_dict = dict(example)
                         input_keys = [k for k in example_dict.keys() if k != 'score']
-                    
                     else:
                         # Try to convert to dict if possible
                         print(f"🔍 DEBUG: Example {i} is {type(example)}, trying to convert")
@@ -567,12 +601,28 @@ class _ExampleRubricMetricMixin:
                             continue
                     
                     if example_dict is not None:
-                        # Generate individual arguments, not a list
+                        # Coerce non-serializable values to strings for safety
+                        clean_dict = {}
+                        for k, v in example_dict.items():
+                            if isinstance(v, (str, int, float, bool)) or v is None:
+                                clean_dict[k] = v
+                            else:
+                                try:
+                                    clean_dict[k] = str(v)
+                                except Exception:
+                                    clean_dict[k] = None
+                        # Ensure output field exists (score)
+                        if 'score' not in clean_dict:
+                            # Leave absent rather than fabricate
+                            pass
+                        # Determine inputs
+                        if not input_keys:
+                            input_keys = [k for k in clean_dict.keys() if k != 'score']
                         input_keys_args = ', '.join(f'"{key}"' for key in input_keys)
-                        
-                        # Create properly formatted DSPy Example
+                        # Use a Python literal via repr for safe embedding
+                        py_literal = repr(clean_dict)
                         serialized_example = (
-                            f"dspy.Example({example_dict})"
+                            f"dspy.Example({py_literal})"
                             f".with_inputs({input_keys_args})"
                         )
                         serialized_examples.append(serialized_example)

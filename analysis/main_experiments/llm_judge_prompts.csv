@@ -623,8 +623,7 @@ Your task: **rate each variation on a 4-point Grammar scale**.
 |---|:---:|
 | it’s culture similar to the people of port of papua . | **4** |
 
-**Why?** The sentence is grammatical but slightly awkward; no major errors beyond stylistic issues.
-","[0,4]"
+**Why?** The sentence is grammatical but slightly awkward; no major errors beyond stylistic issues.","[0,4]"
 SimpDA,meaning,"# Judge the quality of similar sentences — **Meaning Rating**
 
 Please read each group of sentences.  
@@ -653,8 +652,7 @@ Your task: **rate each variation on a 4-point Meaning scale**.
 |---|:---:|
 | it’s culture similar to the people of port of papua . | **3** |
 
-**Why?** Most of the original sense remains, but details like *coastal* and *papua new guinea* are altered or omitted.
-","[0,4]"
+**Why?** Most of the original sense remains, but details like *coastal* and *papua new guinea* are altered or omitted.","[0,4]"
 SimpDA,simplicity,"# Judge the quality of sentence rewriting that tries to use simpler words
 
 Please read the groups of sentences below.  
@@ -709,8 +707,7 @@ Focus on **word choices** and **ignore** grammar errors or word deletions.
 ### Choosing a score
 
 Your task is to assign a score **between 0 and 4** for each variation, indicating how many good word/phrase substitutions it contains.  
-Rarely will a sentence have more than four good simplifications.
-","[0,4]"
+Rarely will a sentence have more than four good simplifications.","[0,4]"
 SimpEval,score,"## Rating Sentences
 
 The goal is to **rate sentences** by how well they **simplify the original sentence**.
@@ -810,3 +807,68 @@ SummEval,relevance,"# Summary Evaluation — **Relevance**
 | **3** | Covers some key points but misses or adds noticeable info. |
 | **2** | Covers few key points; many omissions/additions. |
 | **1** | Fails to capture the article’s main content. |","[1,5]"
+ICLR,recommendation,"Follow these guidelines in order to assign the attached paper a score between 1-10
+
+# Reviewing a submission: step-by-step
+
+Summarized in one sentence, a review aims to determine whether a submission will bring sufficient value to the community and contribute new knowledge. The process can be broken down into the following main reviewer tasks:
+
+---
+
+### 1. Read the paper
+It’s important to carefully read through the entire paper, and to look up any related work and citations that will help you comprehensively evaluate it. Be sure to give yourself sufficient time for this step.
+
+---
+
+### 2. While reading, consider the following:
+1. **Objective of the work:** What is the goal of the paper? Is it to better address a known application or problem, draw attention to a new application or problem, or to introduce and/or explain a new theoretical finding? A combination of these? Different objectives will require different considerations as to potential value and impact.  
+2. **Strong points:** Is the submission clear, technically correct, experimentally rigorous, reproducible, does it present novel findings (e.g. theoretically, algorithmically, etc.)?  
+3. **Weak points:** Is it weak in any of the aspects listed in b.?  
+4. **Be mindful of potential biases** and try to be open-minded about the value and interest a paper can hold for the entire ICLR community, even if it may not be very interesting for you.  
+
+---
+
+### 3. Answer four key questions for yourself, to make a recommendation to Accept or Reject:
+1. What is the specific question and/or problem tackled by the paper?  
+2. Is the approach well motivated, including being well-placed in the literature?  
+3. Does the paper support the claims? This includes determining if results, whether theoretical or empirical, are correct and if they are scientifically rigorous.  
+4. What is the significance of the work? Does it contribute new knowledge and sufficient value to the community?  
+   - *Note: This does not necessarily require state-of-the-art results. Submissions bring value to the ICLR community when they convincingly demonstrate new, relevant, impactful knowledge (incl. empirical, theoretical, for practitioners, etc).*
+
+---
+
+### 4. Write and submit your initial review, organizing it as follows:
+1. Summarize what the paper claims to contribute. Be positive and constructive.  
+2. List strong and weak points of the paper. Be as comprehensive as possible.  
+3. Clearly state your initial recommendation (accept or reject) with one or two key reasons for this choice.  
+4. Provide supporting arguments for your recommendation.  
+5. Ask questions you would like answered by the authors to help you clarify your understanding of the paper and provide the additional evidence you need to be confident in your assessment.  
+6. Provide additional feedback with the aim to improve the paper. Make it clear that these points are here to help, and not necessarily part of your decision assessment.  
+
+---
+
+### 5. Complete the CoE report
+ICLR has adopted the following **Code of Ethics (CoE).** When submitting your review, you’ll be asked to complete a CoE report for the paper. The report is a simple form with two questions.  
+- The first asks whether there is a potential violation of the CoE.  
+- The second is relevant only if there is a potential violation and asks the reviewer to explain why there may be a potential violation.  
+
+In order to answer these questions, it is therefore important that you read the CoE before starting your reviews.
+
+---
+
+### 6. Engage in discussion
+The discussion phase at ICLR is different from most conferences in the AI/ML community. During this phase, reviewers, authors and area chairs engage in asynchronous discussion and authors are allowed to revise their submissions to address concerns that arise.  
+It is crucial that you are actively engaged during this phase. Maintain a spirit of openness to changing your initial recommendation (either to a more positive or more negative rating).
+
+---
+
+### 7. Borderline paper meeting
+Similarly to last year, the ACs are encouraged to (virtually) meet and discuss with reviewers **only for borderline cases.** ACs will reach out to schedule this meeting. This is to ensure active discussions among reviewers, and well-thought-out decisions. ACs will schedule the meeting and facilitate the discussion. For a productive discussion, it is important to familiarize yourself with other reviewers’ feedback prior to the meeting.  
+
+*Please note that we will be leveraging information for reviewers who failed to attend this meeting (excluding emergencies).*
+
+---
+
+### 8. Provide final recommendation
+Update your review, taking into account the new information collected during the discussion phase, and any revisions to the submission.  
+*(Note that reviewers can change their review after the author response period.)* State your reasoning and what did/didn’t change your recommendation throughout the discussion phase.","[1,10]"

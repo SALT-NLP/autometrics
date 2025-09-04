@@ -29,8 +29,8 @@ class JudgeByRubric(dspy.Module):
         super(JudgeByRubric, self).__init__()
         self.score_by_rubric = dspy.ChainOfThought(JudgeByRubricSignature)
 
-    def forward(self, task_description, metric_title, metric_description, rubric, input, reference, output):
-        score = self.score_by_rubric(task_description=task_description, metric_title=metric_title, metric_description=metric_description, rubric=rubric, input=input, reference=reference, output=output).score
+    def forward(self, task_description, metric_title, metric_description, rubric, input, reference, output, lm=None):
+        score = self.score_by_rubric(task_description=task_description, metric_title=metric_title, metric_description=metric_description, rubric=rubric, input=input, reference=reference, output=output, lm=lm).score
 
         return dspy.Prediction(score=score)
 
@@ -71,7 +71,7 @@ class LLMJudgeRubricDSPy(Metric):
         rubric = SCORE_RUBRIC_TEMPLATE.format(**self.rubric)
         
         with dspy.context(lm=self.judge):
-            score = JudgeByRubric()(task_description=input, metric_title=self.name, metric_description=self.description, rubric=rubric, input=input, reference=reference, output=output)
+            score = JudgeByRubric()(task_description=input, metric_title=self.name, metric_description=self.description, rubric=rubric, input=input, reference=reference, output=output, lm=self.judge)
 
         # score.score is a string containing a number (with possible extra text)
         # Convert it to an integer using regex

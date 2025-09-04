@@ -178,6 +178,7 @@ class _OptimizedJudgeMetricMixin:
                         reference_text=reference_text,
                         output_text=output_text,
                         suggested_range=self.suggested_range,
+                        lm=self.model,
                     ).score
                 else:
                     return self._optimized_module(
@@ -186,6 +187,7 @@ class _OptimizedJudgeMetricMixin:
                         input_text=input_text,
                         output_text=output_text,
                         suggested_range=self.suggested_range,
+                        lm=self.model,
                     ).score
 
         # Convert score to float, handling various string formats

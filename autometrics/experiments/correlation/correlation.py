@@ -174,6 +174,13 @@ class CorrelationExperiment(Experiment):
 
     def _scale_to_target_range(self, metric_series: pd.Series, target_min: float, target_max: float) -> pd.Series:
         """Min-max scale a metric series to lie within the [target_min, target_max] range."""
+        # Coerce boolean targets to numeric bounds [0.0, 1.0] for arithmetic
+        if isinstance(target_min, (bool, np.bool_)) or isinstance(target_max, (bool, np.bool_)):
+            target_min = float(target_min)
+            target_max = float(target_max)
+        # If metric series is boolean, cast to float for scaling
+        if pd.api.types.is_bool_dtype(metric_series):
+            metric_series = metric_series.astype(float)
         metric_min, metric_max = metric_series.min(), metric_series.max()
         # Handle constant or NaN series gracefully
         if pd.isna(metric_min) or pd.isna(metric_max):

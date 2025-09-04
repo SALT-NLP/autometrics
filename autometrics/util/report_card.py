@@ -159,7 +159,7 @@ def _clean_xy(x: List[Any], y: List[Any]) -> Tuple[np.ndarray, np.ndarray]:
     return x_arr[mask], y_arr[mask]
 
 
-def compute_correlation(eval_dataset: Any, feature_names: List[str], target_measure: str, include_regression: bool = True) -> Dict[str, Any]:
+def compute_correlation(eval_dataset: Any, feature_names: List[str], target_measure: str, include_regression: bool = True, regression_col_name: Optional[str] = None) -> Dict[str, Any]:
     df = eval_dataset.get_dataframe().copy()
     results: Dict[str, Any] = { 'metrics': [] }
     if include_regression and target_measure in df.columns:
@@ -221,6 +221,9 @@ def compute_correlation(eval_dataset: Any, feature_names: List[str], target_meas
     # Try regression column if present
     if include_regression:
         reg_cols = [c for c in df.columns if c.lower().startswith('autometrics_regression_')]
+        # Fallback: use provided regression column name, if available
+        if not reg_cols and regression_col_name and regression_col_name in df.columns:
+            reg_cols = [regression_col_name]
         if reg_cols:
             col = reg_cols[0]
             x_raw = df[col].tolist()
@@ -1210,7 +1213,13 @@ def generate_metric_report_card(
             pass
 
         # 4) Correlation (uses eval columns)
-        correlation = compute_correlation(eval_dataset, feature_names, target_measure, include_regression=True)
+        # Try to pass the exact regression column name, if present on the metric
+        reg_name = None
+        try:
+            reg_name = regression_metric.get_name() if hasattr(regression_metric, 'get_name') else None
+        except Exception:
+            reg_name = None
+        correlation = compute_correlation(eval_dataset, feature_names, target_measure, include_regression=True, regression_col_name=reg_name)
         if verbose:
             r = correlation.get('regression', {}).get('r') if isinstance(correlation, dict) else None
             t = correlation.get('regression', {}).get('tau') if isinstance(correlation, dict) else None

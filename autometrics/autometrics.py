@@ -145,7 +145,7 @@ class Autometrics:
                 Note: The default retriever configuration automatically adapts to hardware:
                 - GPU environments: Uses ColBERT + LLMRec pipeline for optimal performance
                 - CPU-only environments: Uses BM25 + LLMRec pipeline for CPU-optimized performance
-            regression_strategy: Regression aggregator class (defaults to HotellingPLS: PLS with Hotelling T² auto variable selection)
+            regression_strategy: Regression aggregator class (defaults to PLS)
             regression_kwargs: Keyword arguments to pass to regression strategy constructor (dataset is automatically added during construction)
             metric_bank: Either:
                 - List of metric classes (e.g., [BLEU, SARI, LevenshteinDistance]) - RECOMMENDED
@@ -728,6 +728,27 @@ class Autometrics:
     def _save_generated_metrics(self, metrics: List, generator_type: str, dataset_name: str, measure: str, seed: int, output_dir: str):
         """Save generated metrics to organized directory structure."""
         from pathlib import Path
+        import re as _re
+        
+        def _infer_exported_class_name(metric_obj) -> str:
+            base = getattr(metric_obj, 'name', metric_obj.__class__.__name__)
+            safe = str(base).replace(' ', '_').replace('-', '_')
+            mod = metric_obj.__class__.__module__
+            if mod.endswith('GeneratedLLMJudgeMetric'):
+                return f"{safe}_LLMJudge"
+            if mod.endswith('GeneratedExampleRubric'):
+                return f"{safe}_ExampleRubric"
+            if mod.endswith('GeneratedOptimizedJudge'):
+                return f"{safe}_OptimizedJudge"
+            # Fallback: parse class name from generated code
+            try:
+                code = metric_obj._generate_python_code(include_metric_card=False)
+                m = _re.search(r"class\s+([A-Za-z_]\w*)\(", code)
+                if m:
+                    return m.group(1)
+            except Exception:
+                pass
+            return safe
         
         # Create output directory structure: dataset_name/measure/seed/generator_type
         safe_dataset_name = dataset_name.replace(" ", "_").replace("/", "_")
@@ -749,6 +770,13 @@ class Autometrics:
             # Save metric as standalone Python file
             metric.save_python_code(str(metric_path))
             metric_paths.append(str(metric_path))
+
+            # Attach helpful attributes for downstream import-by-path
+            try:
+                setattr(metric, "_python_file_path", str(metric_path))
+                setattr(metric, "_exported_class_name", _infer_exported_class_name(metric))
+            except Exception:
+                pass
         
         return metric_paths
 
@@ -888,11 +916,18 @@ class Autometrics:
                     metric._unload_models()
                     print(f"    🔄 Unloaded {metric.get_name()} to free GPU memory")
                 else:
-                    # For metrics without explicit unload methods, clear model attributes
+                    # For metrics without explicit unload methods, clear heavy attributes
+                    # Preserve dspy.LM to avoid losing LLM configuration for export/reuse
                     for attr in ['model', 'tokenizer', 'qg', 'qa']:
-                        if hasattr(metric, attr):
-                            setattr(metric, attr, None)
-                    print(f"    🔄 Cleared model attributes for {metric.get_name()}")
+                        if not hasattr(metric, attr):
+                            continue
+                        if attr == 'model' and isinstance(getattr(metric, 'model', None), dspy.LM):
+                            print(f"    🔄 Skipping clearing dspy.LM for {metric.get_name()}")
+                            continue
+                        setattr(metric, attr, None)
+                    if hasattr(metric, 'model') and getattr(metric, 'model', None) is None:
+                        print(f"    🔄 Cleared model for {metric.get_name()} (not dspy.LM)")
+                    print(f"    🔄 Cleared heavy attributes (preserved dspy.LM if present) for {metric.get_name()}")
                 
                 # Force garbage collection and CUDA cache clearing
                 gc.collect()
@@ -1187,7 +1222,7 @@ class Autometrics:
             }
         
         # HotellingPLS fast-path: train once, use selected columns, and return trained instance
-        if hasattr(regression_instance, "get_selected_columns"):
+        if hasattr(regression_instance, "get_selected_columns") and isinstance(regression_instance, HotellingPLS):
             regression_dataset = dataset.copy()
             regression_instance.input_metrics = metric_instances
             regression_instance.learn(regression_dataset, target_column=target_measure)
@@ -1517,11 +1552,23 @@ The Autometrics pipeline successfully identified the most relevant metrics for e
                 metric._unload_models()
                 print(f"    🔄 Unloaded {metric.get_name()}")
             else:
-                # For metrics without explicit unload methods, try to clear model attributes
+                # For metrics without explicit unload methods, try to clear heavy attributes
+                # Preserve dspy.LM to avoid losing LLM configuration for export/reuse
                 for attr in ['model', 'tokenizer', 'qg', 'qa']:
-                    if hasattr(metric, attr):
-                        setattr(metric, attr, None)
-                print(f"    🔄 Cleared model attributes for {metric.get_name()}")
+                    if not hasattr(metric, attr):
+                        continue
+                    try:
+                        import dspy
+                        if attr == 'model' and isinstance(getattr(metric, 'model', None), dspy.LM):
+                            print(f"    🔄 Skipping clearing dspy.LM for {metric.get_name()}")
+                            continue
+                    except Exception:
+                        # If type check fails, fall back to clearing
+                        pass
+                    setattr(metric, attr, None)
+                if hasattr(metric, 'model') and getattr(metric, 'model', None) is None:
+                    print(f"    🔄 Cleared model for {metric.get_name()} (not dspy.LM)")
+                print(f"    🔄 Cleared heavy attributes (preserved dspy.LM if present) for {metric.get_name()}")
         except Exception as e:
             print(f"    ⚠ Warning: Failed to unload {metric.get_name()}: {e}")
 

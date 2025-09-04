@@ -77,6 +77,7 @@ class Dataset():
         self.dataframe = dataframe
 
     def add_metric(self, metric: Metric, update_dataset: bool = True):
+        
         if isinstance(metric, MultiMetric):
             self.metrics.append(metric)
             for submetric_name in metric.get_submetric_names():

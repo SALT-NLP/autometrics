@@ -9,7 +9,7 @@ metrics, and measures their correlation with human annotations across different 
 The script follows the same patterns as run_best_static_metric.py but handles:
 - Custom score ranges per prompt
 - LLM API calls with retry logic
-- Different model backends (GPT-4o-mini, Qwen3-32B, etc.)
+- Different model backends (GPT-4o-mini, Qwen3-32B, GPT-5-mini, etc.)
 - Reference-free vs reference-based metrics based on dataset
 
 Example usage:
@@ -31,6 +31,7 @@ from collections import defaultdict
 import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
+import uuid
 
 # Add autometrics to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -162,6 +163,9 @@ def load_dataset(dataset_name: str) -> Dataset:
     elif dataset_name == "Design2Code":
         from autometrics.dataset.datasets.design2code.design2code import Design2Code
         return Design2Code()
+    elif dataset_name == "ICLR":
+        from autometrics.dataset.datasets.iclr.iclr import ICLR
+        return ICLR()
     
     raise ValueError(f"Unknown dataset: {dataset_name}")
 
@@ -185,12 +189,14 @@ def create_dataset_cache_dir(base_cache_dir: str, dataset_name: str) -> str:
         "EvalGenMedical": "evalgen_medical",
         "EvalGenProduct": "evalgen_product",
         "RealHumanEval": "real_human_eval",
-        "Design2Code": "design2code"
+        "Design2Code": "design2code",
+        "ICLR": "iclr"
     }
     
     cache_subdir = cache_mapping.get(dataset_name, dataset_name.lower())
     cache_dir = f"./.cache/{cache_subdir}"
     os.makedirs(cache_dir, exist_ok=True)
+    logging.debug(f"Created/using cache dir at {cache_dir} for dataset {dataset_name}")
     return cache_dir
 
 
@@ -240,6 +246,8 @@ class CustomLLMJudgeMetricRefFree(GeneratedRefFreeMetric):
         self.model = model
         self.task_description = task_description
         self.max_retries = max_retries
+        self.seed = kwargs.get("seed")
+        self.model_name = kwargs.get("model_name")
         
         # Create DSPy module
         self._judge_module = dspy.ChainOfThought(LLMJudgeSignatureRefFree)
@@ -257,6 +265,22 @@ class CustomLLMJudgeMetricRefFree(GeneratedRefFreeMetric):
     
     def _call_llm_with_retry(self, input_text: str, output_text: str) -> float:
         """Call LLM with retry logic and range validation."""
+        logging.debug(
+            f"[RefFree:{self.name}] Starting LLM call with prompt len={len(self.prompt)} "
+            f"input_len={len(str(input_text))} output_len={len(str(output_text))} "
+            f"score_range={self.score_range} max_retries={self.max_retries}"
+        )
+        # Inject a benign cache-busting token for GPT-5
+        axis = self.prompt
+        task_description = self.task_description
+        model_name_lower = (self.model_name or "").lower()
+        use_cache_bust = ("gpt5" in model_name_lower) or ("gpt-5" in model_name_lower) or (model_name_lower == "gpt5_mini")
+        cache_token = ""
+        if use_cache_bust:
+            cache_token = f" [cache-id:{self.seed}]" if self.seed is not None else " [cache-id]"
+            # Prefer adding to task_description to minimize effect on rubric
+            task_description = f"{task_description}\n(Ignore this line; cache identifier){cache_token}"
+        logging.debug(f"[RefFree:{self.name}] cache_bust={'ON' if use_cache_bust else 'OFF'} token='{cache_token}' model_name='{self.model_name}'")
         for attempt in range(self.max_retries):
             try:
                 # Temporarily suppress verbose logging during inference
@@ -268,10 +292,11 @@ class CustomLLMJudgeMetricRefFree(GeneratedRefFreeMetric):
                     logger_obj.setLevel(logging.ERROR)
                 
                 try:
+                    logging.debug(f"[RefFree:{self.name}] Attempt {attempt+1}/{self.max_retries} - invoking model {type(self.model).__name__}")
                     with dspy.settings.context(lm=self.model):
                         result = self._judge_module(
-                            task_description=self.task_description,
-                            axis=self.prompt,
+                            task_description=task_description,
+                            axis=axis,
                             input_text=input_text,
                             output_text=output_text,
                             score_range=self._format_score_range(),
@@ -279,8 +304,9 @@ class CustomLLMJudgeMetricRefFree(GeneratedRefFreeMetric):
                         
                         # Extract and validate score
                         score = float(result.score)
-                        score = self._validate_score(score)
-                        return score
+                        clamped = self._validate_score(score)
+                        logging.debug(f"[RefFree:{self.name}] Attempt {attempt+1} succeeded with raw score={score} clamped={clamped}")
+                        return clamped
                 finally:
                     # Restore original logging levels
                     for logger_name, level in original_levels.items():
@@ -370,6 +396,8 @@ class CustomLLMJudgeMetricRefBased(GeneratedRefBasedMetric):
         self.model = model
         self.task_description = task_description
         self.max_retries = max_retries
+        self.seed = kwargs.get("seed")
+        self.model_name = kwargs.get("model_name")
         
         # Create DSPy module
         self._judge_module = dspy.ChainOfThought(LLMJudgeSignatureRefBased)
@@ -387,6 +415,16 @@ class CustomLLMJudgeMetricRefBased(GeneratedRefBasedMetric):
     
     def _call_llm_with_retry(self, input_text: str, output_text: str, references: Optional[List[str]] = None) -> float:
         """Call LLM with retry logic and range validation."""
+        logging.debug(
+            f"[RefBased:{self.name}] Starting LLM call with prompt len={len(self.prompt)} "
+            f"input_len={len(str(input_text))} output_len={len(str(output_text))} "
+            f"ref_len={(len(references[0]) if references and len(references)>0 and references[0] is not None else 0)} "
+            f"score_range={self.score_range} max_retries={self.max_retries}"
+        )
+        # Inject a benign cache-busting token for GPT-5
+        model_name_lower = (self.model_name or "").lower()
+        use_cache_bust = ("gpt5" in model_name_lower) or ("gpt-5" in model_name_lower) or (model_name_lower == "gpt5_mini")
+        logging.debug(f"[RefBased:{self.name}] cache_bust={'ON' if use_cache_bust else 'OFF'} model_name='{self.model_name}'")
         for attempt in range(self.max_retries):
             try:
                 # Temporarily suppress verbose logging during inference
@@ -398,9 +436,14 @@ class CustomLLMJudgeMetricRefBased(GeneratedRefBasedMetric):
                     logger_obj.setLevel(logging.ERROR)
                 
                 try:
+                    logging.debug(f"[RefBased:{self.name}] Attempt {attempt+1}/{self.max_retries} - invoking model {type(self.model).__name__}")
                     with dspy.settings.context(lm=self.model):
                         # Use first reference if multiple are provided
                         reference_text = references[0] if references and len(references) > 0 else ""
+                        if use_cache_bust:
+                            cache_token = f" [cache-id:{self.seed}]" if self.seed is not None else " [cache-id]"
+                            reference_text = f"{reference_text}\n(Ignore this line; cache identifier){cache_token}"
+                            logging.debug(f"[RefBased:{self.name}] using cache token '{cache_token}'")
                         
                         result = self._judge_module(
                             task_description=self.task_description,
@@ -413,8 +456,9 @@ class CustomLLMJudgeMetricRefBased(GeneratedRefBasedMetric):
                         
                         # Extract and validate score
                         score = float(result.score)
-                        score = self._validate_score(score)
-                        return score
+                        clamped = self._validate_score(score)
+                        logging.debug(f"[RefBased:{self.name}] Attempt {attempt+1} succeeded with raw score={score} clamped={clamped}")
+                        return clamped
                 finally:
                     # Restore original logging levels
                     for logger_name, level in original_levels.items():
@@ -490,6 +534,7 @@ def parse_score_range(range_str: str) -> Tuple[float, float]:
         "(1,5]" -> (1.0, 5.0)
     """
     try:
+        logging.debug(f"Parsing score range from string: {range_str}")
         # Clean up the string - remove any brackets/parentheses and split on comma
         cleaned = range_str.strip()
         for char in ['[', ']', '(', ')']:
@@ -509,6 +554,7 @@ def parse_score_range(range_str: str) -> Tuple[float, float]:
         else:
             max_val = float(max_part)
         
+        logging.debug(f"Parsed score range: ({min_val}, {max_val})")
         return (min_val, max_val)
         
     except Exception as e:
@@ -523,10 +569,12 @@ def load_llm_judge_prompts(csv_file: str) -> Dict[str, Dict[str, Any]]:
         Dict mapping "dataset_measure" to prompt info
     """
     df = pd.read_csv(csv_file)
+    logging.debug(f"Loaded prompts CSV '{csv_file}' with shape {df.shape} and columns {list(df.columns)}")
     prompts = {}
     
     for _, row in df.iterrows():
         key = f"{row['dataset']}_{row['measure']}"
+        logging.debug(f"Processing prompt row for key={key} dataset={row['dataset']} measure={row['measure']} score_range={row['score_range']}")
         prompts[key] = {
             'dataset': row['dataset'],
             'measure': row['measure'], 
@@ -535,6 +583,12 @@ def load_llm_judge_prompts(csv_file: str) -> Dict[str, Dict[str, Any]]:
         }
     
     logging.info(f"Loaded {len(prompts)} LLM judge prompts from {csv_file}")
+    try:
+        datasets_list = sorted(set(df['dataset'].tolist()))
+        measures_list = sorted(set(df['measure'].tolist()))
+        logging.debug(f"Prompts cover datasets={datasets_list} measures={measures_list}")
+    except Exception:
+        pass
     return prompts
 
 
@@ -542,26 +596,36 @@ def create_llm_model(model_name: str, api_base: Optional[str] = None, seed: int 
     """Create LLM model instance based on model name with unique cache busting per seed."""
     
     temperature = 0.0001 * seed
+    logging.debug(f"Creating LLM model name={model_name} seed={seed} temperature={temperature} api_base={api_base}")
 
     if model_name == "gpt4o_mini":
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
             raise RuntimeError("Please export OPENAI_API_KEY before running with gpt4o_mini.")
         model = dspy.LM("openai/gpt-4o-mini", api_key=api_key, temperature=temperature)
+
+    elif model_name == "gpt5_mini":
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise RuntimeError("Please export OPENAI_API_KEY before running with gpt5mini.")
+        model = dspy.LM("openai/gpt-5-mini", api_key=api_key, temperature=temperature)
     
     elif model_name == "qwen3_32b":
         # Use provided api_base or default to localhost (for local server)
         base_url = api_base or "http://localhost:7410/v1"
+        logging.debug(f"Using base_url={base_url} for qwen3_32b")
         model = dspy.LM("litellm_proxy/Qwen/Qwen3-32B", api_base=base_url, temperature=temperature, max_tokens=4096) # Raise the max_tokens for Qwen since it's a reasoning model
     
     elif model_name == "llama3_70b":
         # Use provided api_base or default
         base_url = api_base or "http://localhost:7410/v1"
+        logging.debug(f"Using base_url={base_url} for llama3_70b")
         model = dspy.LM("litellm_proxy/meta-llama/Llama-3.3-70B-Instruct", api_base=base_url, temperature=temperature)
     
     else:
         raise ValueError(f"Unknown model: {model_name}")
 
+    logging.debug(f"Created model object of type {type(model).__name__} for {model_name}")
     return model
 
 
@@ -571,8 +635,10 @@ def determine_metric_class(dataset: Dataset) -> type:
     has_references = reference_columns is not None and len(reference_columns) > 0
     
     if has_references:
+        logging.debug(f"Dataset has references ({len(reference_columns)}). Using CustomLLMJudgeMetricRefBased")
         return CustomLLMJudgeMetricRefBased
     else:
+        logging.debug("Dataset has no references. Using CustomLLMJudgeMetricRefFree")
         return CustomLLMJudgeMetricRefFree
 
 
@@ -594,6 +660,11 @@ def run_single_metric_seed(
         # Load dataset and get test split
         dataset = load_dataset(dataset_name)
         _, _, test_dataset = dataset.load_permanent_splits()
+        try:
+            df = test_dataset.get_dataframe()
+            logging.debug(f"Loaded test split for {dataset_name} with shape {df.shape} and target columns {getattr(test_dataset, 'target_columns', 'unknown')}")
+        except Exception as e:
+            logging.debug(f"Could not introspect test split dataframe: {e}")
         
         # Run correlation experiment with ALL correlation functions at once
         experiment = CorrelationExperiment(
@@ -606,9 +677,11 @@ def run_single_metric_seed(
             seed=seed,
             should_split=False
         )
+        logging.debug(f"Initialized CorrelationExperiment with metrics={[m.name for m in [metric_instance]]} corr_funcs={list(correlation_funcs.keys())} seed={seed}")
         
         # Run experiment and extract correlations for ALL functions
         all_correlations = experiment.run(print_results=False)
+        logging.debug(f"Experiment run complete for seed={seed}. Available corr func results={list(all_correlations.keys())}")
         
         # Extract correlations and p-values for all correlation functions
         results_by_func = {}
@@ -618,6 +691,7 @@ def run_single_metric_seed(
                 raise ValueError(f"Measure {measure} not found in correlation results for {func_name}")
             
             df_corr = correlations_for_func[measure]
+            logging.debug(f"Seed {seed} - {func_name} correlation table for {measure} has shape {df_corr.shape}")
             
             # Find the correlation for our specific metric
             metric_row = df_corr[df_corr['Metric'] == metric_instance.name]
@@ -627,7 +701,7 @@ def run_single_metric_seed(
             correlation = metric_row.iloc[0]['Correlation']
             p_value = metric_row.iloc[0]['P-value']
             results_by_func[func_name] = {'correlation': correlation, 'p_value': p_value}
-        
+
         logger.debug(f"Seed {seed} results: {results_by_func}")
         return results_by_func
         
@@ -639,6 +713,7 @@ def run_single_metric_seed(
 
 def compute_statistics(values: List[float]) -> Dict[str, float]:
     """Compute statistical measures for correlation values."""
+    logging.debug(f"Computing statistics over {len(values)} values (nan filtered)")
     valid_values = [v for v in values if not pd.isna(v)]
     n = len(valid_values)
     
@@ -653,6 +728,7 @@ def compute_statistics(values: List[float]) -> Dict[str, float]:
         }
     
     mean_val = np.mean(valid_values)
+    logging.debug(f"Stats: n={n} mean={mean_val}")
     
     if n == 1:
         return {
@@ -671,7 +747,7 @@ def compute_statistics(values: List[float]) -> Dict[str, float]:
     t_value = stats.t.ppf(1 - alpha/2, df=n-1)
     margin_error = t_value * std_val / np.sqrt(n)
     
-    return {
+    result_stats = {
         'mean': mean_val,
         'std': std_val,
         'ci_lower': mean_val - margin_error,
@@ -679,13 +755,17 @@ def compute_statistics(values: List[float]) -> Dict[str, float]:
         'ci_range': margin_error,
         'num_successful_runs': n
     }
+    logging.debug(f"Stats computed: {result_stats}")
+    return result_stats
 
 
 def format_mean_ci(mean: float, ci_range: float) -> str:
     """Format mean ± CI for easy copying to papers."""
     if np.isnan(mean) or np.isnan(ci_range):
         return "N/A"
-    return f"{mean:.4f} ± {ci_range:.4f}"
+    formatted = f"{mean:.4f} ± {ci_range:.4f}"
+    logging.debug(f"Formatted mean±CI: {formatted}")
+    return formatted
 
 
 def sort_columns_for_output(df: pd.DataFrame) -> pd.DataFrame:
@@ -712,6 +792,7 @@ def sort_columns_for_output(df: pd.DataFrame) -> pd.DataFrame:
     
     correlation_columns.sort(key=extract_seed_number)
     p_value_columns.sort(key=extract_seed_number)
+    logging.debug(f"Sorting output columns: {len(correlation_columns)} corr seed cols, {len(p_value_columns)} pval seed cols")
     
     # Statistics columns
     stats_columns = [
@@ -737,7 +818,9 @@ def sort_columns_for_output(df: pd.DataFrame) -> pd.DataFrame:
         if col not in final_columns:
             final_columns.append(col)
     
-    return df[final_columns]
+    sorted_df = df[final_columns]
+    logging.debug(f"Final output columns order has {len(final_columns)} columns")
+    return sorted_df
 
 
 def save_results(results: Dict[str, Any], output_file: str, logger: logging.Logger):
@@ -747,6 +830,7 @@ def save_results(results: Dict[str, Any], output_file: str, logger: logging.Logg
         df = sort_columns_for_output(df)
         df.to_csv(output_file, index=False)
         logger.info(f"Results saved to {output_file}")
+        logging.debug(f"Saved results with shape {df.shape} to {output_file}. Columns={list(df.columns)}")
     except Exception as e:
         logger.error(f"Failed to save results to {output_file}: {e}")
         raise
@@ -757,6 +841,7 @@ def load_existing_results(output_file: str) -> Dict[str, Any]:
     if os.path.exists(output_file):
         try:
             df = pd.read_csv(output_file)
+            logging.debug(f"Loaded existing results from {output_file} with shape {df.shape}")
             return df.to_dict('records')
         except Exception as e:
             logging.warning(f"Could not read existing results file {output_file}: {e}")
@@ -783,9 +868,11 @@ def merge_with_existing_results(new_results: List[Dict], output_file: str, logge
         # Load existing results
         existing_df = pd.read_csv(output_file)
         logger.info(f"Loaded {len(existing_df)} existing results from {output_file}")
+        logging.debug(f"Existing results columns: {list(existing_df.columns)}")
         
         # Convert new results to DataFrame
         new_df = pd.DataFrame(new_results)
+        logging.debug(f"New results rows: {len(new_df)} columns: {list(new_df.columns)}")
         
         if existing_df.empty:
             logger.info("Existing file is empty, using new results")
@@ -882,6 +969,7 @@ def merge_with_existing_results(new_results: List[Dict], output_file: str, logge
         # Sort columns before returning
         merged_df = pd.DataFrame(merged_results)
         merged_df = sort_columns_for_output(merged_df)
+        logging.debug(f"Merged results final shape: {merged_df.shape}")
         
         logger.info(f"Merge complete: {len(merged_results)} total results")
         return merged_df.to_dict('records')
@@ -905,7 +993,7 @@ def main():
     parser.add_argument(
         "--model",
         default="gpt4o_mini",
-        choices=["gpt4o_mini", "qwen3_32b", "llama3_70b"],
+        choices=["gpt4o_mini", "qwen3_32b", "llama3_70b", "gpt5_mini"],
         help="LLM model to use for judging"
     )
     parser.add_argument(
@@ -1044,7 +1132,7 @@ def main():
                 task_description = dataset_instance.get_task_description() or f"Evaluate {measure} for {dataset_name} dataset"
                 
                 # Create metric name
-                metric_name = f"LLMJudge-{args.model}-{measure}"
+                base_metric_name = f"LLMJudge-{args.model}-{measure}"
                 
                 # Run correlation for each seed
                 correlations = []
@@ -1058,15 +1146,20 @@ def main():
                         # Create seed-specific model for cache busting
                         seed_model = create_llm_model(args.model, args.api_base, seed)
                         
+                        # Use a unique metric name per seed to avoid dataset-level caching
+                        metric_name_seeded = f"{base_metric_name}-seed{seed}"
+                        
                         # Create fresh metric instance for this seed
                         metric = metric_class(
-                            name=metric_name,
+                            name=metric_name_seeded,
                             prompt=prompt_text,
                             score_range=score_range,
                             model=seed_model,
                             task_description=task_description,
-                            seed=seed
+                            seed=seed,
+                            model_name=args.model
                         )
+                        logging.debug(f"Constructed metric {metric_class.__name__} for seed={seed} with name={metric_name_seeded} score_range={score_range}")
                         
                         # Run the correlation
                         corr_results = run_single_metric_seed(
@@ -1083,6 +1176,7 @@ def main():
                         correlations.append(correlation)
                         p_values.append(p_value)
                         logger.info(f"    Correlation: {correlation:.4f}, p-value: {p_value:.4f}")
+                        logging.debug(f"Seed {seed} results stored. Running totals: {len([c for c in correlations if not pd.isna(c)])} successful correlations")
                         
                     except Exception as e:
                         error_msg = f"Seed {seed}: {str(e)}"
@@ -1099,12 +1193,12 @@ def main():
                 result = {
                     'dataset': dataset_name,
                     'measure': measure,
-                    'metric': metric_name,
+                    'metric': base_metric_name,
                     'metric_class': metric_class.__name__,
                     'num_successful_runs': corr_stats['num_successful_runs'],
                     'errors': '; '.join(errors) if errors else ''
                 }
-                
+
                 # Add individual seed results for correlations
                 for i, seed in enumerate(args.seeds):
                     result[f'seed_{seed}_correlation'] = correlations[i] if i < len(correlations) else np.nan

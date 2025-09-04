@@ -5,6 +5,7 @@ from typing import List, Tuple, Optional, Dict
 import gc
 
 from autometrics.metrics.MultiMetric import MultiMetric
+import dspy
 
 
 def _unload_metric(metric) -> None:
@@ -15,8 +16,14 @@ def _unload_metric(metric) -> None:
             metric._unload_models()
         else:
             for attr in ['model', 'tokenizer', 'qg', 'qa']:
-                if hasattr(metric, attr):
-                    setattr(metric, attr, None)
+                if not hasattr(metric, attr):
+                    continue
+                # Preserve dspy.LM instances to avoid losing LLM configuration
+                if attr == 'model' and hasattr(metric, 'model'):
+                    if isinstance(getattr(metric, 'model', None), dspy.LM):
+                        print(f"[DEBUG][_unload_metric] Skipping clearing dspy.LM for {getattr(metric,'name', type(metric).__name__)}")
+                        continue
+                setattr(metric, attr, None)
     except Exception:
         pass
 
@@ -84,7 +91,12 @@ def evaluate_metric_instances(
         for _, metric in oom_queue:
             try:
                 _unload_all(successful)
-                metric.predict(dataset, update_dataset=True)
+                lm = getattr(metric, 'model', None)
+                if lm is not None:
+                    with dspy.settings.context(lm=lm):
+                        metric.predict(dataset, update_dataset=True)
+                else:
+                    metric.predict(dataset, update_dataset=True)
                 successful.append(metric)
             except Exception as e:
                 failed.append(metric)
@@ -98,7 +110,12 @@ def evaluate_metric_instances(
         for _, metric in auto_device:
             try:
                 _unload_all(successful)
-                metric.predict(dataset, update_dataset=True)
+                lm = getattr(metric, 'model', None)
+                if lm is not None:
+                    with dspy.settings.context(lm=lm):
+                        metric.predict(dataset, update_dataset=True)
+                else:
+                    metric.predict(dataset, update_dataset=True)
                 successful.append(metric)
             except Exception as e:
                 failed.append(metric)
@@ -114,7 +131,12 @@ def _evaluate_sequential(dataset, indexed_metrics: List[Tuple[int, object]], fai
     successful: List[object] = []
     for _, metric in indexed_metrics:
         try:
-            metric.predict(dataset, update_dataset=True)
+            lm = getattr(metric, 'model', None)
+            if lm is not None:
+                with dspy.settings.context(lm=lm):
+                    metric.predict(dataset, update_dataset=True)
+            else:
+                metric.predict(dataset, update_dataset=True)
             successful.append(metric)
             _unload_metric(metric)
         except Exception as e:
@@ -138,7 +160,12 @@ def _evaluate_parallel_with_fallback(
     def run_metric(metric):
         try:
             ds_copy = dataset.copy()
-            metric.predict(ds_copy, update_dataset=True)
+            lm = getattr(metric, 'model', None)
+            if lm is not None:
+                with dspy.settings.context(lm=lm):
+                    metric.predict(ds_copy, update_dataset=True)
+            else:
+                metric.predict(ds_copy, update_dataset=True)
 
             # Extract results from copy to avoid recompute on main dataset
             results_dict: Dict[str, List] = {}

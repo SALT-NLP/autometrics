@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 import dspy
 import re
+import os
 
 __all__ = ["build_llm_judge_metric_card"]
 
@@ -12,6 +13,14 @@ def generate_llm_constructor_code(model: dspy.LM) -> str:
     # Extract all kwargs if present
     if hasattr(model, "kwargs"):
         kwargs = {k: v for k, v in model.kwargs.items() if v is not None}
+        # Minimal, surgical fallback: if model_name is missing/None, prefer kwargs['model'] when available
+        try:
+            if (not model_name or model_name.lower() == 'none') and isinstance(model.kwargs, dict):
+                candidate = model.kwargs.get('model')
+                if isinstance(candidate, str) and candidate:
+                    model_name = candidate
+        except Exception:
+            pass
     
     """Generate constructor code for DSPy LLMs"""
     if "openai" in model_name.lower():

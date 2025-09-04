@@ -236,6 +236,13 @@ class Regression(Aggregator):
         def _sanitize(s: str) -> str:
             return s.replace(' ', '_').replace('-', '_')
         class_def_name = f"{_sanitize(class_base_unsalted)}_StaticRegression"
+        # Prepare simple metric card text summarizing weights and intercept
+        weights_lines = "\n".join([f"- {fname}: {float(coef):.6f}" for fname, coef in zip(feature_names, coef_arr)])
+        simple_card = (
+            "Regression aggregator over component metrics with a linear model.\n\n"
+            f"Components and weights:\n{weights_lines}\n\n"
+            f"Intercept: {float(intercept_val):.6f}"
+        )
         code = f"""# Auto-generated static regression for {self.name}
 from typing import ClassVar
 import numpy as np
@@ -250,14 +257,14 @@ INPUT_METRICS = [
 ]
 
 class {class_def_name}(GeneratedStaticRegressionAggregator):
-    \"\"\"Static regression aggregator generated from a trained Regression.\"\"\"
+    \"\"\"Regression aggregator over component metrics with a linear model.\n\nComponents and weights:\n{weights_lines}\n\nIntercept: {float(intercept_val):.6f}\"\"\"
 
-    description: ClassVar[str] = {repr(self.description)}
+    description: ClassVar[str] = {repr(simple_card)}
 
     def __init__(self):
         super().__init__(
             name={repr(salted_name)},
-            description={repr(self.description)},
+            description={repr(simple_card)},
             input_metrics=INPUT_METRICS,
             feature_names={repr(list(feature_names))},
             coefficients={repr([float(x) for x in list(coef_arr)])},
@@ -267,7 +274,7 @@ class {class_def_name}(GeneratedStaticRegressionAggregator):
         )
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(name={repr(self.name)})"
+        return f"{self.__class__.__name__}(name={{repr(self.name)}})"
 """
         return code
 

@@ -3,6 +3,7 @@ import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional, Dict, Any
 import math
+import time
 from tqdm import tqdm
 
 import dspy
@@ -381,6 +382,7 @@ class _ExampleRubricMetricMixin:
         attempt_task_desc = original_task_desc
         
         attempts_left = 2  # first try + one retry
+        rate_limit_retries_left = 3  # allow a few retries on rate limit
         # Compute effective LM for this call
         _eff_lm = self.model or dspy.settings.lm
         _ctx_kwargs = { 'temperature': temperature }
@@ -461,6 +463,40 @@ class _ExampleRubricMetricMixin:
                         longest_idx = max(range(len(demos)), key=lambda i: demo_length(demos[i]))
                         self.debug_print(f"⚠️  Dropping demo #{longest_idx} (length={demo_length(demos[longest_idx])}) and retrying...")
                         demos.pop(longest_idx)
+                        continue
+                    # Handle rate limit errors by waiting then retrying
+                    elif (
+                        'RateLimitError' in error_str
+                        or 'Rate limit' in error_str
+                        or 'rate limit' in error_str
+                        or '429' in error_str
+                        or 'Too Many Requests' in error_str
+                        or 'rate_limit_exceeded' in error_str
+                        or 'quota' in error_str
+                        or 'exceeded your current quota' in error_str
+                    ) and rate_limit_retries_left > 0:
+                        # Try to parse suggested wait time like: "Please try again in 27.875s" or "Please try again in 27875ms"
+                        wait_seconds = 30.0
+                        try:
+                            import re as _re
+                            m = _re.search(r"Please try again in\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)\b", error_str, _re.IGNORECASE)
+                            if m:
+                                _val = float(m.group(1))
+                                _unit = m.group(2).lower()
+                                wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                            else:
+                                m = _re.search(r"Retry-After\s*:?\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)?", error_str, _re.IGNORECASE)
+                                if m:
+                                    _val = float(m.group(1))
+                                    _unit = (m.group(2) or 's').lower()
+                                    wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                        except Exception:
+                            pass
+                        # Cap to maximum of 30 seconds
+                        wait_seconds = max(0.0, min(wait_seconds, 30.0))
+                        rate_limit_retries_left -= 1
+                        self.debug_print(f"⏳ Rate limit hit. Waiting {wait_seconds:.2f}s before retrying... ({3 - rate_limit_retries_left}/3)")
+                        time.sleep(wait_seconds)
                         continue
                     # Handle truncation/adapter parse failures by retrying once with a cache-bust
                     elif (

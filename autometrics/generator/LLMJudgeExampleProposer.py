@@ -2,6 +2,8 @@ from autometrics.generator.Generator import Generator
 import dspy
 from typing import Optional, Callable, List, Any
 import random
+import time
+import re
 import pandas as pd
 
 # Utilities for dataset formatting and processing
@@ -245,6 +247,45 @@ class LLMJudgeExampleProposer(Generator):
             display_table=False
         )
 
+        # Helper to run evaluate with rate-limit wait-and-retry
+        def _run_evaluate_with_rate_limit(_program):
+            retries_left = 3
+            while True:
+                try:
+                    return evaluate(_program)
+                except Exception as e:
+                    msg = str(e)
+                    if (
+                        'RateLimitError' in msg
+                        or 'Rate limit' in msg
+                        or 'rate limit' in msg
+                        or '429' in msg
+                        or 'Too Many Requests' in msg
+                        or 'rate_limit_exceeded' in msg
+                        or 'quota' in msg
+                        or 'exceeded your current quota' in msg
+                    ) and retries_left > 0:
+                        wait_seconds = 30.0
+                        try:
+                            m = re.search(r"Please try again in\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)\b", msg, re.IGNORECASE)
+                            if m:
+                                _val = float(m.group(1))
+                                _unit = m.group(2).lower()
+                                wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                            else:
+                                m = re.search(r"Retry-After\s*:?\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)?", msg, re.IGNORECASE)
+                                if m:
+                                    _val = float(m.group(1))
+                                    _unit = (m.group(2) or 's').lower()
+                                    wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                        except Exception:
+                            pass
+                        wait_seconds = max(0.0, min(wait_seconds, 30.0))
+                        retries_left -= 1
+                        time.sleep(wait_seconds)
+                        continue
+                    raise
+
         # Smart limit examples for context window constraints
         # Get model name for token estimation
         model_name = "gpt-3.5-turbo"  # Default
@@ -311,7 +352,7 @@ class LLMJudgeExampleProposer(Generator):
                     # Use the correct DSPy path we discovered
                     new_program.generate_score.predict.demos = demoset
                     
-                    score = evaluate(new_program)
+                    score = _run_evaluate_with_rate_limit(new_program)
                     
                     print(f"Attempt {i+1}/{self.attempts}: Score = {score:.4f}")
                     
@@ -329,7 +370,7 @@ class LLMJudgeExampleProposer(Generator):
                             try:
                                 new_program = program.deepcopy()
                                 new_program.generate_score.predict.demos = reduced_demoset
-                                score = evaluate(new_program)
+                                score = _run_evaluate_with_rate_limit(new_program)
                                 print(f"  Reduced attempt {i+1}: Score = {score:.4f} with {len(reduced_demoset)} examples")
                                 if score > best_score:
                                     best_score = score

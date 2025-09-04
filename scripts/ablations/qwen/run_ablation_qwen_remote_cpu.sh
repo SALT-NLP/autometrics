@@ -2,7 +2,7 @@
 
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=100G
+#SBATCH --mem=50G
 #SBATCH --gres=gpu:0
 #SBATCH --open-mode=append
 #SBATCH --partition=john-lo

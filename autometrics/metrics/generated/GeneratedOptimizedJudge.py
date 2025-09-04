@@ -3,6 +3,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional, Tuple
 import re
+import time
 
 import dspy
 
@@ -191,21 +192,55 @@ class _OptimizedJudgeMetricMixin:
                     ).score
 
         # Convert score to float, handling various string formats
-        # First attempt
-        try:
-            score = _invoke(self.task_description)
-        except Exception as e:
-            msg = str(e)
-            needs_retry = (
-                'Adapter JSONAdapter failed to parse' in msg
-                or 'ContextWindowExceededError' in msg
-                or 'response was truncated' in msg
-                or 'exceeding max_tokens' in msg
-            )
-            if not needs_retry:
-                raise
-            retry_task_desc = (self.task_description or "") + " "
-            score = _invoke(retry_task_desc)
+        # Attempt with special handling for parser/ctx and rate limit
+        rate_limit_retries_left = 3
+        while True:
+            try:
+                score = _invoke(self.task_description)
+                break
+            except Exception as e:
+                msg = str(e)
+                # Handle rate limit errors with wait-and-retry
+                if (
+                    'RateLimitError' in msg
+                    or 'Rate limit' in msg
+                    or 'rate limit' in msg
+                    or '429' in msg
+                    or 'Too Many Requests' in msg
+                    or 'rate_limit_exceeded' in msg
+                    or 'quota' in msg
+                    or 'exceeded your current quota' in msg
+                ) and rate_limit_retries_left > 0:
+                    wait_seconds = 30.0
+                    try:
+                        m = re.search(r"Please try again in\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)\b", msg, re.IGNORECASE)
+                        if m:
+                            _val = float(m.group(1))
+                            _unit = m.group(2).lower()
+                            wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                        else:
+                            m = re.search(r"Retry-After\s*:?\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)?", msg, re.IGNORECASE)
+                            if m:
+                                _val = float(m.group(1))
+                                _unit = (m.group(2) or 's').lower()
+                                wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                    except Exception:
+                        pass
+                    wait_seconds = max(0.0, min(wait_seconds, 30.0))
+                    rate_limit_retries_left -= 1
+                    time.sleep(wait_seconds)
+                    continue
+                needs_retry = (
+                    'Adapter JSONAdapter failed to parse' in msg
+                    or 'ContextWindowExceededError' in msg
+                    or 'response was truncated' in msg
+                    or 'exceeding max_tokens' in msg
+                )
+                if not needs_retry:
+                    raise
+                retry_task_desc = (self.task_description or "") + " "
+                score = _invoke(retry_task_desc)
+                break
 
         # Normalize score
         try:

@@ -2,6 +2,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional
 import re
+import time
 
 import dspy
 
@@ -59,10 +60,6 @@ class _LLMJudgeMetricMixin:
         self.axis = axis
         self.task_description = task_description or "None"
         self.model = model
-        try:
-            print(f"[LLMJudge.__init__] name={name} axis={axis} model_type={type(model)} model.model={getattr(model,'model',None)} model.kwargs={getattr(model,'kwargs',None)}")
-        except Exception:
-            pass
         # Capture reconstructable model constructor code for later export, before any cleanup
         try:
             from autometrics.metrics.generated.utils.utils import generate_llm_constructor_code as _gen_llm_code
@@ -166,24 +163,56 @@ class _LLMJudgeMetricMixin:
                         lm=self.model,
                     ).score
 
-        # First attempt
-        try:
-            score = _invoke(self.task_description)
-            return float(score)
-        except Exception as e:
-            msg = str(e)
-            needs_retry = (
-                'Adapter JSONAdapter failed to parse' in msg
-                or 'ContextWindowExceededError' in msg
-                or 'response was truncated' in msg
-                or "exceeding max_tokens" in msg
-            )
-            if not needs_retry:
-                raise
-            # Retry once with a cheap cache-bust: append a space to task_description
-            retry_task_desc = (self.task_description or "") + " "
-            score = _invoke(retry_task_desc)
-            return float(score)
+        # Attempts with special handling for parser/ctx and rate limit
+        rate_limit_retries_left = 3
+        while True:
+            try:
+                score = _invoke(self.task_description)
+                return float(score)
+            except Exception as e:
+                msg = str(e)
+                # Handle rate limit errors with wait-and-retry
+                if (
+                    'RateLimitError' in msg
+                    or 'Rate limit' in msg
+                    or 'rate limit' in msg
+                    or '429' in msg
+                    or 'Too Many Requests' in msg
+                    or 'rate_limit_exceeded' in msg
+                    or 'quota' in msg
+                    or 'exceeded your current quota' in msg
+                ) and rate_limit_retries_left > 0:
+                    wait_seconds = 30.0
+                    try:
+                        m = re.search(r"Please try again in\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)\b", msg, re.IGNORECASE)
+                        if m:
+                            _val = float(m.group(1))
+                            _unit = m.group(2).lower()
+                            wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                        else:
+                            m = re.search(r"Retry-After\s*:?\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)?", msg, re.IGNORECASE)
+                            if m:
+                                _val = float(m.group(1))
+                                _unit = (m.group(2) or 's').lower()
+                                wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                    except Exception:
+                        pass
+                    wait_seconds = max(0.0, min(wait_seconds, 30.0))
+                    rate_limit_retries_left -= 1
+                    time.sleep(wait_seconds)
+                    continue
+                # Handle parser/context/truncation errors with one cache-busted retry
+                needs_retry = (
+                    'Adapter JSONAdapter failed to parse' in msg
+                    or 'ContextWindowExceededError' in msg
+                    or 'response was truncated' in msg
+                    or 'exceeding max_tokens' in msg
+                )
+                if not needs_retry:
+                    raise
+                retry_task_desc = (self.task_description or '') + ' '
+                score = _invoke(retry_task_desc)
+                return float(score)
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         del kwargs  # pragma: no cover

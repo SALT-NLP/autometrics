@@ -166,9 +166,15 @@ echo "[Orchestrator] ✅ Server ready at ${API_BASE}"
 kill ${TAIL_PID} 2>/dev/null || true
 
 # Prepare downstream job submissions
-if [ -z "${DATASET_NAME:-}" ]; then echo "❌ DATASET_NAME required"; kill ${SERVER_PID} || true; exit 1; fi
-if [ -z "${TARGET_MEASURE:-}" ]; then echo "❌ TARGET_MEASURE required"; kill ${SERVER_PID} || true; exit 1; fi
+# Allow ALL mode to submit multiple datasets in one orchestrator
 SEEDS=${SEEDS:-"42"}
+ALL_MODE=false
+if [ "${DATASET_NAME:-}" = "ALL" ] || [ "${ALL_DATASETS:-false}" = "true" ]; then
+  ALL_MODE=true
+else
+  if [ -z "${DATASET_NAME:-}" ]; then echo "❌ DATASET_NAME required (or set DATASET_NAME=ALL)"; kill ${SERVER_PID} || true; exit 1; fi
+  if [ -z "${TARGET_MEASURE:-}" ]; then echo "❌ TARGET_MEASURE required (or set DATASET_NAME=ALL)"; kill ${SERVER_PID} || true; exit 1; fi
+fi
 
 # Ensure downstream jobs have some API key (Qwen server ignores it)
 DOWNSTREAM_OPENAI_API_KEY=${OPENAI_API_KEY:-"None"}
@@ -183,6 +189,28 @@ submit_one() {
   local no_cards="$1"; shift
   local force_reidx="$1"; shift
   local resized="$1"; shift
+
+  # Pre-submit existence check to avoid queue spam
+  local abla_tag="${mb_mode}"
+  if [ -n "${k_val}" ]; then abla_tag="${abla_tag}_k${k_val}"; fi
+  if [ -n "${n_val}" ]; then abla_tag="${abla_tag}_n${n_val}"; fi
+  if [ "${no_cards}" = "true" ]; then abla_tag="${abla_tag}_desc"; fi
+
+  local base_dir
+  if [ "${resized}" = "true" ]; then
+    base_dir="${OUTPUT_ROOT}/${DATASET_NAME}_${TARGET_MEASURE}_resized"
+  else
+    base_dir="${OUTPUT_ROOT}/${DATASET_NAME}_${TARGET_MEASURE}"
+  fi
+  local out_dir="${base_dir}/${abla_tag}"
+
+  local metric_to_check="${DONE_CHECK_METRIC:-pearson}"
+  local log_file="${out_dir}/log_${seed}.json"
+  local score_file="${out_dir}/score_${metric_to_check}_${seed}.txt"
+  if [ -f "${log_file}" ] && [ -f "${score_file}" ]; then
+    echo "[Orchestrator] ✅ Already done: ${DATASET_NAME}/${TARGET_MEASURE}/${abla_tag} seed=${seed} (${metric_to_check})"
+    return 0
+  fi
 
   local envs="ALL,DATASET_NAME=${DATASET_NAME},TARGET_MEASURE=${TARGET_MEASURE},SEED=${seed},MODEL_NAME=${MODEL_PATH},QWEN_API_BASE=${API_BASE},OPENAI_API_KEY=${DOWNSTREAM_OPENAI_API_KEY},METRICBANK_MODE=${mb_mode},OUTPUT_ROOT=${OUTPUT_ROOT}"
   if [ -n "${k_val}" ]; then envs=",${envs},K=${k_val}"; fi
@@ -211,27 +239,82 @@ submit_one() {
 
 JOBS=()
 
-resized=${RESIZED:-"false"}
+# Dataset iteration logic
+should_skip_dataset() {
+  local name="$1"
+  # If ONLY_DATASETS is set, skip any not in the list
+  if [ -n "${ONLY_DATASETS:-}" ]; then
+    for d in ${ONLY_DATASETS}; do
+      if [ "$d" = "$name" ]; then return 1; fi
+    done
+    return 0
+  fi
+  # If DISABLE_DATASETS is set, skip those in the list
+  if [ -n "${DISABLE_DATASETS:-}" ]; then
+    for d in ${DISABLE_DATASETS}; do
+      if [ "$d" = "$name" ]; then return 0; fi
+    done
+  fi
+  return 1
+}
 
-if [ "${FULL_SUITE:-false}" = "true" ]; then
-  for s in ${SEEDS}; do
-    for k in 30 20 10 5; do
-      submit_one "$s" "full" "$k" "" "false" "false" "${resized}"; done
-    for n in 20 10 5 3 1; do
-      submit_one "$s" "full" "30" "$n" "false" "false" "${resized}"; done
-    submit_one "$s" "full" "20" "" "true" "true" "${resized}";
-    submit_one "$s" "generated_only" "" "" "false" "true" "${resized}";
-    submit_one "$s" "existing_only" "" "" "false" "true" "${resized}";
+if [ "$ALL_MODE" = true ]; then
+  # Whitespace-separated list of dataset specs: name:measure:resized_flag
+  DATASET_SPECS_LIST=${DATASET_SPECS:-"CoGymTravelOutcome:outcomeRating:true EvalGenProduct:grade:true RealHumanEval:accepted:false Primock57:time_sec:false HelpSteer2:helpfulness:false SimpEval:score:false"}
+  for spec in ${DATASET_SPECS_LIST}; do
+    IFS=':' read -r ds tm rsz <<< "${spec}"
+    if should_skip_dataset "${ds}"; then
+      echo "[Orchestrator] Skipping dataset ${ds} due to ONLY/DISABLE filters"
+      continue
+    fi
+    DATASET_NAME="${ds}"
+    TARGET_MEASURE="${tm}"
+    resized="${rsz}"
+    echo "[Orchestrator] Dataset=${DATASET_NAME} Measure=${TARGET_MEASURE} Resized=${resized}"
+
+    if [ "${FULL_SUITE:-false}" = "true" ]; then
+      for s in ${SEEDS}; do
+        for k in 30 20 10 5; do
+          submit_one "$s" "full" "$k" "" "false" "false" "${resized}"; done
+        for n in 20 10 5 3 1; do
+          submit_one "$s" "full" "30" "$n" "false" "false" "${resized}"; done
+        submit_one "$s" "full" "20" "" "true" "true" "${resized}";
+        submit_one "$s" "generated_only" "" "" "false" "true" "${resized}";
+        submit_one "$s" "existing_only" "" "" "false" "true" "${resized}";
+      done
+    else
+      mb_mode=${METRICBANK_MODE:-"full"}
+      k_val=${K:-""}
+      n_val=${N:-""}
+      no_cards=${NO_METRIC_CARDS:-"false"}
+      force_reidx=${FORCE_REINDEX:-"false"}
+      for s in ${SEEDS}; do
+        submit_one "$s" "$mb_mode" "$k_val" "$n_val" "$no_cards" "$force_reidx" "${resized}"
+      done
+    fi
   done
 else
-  mb_mode=${METRICBANK_MODE:-"full"}
-  k_val=${K:-""}
-  n_val=${N:-""}
-  no_cards=${NO_METRIC_CARDS:-"false"}
-  force_reidx=${FORCE_REINDEX:-"false"}
-  for s in ${SEEDS}; do
-    submit_one "$s" "$mb_mode" "$k_val" "$n_val" "$no_cards" "$force_reidx" "${resized}"
-  done
+  resized=${RESIZED:-"false"}
+  if [ "${FULL_SUITE:-false}" = "true" ]; then
+    for s in ${SEEDS}; do
+      for k in 30 20 10 5; do
+        submit_one "$s" "full" "$k" "" "false" "false" "${resized}"; done
+      for n in 20 10 5 3 1; do
+        submit_one "$s" "full" "30" "$n" "false" "false" "${resized}"; done
+      submit_one "$s" "full" "20" "" "true" "true" "${resized}";
+      submit_one "$s" "generated_only" "" "" "false" "true" "${resized}";
+      submit_one "$s" "existing_only" "" "" "false" "true" "${resized}";
+    done
+  else
+    mb_mode=${METRICBANK_MODE:-"full"}
+    k_val=${K:-""}
+    n_val=${N:-""}
+    no_cards=${NO_METRIC_CARDS:-"false"}
+    force_reidx=${FORCE_REINDEX:-"false"}
+    for s in ${SEEDS}; do
+      submit_one "$s" "$mb_mode" "$k_val" "$n_val" "$no_cards" "$force_reidx" "${resized}"
+    done
+  fi
 fi
 
 echo "[Orchestrator] Server will remain running. Cancel this job to shut it down (scancel ${SLURM_JOB_ID})."

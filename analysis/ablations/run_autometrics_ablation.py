@@ -302,6 +302,14 @@ def run_ablation(
     if regression_metric is None:
         raise ValueError("No regression metric generated")
 
+    # Export the static regression Python file to output directory
+    try:
+        export_path = os.path.join(output_dir, f"StaticRegression_{dataset_name}_{target_name}_seed{seed}.py")
+        regression_metric.export_python(export_path, inline_generated_metrics=True, name_salt=None)
+        print(f"💾 Saved static regression to {export_path} ({os.path.getsize(export_path)} bytes)")
+    except Exception as _exp_e:
+        print(f"⚠️ Failed to export static regression: {_exp_e}")
+
     print("📈 Evaluating on validation split…")
     val_scores, val_p_values = evaluate_on_validation(regression_metric, val_dataset, target_name)
 

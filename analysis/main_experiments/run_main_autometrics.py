@@ -318,6 +318,14 @@ def run_autometrics_experiment(
         if regression_metric is None:
             raise ValueError("No regression metric generated")
         
+        # Export the static regression Python file to output directory
+        try:
+            export_path = os.path.join(output_dir, f"StaticRegression_{dataset_name}_{target_name}_seed{seed}.py")
+            regression_metric.export_python(export_path, inline_generated_metrics=True, name_salt=None)
+            print(f"💾 Saved static regression to {export_path} ({os.path.getsize(export_path)} bytes)")
+        except Exception as _exp_e:
+            print(f"⚠️ Failed to export static regression: {_exp_e}")
+        
         # Evaluate on test set
         print(f"📈 Evaluating regression metric on test set...")
         # Ensure constituent top metrics are computed on the test split before regression prediction

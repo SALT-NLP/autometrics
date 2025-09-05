@@ -11,6 +11,7 @@ from autometrics.metrics.generated.utils.metric_card import generate_further_rea
 from autometrics.metrics.generated.utils.metric_card import MetricCardBuilder
 from autometrics.metrics.generated.GeneratedRefFreeMetric import GeneratedRefFreeMetric
 from autometrics.metrics.generated.GeneratedRefBasedMetric import GeneratedRefBasedMetric
+from autometrics.metrics.Metric import MetricResult
 
 __all__ = ["GeneratedRefFreeLLMJudgeMetric", "GeneratedRefBasedLLMJudgeMetric"]
 
@@ -42,6 +43,8 @@ class _LLMJudgeMetricMixin:
     """Shared functionality for both reference-free and reference-based LLM judge metrics."""
 
     DEFAULT_MAX_WORKERS = 32
+    # These judges use DSPy ChainOfThought and can provide reasoning
+    has_feedback = True
 
     def __init__(
         self,
@@ -130,19 +133,18 @@ class _LLMJudgeMetricMixin:
         
         return lines
 
-    def _call_llm(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
+    def _call_llm(self, input_text: str, output_text: str, references: Optional[str] = None) -> MetricResult:
         input_text = str(input_text) if input_text is not None else ""
         output_text = str(output_text) if output_text is not None else ""
         if references is not None:
             if isinstance(references, list):
                 references = [str(ref) if ref is not None else "" for ref in references]
-                # Use first reference if multiple are provided
                 reference_text = references[0] if references else ""
             else:
                 reference_text = str(references)
         else:
             reference_text = None
-            
+
         def _invoke(task_desc: str):
             with dspy.settings.context(lm=self.model):
                 if self.is_reference_based and reference_text is not None:
@@ -153,7 +155,7 @@ class _LLMJudgeMetricMixin:
                         reference_text=reference_text,
                         output_text=output_text,
                         lm=self.model,
-                    ).score
+                    )
                 else:
                     return self._judge_module(
                         task_description=task_desc,
@@ -161,58 +163,51 @@ class _LLMJudgeMetricMixin:
                         input_text=input_text,
                         output_text=output_text,
                         lm=self.model,
-                    ).score
+                    )
 
-        # Attempts with special handling for parser/ctx and rate limit
         rate_limit_retries_left = 3
         while True:
             try:
-                score = _invoke(self.task_description)
-                return float(score)
+                pred = _invoke(self.task_description)
+                try:
+                    score_val = float(pred.score)
+                except Exception:
+                    try:
+                        score_val = float(str(pred.score).strip())
+                    except Exception:
+                        score_val = 0.0
+                feedback = getattr(pred, 'reasoning', '')
+                return MetricResult(score=score_val, feedback=feedback)
             except Exception as e:
                 msg = str(e)
-                # Handle rate limit errors with wait-and-retry
                 if (
-                    'RateLimitError' in msg
-                    or 'Rate limit' in msg
-                    or 'rate limit' in msg
-                    or '429' in msg
-                    or 'Too Many Requests' in msg
-                    or 'rate_limit_exceeded' in msg
-                    or 'quota' in msg
+                    'RateLimitError' in msg or 'Rate limit' in msg or 'rate limit' in msg or '429' in msg
+                    or 'Too Many Requests' in msg or 'rate_limit_exceeded' in msg or 'quota' in msg
                     or 'exceeded your current quota' in msg
                 ) and rate_limit_retries_left > 0:
                     wait_seconds = 30.0
                     try:
                         m = re.search(r"Please try again in\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)\b", msg, re.IGNORECASE)
                         if m:
-                            _val = float(m.group(1))
-                            _unit = m.group(2).lower()
-                            wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                            _val = float(m.group(1)); _unit = m.group(2).lower(); wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
                         else:
                             m = re.search(r"Retry-After\s*:?\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)?", msg, re.IGNORECASE)
                             if m:
-                                _val = float(m.group(1))
-                                _unit = (m.group(2) or 's').lower()
-                                wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                                _val = float(m.group(1)); _unit = (m.group(2) or 's').lower(); wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
                     except Exception:
                         pass
                     wait_seconds = max(0.0, min(wait_seconds, 30.0))
                     rate_limit_retries_left -= 1
                     time.sleep(wait_seconds)
                     continue
-                # Handle parser/context/truncation errors with one cache-busted retry
-                needs_retry = (
-                    'Adapter JSONAdapter failed to parse' in msg
-                    or 'ContextWindowExceededError' in msg
-                    or 'response was truncated' in msg
-                    or 'exceeding max_tokens' in msg
-                )
+                needs_retry = ('Adapter JSONAdapter failed to parse' in msg or 'ContextWindowExceededError' in msg or 'response was truncated' in msg or 'exceeding max_tokens' in msg)
                 if not needs_retry:
                     raise
                 retry_task_desc = (self.task_description or '') + ' '
-                score = _invoke(retry_task_desc)
-                return float(score)
+                pred = _invoke(retry_task_desc)
+                score_val = float(pred.score)
+                feedback = getattr(pred, 'reasoning', '')
+                return MetricResult(score=score_val, feedback=feedback)
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
         del kwargs  # pragma: no cover
@@ -222,6 +217,27 @@ class _LLMJudgeMetricMixin:
         if self.max_workers == 1:
             return [self._call_llm(i, o, r) for i, o, r in zip(inputs, outputs, references or [None] * len(outputs))]
 
+        with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
+            futures = {
+                pool.submit(self._call_llm, i, o, r): idx 
+                for idx, (i, o, r) in enumerate(zip(inputs, outputs, references or [None] * len(outputs)))
+            }
+            for fut in as_completed(futures):
+                idx = futures[fut]
+                mr = fut.result()
+                results[idx] = mr.score
+        return results
+
+    def _calculate_with_feedback_impl(self, input, output, references=None, **kwargs):
+        del kwargs  # pragma: no cover
+        return self._call_llm(input, output, references)
+
+    def _calculate_batched_with_feedback_impl(self, inputs, outputs, references=None, **kwargs):
+        del kwargs  # pragma: no cover
+        results: List[MetricResult] = [MetricResult(0.0, "")] * len(outputs)
+        # Fail-fast if workers=1
+        if self.max_workers == 1:
+            return [self._call_llm(i, o, r) for i, o, r in zip(inputs, outputs, references or [None] * len(outputs))]
         with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
             futures = {
                 pool.submit(self._call_llm, i, o, r): idx 
@@ -541,7 +557,7 @@ class GeneratedRefFreeLLMJudgeMetric(_LLMJudgeMetricMixin, GeneratedRefFreeMetri
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
         del references, kwargs  # pragma: no cover
-        return self._call_llm(input, output)
+        return self._call_llm(input, output).score
 
 
 class GeneratedRefBasedLLMJudgeMetric(_LLMJudgeMetricMixin, GeneratedRefBasedMetric):
@@ -563,4 +579,4 @@ class GeneratedRefBasedLLMJudgeMetric(_LLMJudgeMetricMixin, GeneratedRefBasedMet
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
         del kwargs  # pragma: no cover
-        return self._call_llm(input, output, references)
+        return self._call_llm(input, output, references).score

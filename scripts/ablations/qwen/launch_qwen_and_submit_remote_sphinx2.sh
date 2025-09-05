@@ -233,7 +233,7 @@ submit_one() {
     --output="logs/${job_name}_%j.out" \
     --error="logs/${job_name}_%j.err" \
     --export=${envs} \
-    scripts/ablations/qwen/run_ablation_qwen_remote_cpu.sh | awk '{print $4}')
+    scripts/ablations/qwen/run_ablation_qwen_remote_sc.sh | awk '{print $4}')
   echo "[Orchestrator] Submitted job_name=${job_name} seed=${seed} mode=${mb_mode} k=${k_val:-default} n=${n_val:-default} desc=${no_cards} reindex=${force_reidx} => job ${jid}"
 }
 

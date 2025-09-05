@@ -611,7 +611,7 @@ def make_main_table(main_aggr: Dict[str, Dict[Tuple[str, str], List[float]]], co
     # Render groups and their rows in declared order.
     for group_index, (group_name, rows) in enumerate(ABLATION_GROUPS):
         lines.append(rf"        \rowcolor[gray]{{0.85}} \multicolumn{{7}}{{l}}{{\textbf{{{group_name}}}}} \\")
-        # Compute per-column top and second-best within this section
+        # Compute per-column top and second-best within this section, with underline expanded to all visually equivalent values (rounded to 3 decimals)
         group_methods = [method_row_name for method_row_name, _ in rows]
         main_ds_pairs: List[Tuple[str, str]] = [
             ("SimpEval", "score"),
@@ -622,7 +622,7 @@ def make_main_table(main_aggr: Dict[str, Dict[Tuple[str, str], List[float]]], co
             ("CoGymTravel", "outcomeRating"),
         ]
 
-        # Map each column to sets of top and second-best methods (handle ties)
+        # Map each column to sets of top and visually-second-best methods (handle ties and visible equivalence)
         column_ranks: Dict[Tuple[str, str], Tuple[set, set]] = {}
         for ds_tg in main_ds_pairs:
             means_by_method: Dict[str, float] = {}
@@ -634,13 +634,21 @@ def make_main_table(main_aggr: Dict[str, Dict[Tuple[str, str], List[float]]], co
             if not means_by_method:
                 column_ranks[ds_tg] = (set(), set())
                 continue
-            unique_means_desc = sorted(set(means_by_method.values()), reverse=True)
-            top_val = unique_means_desc[0]
+            # Determine exact top set (bolding remains based on exact best means)
+            top_val = max(means_by_method.values())
             top_set = {m for m, v in means_by_method.items() if v == top_val}
-            second_set = set()
-            if len(unique_means_desc) > 1:
-                second_val = unique_means_desc[1]
-                second_set = {m for m, v in means_by_method.items() if v == second_val}
+
+            # Determine second-best by displayed mean (rounded to 3 decimals), then underline all methods visually equal to that
+            displayed_top = round(top_val, 3)
+            displayed_values_below_top = sorted(
+                {round(v, 3) for v in means_by_method.values() if round(v, 3) < displayed_top},
+                reverse=True,
+            )
+            if not displayed_values_below_top:
+                column_ranks[ds_tg] = (top_set, set())
+                continue
+            second_displayed = displayed_values_below_top[0]
+            second_set = {m for m, v in means_by_method.items() if round(v, 3) == second_displayed}
             column_ranks[ds_tg] = (top_set, second_set)
 
         for method_row_name, _ in rows:
@@ -677,6 +685,130 @@ def make_main_table(main_aggr: Dict[str, Dict[Tuple[str, str], List[float]]], co
     lines.append(footer)
     return "\n".join(lines)
 
+
+def make_main_table_ci_overlap(main_aggr: Dict[str, Dict[Tuple[str, str], List[float]]], corr_type: str, model_name: str) -> str:
+    """Variant of the main table that bolds any method whose 95% CI overlaps the best method's CI in each column. No underlines."""
+    # Prepare rows in the order of ABLATION_GROUPS
+    method_to_group: Dict[str, str] = {}
+    for group_name, rows in ABLATION_GROUPS:
+        for method_row_name, _ in rows:
+            method_to_group[method_row_name] = group_name
+
+    header = r"""\begin{table*}[h]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lccc|ccc}
+        \toprule
+        \rowcolor[gray]{0.9}
+         & \multicolumn{3}{c|}{\textbf{In-Distribution}} & \multicolumn{3}{c}{\textbf{Out-of-Distribution}} \\
+        \rowcolor[gray]{0.9}
+        Method & SimpEval & Primock57 & HelpSteer & EvalGen & RealHumanEval & CoGym \\
+        \midrule
+    """
+
+    lines: List[str] = [header]
+
+    # Convenience accessors
+    def get_values(method: str, ds_tg: Tuple[str, str]) -> List[float]:
+        return main_aggr.get(method, {}).get(ds_tg, [])
+
+    def get_mean_ci(method: str, ds_tg: Tuple[str, str]) -> Tuple[float, Optional[float]]:
+        values = get_values(method, ds_tg)
+        return compute_mean_ci(values)
+
+    main_ds_pairs: List[Tuple[str, str]] = [
+        ("SimpEval", "score"),
+        ("Primock57", "time_sec"),
+        ("HelpSteer2", "helpfulness"),
+        ("EvalGenProduct", "grade"),
+        ("RealHumanEval", "accepted"),
+        ("CoGymTravel", "outcomeRating"),
+    ]
+
+    # Render groups and their rows in declared order.
+    for group_index, (group_name, rows) in enumerate(ABLATION_GROUPS):
+        lines.append(rf"        \rowcolor[gray]{{0.85}} \multicolumn{{7}}{{l}}{{\textbf{{{group_name}}}}} \\")
+
+        group_methods = [method_row_name for method_row_name, _ in rows]
+
+        # Pre-compute the best CI interval per column (handle ties by taking the union of best intervals)
+        best_intervals: Dict[Tuple[str, str], Optional[Tuple[float, float]]] = {}
+        for ds_tg in main_ds_pairs:
+            # Compute means for group methods in this column
+            means_by_method: Dict[str, float] = {}
+            mcis_by_method: Dict[str, Tuple[float, Optional[float]]] = {}
+            for m in group_methods:
+                mean, ci = get_mean_ci(m, ds_tg)
+                mcis_by_method[m] = (mean, ci)
+                if not math.isnan(mean):
+                    means_by_method[m] = mean
+            if not means_by_method:
+                best_intervals[ds_tg] = None
+                continue
+            top_val = max(means_by_method.values())
+            top_methods = [m for m, v in means_by_method.items() if v == top_val]
+            lowers: List[float] = []
+            uppers: List[float] = []
+            for m in top_methods:
+                mean, ci = mcis_by_method[m]
+                if math.isnan(mean) or ci is None:
+                    continue
+                lowers.append(mean - ci)
+                uppers.append(mean + ci)
+            if not lowers or not uppers:
+                # If CI is None for the best (e.g., no variance), treat as a point interval
+                # Use 0.0 margin in that case
+                for m in top_methods:
+                    mean, ci = mcis_by_method[m]
+                    if not math.isnan(mean):
+                        margin = ci if ci is not None else 0.0
+                        lowers.append(mean - margin)
+                        uppers.append(mean + margin)
+                if not lowers:
+                    best_intervals[ds_tg] = None
+                    continue
+            best_intervals[ds_tg] = (min(lowers), max(uppers))
+
+        for method_row_name, _ in rows:
+            cells: List[str] = []
+
+            def style_cell(ds_tg: Tuple[str, str]) -> str:
+                best_iv = best_intervals.get(ds_tg)
+                mean, ci = get_mean_ci(method_row_name, ds_tg)
+                value_str = format_value(mean, ci)
+                if best_iv is None or math.isnan(mean):
+                    return value_str
+                margin = ci if ci is not None else 0.0
+                lower = mean - margin
+                upper = mean + margin
+                best_lower, best_upper = best_iv
+                # Overlap if intervals intersect
+                if not (upper < best_lower or lower > best_upper):
+                    return f"\\textbf{{{value_str}}}"
+                return value_str
+
+            d1 = style_cell(("SimpEval", "score"))
+            d2 = style_cell(("Primock57", "time_sec"))
+            d3 = style_cell(("HelpSteer2", "helpfulness"))
+            d4 = style_cell(("EvalGenProduct", "grade"))
+            d5 = style_cell(("RealHumanEval", "accepted"))
+            d6 = style_cell(("CoGymTravel", "outcomeRating"))
+            cells.extend([d1, d2, d3, d4, d5, d6])
+            line = f"        {method_row_name:<30} & " + " & ".join(cells) + " \\\\"
+            lines.append(line)
+        if group_index < len(ABLATION_GROUPS) - 1:
+            lines.append(r"        \midrule")
+
+    footer = rf"""
+        \bottomrule
+    \end{{tabular}}
+    }}
+    \caption{{Performance ({corr_type.title()} correlation) with 95\% confidence intervals. Cells are \textbf{{bold}} when the method's 95\% CI overlaps the best method's 95\% CI for that column. Model: {model_name}.}}
+    \label{{tab:ablations_ci_overlap_{corr_type}}}
+\end{{table*}}"""
+
+    lines.append(footer)
+    return "\n".join(lines)
 
 def make_aux_table(aux_aggr: Dict[str, Dict[Tuple[str, str], List[float]]], corr_type: str, model_name: str) -> Optional[str]:
     if not aux_aggr:
@@ -795,6 +927,12 @@ def main() -> None:
     main_tex_path = args.out_root / f"ablations_main_{args.corr_type}_{model_safe_name}.tex"
     main_tex_path.write_text(main_table_tex)
     logging.info(f"Main LaTeX table → {main_tex_path}")
+
+    # Also build CI-overlap variant of the main table
+    main_overlap_tex = make_main_table_ci_overlap(main_aggr, args.corr_type, model_display_name)
+    main_overlap_path = args.out_root / f"ablations_main_overlap_{args.corr_type}_{model_safe_name}.tex"
+    main_overlap_path.write_text(main_overlap_tex)
+    logging.info(f"Main (CI-overlap) LaTeX table → {main_overlap_path}")
 
     aux_table_tex = make_aux_table(aux_aggr, args.corr_type, model_display_name)
     if aux_table_tex:

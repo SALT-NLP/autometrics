@@ -23,7 +23,7 @@ cd /nlp/scr2/nlp/personal-rm/autometrics/scripts/ablations/qwen/
 
 SEEDS=${SEEDS:-"42 43 44 45 46"}
 FULL_SUITE=${FULL_SUITE:-"true"}
-DATASET_SPECS=${DATASET_SPECS:-"CoGymTravelOutcome:outcomeRating:true EvalGenProduct:grade:true RealHumanEval:accepted:false Primock57:time_sec:false HelpSteer2:helpfulness:false SimpEval:score:false"}
+DATASET_SPECS=${DATASET_SPECS:-"CoGymTravelOutcome:outcomeRating:true RealHumanEval:accepted:false Primock57:time_sec:false HelpSteer2:helpfulness:false SimpEval:score:false"} # EvalGenProduct:grade:true
 ONLY_DATASETS=${ONLY_DATASETS:-""}
 DISABLE_DATASETS=${DISABLE_DATASETS:-""}
 

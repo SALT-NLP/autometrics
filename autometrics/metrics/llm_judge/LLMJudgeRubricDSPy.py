@@ -36,6 +36,7 @@ class JudgeByRubric(dspy.Module):
 
 
 class LLMJudgeRubricDSPy(Metric):
+    has_feedback: bool = True
     def __init__(self, name, description, dataset, rubric, judge=None, task_description=None, judge_api_base="http://future-hgx-1:7410/v1"):
         # Initialize default judge if not provided
         if judge is None:
@@ -60,7 +61,7 @@ class LLMJudgeRubricDSPy(Metric):
         # Exclude non-affecting parameters from cache key
         self.exclude_from_cache_key('dataset', 'judge_api_base')
 
-    def _calculate_impl(self, input, output, references=None, **kwargs):
+    def _calculate_with_feedback_impl(self, input, output, references=None, **kwargs):
         if self.task_description:
             input = self.task_description + "\n\n" + input
 
@@ -71,15 +72,23 @@ class LLMJudgeRubricDSPy(Metric):
         rubric = SCORE_RUBRIC_TEMPLATE.format(**self.rubric)
         
         with dspy.context(lm=self.judge):
-            score = JudgeByRubric()(task_description=input, metric_title=self.name, metric_description=self.description, rubric=rubric, input=input, reference=reference, output=output, lm=self.judge)
+            pred = JudgeByRubric()(task_description=input, metric_title=self.name, metric_description=self.description, rubric=rubric, input=input, reference=reference, output=output, lm=self.judge)
 
         # score.score is a string containing a number (with possible extra text)
         # Convert it to an integer using regex
-        score = re.search(r'\d+', score.score)
+        score = re.search(r'\d+', pred.score)
         if score is None:
-            return 0
-        
-        return int(score.group())
+            numeric = 0
+        else:
+            numeric = int(score.group())
+
+        # Extract DSPy ChainOfThought reasoning (spec mandates .reasoning only)
+        feedback = getattr(pred, 'reasoning', '')
+        return MetricResult(score=float(numeric), feedback=feedback)
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):
+        res = self._calculate_with_feedback_impl(input, output, references, **kwargs)
+        return res.score
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, num_workers=64, **kwargs):
         """
@@ -124,13 +133,15 @@ class LLMJudgeRubricDSPy(Metric):
         inputs = df[input_column].values.tolist()
         outputs = df[output_column].values.tolist()
 
-        results = self.calculate_batched(inputs, outputs, num_workers=num_workers)
+        results_wrapped = self.calculate_batched_with_feedback(inputs, outputs, num_workers=num_workers)
 
         # If any of the results are NaN, replace them with 0
-        results = [result if result and not math.isnan(result) else 0 for result in results]
+        results = [r.score if r and not math.isnan(r.score) else 0 for r in results_wrapped]
 
         if update_dataset:
             df[self.name] = results
+            # Persist feedback column
+            df[f"{self.name}__feedback"] = [r.feedback for r in results_wrapped]
             dataset.set_dataframe(df)
 
             if self.name not in dataset.get_metric_columns():

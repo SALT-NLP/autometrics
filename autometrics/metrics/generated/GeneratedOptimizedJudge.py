@@ -17,6 +17,7 @@ from autometrics.metrics.generated.utils.dspy_inspection import (
 )
 from autometrics.metrics.generated.GeneratedRefFreeMetric import GeneratedRefFreeMetric
 from autometrics.metrics.generated.GeneratedRefBasedMetric import GeneratedRefBasedMetric
+from autometrics.metrics.Metric import MetricResult
 
 __all__ = ["GeneratedRefFreeOptimizedJudge", "GeneratedRefBasedOptimizedJudge"]
 
@@ -156,7 +157,10 @@ class _OptimizedJudgeMetricMixin:
             self._optimized_module = dspy.ChainOfThought(signature)
             print("📝 Using base signature (no optimization)")
 
-    def _call_optimized_llm(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
+    # Optimized judges use DSPy CoT; enable feedback
+    has_feedback = True
+
+    def _call_optimized_llm(self, input_text: str, output_text: str, references: Optional[str] = None) -> MetricResult:
         input_text = str(input_text) if input_text is not None else ""
         output_text = str(output_text) if output_text is not None else ""
         if references is not None:
@@ -168,7 +172,7 @@ class _OptimizedJudgeMetricMixin:
                 reference_text = str(references)
         else:
             reference_text = None
-            
+
         def _invoke(task_desc: str):
             with dspy.settings.context(lm=self.model):
                 if self.is_reference_based and reference_text is not None:
@@ -180,7 +184,7 @@ class _OptimizedJudgeMetricMixin:
                         output_text=output_text,
                         suggested_range=self.suggested_range,
                         lm=self.model,
-                    ).score
+                    )
                 else:
                     return self._optimized_module(
                         task_description=task_desc,
@@ -189,41 +193,45 @@ class _OptimizedJudgeMetricMixin:
                         output_text=output_text,
                         suggested_range=self.suggested_range,
                         lm=self.model,
-                    ).score
+                    )
 
         # Convert score to float, handling various string formats
         # Attempt with special handling for parser/ctx and rate limit
         rate_limit_retries_left = 3
         while True:
             try:
-                score = _invoke(self.task_description)
-                break
+                pred = _invoke(self.task_description)
+                # Parse score
+                score = pred.score
+                try:
+                    if isinstance(score, str):
+                        if '\n' in score:
+                            score = score.split('\n')[0]
+                        m = re.search(r'\d+\.?\d*', score.strip())
+                        score_val = float(m.group()) if m else 0.0
+                    else:
+                        score_val = float(score)
+                except Exception:
+                    score_val = 0.0
+                feedback = getattr(pred, 'reasoning', '')
+                return MetricResult(score=score_val, feedback=feedback)
             except Exception as e:
                 msg = str(e)
                 # Handle rate limit errors with wait-and-retry
                 if (
-                    'RateLimitError' in msg
-                    or 'Rate limit' in msg
-                    or 'rate limit' in msg
-                    or '429' in msg
-                    or 'Too Many Requests' in msg
-                    or 'rate_limit_exceeded' in msg
-                    or 'quota' in msg
+                    'RateLimitError' in msg or 'Rate limit' in msg or 'rate limit' in msg or '429' in msg
+                    or 'Too Many Requests' in msg or 'rate_limit_exceeded' in msg or 'quota' in msg
                     or 'exceeded your current quota' in msg
                 ) and rate_limit_retries_left > 0:
                     wait_seconds = 30.0
                     try:
                         m = re.search(r"Please try again in\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)\b", msg, re.IGNORECASE)
                         if m:
-                            _val = float(m.group(1))
-                            _unit = m.group(2).lower()
-                            wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                            _val = float(m.group(1)); _unit = m.group(2).lower(); wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
                         else:
                             m = re.search(r"Retry-After\s*:?\s*([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds|s|sec|seconds)?", msg, re.IGNORECASE)
                             if m:
-                                _val = float(m.group(1))
-                                _unit = (m.group(2) or 's').lower()
-                                wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
+                                _val = float(m.group(1)); _unit = (m.group(2) or 's').lower(); wait_seconds = _val / 1000.0 if _unit.startswith('m') else _val
                     except Exception:
                         pass
                     wait_seconds = max(0.0, min(wait_seconds, 30.0))
@@ -258,8 +266,12 @@ class _OptimizedJudgeMetricMixin:
         except (ValueError, TypeError):
             score = 0.0
 
-        return score
+        feedback = getattr(pred, 'reasoning', '')
+        return MetricResult(score=score, feedback=feedback)
 
+    def _call_optimized_llm_with_feedback(self, input_text: str, output_text: str, references: Optional[str] = None) -> MetricResult:
+        # Delegate to unified call
+        return self._call_optimized_llm(input_text, output_text, references)
         
         
 
@@ -269,8 +281,27 @@ class _OptimizedJudgeMetricMixin:
 
         # Fail-fast if workers=1
         if self.max_workers == 1:
-            return [self._call_optimized_llm(i, o, r) for i, o, r in zip(inputs, outputs, references or [None] * len(outputs))]
+            return [self._call_optimized_llm(i, o, r).score for i, o, r in zip(inputs, outputs, references or [None] * len(outputs))]
 
+        with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
+            futures = {
+                pool.submit(self._call_optimized_llm, i, o, r): idx 
+                for idx, (i, o, r) in enumerate(zip(inputs, outputs, references or [None] * len(outputs)))
+            }
+            for fut in as_completed(futures):
+                idx = futures[fut]
+                results[idx] = fut.result().score
+        return results
+
+    def _calculate_with_feedback_impl(self, input, output, references=None, **kwargs):  # noqa: D401
+        del kwargs  # pragma: no cover
+        return self._call_optimized_llm(input, output, references)
+
+    def _calculate_batched_with_feedback_impl(self, inputs, outputs, references=None, **kwargs):
+        del kwargs  # pragma: no cover
+        results: List[MetricResult] = [MetricResult(0.0, "")] * len(outputs)
+        if self.max_workers == 1:
+            return [self._call_optimized_llm(i, o, r) for i, o, r in zip(inputs, outputs, references or [None] * len(outputs))]
         with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
             futures = {
                 pool.submit(self._call_optimized_llm, i, o, r): idx 
@@ -774,7 +805,7 @@ class GeneratedRefFreeOptimizedJudge(_OptimizedJudgeMetricMixin, GeneratedRefFre
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
         del references, kwargs  # pragma: no cover
-        return self._call_optimized_llm(input, output)
+        return self._call_optimized_llm(input, output).score
 
 
 class GeneratedRefBasedOptimizedJudge(_OptimizedJudgeMetricMixin, GeneratedRefBasedMetric):
@@ -802,4 +833,4 @@ class GeneratedRefBasedOptimizedJudge(_OptimizedJudgeMetricMixin, GeneratedRefBa
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
         del kwargs  # pragma: no cover
-        return self._call_optimized_llm(input, output, references) 
+        return self._call_optimized_llm(input, output, references).score 

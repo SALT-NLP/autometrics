@@ -257,7 +257,6 @@ class LLMJudgeGEval(Metric):
             model_output=output,
             dspy_lm=self.model  # Use main evaluation model
         )
-        
         return score
 
     def _calculate_batched_impl(self, inputs, outputs, references=None, num_workers=64, **kwargs):
@@ -291,11 +290,8 @@ class LLMJudgeGEval(Metric):
             with tqdm(total=len(futures), desc="Processing G-Eval") as pbar:
                 for future in as_completed(futures):
                     index = futures[future]
-                    # FIXED: Let errors propagate naturally instead of catching and returning 0.0
-                    # This allows the cache to distinguish between failures and valid results
                     results[index] = future.result()
                     pbar.update(1)
-        
         return results
 
     def predict(self, dataset, update_dataset=True, num_workers=64, **kwargs):

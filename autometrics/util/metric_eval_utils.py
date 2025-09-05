@@ -94,9 +94,9 @@ def evaluate_metric_instances(
                 lm = getattr(metric, 'model', None)
                 if lm is not None:
                     with dspy.settings.context(lm=lm):
-                        metric.predict(dataset, update_dataset=True)
+                        metric.predict(dataset, update_dataset=True, with_feedback=True)
                 else:
-                    metric.predict(dataset, update_dataset=True)
+                    metric.predict(dataset, update_dataset=True, with_feedback=True)
                 successful.append(metric)
             except Exception as e:
                 failed.append(metric)
@@ -113,9 +113,9 @@ def evaluate_metric_instances(
                 lm = getattr(metric, 'model', None)
                 if lm is not None:
                     with dspy.settings.context(lm=lm):
-                        metric.predict(dataset, update_dataset=True)
+                        metric.predict(dataset, update_dataset=True, with_feedback=True)
                 else:
-                    metric.predict(dataset, update_dataset=True)
+                    metric.predict(dataset, update_dataset=True, with_feedback=True)
                 successful.append(metric)
             except Exception as e:
                 failed.append(metric)
@@ -163,9 +163,9 @@ def _evaluate_parallel_with_fallback(
             lm = getattr(metric, 'model', None)
             if lm is not None:
                 with dspy.settings.context(lm=lm):
-                    metric.predict(ds_copy, update_dataset=True)
+                    metric.predict(ds_copy, update_dataset=True, with_feedback=True)
             else:
-                metric.predict(ds_copy, update_dataset=True)
+                metric.predict(ds_copy, update_dataset=True, with_feedback=True)
 
             # Extract results from copy to avoid recompute on main dataset
             results_dict: Dict[str, List] = {}

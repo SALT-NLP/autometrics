@@ -29,7 +29,7 @@ class ReferenceFreeMetric(Metric):
 
         return result
 
-    def predict(self, dataset, update_dataset=True, **kwargs):
+    def predict(self, dataset, update_dataset=True, with_feedback: bool = True, **kwargs):
         """
         Calculate the metric for the dataset
         """
@@ -45,11 +45,18 @@ class ReferenceFreeMetric(Metric):
         inputs = df[input_column].values.tolist()
         outputs = df[output_column].values.tolist()
 
-        results = self.calculate_batched(inputs, outputs)
+        if with_feedback and getattr(self, 'has_feedback', False):
+            results_wrapped = self.calculate_batched_with_feedback(inputs, outputs)
+            results = [r.score for r in results_wrapped]
+            feedback_vals = [r.feedback for r in results_wrapped]
+        else:
+            results = self.calculate_batched(inputs, outputs)
 
         if update_dataset:
             # Use assign to create a new DataFrame column without chained assignment issues
             df = df.assign(**{self.name: results})
+            if with_feedback and getattr(self, 'has_feedback', False):
+                df = df.assign(**{f"{self.name}__feedback": feedback_vals})
             dataset.set_dataframe(df)
 
             if self.name not in dataset.get_metric_columns():

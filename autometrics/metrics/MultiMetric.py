@@ -1,4 +1,5 @@
 from autometrics.metrics.Metric import Metric
+from autometrics.metrics.Metric import MetricResult
 
 class MultiMetric(Metric):
     """
@@ -132,7 +133,23 @@ class MultiMetric(Metric):
 
         return results_by_submetric
 
-    def predict(self, dataset, update_dataset=True, **kwargs):
+    def calculate_batched_with_feedback(self, inputs, outputs, references=None, **kwargs):
+        """
+        Batched variant returning feedback for each submetric per example.
+        Shape: List[List[MetricResult]] => [submetric][example].
+        """
+        # Compute using subclass batch with-feedback if available
+        if hasattr(self, '_calculate_batched_with_feedback_impl'):
+            return self._calculate_batched_with_feedback_impl(inputs, outputs, references, **kwargs)
+
+        # Default: reuse score-only path and wrap
+        results_by_submetric = self.calculate_batched(inputs, outputs, references, **kwargs)
+        wrapped = []
+        for sub_list in results_by_submetric:
+            wrapped.append([MetricResult(float(v), "") for v in sub_list])
+        return wrapped
+
+    def predict(self, dataset, update_dataset=True, with_feedback: bool = True, **kwargs):
         """
         Calculate the metric for the dataset
         """
@@ -172,13 +189,27 @@ class MultiMetric(Metric):
             if reference_columns:
                 references = df[reference_columns].values.tolist()
             
-            results = self.calculate_batched(inputs, outputs, references, **kwargs)
+            if with_feedback and getattr(self, 'has_feedback', False):
+                results_wrapped = self.calculate_batched_with_feedback(inputs, outputs, references, **kwargs)
+                # Unwrap scores and gather feedback
+                results = []
+                feedback_cols = {}
+                for i, submetric_name in enumerate(self.submetric_names):
+                    scores_i = [mr.score for mr in results_wrapped[i]]
+                    if update_dataset and getattr(self, 'has_feedback', False):
+                        feedback_cols[f"{submetric_name}__feedback"] = [mr.feedback for mr in results_wrapped[i]]
+                    results.append(scores_i)
+            else:
+                results = self.calculate_batched(inputs, outputs, references, **kwargs)
             
             if update_dataset:
                 for i, submetric_name in enumerate(self.submetric_names):
                     df[submetric_name] = results[i]
                     if submetric_name not in dataset.get_metric_columns():
                         dataset.get_metric_columns().append(submetric_name)
+                if with_feedback and getattr(self, 'has_feedback', False):
+                    for col, vals in (feedback_cols if 'feedback_cols' in locals() else {}).items():
+                        df[col] = vals
                 
                 dataset.set_dataframe(df)
             

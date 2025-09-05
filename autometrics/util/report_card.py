@@ -592,7 +592,15 @@ def collect_metric_docs(metric_classes: List[Any]) -> Dict[str, str]:
     return docs
 
 
-def build_examples_table(eval_dataset: Any, feature_names: List[str], target_measure: str, include_regression: bool = True, max_rows: Optional[int] = None) -> str:
+def build_examples_table(
+    eval_dataset: Any,
+    feature_names: List[str],
+    target_measure: str,
+    include_regression: bool = True,
+    max_rows: Optional[int] = None,
+    aggregator_feedback_cols: Optional[List[str]] = None,
+    include_per_metric_feedback: bool = False,
+) -> str:
     df = eval_dataset.get_dataframe()
     # Select columns safely
     cols = [eval_dataset.get_input_column(), eval_dataset.get_output_column()]
@@ -606,6 +614,17 @@ def build_examples_table(eval_dataset: Any, feature_names: List[str], target_mea
     if include_regression:
         reg_cols = [c for c in df.columns if c.lower().startswith('autometrics_regression_')]
         cols.extend(reg_cols)
+    # Add aggregated regression feedback columns by default (if provided and present)
+    if aggregator_feedback_cols:
+        for c in aggregator_feedback_cols:
+            if c in df.columns and c not in cols:
+                cols.append(c)
+    # Optionally include per-metric feedback columns (off by default to reduce clutter)
+    if include_per_metric_feedback:
+        for base in feature_names:
+            fb = f"{base}__feedback"
+            if fb in df.columns and fb not in cols:
+                cols.append(fb)
     sub = df[cols]
     if max_rows is not None:
         sub = sub.head(max_rows)
@@ -616,7 +635,14 @@ def build_examples_table(eval_dataset: Any, feature_names: List[str], target_mea
     else:
         sub.insert(0, 'ID', range(1, len(sub) + 1))
     # Render Bootstrap-styled table and wrap in a scrollable container
+    # Render multiline feedback nicely: convert newlines to <br/> for any feedback columns
     try:
+        fb_cols = [c for c in sub.columns if isinstance(c, str) and c.endswith('__feedback')]
+        for c in fb_cols:
+            try:
+                sub[c] = sub[c].apply(lambda v: (v if isinstance(v, str) else '').replace('\n', '<br/>'))
+            except Exception:
+                pass
         html_table = sub.to_html(index=False, escape=False, classes=['table', 'table-striped', 'table-sm', 'w-100'], table_id='examples-table')
     except TypeError:
         # Fallback for older pandas without table_id support
@@ -1165,6 +1191,7 @@ def generate_metric_report_card(
     lm: Optional[dspy.LM] = None,
     output_path: Optional[str] = None,
     verbose: bool = False,
+    include_per_metric_feedback: bool = False,
 ) -> Dict[str, Any]:
     # Determine feature names and coefficients
     feature_names = extract_feature_names(regression_metric, metrics, eval_dataset or train_dataset)
@@ -1250,9 +1277,27 @@ def generate_metric_report_card(
                 if err:
                     print(f"[ReportCard] Robustness error: {err}")
 
-        # 6) Examples table
+        # 6) Examples table (default: include aggregated regression feedback only)
         try:
-            examples_html = build_examples_table(eval_dataset, feature_names, target_measure, include_regression=True, max_rows=None)
+            # Determine aggregated regression feedback column if present
+            agg_fb_cols: List[str] = []
+            try:
+                if hasattr(regression_metric, 'get_name'):
+                    reg_name = regression_metric.get_name()
+                    fb_col = f"{reg_name}__feedback"
+                    if fb_col in eval_dataset.get_dataframe().columns:
+                        agg_fb_cols.append(fb_col)
+            except Exception:
+                pass
+            examples_html = build_examples_table(
+                eval_dataset,
+                feature_names,
+                target_measure,
+                include_regression=True,
+                max_rows=None,
+                aggregator_feedback_cols=agg_fb_cols,
+                include_per_metric_feedback=include_per_metric_feedback,
+            )
         except Exception:
             examples_html = ''
         if verbose:

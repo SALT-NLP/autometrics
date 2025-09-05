@@ -129,6 +129,7 @@ class Autometrics:
         merge_generated_with_bank: bool = False,
         seed: int = 42,
         allowed_failed_metrics: int = 0,
+        full_bank_data_cutoff: Optional[int] = 100,
         # New parameters for metric priors (no defaults - users must explicitly set if desired)
         metric_priors: Optional[List[Type[Metric]]] = None,
         generated_metric_priors: Optional[Dict[str, int]] = None,
@@ -155,6 +156,14 @@ class Autometrics:
             merge_generated_with_bank: If True, save generated metrics directly to metric_bank directory
             seed: Random seed for reproducibility (defaults to 42)
             allowed_failed_metrics: Maximum number of metrics that can fail evaluation before raising an exception (default: 0)
+            full_bank_data_cutoff: If not None (default: 100), and the dataset size is
+                less than or equal to this value, and the default metric bank
+                (i.e., `metric_bank is all_metric_classes`) is in use, the pipeline
+                will ignore the full metric bank and use only generated metrics.
+                If set to None, this behavior is disabled and the metric bank is
+                used as-is regardless of dataset size. This setting does not modify
+                the value stored in `self.metric_bank`; the decision is applied at
+                runtime inside `run()` based on the current dataset size.
             metric_priors: List of metric classes that should be included upfront (e.g., [LDLRewardModel, BLEU])
                 These metrics will be evaluated on the dataset before retrieval and included in the final regression
                 No defaults - users must explicitly set if desired
@@ -178,6 +187,7 @@ class Autometrics:
         self.merge_generated_with_bank = merge_generated_with_bank
         self.seed = seed
         self.allowed_failed_metrics = allowed_failed_metrics
+        self.full_bank_data_cutoff = full_bank_data_cutoff
         
         # Store prior configurations (no defaults - users must explicitly set if desired)
         self.metric_priors = metric_priors or []
@@ -243,6 +253,23 @@ class Autometrics:
         metric_bank = self._load_metric_bank(dataset)
         
         print(f"[Autometrics] Loaded {len(metric_bank)} metrics in bank")
+
+        # 2.1 Apply small-dataset override to use generated metrics only
+        # Do not overwrite self.metric_bank; only adjust the local metric_bank for this run
+        try:
+            dataset_size = len(dataset.get_dataframe())
+        except Exception:
+            dataset_size = None
+        if (
+            self.full_bank_data_cutoff is not None
+            and dataset_size is not None
+            and dataset_size <= self.full_bank_data_cutoff
+            and (self.metric_bank is all_metric_classes)
+        ):
+            print(
+                f"[Autometrics] Dataset size ({dataset_size}) <= cutoff ({self.full_bank_data_cutoff}) with default bank — using generated metrics only"
+            )
+            metric_bank = []
 
         # 2.5 Merge generated metrics with metric bank
         print("\n[Autometrics]  Merging Generated Metrics with Metric Bank")
@@ -377,7 +404,8 @@ class Autometrics:
                 'regenerate_metrics': regenerate_metrics,
                 'generator_configs': self.metric_generation_configs,
                 'metric_priors': [m.__name__ for m in self.metric_priors] if self.metric_priors else None,
-                'generated_metric_priors': self.generated_metric_priors
+                'generated_metric_priors': self.generated_metric_priors,
+                'full_bank_data_cutoff': self.full_bank_data_cutoff,
             }
         }
 
@@ -882,7 +910,7 @@ class Autometrics:
         # Phase 2: Evaluate device_map="auto" metrics sequentially (if any)
         if len(auto_device_map_metrics) > 0:
             print(f"[Autometrics] Evaluating {len(auto_device_map_metrics)} device_map='auto' metrics sequentially...")
-            print(f"[Autometrics] device_map='auto' metrics: {[metric.get_name() for _, metric in auto_device_map_metrics]}")
+            print(f"[Autometrics] device_map='auto' metrics: [{', '.join(m.get_name() for _, m in auto_device_map_metrics)}]")
             successful_metrics.extend(self._evaluate_metrics_sequential(dataset, metric_classes, auto_device_map_metrics))
         
         return successful_metrics

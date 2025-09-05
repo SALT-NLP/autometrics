@@ -3,7 +3,8 @@ import os
 import hashlib
 from diskcache import Cache
 from functools import wraps
-from typing import Any, List, Optional, Union, Tuple, Dict
+from typing import Any, List, Optional, Union, Tuple, Dict, ClassVar
+from dataclasses import dataclass
 
 def _get_cache_dir() -> str:
     """
@@ -15,10 +16,18 @@ def _get_cache_dir() -> str:
     """
     return os.environ.get("AUTOMETRICS_CACHE_DIR", "./autometrics_cache")
 
+@dataclass
+class MetricResult:
+    score: float
+    feedback: str = ""
+
+
 class Metric(ABC):
     """
     Abstract class for metrics
     """
+    # Whether this metric produces non-empty feedback/rationale alongside scores
+    has_feedback: ClassVar[bool] = False
     # Class-level default that subclasses can override
     DEFAULT_USE_CACHE = True
     
@@ -234,6 +243,104 @@ class Metric(ABC):
         
         return results
 
+    def calculate_with_feedback(self, input, output, references=None, **kwargs):
+        """
+        Calculate the metric and return MetricResult(score, feedback).
+        Uses separate cache namespace from calculate.
+        """
+        # Skip caching if disabled
+        if not self.use_cache or self._cache is None:
+            try:
+                if hasattr(self, '_calculate_with_feedback_impl'):
+                    res = self._calculate_with_feedback_impl(input, output, references, **kwargs)
+                    if isinstance(res, MetricResult):
+                        return res
+                    # Fallback if subclass returned tuple
+                    try:
+                        score, feedback = res
+                        return MetricResult(float(score), str(feedback) if feedback is not None else "")
+                    except Exception:
+                        return MetricResult(float(res), "")
+                else:
+                    score = self._calculate_impl(input, output, references, **kwargs)
+                    return MetricResult(float(score), "")
+            except Exception as e:
+                raise e
+
+        key = self._make_cache_key('calculate_with_feedback', input, output, references, **kwargs)
+        cached = self._cache.get(key)
+        if cached is not None:
+            return cached
+
+        # Compute and cache
+        if hasattr(self, '_calculate_with_feedback_impl'):
+            res = self._calculate_with_feedback_impl(input, output, references, **kwargs)
+            if not isinstance(res, MetricResult):
+                try:
+                    score, feedback = res
+                    res = MetricResult(float(score), str(feedback) if feedback is not None else "")
+                except Exception:
+                    res = MetricResult(float(res), "")
+        else:
+            score = self._calculate_impl(input, output, references, **kwargs)
+            res = MetricResult(float(score), "")
+        self._cache[key] = res
+        return res
+
+    def calculate_batched_with_feedback(self, inputs, outputs, references=None, **kwargs):
+        """
+        Batched calculation returning a list of MetricResult, with caching per item similar to calculate_batched.
+        """
+        if not self.use_cache or self._cache is None:
+            # No cache; try subclass batch impl if provided
+            if hasattr(self, '_calculate_batched_with_feedback_impl'):
+                return self._calculate_batched_with_feedback_impl(inputs, outputs, references, **kwargs)
+            # Fallback: compute scores and wrap
+            scores = self._calculate_batched_impl(inputs, outputs, references, **kwargs)
+            return [MetricResult(float(s), "") for s in scores]
+
+        # Prepare references
+        if references is None:
+            refs = [None] * len(inputs)
+        else:
+            refs = references
+
+        results: List[Optional[MetricResult]] = []
+        missing_indices: List[int] = []
+        missing_inputs: List[Any] = []
+        missing_outputs: List[Any] = []
+        missing_refs: List[Any] = []
+
+        for i, (inp, out, ref) in enumerate(zip(inputs, outputs, refs)):
+            key = self._make_cache_key('calculate_with_feedback', inp, out, ref, **kwargs)
+            cached = self._cache.get(key)
+            if cached is not None:
+                results.append(cached)
+            else:
+                results.append(None)
+                missing_indices.append(i)
+                missing_inputs.append(inp)
+                missing_outputs.append(out)
+                missing_refs.append(ref)
+
+        if missing_indices:
+            if hasattr(self, '_calculate_batched_with_feedback_impl'):
+                batch_refs = missing_refs if any(r is not None for r in missing_refs) else None
+                missing_results = self._calculate_batched_with_feedback_impl(missing_inputs, missing_outputs, batch_refs, **kwargs)
+            else:
+                # Fallback via score-only batched + wrap
+                batch_refs = missing_refs if any(r is not None for r in missing_refs) else None
+                scores = self._calculate_batched_impl(missing_inputs, missing_outputs, batch_refs, **kwargs)
+                missing_results = [MetricResult(float(s), "") for s in scores]
+
+            for local_idx, global_idx in enumerate(missing_indices):
+                res = missing_results[local_idx]
+                key = self._make_cache_key('calculate_with_feedback', missing_inputs[local_idx], missing_outputs[local_idx], missing_refs[local_idx], **kwargs)
+                self._cache[key] = res
+                results[global_idx] = res
+
+        return results
+
     @abstractmethod
     def predict(self, dataset, update_dataset=True, **kwargs):
         """
@@ -246,7 +353,7 @@ class Metric(ABC):
     
     def get_description(self):
         return self.description
-
+    
     def __str__(self):
         return f"{self.name}: {self.description}"
     

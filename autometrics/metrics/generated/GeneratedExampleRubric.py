@@ -14,6 +14,7 @@ from autometrics.metrics.generated.utils.metric_card import generate_further_rea
 from autometrics.metrics.generated.utils.metric_card import MetricCardBuilder
 from autometrics.metrics.generated.GeneratedRefFreeMetric import GeneratedRefFreeMetric
 from autometrics.metrics.generated.GeneratedRefBasedMetric import GeneratedRefBasedMetric
+from autometrics.metrics.Metric import MetricResult
 
 __all__ = ["GeneratedRefFreeExampleRubricMetric", "GeneratedRefBasedExampleRubricMetric"]
 
@@ -60,13 +61,14 @@ class LLMAsAJudge(dspy.Module):
             ctx_kwargs['lm'] = effective_lm
 
         with dspy.settings.context(**ctx_kwargs):
-            score = self.generate_score(
+            raw = self.generate_score(
                 task_description=task_description,
                 text=text,
                 measure=measure,
                 suggested_range=suggested_range_str,
                 lm=effective_lm
-            ).score
+            )
+            score = raw.score
         
         # Convert the string score to a float by stripping any additional text and converting to a float
         if '\n' in score:
@@ -76,7 +78,7 @@ class LLMAsAJudge(dspy.Module):
         except:
             score = 0.0
 
-        return dspy.Prediction(text=text, measure=measure, score=score)
+        return dspy.Prediction(text=text, measure=measure, score=score, reasoning=getattr(raw, 'reasoning', ''))
 
 
 def grade_row(row, axis, llm, formatter, task_description, program, suggested_range=(1,5), temperature=None):
@@ -93,6 +95,8 @@ class _ExampleRubricMetricMixin:
     """Shared functionality for both reference-free and reference-based example rubric metrics."""
 
     DEFAULT_MAX_WORKERS = 32
+    # Example-based judges use DSPy ChainOfThought and can provide reasoning
+    has_feedback = True
 
     def __init__(
         self,
@@ -312,8 +316,12 @@ class _ExampleRubricMetricMixin:
         
         return ["*No examples available.*"]
 
-    def _call_llm_judge(self, input_text: str, output_text: str, references: Optional[str] = None) -> float:
-        """Call the LLM judge with the given inputs. If context length is exceeded, drop the longest demo and retry. Never modify self.program or its demos; always work on a deepcopy."""
+    def _call_llm_judge(self, input_text: str, output_text: str, references: Optional[str] = None) -> MetricResult:
+        """Call the LLM judge and return MetricResult(score, feedback).
+
+        If context length is exceeded, drop the longest demo and retry. Never
+        modify self.program or its demos; always work on a deepcopy.
+        """
         
         input_text = str(input_text) if input_text is not None else ""
         output_text = str(output_text) if output_text is not None else ""
@@ -429,7 +437,8 @@ class _ExampleRubricMetricMixin:
                                 self.debug_print("🚨 CRITICAL: Model history is empty - LLM was never called!")
                             else:
                                 self.debug_print(f"🔍 Example Judge Last call: {self.model.history[-1]}")
-                        return score_value
+                        feedback = getattr(result, 'reasoning', '')
+                        return MetricResult(score=score_value, feedback=feedback)
                     else:
                         self.debug_print(f"❌ Example Judge result has no 'score' attribute")
                         self.debug_print(f"❌ Example Judge result attributes: {[attr for attr in dir(result) if not attr.startswith('_')]}")
@@ -532,9 +541,8 @@ class _ExampleRubricMetricMixin:
         # Fail-fast if workers=1
         if self.max_workers == 1:
             for i, (inp, out, ref) in enumerate(zip(inputs, outputs, references or [None] * len(outputs))):
-                # FIXED: Let errors propagate naturally instead of catching and returning 0.0
-                # This allows the cache to distinguish between failures and valid results
-                results[i] = self._call_llm_judge(inp, out, ref)
+                # Return only the numeric score on legacy path
+                results[i] = self._call_llm_judge(inp, out, ref).score
             return results
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
@@ -547,8 +555,29 @@ class _ExampleRubricMetricMixin:
             with tqdm(total=len(futures), desc="Processing Example Rubric Evaluation") as pbar:
                 for future in as_completed(futures):
                     index = futures[future]
-                    # FIXED: Let errors propagate naturally instead of catching and returning 0.0
-                    # This allows the cache to distinguish between failures and valid results
+                    # Map MetricResult to score for legacy path
+                    results[index] = future.result().score
+                    pbar.update(1)
+        
+        return results
+
+    def _calculate_with_feedback_impl(self, input, output, references=None, **kwargs):  # noqa: D401
+        del kwargs  # pragma: no cover
+        return self._call_llm_judge(input, output, references)
+
+    def _calculate_batched_with_feedback_impl(self, inputs, outputs, references=None, **kwargs):
+        del kwargs  # pragma: no cover
+        results: List[MetricResult] = [MetricResult(0.0, "")] * len(outputs)
+        if self.max_workers == 1:
+            return [self._call_llm_judge(i, o, r) for i, o, r in zip(inputs, outputs, references or [None] * len(outputs))]
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = {
+                executor.submit(self._call_llm_judge, i, o, r): idx 
+                for idx, (i, o, r) in enumerate(zip(inputs, outputs, references or [None] * len(outputs)))
+            }
+            with tqdm(total=len(futures), desc="Processing Example Rubric Evaluation") as pbar:
+                for future in as_completed(futures):
+                    index = futures[future]
                     results[index] = future.result()
                     pbar.update(1)
         
@@ -1036,7 +1065,7 @@ class GeneratedRefFreeExampleRubricMetric(_ExampleRubricMetricMixin, GeneratedRe
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
         del references, kwargs  # pragma: no cover
-        return self._call_llm_judge(input, output)
+        return self._call_llm_judge(input, output).score
 
 
 class GeneratedRefBasedExampleRubricMetric(_ExampleRubricMetricMixin, GeneratedRefBasedMetric):
@@ -1071,4 +1100,4 @@ class GeneratedRefBasedExampleRubricMetric(_ExampleRubricMetricMixin, GeneratedR
 
     def _calculate_impl(self, input, output, references=None, **kwargs):  # noqa: D401
         del kwargs  # pragma: no cover
-        return self._call_llm_judge(input, output, references) 
+        return self._call_llm_judge(input, output, references).score 

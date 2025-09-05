@@ -94,6 +94,66 @@ class Regression(Aggregator):
             if self.name not in dataset.get_metric_columns():
                 dataset.get_metric_columns().append(self.name)
 
+            # Build aggregated feedback column from component metrics, if available
+            try:
+                # Gather coefficients with feature names in current order
+                coef = getattr(self.model, 'coef_', None)
+                feature_names = list(self.get_input_columns())
+                coef_list = None
+                if coef is not None:
+                    try:
+                        import numpy as _np
+                        coef_list = _np.array(coef, dtype=float).reshape(-1)
+                    except Exception:
+                        try:
+                            coef_list = list(coef)[0] if hasattr(coef, '__iter__') and len(coef) == 1 else list(coef)
+                        except Exception:
+                            coef_list = None
+
+                if coef_list is not None and feature_names:
+                    name_to_coef = {}
+                    for idx, fname in enumerate(feature_names[:len(coef_list)]):
+                        try:
+                            name_to_coef[str(fname)] = float(coef_list[idx])
+                        except Exception:
+                            name_to_coef[str(fname)] = 0.0
+
+                    # Order features by absolute coefficient magnitude (desc)
+                    ordered_feats = sorted(name_to_coef.items(), key=lambda p: abs(p[1]), reverse=True)
+
+                    # Collect feedback strings per row following ordered features; include all by default
+                    agg_col = f"{self.name}__feedback"
+                    feedback_cols = []
+                    for fname, _w in ordered_feats:
+                        col = f"{fname}__feedback"
+                        if col in df.columns:
+                            feedback_cols.append(col)
+
+                    if feedback_cols:
+                        # Build aggregated feedback; deduplicate consecutive identical strings per row
+                        def _combine_feedback(row):
+                            seen = set()
+                            out_lines = []
+                            for c in feedback_cols:
+                                try:
+                                    txt = row.get(c)
+                                except Exception:
+                                    txt = None
+                                if not isinstance(txt, str) or len(txt.strip()) == 0:
+                                    continue
+                                key = txt.strip()
+                                if key in seen:
+                                    continue
+                                seen.add(key)
+                                out_lines.append(key)
+                            return "\n".join(out_lines)
+
+                        df.loc[:, agg_col] = df.apply(_combine_feedback, axis=1)
+                        dataset.set_dataframe(df)
+            except Exception:
+                # Feedback aggregation is best-effort; never fail prediction
+                pass
+
         return y_pred
     
     def identify_important_metrics(self):

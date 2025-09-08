@@ -137,13 +137,19 @@ for seed in $SEEDS; do
     echo "Running seed $seed..."
     echo "=============================================================================="
     
-    # Set seed-specific cache directories
-    export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_qwen_${DATASET_NAME}_${TARGET_MEASURE}_seed${seed}"
-    export AUTOMETRICS_CACHE_DIR="/nlp/scr3/nlp/20questions/autometrics_cache/qwen_${DATASET_NAME}_${TARGET_MEASURE}_seed${seed}"
+    # Mirror ablation cache naming; default to K=30, n=5 cache
+    ABLA_TAG="${MAIN_ABLATION_TAG:-full_k30_n5}"
+    export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_ablation_qwen_${DATASET_NAME}_${TARGET_MEASURE}_${ABLA_TAG}_seed${seed}"
+    export AUTOMETRICS_CACHE_DIR="/nlp/scr3/nlp/20questions/autometrics_cache/ablation_qwen_${DATASET_NAME}_${TARGET_MEASURE}_${ABLA_TAG}_seed${seed}"
     
     echo "Using DSPY cache: $DSPY_CACHEDIR"
     echo "Using Autometrics cache: $AUTOMETRICS_CACHE_DIR"
-    
+    # Skip if already completed
+    if [ -f "$OUTPUT_DIR/score_pearson_${seed}.txt" ] && [ -f "$OUTPUT_DIR/log_${seed}.json" ]; then
+        echo "✅ Seed $seed already completed. Skipping."
+        continue
+    fi
+
     # Run the autometrics experiment
     python analysis/main_experiments/run_main_autometrics.py \
         "$DATASET_NAME" \

@@ -245,14 +245,17 @@ def run_autometrics_experiment(
             or generator_model_name_base
         )
         
-        # Convert model names to proper litellm format if using local server
+        # Convert model names to proper litellm format when using an OpenAI-compatible endpoint
         def format_model_name(model_name: str) -> str:
-            if os.environ.get("OPENAI_API_BASE") and "localhost" in os.environ.get("OPENAI_API_BASE", ""):
-                # Local server - use litellm_proxy format
-                if model_name.startswith("Qwen/"):
-                    return f"litellm_proxy/{model_name}"
-                elif "/" not in model_name and model_name.lower().startswith("qwen"):
-                    return "litellm_proxy/Qwen/Qwen3-32B"
+            api_base_env = os.environ.get("OPENAI_API_BASE", "")
+            if api_base_env:
+                # If pointing to any OpenAI-compatible endpoint (local or remote),
+                # ensure non-OpenAI providers like Qwen are routed via litellm_proxy
+                if not model_name.startswith("litellm_proxy/"):
+                    if model_name.startswith("Qwen/"):
+                        return f"litellm_proxy/{model_name}"
+                    elif "/" not in model_name and model_name.lower().startswith("qwen"):
+                        return "litellm_proxy/Qwen/Qwen3-32B"
             return model_name
         
         generator_model_id = format_model_name(generator_model_name_base)
@@ -261,8 +264,12 @@ def run_autometrics_experiment(
         # Get unique directories for this experiment
         cache_dir, generated_metrics_dir = get_unique_directories(generator_model_id, dataset_name, target_name, seed)
         
-        # Set environment variables for unique cache
-        os.environ["AUTOMETRICS_CACHE_DIR"] = cache_dir
+        # Respect pre-set AUTOMETRICS_CACHE_DIR if provided (e.g., to share cache with ablations).
+        # Otherwise, set to the unique main-run path.
+        if not os.environ.get("AUTOMETRICS_CACHE_DIR"):
+            os.environ["AUTOMETRICS_CACHE_DIR"] = cache_dir
+        else:
+            print(f"🔁 Using existing AUTOMETRICS_CACHE_DIR from environment: {os.environ['AUTOMETRICS_CACHE_DIR']}")
         
         print(f"   Generator LM: {generator_model_id}")
         print(f"   Judge LM: {judge_model_id}")

@@ -116,7 +116,13 @@ class DNAEval(ReferenceFreeMetric):
         with dspy.settings.context(lm=self.model):
             results = program.batch(dspy_inputs)
 
-        return [float(r) for r in results]
+        def safe_float(r):
+            try:
+                return float(r)
+            except Exception:
+                return 0.0
+
+        return [safe_float(r) for r in results]
 
     def _calculate_impl(self, input, output, references=None, **kwargs):
         """
@@ -126,7 +132,10 @@ class DNAEval(ReferenceFreeMetric):
 
         with dspy.settings.context(lm=self.model):
             result = program(input=input, output=output, task_description=self.task_description)
-        return float(result)
+        try:
+            return float(result)
+        except Exception:
+            return 0.0
 
 # ================================
 # Experiment Runner Utilities

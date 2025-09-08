@@ -111,11 +111,16 @@ def compute_per_document_perplexities(grouped, model, tokenizer, device, batch_s
                     if valid_length < padded_inputs.size(1):
                         target_ids[i, valid_length:] = -100
 
+                # Clamp any out-of-range token IDs to avoid device-side asserts in Embedding/CE
+                vocab_size_inputs = getattr(model.config, 'vocab_size', None)
+                if vocab_size_inputs is not None:
+                    padded_inputs = torch.clamp(padded_inputs, min=0, max=vocab_size_inputs - 1)
                 padded_inputs = padded_inputs.to(device)
                 target_ids = target_ids.to(device)
                 # Derive attention mask to avoid attending over pad tokens
                 attention_mask = (padded_inputs != tokenizer.pad_token_id).long().to(device)
-                outputs = model(padded_inputs, attention_mask=attention_mask, labels=None)
+                with torch.no_grad():
+                    outputs = model(padded_inputs, attention_mask=attention_mask, labels=None)
                 logits = outputs.logits
                 # Shift logits and targets for computing cross-entropy loss.
                 shifted_logits = logits[:, :-1, :].contiguous()
@@ -361,6 +366,7 @@ This method provides a **more realistic** evaluation of model fluency while effi
         if self.model is None:
             # Load on CPU first, then move to target device if CUDA and safe
             self.model = GPT2LMHeadModel.from_pretrained(self.model_name)
+            self.model.eval()
             if str(self.device).startswith('cuda') and torch.cuda.is_available():
                 try:
                     self.model = self.model.to(self.device)
@@ -428,7 +434,13 @@ This method provides a **more realistic** evaluation of model fluency while effi
             msg = str(e).lower()
             if 'device-side assert' in msg or 'cuda' in msg or 'cublas' in msg:
                 cpu_device = torch.device('cpu')
-                self.model = self.model.to(cpu_device)
+                # Fully unload and reload on CPU to avoid touching a corrupted CUDA context
+                try:
+                    self._unload_model()
+                except Exception:
+                    pass
+                self.device = cpu_device
+                self._load_model()
                 results = calculate_perplexities(
                     outputs,
                     self.model,

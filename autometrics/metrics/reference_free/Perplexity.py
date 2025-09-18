@@ -119,8 +119,16 @@ def compute_per_document_perplexities(grouped, model, tokenizer, device, batch_s
                 target_ids = target_ids.to(device)
                 # Derive attention mask to avoid attending over pad tokens
                 attention_mask = (padded_inputs != tokenizer.pad_token_id).long().to(device)
+                # Robust forward: try with attention_mask; on CUDA/meta issues, retry without it on same device
                 with torch.no_grad():
-                    outputs = model(padded_inputs, attention_mask=attention_mask, labels=None)
+                    try:
+                        outputs = model(padded_inputs, attention_mask=attention_mask, labels=None)
+                    except RuntimeError as e:
+                        emsg = str(e).lower()
+                        if ('cuda' in emsg or 'device-side assert' in emsg or 'meta' in emsg or 'cublas' in emsg):
+                            outputs = model(padded_inputs, attention_mask=None, labels=None)
+                        else:
+                            raise
                 logits = outputs.logits
                 # Shift logits and targets for computing cross-entropy loss.
                 shifted_logits = logits[:, :-1, :].contiguous()
@@ -363,7 +371,7 @@ This method provides a **more realistic** evaluation of model fluency while effi
 
     def _load_model(self):
         """Load model and tokenizer if not already loaded."""
-        if self.model is None:
+        if getattr(self, 'model', None) is None:
             # Load on CPU first, then move to target device if CUDA and safe
             self.model = GPT2LMHeadModel.from_pretrained(self.model_name)
             self.model.eval()
@@ -379,12 +387,15 @@ This method provides a **more realistic** evaluation of model fluency while effi
 
     def _unload_model(self):
         """Unload model and tokenizer to free resources."""
-        if self.model is not None:
-            del self.model
-            del self.tokenizer
-            torch.cuda.empty_cache()
+        # Make idempotent and resilient to partial deletion
+        if hasattr(self, 'model') or hasattr(self, 'tokenizer'):
             self.model = None
             self.tokenizer = None
+            if torch.cuda.is_available():
+                try:
+                    torch.cuda.empty_cache()
+                except Exception:
+                    pass
 
     def _calculate_impl(self, input, output, references=None, **kwargs):
         """

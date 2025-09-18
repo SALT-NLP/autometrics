@@ -59,7 +59,7 @@ export AUTOMETRICS_LM_JUDGE="Qwen/Qwen3-32B"
 # Mirror ablation cache naming; default to K=30, n=5 cache
 ABLA_TAG="${MAIN_ABLATION_TAG:-full_k30_n5}"
 export DSPY_CACHEDIR="/nlp/scr3/nlp/20questions/dspy_cache/autometrics_ablation_qwen_${DATASET_NAME}_${TARGET_MEASURE}_${ABLA_TAG}_seed${SEED}"
-export AUTOMETRICS_CACHE_DIR="/nlp/scr3/nlp/20questions/autometrics_cache/ablation_qwen_${DATASET_NAME}_${TARGET_MEASURE}_${ABLA_TAG}_seed${SEED}"
+export AUTOMETRICS_CACHE_DIR="/nlp/scr3/nlp/20questions/autometrics_cache/ablation_qwen_${DATASET_NAME}_${TARGET_MEASURE}_${ABLA_TAG}_seed${SEED}" # THIS IS ACTUALLY NOT WHERE THE CACHE SHOULD BE TO MATCH THE ABLATIONS.  KEEPING SINCE WE ALREADY RAN WITH THIS BUT THIS WAS NOT CORRECT.  IF TRYING TO MATCH THE CACHE IN THE FUTURE GO BACK TO THE ABLATIONS TO FIGURE OUT HOW TO MATCH THE CACHE.
 
 # Prefer a writable, job-local TMPDIR. Try in order: $TMP_BASE, repo-local on scr2, $HOME, then /tmp
 choose_tmp_base() {

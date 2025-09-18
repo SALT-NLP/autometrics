@@ -296,18 +296,37 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
             messages, tokenize=False, add_generation_prompt=False
         )
         
-        # Decide where to place inputs: for device-mapped models, keep inputs on CPU
-        # so accelerate can shard/move as needed per-module. Otherwise, place on model device.
+        # Decide where to place inputs. If the model is sharded across multiple devices
+        # or includes CPU offload, keep inputs on CPU and let accelerate handle routing.
+        # If the model is fully on a single CUDA device, move inputs to that device to
+        # avoid index-select device mismatches inside custom modules.
         model_device = get_model_device(self.model, fallback_device=self.device)
-        keep_on_cpu = hasattr(self.model, 'hf_device_map') and getattr(self.model, 'hf_device_map') is not None
+        hf_device_map = getattr(self.model, 'hf_device_map', None)
+        keep_on_cpu = False
+        exec_device = model_device
+        if isinstance(hf_device_map, dict):
+            unique_devices = set(hf_device_map.values())
+            if len(unique_devices) == 1:
+                only_device = next(iter(unique_devices))
+                if isinstance(only_device, str) and only_device.startswith("cuda"):
+                    exec_device = torch.device(only_device)
+                    keep_on_cpu = False
+                elif only_device == "cpu":
+                    keep_on_cpu = True
+                else:
+                    keep_on_cpu = True
+            else:
+                # Mixed devices → keep inputs on CPU
+                keep_on_cpu = True
+        elif hf_device_map is not None:
+            # Unknown map type → conservative default: keep on CPU
+            keep_on_cpu = True
+
         # Tokenize
         input_ids = self.tokenizer.encode(conv_str, return_tensors="pt")
-        if keep_on_cpu:
-            # leave on CPU intentionally
-            pass
-        else:
-            input_ids = ensure_tensor_on_device(input_ids, model_device)
-        # Build attention_mask on CPU (valid for both CPU and model-sharded execution)
+        if not keep_on_cpu:
+            input_ids = ensure_tensor_on_device(input_ids, exec_device)
+        # Attention mask on same device as input_ids
         attention_mask = torch.ones_like(input_ids, dtype=torch.long)
         
         # Single forward pass (do NOT pass position_ids; let the model create them on the correct device)
@@ -318,6 +337,31 @@ where $l_i$ are the logits at the token position corresponding to $<\!extra_0\!>
             if ("same device" in msg or "different devices" in msg or "cuda:" in msg) and hasattr(self.model, 'hf_device_map') and getattr(self.model, 'hf_device_map') is not None:
                 # Attempt to redispatch with stricter no-split and retry once
                 self._redispatch_sharded_model()
+                # Re-evaluate placement policy after redispatch
+                model_device = get_model_device(self.model, fallback_device=self.device)
+                hf_device_map = getattr(self.model, 'hf_device_map', None)
+                keep_on_cpu = False
+                exec_device = model_device
+                if isinstance(hf_device_map, dict):
+                    unique_devices = set(hf_device_map.values())
+                    if len(unique_devices) == 1:
+                        only_device = next(iter(unique_devices))
+                        if isinstance(only_device, str) and only_device.startswith("cuda"):
+                            exec_device = torch.device(only_device)
+                            keep_on_cpu = False
+                        elif only_device == "cpu":
+                            keep_on_cpu = True
+                        else:
+                            keep_on_cpu = True
+                    else:
+                        keep_on_cpu = True
+                elif hf_device_map is not None:
+                    keep_on_cpu = True
+
+                if not keep_on_cpu:
+                    input_ids = ensure_tensor_on_device(input_ids, exec_device)
+                # Rebuild attention_mask to match input device
+                attention_mask = torch.ones_like(input_ids, dtype=torch.long)
                 outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, use_cache=False)
             else:
                 raise

@@ -188,6 +188,22 @@ The model is trained using human-annotated quality scores from simplification co
             
             try:
                 self.model = _LENS_SALSA_Model(ckpt_path)
+            except RuntimeError as e:
+                # Handle CUDA assert during checkpoint load by retrying on CPU
+                if "device-side assert" in str(e) or "CUDA error" in str(e):
+                    import os
+                    old_cuda_visible = os.environ.get("CUDA_VISIBLE_DEVICES", None)
+                    try:
+                        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+                        self.model = _LENS_SALSA_Model(ckpt_path)
+                    finally:
+                        # Restore original CUDA visibility
+                        if old_cuda_visible is None:
+                            os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+                        else:
+                            os.environ["CUDA_VISIBLE_DEVICES"] = old_cuda_visible
+                else:
+                    raise e
             except NotImplementedError as e:
                 # Handle meta tensor issue
                 if "Cannot copy out of meta tensor" in str(e):
@@ -270,6 +286,51 @@ The model is trained using human-annotated quality scores from simplification co
 
             if enc is not None and hasattr(enc, "pad_tensor"):
                 enc.pad_tensor = MethodType(_safe_pad_tensor, enc)
+
+            # ------------------------------------------------------------------
+            # Monkey-patch UnifiedMetric.compute_loss to be device-agnostic.
+            # Upstream calls .cuda() inside compute_loss, which crashes on CPU
+            # or when Lightning has placed the module on a different device.
+            # We override it to move tensors to the prediction/logit device
+            # and align loss weights accordingly.
+            # ------------------------------------------------------------------
+
+            def _safe_compute_loss(this, prediction, target):
+                import torch  # local import to keep module namespace clean
+
+                sentence_loss = this.sentloss(prediction.scores, target.scores)
+                if this.word_level:
+                    sentence_loss = this.sentloss(prediction.scores, target.scores)
+                    device = prediction.logits.device
+
+                    if this.continuous_word_labels:
+                        pred_vec = (
+                            prediction.logits.reshape(-1, 1)
+                            .view(-1)
+                            .to(device=device, dtype=torch.float16)
+                        )
+                        tgt_vec = target.labels.view(-1).to(device=device, dtype=torch.float16)
+                    else:
+                        pred_vec = prediction.logits.reshape(-1, this.num_token_spans).to(device=device)
+                        tgt_vec = target.labels.view(-1).to(device=device, dtype=torch.long)
+
+                    # Ensure loss weights live on the same device
+                    if hasattr(this, "wordloss") and hasattr(this.wordloss, "weight") and this.wordloss.weight is not None:
+                        if this.wordloss.weight.device != device:
+                            this.wordloss.weight = this.wordloss.weight.to(device)
+
+                    word_loss = this.wordloss(pred_vec, tgt_vec) if hasattr(this, "wordloss") else 0.0
+                    return sentence_loss * (1 - this.hparams.loss_lambda) + word_loss * (this.hparams.loss_lambda)
+
+                return sentence_loss
+
+            # Bind method if model matches expected structure
+            inner_model = getattr(self.model, "model", None)
+            if inner_model is not None and hasattr(inner_model, "compute_loss"):
+                try:
+                    inner_model.compute_loss = MethodType(_safe_compute_loss, inner_model)
+                except Exception:
+                    pass
 
     def _unload_model(self):
         """Unload SALSA model to free resources."""

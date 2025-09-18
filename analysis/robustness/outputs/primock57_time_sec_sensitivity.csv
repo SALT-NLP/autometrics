@@ -1,0 +1,361 @@
+uid,strategy,metric,score,metric_logical
+2a0acd9bd535c8d1555642ff47c732d4,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.12291666666666666,LLMJudge
+2a0acd9bd535c8d1555642ff47c732d4,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.12291666666666666,LLMJudge
+2a0acd9bd535c8d1555642ff47c732d4,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.11875,LLMJudge
+2a0acd9bd535c8d1555642ff47c732d4,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.371875,LLMJudge
+2a0acd9bd535c8d1555642ff47c732d4,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.11770833333333332,LLMJudge
+2a0acd9bd535c8d1555642ff47c732d4,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.621875,LLMJudge
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.03125,LLMJudge
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.125,LLMJudge
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.14583333333333331,LLMJudge
+3206cf67635a5ffccd10a1d3189db638,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.0036458333333333343,LLMJudge
+3206cf67635a5ffccd10a1d3189db638,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.0036458333333333343,LLMJudge
+3206cf67635a5ffccd10a1d3189db638,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.06614583333333333,LLMJudge
+a9b7430ccffa4f2f9c57dc2169c8a665,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.1875,LLMJudge
+a9b7430ccffa4f2f9c57dc2169c8a665,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.0625,LLMJudge
+a9b7430ccffa4f2f9c57dc2169c8a665,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.010416666666666657,LLMJudge
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.03125,LLMJudge
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.30208333333333337,LLMJudge
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.71875,LLMJudge
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.16319444444444448,LLMJudge
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.16319444444444448,LLMJudge
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.16319444444444448,LLMJudge
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.045138888888888874,LLMJudge
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.22569444444444448,LLMJudge
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.08159722222222221,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.025000000000000022,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.15000000000000002,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.03749999999999998,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.26666666666666666,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.26249999999999996,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.2833333333333333,LLMJudge
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.16319444444444448,LLMJudge
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.4131944444444445,LLMJudge
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.10069444444444446,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.25625,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.03749999999999998,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.03749999999999998,LLMJudge
+65f0aa2af23948f27b05e2f8664780cd,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.4505208333333333,LLMJudge
+65f0aa2af23948f27b05e2f8664780cd,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.042187499999999996,LLMJudge
+65f0aa2af23948f27b05e2f8664780cd,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.3255208333333333,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.03749999999999998,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.7125,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.025000000000000022,LLMJudge
+e3c55133670bf57b312552a88b185d48,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.00625,LLMJudge
+e3c55133670bf57b312552a88b185d48,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.09375,LLMJudge
+e3c55133670bf57b312552a88b185d48,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.004166666666666667,LLMJudge
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.04513888888888889,LLMJudge
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.059027777777777776,LLMJudge
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.059027777777777776,LLMJudge
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.31145833333333334,LLMJudge
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.03125,LLMJudge
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.19791666666666666,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.2833333333333333,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.25625,LLMJudge
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.25625,LLMJudge
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.20833333333333334,LLMJudge
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.203125,LLMJudge
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.20833333333333334,LLMJudge
+8926974c96533a1af0a2a24bab42e8c9,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.15260416666666668,LLMJudge
+8926974c96533a1af0a2a24bab42e8c9,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.09010416666666667,LLMJudge
+8926974c96533a1af0a2a24bab42e8c9,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.24635416666666668,LLMJudge
+65f0aa2af23948f27b05e2f8664780cd,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.20052083333333334,LLMJudge
+65f0aa2af23948f27b05e2f8664780cd,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.24218750000000003,LLMJudge
+65f0aa2af23948f27b05e2f8664780cd,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.04427083333333333,LLMJudge
+ff3ca20062474bb3839f9ad89802fca3,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.09375,LLMJudge
+ff3ca20062474bb3839f9ad89802fca3,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.15104166666666666,LLMJudge
+ff3ca20062474bb3839f9ad89802fca3,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.03125,LLMJudge
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.03125,LLMJudge
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,0.3375,LLMJudge
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.25,LLMJudge
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.1527777777777778,LLMJudge
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.2152777777777778,LLMJudge
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.1527777777777778,LLMJudge
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.2152777777777778,LLMJudge
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.1527777777777778,LLMJudge
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.2673611111111111,LLMJudge
+8926974c96533a1af0a2a24bab42e8c9,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.15260416666666668,LLMJudge
+8926974c96533a1af0a2a24bab42e8c9,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.30885416666666665,LLMJudge
+8926974c96533a1af0a2a24bab42e8c9,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.034895833333333334,LLMJudge
+a334fc23bfa3455dc3342a79729df868,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.5,LLMJudge
+a334fc23bfa3455dc3342a79729df868,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.27083333333333337,LLMJudge
+a334fc23bfa3455dc3342a79729df868,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.0625,LLMJudge
+62cd1ffdd6296220fde591628ea23af8,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,0.15729166666666666,LLMJudge
+62cd1ffdd6296220fde591628ea23af8,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.37395833333333334,LLMJudge
+62cd1ffdd6296220fde591628ea23af8,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.06145833333333334,LLMJudge
+3206cf67635a5ffccd10a1d3189db638,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.40260416666666665,LLMJudge
+3206cf67635a5ffccd10a1d3189db638,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.6317708333333333,LLMJudge
+3206cf67635a5ffccd10a1d3189db638,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,0.0036458333333333343,LLMJudge
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LLMJudge-qwen3_32b-seed42,-0.09375,LLMJudge
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,LLMJudge-qwen3_32b-seed42,-0.71875,LLMJudge
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,LLMJudge-qwen3_32b-seed42,-0.09375,LLMJudge
+2a0acd9bd535c8d1555642ff47c732d4,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.1558441558441559,DNAEval
+2a0acd9bd535c8d1555642ff47c732d4,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.11688311688311681,DNAEval
+2a0acd9bd535c8d1555642ff47c732d4,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.2987012987012987,DNAEval
+2a0acd9bd535c8d1555642ff47c732d4,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.14285714285714268,DNAEval
+2a0acd9bd535c8d1555642ff47c732d4,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.11688311688311681,DNAEval
+2a0acd9bd535c8d1555642ff47c732d4,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.2597402597402597,DNAEval
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.11525974025974012,DNAEval
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.07629870129870125,DNAEval
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.4561688311688311,DNAEval
+3206cf67635a5ffccd10a1d3189db638,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.3522727272727272,DNAEval
+3206cf67635a5ffccd10a1d3189db638,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.04058441558441561,DNAEval
+3206cf67635a5ffccd10a1d3189db638,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.5211038961038961,DNAEval
+a9b7430ccffa4f2f9c57dc2169c8a665,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.04220779220779208,DNAEval
+a9b7430ccffa4f2f9c57dc2169c8a665,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.0162337662337661,DNAEval
+a9b7430ccffa4f2f9c57dc2169c8a665,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.10389610389610388,DNAEval
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.27110389610389596,DNAEval
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.02435064935064929,DNAEval
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.053571428571428825,DNAEval
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.16774891774891787,DNAEval
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.2326839826839828,DNAEval
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.03354978354978344,DNAEval
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.037878787878787956,DNAEval
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.07683982683982693,DNAEval
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.12878787878787878,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.0500000000000001,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.19285714285714295,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.16363636363636375,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.030519480519480557,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.14740259740259753,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.11493506493506506,DNAEval
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.06601731601731597,DNAEval
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.037878787878787956,DNAEval
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.04004329004328988,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.2512987012987014,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.24805194805194808,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.3357142857142858,DNAEval
+65f0aa2af23948f27b05e2f8664780cd,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.2987012987012988,DNAEval
+65f0aa2af23948f27b05e2f8664780cd,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.14610389610389607,DNAEval
+65f0aa2af23948f27b05e2f8664780cd,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.2597402597402597,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.09220779220779224,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.11168831168831173,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.018181818181818077,DNAEval
+e3c55133670bf57b312552a88b185d48,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.30519480519480524,DNAEval
+e3c55133670bf57b312552a88b185d48,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.2857142857142858,DNAEval
+e3c55133670bf57b312552a88b185d48,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.12337662337662347,DNAEval
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.023809523809523836,DNAEval
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.18614718614718614,DNAEval
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.28354978354978355,DNAEval
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.1266233766233767,DNAEval
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.04870129870129869,DNAEval
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.06168831168831174,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.05714285714285716,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.01753246753246762,DNAEval
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.06623376623376631,DNAEval
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.23214285714285704,DNAEval
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.12824675324675316,DNAEval
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.037337662337662225,DNAEval
+8926974c96533a1af0a2a24bab42e8c9,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.37662337662337664,DNAEval
+8926974c96533a1af0a2a24bab42e8c9,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.2597402597402597,DNAEval
+8926974c96533a1af0a2a24bab42e8c9,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.17532467532467533,DNAEval
+65f0aa2af23948f27b05e2f8664780cd,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.05194805194805191,DNAEval
+65f0aa2af23948f27b05e2f8664780cd,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.18181818181818188,DNAEval
+65f0aa2af23948f27b05e2f8664780cd,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.22402597402597402,DNAEval
+ff3ca20062474bb3839f9ad89802fca3,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.29870129870129875,DNAEval
+ff3ca20062474bb3839f9ad89802fca3,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.5714285714285714,DNAEval
+ff3ca20062474bb3839f9ad89802fca3,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.3376623376623377,DNAEval
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.47727272727272724,DNAEval
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.10064935064935071,DNAEval
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.340909090909091,DNAEval
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.10173160173160173,DNAEval
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.158008658008658,DNAEval
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.05411255411255417,DNAEval
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.21645021645021661,DNAEval
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.4047619047619048,DNAEval
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.08874458874458879,DNAEval
+8926974c96533a1af0a2a24bab42e8c9,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.07142857142857129,DNAEval
+8926974c96533a1af0a2a24bab42e8c9,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.09740259740259738,DNAEval
+8926974c96533a1af0a2a24bab42e8c9,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.03896103896103886,DNAEval
+a334fc23bfa3455dc3342a79729df868,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.29870129870129863,DNAEval
+a334fc23bfa3455dc3342a79729df868,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.21103896103896114,DNAEval
+a334fc23bfa3455dc3342a79729df868,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.16883116883116883,DNAEval
+62cd1ffdd6296220fde591628ea23af8,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,-0.006493506493506523,DNAEval
+62cd1ffdd6296220fde591628ea23af8,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,-0.025974025974025983,DNAEval
+62cd1ffdd6296220fde591628ea23af8,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.07792207792207789,DNAEval
+3206cf67635a5ffccd10a1d3189db638,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.09253246753246736,DNAEval
+3206cf67635a5ffccd10a1d3189db638,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.1834415584415584,DNAEval
+3206cf67635a5ffccd10a1d3189db638,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,0.469155844155844,DNAEval
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",DNAEval-qwen3_32b-seed42,0.07629870129870114,DNAEval
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,DNAEval-qwen3_32b-seed42,0.10227272727272718,DNAEval
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,DNAEval-qwen3_32b-seed42,-0.01461038961038963,DNAEval
+2a0acd9bd535c8d1555642ff47c732d4,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.1825779131499939,Autometrics
+2a0acd9bd535c8d1555642ff47c732d4,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.1778762413637962,Autometrics
+2a0acd9bd535c8d1555642ff47c732d4,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.23721461091335633,Autometrics
+2a0acd9bd535c8d1555642ff47c732d4,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.1973142654174,Autometrics
+2a0acd9bd535c8d1555642ff47c732d4,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.18186463897696004,Autometrics
+2a0acd9bd535c8d1555642ff47c732d4,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.18993709118306923,Autometrics
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.36007655509595593,Autometrics
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.2192070990258805,Autometrics
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.24828417519652698,Autometrics
+3206cf67635a5ffccd10a1d3189db638,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.3375179542677817,Autometrics
+3206cf67635a5ffccd10a1d3189db638,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.3125636522217001,Autometrics
+3206cf67635a5ffccd10a1d3189db638,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.3531596230716553,Autometrics
+a9b7430ccffa4f2f9c57dc2169c8a665,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.09378032614127413,Autometrics
+a9b7430ccffa4f2f9c57dc2169c8a665,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.09376290749981381,Autometrics
+a9b7430ccffa4f2f9c57dc2169c8a665,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.1117589689445026,Autometrics
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.209914382296752,Autometrics
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.13542241570546815,Autometrics
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.13541769237235304,Autometrics
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.21285123172439463,Autometrics
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.22893907756654736,Autometrics
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.2268621430276413,Autometrics
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.19168156535568703,Autometrics
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.13325618220084204,Autometrics
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.19123953648190975,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.156587450881959,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.07848824248166367,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.10702800916068209,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,0.059579650272877135,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,0.07689352910649094,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,0.05139082388597524,Autometrics
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.12252370338265081,Autometrics
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.1356036153775823,Autometrics
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.1367194158507612,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.6643663551775486,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.8210059973584719,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.7943529756701267,Autometrics
+65f0aa2af23948f27b05e2f8664780cd,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.12195600256390993,Autometrics
+65f0aa2af23948f27b05e2f8664780cd,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.11432372447711958,Autometrics
+65f0aa2af23948f27b05e2f8664780cd,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.09321242707613786,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.17853752191447717,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.1679017285278627,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.18600294245575485,Autometrics
+e3c55133670bf57b312552a88b185d48,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.1377467351503999,Autometrics
+e3c55133670bf57b312552a88b185d48,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.33196191482409,Autometrics
+e3c55133670bf57b312552a88b185d48,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.12255451833196523,Autometrics
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.25552687321254197,Autometrics
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.247763477206989,Autometrics
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.24160520240524924,Autometrics
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.16603691395035725,Autometrics
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.1600512461865623,Autometrics
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.18887527742016685,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.06893935018674302,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.021215480772459883,Autometrics
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.08221530325745999,Autometrics
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.10824338477609877,Autometrics
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.07296415429414319,Autometrics
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.08683192938717568,Autometrics
+8926974c96533a1af0a2a24bab42e8c9,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.1451370754446082,Autometrics
+8926974c96533a1af0a2a24bab42e8c9,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.10690449194341972,Autometrics
+8926974c96533a1af0a2a24bab42e8c9,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.1497483472435942,Autometrics
+65f0aa2af23948f27b05e2f8664780cd,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.12479234891182023,Autometrics
+65f0aa2af23948f27b05e2f8664780cd,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.10115637605103123,Autometrics
+65f0aa2af23948f27b05e2f8664780cd,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.09045076975098365,Autometrics
+ff3ca20062474bb3839f9ad89802fca3,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.35355636000766966,Autometrics
+ff3ca20062474bb3839f9ad89802fca3,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.3530048700143099,Autometrics
+ff3ca20062474bb3839f9ad89802fca3,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.36580446440774483,Autometrics
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.13518525396038727,Autometrics
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.23746981182598376,Autometrics
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.21344972138339086,Autometrics
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.14322438572106994,Autometrics
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.09601326485263095,Autometrics
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.13870289156838456,Autometrics
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.15401698325114216,Autometrics
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.14053327201853089,Autometrics
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.11017208533536538,Autometrics
+8926974c96533a1af0a2a24bab42e8c9,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.2832528176604227,Autometrics
+8926974c96533a1af0a2a24bab42e8c9,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.2845597914518602,Autometrics
+8926974c96533a1af0a2a24bab42e8c9,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.3000201441046252,Autometrics
+a334fc23bfa3455dc3342a79729df868,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.20260899338495783,Autometrics
+a334fc23bfa3455dc3342a79729df868,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.17872800147490844,Autometrics
+a334fc23bfa3455dc3342a79729df868,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.20894983582201013,Autometrics
+62cd1ffdd6296220fde591628ea23af8,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.0829439873156258,Autometrics
+62cd1ffdd6296220fde591628ea23af8,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.16204105172524097,Autometrics
+62cd1ffdd6296220fde591628ea23af8,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.04968187641795818,Autometrics
+3206cf67635a5ffccd10a1d3189db638,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.07751642325334812,Autometrics
+3206cf67635a5ffccd10a1d3189db638,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.057178637872391136,Autometrics
+3206cf67635a5ffccd10a1d3189db638,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.09064413412541028,Autometrics
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",Autometrics_Regression_time_sec,-0.10627865895532398,Autometrics
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,Autometrics_Regression_time_sec,-0.07845123281371355,Autometrics
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,Autometrics_Regression_time_sec,-0.09813226931574975,Autometrics
+2a0acd9bd535c8d1555642ff47c732d4,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.22658467360454115,BEST_METRIC
+2a0acd9bd535c8d1555642ff47c732d4,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.25023651844843897,BEST_METRIC
+2a0acd9bd535c8d1555642ff47c732d4,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.3978240302743614,BEST_METRIC
+2a0acd9bd535c8d1555642ff47c732d4,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.21807000946073796,BEST_METRIC
+2a0acd9bd535c8d1555642ff47c732d4,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.22563859981078527,BEST_METRIC
+2a0acd9bd535c8d1555642ff47c732d4,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.2407757805108799,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.544465468306528,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.28524124881740776,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.3051087984862819,BEST_METRIC
+3206cf67635a5ffccd10a1d3189db638,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.36613055818353835,BEST_METRIC
+3206cf67635a5ffccd10a1d3189db638,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.33112582781456956,BEST_METRIC
+3206cf67635a5ffccd10a1d3189db638,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.33964049195837276,BEST_METRIC
+a9b7430ccffa4f2f9c57dc2169c8a665,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.1466414380321665,BEST_METRIC
+a9b7430ccffa4f2f9c57dc2169c8a665,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.16177861873226113,BEST_METRIC
+a9b7430ccffa4f2f9c57dc2169c8a665,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.15137180700094605,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.19157994323557237,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.12346263008514666,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.20387890255439922,BEST_METRIC
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.293282876064333,BEST_METRIC
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.38505203405865657,BEST_METRIC
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.40681173131504256,BEST_METRIC
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.18353831598864712,BEST_METRIC
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.13623462630085148,BEST_METRIC
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.1608325449385052,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.2535477767265847,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.17407757805108798,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.2138126773888363,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,0.031220435193945156,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,0.035004730368968784,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,0.0028382213812677415,BEST_METRIC
+3669aa9b198a80a2be12cfd072637b2a,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.19110690633869443,BEST_METRIC
+3669aa9b198a80a2be12cfd072637b2a,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.16177861873226113,BEST_METRIC
+3669aa9b198a80a2be12cfd072637b2a,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.21475875118259227,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.4985808893093661,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.48912015137180703,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.4588457899716178,BEST_METRIC
+65f0aa2af23948f27b05e2f8664780cd,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.24976348155156103,BEST_METRIC
+65f0aa2af23948f27b05e2f8664780cd,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.21286660359508047,BEST_METRIC
+65f0aa2af23948f27b05e2f8664780cd,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.1778618732261117,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.22516556291390727,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.3547776726584673,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.23084200567644275,BEST_METRIC
+e3c55133670bf57b312552a88b185d48,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.1315042573320719,BEST_METRIC
+e3c55133670bf57b312552a88b185d48,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.1901608325449385,BEST_METRIC
+e3c55133670bf57b312552a88b185d48,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.12015137180700095,BEST_METRIC
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.15452538631346577,BEST_METRIC
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.17628508356985176,BEST_METRIC
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.15357931251970988,BEST_METRIC
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.13339640491958377,BEST_METRIC
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.1438032166508988,BEST_METRIC
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.20056764427625356,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.1892147587511826,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.15137180700094605,BEST_METRIC
+87ccd97c236471c1f39ade43a7bffda2,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.23178807947019864,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.1281929990539262,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.06575212866603594,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.10359508041627247,BEST_METRIC
+8926974c96533a1af0a2a24bab42e8c9,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.3533585619678335,BEST_METRIC
+8926974c96533a1af0a2a24bab42e8c9,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.25875118259224217,BEST_METRIC
+8926974c96533a1af0a2a24bab42e8c9,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.3164616840113529,BEST_METRIC
+65f0aa2af23948f27b05e2f8664780cd,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.19962157048249762,BEST_METRIC
+65f0aa2af23948f27b05e2f8664780cd,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.056764427625354774,BEST_METRIC
+65f0aa2af23948f27b05e2f8664780cd,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.11352885525070955,BEST_METRIC
+ff3ca20062474bb3839f9ad89802fca3,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.6357615894039735,BEST_METRIC
+ff3ca20062474bb3839f9ad89802fca3,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.5383159886471145,BEST_METRIC
+ff3ca20062474bb3839f9ad89802fca3,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.5449385052034059,BEST_METRIC
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.016083254493850563,BEST_METRIC
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.16556291390728478,BEST_METRIC
+7deb88a6f0a6dc7a63e6b95ae6b72d2c,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.2185430463576159,BEST_METRIC
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.16493219804478085,BEST_METRIC
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.09492273730684328,BEST_METRIC
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.07221696625670135,BEST_METRIC
+3e4716df00472cd23c669d4ac629ac57,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.2794071270892463,BEST_METRIC
+3e4716df00472cd23c669d4ac629ac57,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.25953957742037215,BEST_METRIC
+3e4716df00472cd23c669d4ac629ac57,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.1800693787448754,BEST_METRIC
+8926974c96533a1af0a2a24bab42e8c9,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.325922421948912,BEST_METRIC
+8926974c96533a1af0a2a24bab42e8c9,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.34200567644276253,BEST_METRIC
+8926974c96533a1af0a2a24bab42e8c9,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.34011352885525076,BEST_METRIC
+a334fc23bfa3455dc3342a79729df868,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.5175023651844844,BEST_METRIC
+a334fc23bfa3455dc3342a79729df868,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.48438978240302744,BEST_METRIC
+a334fc23bfa3455dc3342a79729df868,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.5581835383159887,BEST_METRIC
+62cd1ffdd6296220fde591628ea23af8,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.13245033112582782,BEST_METRIC
+62cd1ffdd6296220fde591628ea23af8,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.10312204351939452,BEST_METRIC
+62cd1ffdd6296220fde591628ea23af8,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.05298013245033112,BEST_METRIC
+3206cf67635a5ffccd10a1d3189db638,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.17123935666982024,BEST_METRIC
+3206cf67635a5ffccd10a1d3189db638,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.0586565752128666,BEST_METRIC
+3206cf67635a5ffccd10a1d3189db638,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.1750236518448439,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,"Add verbose, repetitive phrases to the transcript that do not contribute to clinical context",LevenshteinDistance_min,-0.2019867549668874,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,Introduce ambiguous or conflicting symptoms to force resolution delays,LevenshteinDistance_min,-0.09129612109744561,BEST_METRIC
+ecf022597d3cab9575117ef24fe97406,Insert irrelevant tangential details that distract from core clinical information,LevenshteinDistance_min,-0.15373699148533587,BEST_METRIC

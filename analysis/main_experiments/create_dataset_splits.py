@@ -35,6 +35,7 @@ from autometrics.dataset.datasets.cogym.cogym import (
 )
 from autometrics.dataset.datasets.airesearcher.ai_researcher import AI_Researcher
 from autometrics.dataset.datasets.iclr.iclr import ICLR
+from autometrics.dataset.datasets.taubench.taubench import TauBench, TauBenchBigger, TauBenchHighTemperature
 
 def check_test_sets_match(dataset_name: str) -> Tuple[bool, str]:
     """
@@ -393,39 +394,44 @@ def main():
     
     # Define all datasets to process
     datasets_to_process = [
-        # EvalGen datasets (use explicit subclasses to ensure unique names and correct task descriptions)
-        (EvalGenProduct, "EvalGenProduct"),
-        (EvalGenMedical, "EvalGenMedical"),
+        # # EvalGen datasets (use explicit subclasses to ensure unique names and correct task descriptions)
+        # (EvalGenProduct, "EvalGenProduct"),
+        # (EvalGenMedical, "EvalGenMedical"),
         
-        # Regular datasets (starting with smaller/simpler ones first)
-        (SimpEval, "SimpEval"),
-        (SimpDA, "SimpDA"),
-        (Primock57, "Primock57"),
-        (SummEval, "SummEval"),
+        # # Regular datasets (starting with smaller/simpler ones first)
+        # (SimpEval, "SimpEval"),
+        # (SimpDA, "SimpDA"),
+        # (Primock57, "Primock57"),
+        # (SummEval, "SummEval"),
         
-        # CoGym variants (smaller datasets)
-        (CoGymTabularOutcome, "CoGymTabularOutcome"),
-        (CoGymTabularProcess, "CoGymTabularProcess"),
-        (CoGymTravelOutcome, "CoGymTravelOutcome"),
-        (CoGymTravelProcess, "CoGymTravelProcess"),
-        (CoGymLessonOutcome, "CoGymLessonOutcome"),
-        (CoGymLessonProcess, "CoGymLessonProcess"),
+        # # CoGym variants (smaller datasets)
+        # (CoGymTabularOutcome, "CoGymTabularOutcome"),
+        # (CoGymTabularProcess, "CoGymTabularProcess"),
+        # (CoGymTravelOutcome, "CoGymTravelOutcome"),
+        # (CoGymTravelProcess, "CoGymTravelProcess"),
+        # (CoGymLessonOutcome, "CoGymLessonOutcome"),
+        # (CoGymLessonProcess, "CoGymLessonProcess"),
         
-        # Larger datasets (might be memory intensive)
-        (RealHumanEval, "RealHumanEval"),
+        # # Larger datasets (might be memory intensive)
+        # (RealHumanEval, "RealHumanEval"),
         
-        # HelpSteer datasets
-        (HelpSteer, "HelpSteer"),
-        (HelpSteer2, "HelpSteer2"),
+        # # HelpSteer datasets
+        # (HelpSteer, "HelpSteer"),
+        # (HelpSteer2, "HelpSteer2"),
         
-        # Design2Code
-        (Design2Code, "Design2Code"),
+        # # Design2Code
+        # (Design2Code, "Design2Code"),
 
-        # AI_Researcher dataset
-        (AI_Researcher, "AI_Researcher"),
+        # # AI_Researcher dataset
+        # (AI_Researcher, "AI_Researcher"),
 
-        # ICLR dataset
-        (ICLR, "ICLR"),
+        # # ICLR dataset
+        # (ICLR, "ICLR"),
+
+        # # TauBench dataset
+        # (TauBench, "TauBench"),
+        # (TauBenchBigger, "TauBenchBigger"),
+        (TauBenchHighTemperature, "TauBenchHighTemperature"),
     ]
     
     # Process all datasets

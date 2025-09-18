@@ -1,0 +1,316 @@
+uid,strategy,metric,score,metric_logical
+be87541879d8b12ea79e161867a9445c,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+be87541879d8b12ea79e161867a9445c,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+be87541879d8b12ea79e161867a9445c,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+eb6915eedae301fed322493444be9c96,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+eb6915eedae301fed322493444be9c96,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+eb6915eedae301fed322493444be9c96,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+2ebc960777fb053e311af3d795a3fde3,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+2ebc960777fb053e311af3d795a3fde3,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+2ebc960777fb053e311af3d795a3fde3,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+b9da6aa86067b6d3fa39d3ca25058485,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+b9da6aa86067b6d3fa39d3ca25058485,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+b9da6aa86067b6d3fa39d3ca25058485,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+32cfa398933760a88bc534fb0fab8f8b,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+32cfa398933760a88bc534fb0fab8f8b,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+32cfa398933760a88bc534fb0fab8f8b,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1e9ec4e99f59e7f3a33c66024f466fa0,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1e9ec4e99f59e7f3a33c66024f466fa0,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1e9ec4e99f59e7f3a33c66024f466fa0,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+282bb21d514ff2e20a2798587a07bec2,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+282bb21d514ff2e20a2798587a07bec2,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+282bb21d514ff2e20a2798587a07bec2,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+b60a58b1dd1e8d1439d5a8fa46e97eb1,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+31779ba135934ed036644deb47eb1e54,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+31779ba135934ed036644deb47eb1e54,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+31779ba135934ed036644deb47eb1e54,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+beb1f228968a44d4ea347e2c5a5d2495,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+beb1f228968a44d4ea347e2c5a5d2495,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+beb1f228968a44d4ea347e2c5a5d2495,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+d216512df4831937d9540458a18f8541,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+d216512df4831937d9540458a18f8541,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+d216512df4831937d9540458a18f8541,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+321db07e5841c8f3f9626b1fac356167,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+321db07e5841c8f3f9626b1fac356167,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+321db07e5841c8f3f9626b1fac356167,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+04744fe491aa8cd58dbe92d5afdcb120,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+04744fe491aa8cd58dbe92d5afdcb120,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+04744fe491aa8cd58dbe92d5afdcb120,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+3b15d01774ca62983e5985d80f64ee71,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+3b15d01774ca62983e5985d80f64ee71,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+3b15d01774ca62983e5985d80f64ee71,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+ca54dfebdb5e70386ad964ce57ebe769,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+ca54dfebdb5e70386ad964ce57ebe769,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+ca54dfebdb5e70386ad964ce57ebe769,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+4da4cbef228eaac0d9614b73a802ca4f,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+4da4cbef228eaac0d9614b73a802ca4f,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+4da4cbef228eaac0d9614b73a802ca4f,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+be87541879d8b12ea79e161867a9445c,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+be87541879d8b12ea79e161867a9445c,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+be87541879d8b12ea79e161867a9445c,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+eb6915eedae301fed322493444be9c96,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+eb6915eedae301fed322493444be9c96,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+eb6915eedae301fed322493444be9c96,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+2ebc960777fb053e311af3d795a3fde3,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+2ebc960777fb053e311af3d795a3fde3,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+2ebc960777fb053e311af3d795a3fde3,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+b9da6aa86067b6d3fa39d3ca25058485,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+b9da6aa86067b6d3fa39d3ca25058485,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+b9da6aa86067b6d3fa39d3ca25058485,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+32cfa398933760a88bc534fb0fab8f8b,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+32cfa398933760a88bc534fb0fab8f8b,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+32cfa398933760a88bc534fb0fab8f8b,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1e9ec4e99f59e7f3a33c66024f466fa0,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1e9ec4e99f59e7f3a33c66024f466fa0,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1e9ec4e99f59e7f3a33c66024f466fa0,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+282bb21d514ff2e20a2798587a07bec2,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+282bb21d514ff2e20a2798587a07bec2,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+282bb21d514ff2e20a2798587a07bec2,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+b60a58b1dd1e8d1439d5a8fa46e97eb1,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+31779ba135934ed036644deb47eb1e54,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+31779ba135934ed036644deb47eb1e54,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+31779ba135934ed036644deb47eb1e54,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+beb1f228968a44d4ea347e2c5a5d2495,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+beb1f228968a44d4ea347e2c5a5d2495,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+beb1f228968a44d4ea347e2c5a5d2495,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+d216512df4831937d9540458a18f8541,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+d216512df4831937d9540458a18f8541,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+d216512df4831937d9540458a18f8541,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+321db07e5841c8f3f9626b1fac356167,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+321db07e5841c8f3f9626b1fac356167,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+321db07e5841c8f3f9626b1fac356167,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+04744fe491aa8cd58dbe92d5afdcb120,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+04744fe491aa8cd58dbe92d5afdcb120,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+04744fe491aa8cd58dbe92d5afdcb120,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+3b15d01774ca62983e5985d80f64ee71,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+3b15d01774ca62983e5985d80f64ee71,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+3b15d01774ca62983e5985d80f64ee71,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+ca54dfebdb5e70386ad964ce57ebe769,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+ca54dfebdb5e70386ad964ce57ebe769,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+ca54dfebdb5e70386ad964ce57ebe769,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+4da4cbef228eaac0d9614b73a802ca4f,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+4da4cbef228eaac0d9614b73a802ca4f,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+4da4cbef228eaac0d9614b73a802ca4f,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+be87541879d8b12ea79e161867a9445c,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+be87541879d8b12ea79e161867a9445c,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+be87541879d8b12ea79e161867a9445c,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,0.0,Autometrics
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,0.0,Autometrics
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,0.0,Autometrics
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+eb6915eedae301fed322493444be9c96,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+eb6915eedae301fed322493444be9c96,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+eb6915eedae301fed322493444be9c96,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+2ebc960777fb053e311af3d795a3fde3,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+2ebc960777fb053e311af3d795a3fde3,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,0.0,Autometrics
+2ebc960777fb053e311af3d795a3fde3,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,0.0,Autometrics
+b9da6aa86067b6d3fa39d3ca25058485,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+b9da6aa86067b6d3fa39d3ca25058485,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+b9da6aa86067b6d3fa39d3ca25058485,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+32cfa398933760a88bc534fb0fab8f8b,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+32cfa398933760a88bc534fb0fab8f8b,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+32cfa398933760a88bc534fb0fab8f8b,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+1e9ec4e99f59e7f3a33c66024f466fa0,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+1e9ec4e99f59e7f3a33c66024f466fa0,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+1e9ec4e99f59e7f3a33c66024f466fa0,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+282bb21d514ff2e20a2798587a07bec2,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+282bb21d514ff2e20a2798587a07bec2,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+282bb21d514ff2e20a2798587a07bec2,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,0.0,Autometrics
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,0.0,Autometrics
+b60a58b1dd1e8d1439d5a8fa46e97eb1,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,0.0,Autometrics
+31779ba135934ed036644deb47eb1e54,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+31779ba135934ed036644deb47eb1e54,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+31779ba135934ed036644deb47eb1e54,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+beb1f228968a44d4ea347e2c5a5d2495,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+beb1f228968a44d4ea347e2c5a5d2495,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+beb1f228968a44d4ea347e2c5a5d2495,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+d216512df4831937d9540458a18f8541,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+d216512df4831937d9540458a18f8541,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+d216512df4831937d9540458a18f8541,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+321db07e5841c8f3f9626b1fac356167,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,0.0,Autometrics
+321db07e5841c8f3f9626b1fac356167,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,0.0,Autometrics
+321db07e5841c8f3f9626b1fac356167,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+04744fe491aa8cd58dbe92d5afdcb120,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+04744fe491aa8cd58dbe92d5afdcb120,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+04744fe491aa8cd58dbe92d5afdcb120,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+3b15d01774ca62983e5985d80f64ee71,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+3b15d01774ca62983e5985d80f64ee71,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+3b15d01774ca62983e5985d80f64ee71,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+ca54dfebdb5e70386ad964ce57ebe769,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+ca54dfebdb5e70386ad964ce57ebe769,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+ca54dfebdb5e70386ad964ce57ebe769,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+4da4cbef228eaac0d9614b73a802ca4f,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+4da4cbef228eaac0d9614b73a802ca4f,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+4da4cbef228eaac0d9614b73a802ca4f,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,1.0,Autometrics
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,Autometrics_Regression_outcomeRating,0.0,Autometrics
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,Autometrics_Regression_outcomeRating,1.0,Autometrics
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",Autometrics_Regression_outcomeRating,0.0,Autometrics
+be87541879d8b12ea79e161867a9445c,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+be87541879d8b12ea79e161867a9445c,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+be87541879d8b12ea79e161867a9445c,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,0.0,MetaMetrics
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,0.0,MetaMetrics
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,0.0,MetaMetrics
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+eb6915eedae301fed322493444be9c96,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,0.0,MetaMetrics
+eb6915eedae301fed322493444be9c96,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,0.0,MetaMetrics
+eb6915eedae301fed322493444be9c96,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,0.0,MetaMetrics
+2ebc960777fb053e311af3d795a3fde3,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+2ebc960777fb053e311af3d795a3fde3,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,0.0,MetaMetrics
+2ebc960777fb053e311af3d795a3fde3,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,0.0,MetaMetrics
+b9da6aa86067b6d3fa39d3ca25058485,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+b9da6aa86067b6d3fa39d3ca25058485,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+b9da6aa86067b6d3fa39d3ca25058485,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+32cfa398933760a88bc534fb0fab8f8b,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+32cfa398933760a88bc534fb0fab8f8b,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+32cfa398933760a88bc534fb0fab8f8b,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+1e9ec4e99f59e7f3a33c66024f466fa0,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+1e9ec4e99f59e7f3a33c66024f466fa0,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+1e9ec4e99f59e7f3a33c66024f466fa0,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+282bb21d514ff2e20a2798587a07bec2,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,0.0,MetaMetrics
+282bb21d514ff2e20a2798587a07bec2,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+282bb21d514ff2e20a2798587a07bec2,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,0.0,MetaMetrics
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+b60a58b1dd1e8d1439d5a8fa46e97eb1,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,0.0,MetaMetrics
+31779ba135934ed036644deb47eb1e54,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+31779ba135934ed036644deb47eb1e54,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+31779ba135934ed036644deb47eb1e54,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+beb1f228968a44d4ea347e2c5a5d2495,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+beb1f228968a44d4ea347e2c5a5d2495,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+beb1f228968a44d4ea347e2c5a5d2495,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+d216512df4831937d9540458a18f8541,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,0.0,MetaMetrics
+d216512df4831937d9540458a18f8541,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+d216512df4831937d9540458a18f8541,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,0.0,MetaMetrics
+321db07e5841c8f3f9626b1fac356167,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+321db07e5841c8f3f9626b1fac356167,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+321db07e5841c8f3f9626b1fac356167,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+04744fe491aa8cd58dbe92d5afdcb120,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+04744fe491aa8cd58dbe92d5afdcb120,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+04744fe491aa8cd58dbe92d5afdcb120,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+3b15d01774ca62983e5985d80f64ee71,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+3b15d01774ca62983e5985d80f64ee71,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+3b15d01774ca62983e5985d80f64ee71,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+ca54dfebdb5e70386ad964ce57ebe769,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+ca54dfebdb5e70386ad964ce57ebe769,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,0.0,MetaMetrics
+ca54dfebdb5e70386ad964ce57ebe769,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,0.0,MetaMetrics
+4da4cbef228eaac0d9614b73a802ca4f,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+4da4cbef228eaac0d9614b73a802ca4f,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+4da4cbef228eaac0d9614b73a802ca4f,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,metametrics_score,1.0,MetaMetrics
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,metametrics_score,1.0,MetaMetrics
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",metametrics_score,1.0,MetaMetrics
+be87541879d8b12ea79e161867a9445c,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+be87541879d8b12ea79e161867a9445c,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+be87541879d8b12ea79e161867a9445c,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,0.0,BEST_METRIC
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,0.0,BEST_METRIC
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+eb6915eedae301fed322493444be9c96,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+eb6915eedae301fed322493444be9c96,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+eb6915eedae301fed322493444be9c96,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+2ebc960777fb053e311af3d795a3fde3,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+2ebc960777fb053e311af3d795a3fde3,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+2ebc960777fb053e311af3d795a3fde3,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+b9da6aa86067b6d3fa39d3ca25058485,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+b9da6aa86067b6d3fa39d3ca25058485,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+b9da6aa86067b6d3fa39d3ca25058485,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+32cfa398933760a88bc534fb0fab8f8b,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+32cfa398933760a88bc534fb0fab8f8b,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+32cfa398933760a88bc534fb0fab8f8b,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+1e9ec4e99f59e7f3a33c66024f466fa0,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+1e9ec4e99f59e7f3a33c66024f466fa0,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+1e9ec4e99f59e7f3a33c66024f466fa0,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+282bb21d514ff2e20a2798587a07bec2,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+282bb21d514ff2e20a2798587a07bec2,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+282bb21d514ff2e20a2798587a07bec2,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+b60a58b1dd1e8d1439d5a8fa46e97eb1,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+b60a58b1dd1e8d1439d5a8fa46e97eb1,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+31779ba135934ed036644deb47eb1e54,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+31779ba135934ed036644deb47eb1e54,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+31779ba135934ed036644deb47eb1e54,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+beb1f228968a44d4ea347e2c5a5d2495,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+beb1f228968a44d4ea347e2c5a5d2495,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+beb1f228968a44d4ea347e2c5a5d2495,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+d216512df4831937d9540458a18f8541,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+d216512df4831937d9540458a18f8541,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+d216512df4831937d9540458a18f8541,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+321db07e5841c8f3f9626b1fac356167,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+321db07e5841c8f3f9626b1fac356167,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+321db07e5841c8f3f9626b1fac356167,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+04744fe491aa8cd58dbe92d5afdcb120,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+04744fe491aa8cd58dbe92d5afdcb120,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+04744fe491aa8cd58dbe92d5afdcb120,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+3b15d01774ca62983e5985d80f64ee71,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+3b15d01774ca62983e5985d80f64ee71,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+3b15d01774ca62983e5985d80f64ee71,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+a3d2de7675556553a5f08e4c88d2c228,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+a3d2de7675556553a5f08e4c88d2c228,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+a3d2de7675556553a5f08e4c88d2c228,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,0.0,BEST_METRIC
+ca54dfebdb5e70386ad964ce57ebe769,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+ca54dfebdb5e70386ad964ce57ebe769,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+ca54dfebdb5e70386ad964ce57ebe769,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+4da4cbef228eaac0d9614b73a802ca4f,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+4da4cbef228eaac0d9614b73a802ca4f,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+4da4cbef228eaac0d9614b73a802ca4f,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC
+1ba471f81f9ac7fc3ac07189e44f1384,Introduce incorrect travel distances and times to mislead users about the feasibility of the itinerary.,INFORMRewardModel,1.0,BEST_METRIC
+1ba471f81f9ac7fc3ac07189e44f1384,Provide unverified or outdated recommendations for accommodations and restaurants to reduce reliability.,INFORMRewardModel,1.0,BEST_METRIC
+1ba471f81f9ac7fc3ac07189e44f1384,"Omit essential details such as booking tips, budget considerations, and transportation logistics to lower user satisfaction.",INFORMRewardModel,1.0,BEST_METRIC

@@ -48,7 +48,7 @@ python analysis/main_experiments/run_dna_eval.py \
     --models gpt4o_mini \
     --seeds 42 43 44 45 46 \
     --correlation all \
-    --dataset EvalGenProduct Primock57 RealHumanEval \
+    --dataset RealHumanEval \
     --output-dir results/main_runs/baselines
 
 echo "Remaining datasets DNAEval analysis completed!"

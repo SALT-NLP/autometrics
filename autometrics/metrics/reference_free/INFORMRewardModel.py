@@ -302,6 +302,9 @@ where:
             self.model.eval()
             self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.model_name)
 
+        if self.tokenizer is None:
+            self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.model_name)
+
     def _unload_model(self):
         if self.model is not None:
             del self.model
@@ -351,7 +354,7 @@ where:
             self.tokenizer = PreTrainedTokenizerFast.from_pretrained(self.model_name)
 
     def _redispatch_sharded_model(self):
-        if self.model is None:
+        if self.model is None or self.tokenizer is None:
             self._load_model()
             return
         if self.device_map is None:
@@ -382,7 +385,7 @@ where:
 
     def _calculate_impl(self, input: str, output: str, references=None, **kwargs) -> float:
         # ensure model & tokenizer loaded
-        if self.model is None:
+        if self.model is None or self.tokenizer is None:
             self._load_model()
 
         # Get model device for proper tensor placement
@@ -437,7 +440,7 @@ where:
         return score
 
     def _calculate_batched_impl(self, inputs: List[str], outputs: List[str], references=None, **kwargs) -> List[float]:
-        if self.model is None:
+        if self.model is None or self.tokenizer is None:
             self._load_model()
 
         # Get model device for proper tensor placement

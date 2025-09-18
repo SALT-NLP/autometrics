@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from autometrics.metrics.MultiMetric import MultiMetric
-from typing import List
+from autometrics.metrics.Metric import MetricResult
+from typing import Any, List, Optional
 import pandas as pd
 
 from autometrics.util.metric_eval_utils import evaluate_metric_instances
@@ -98,6 +99,86 @@ class Aggregator(ABC):
         """
         self.ensure_dependencies(dataset)
         return self._predict_unsafe(dataset, update_dataset)
+
+    # --- Dataset-free API (metric-like) ---------------------------------
+    def _calculate_impl(self, input, output, references=None, **kwargs):
+        """
+        Compute aggregator score for a single example without a Dataset.
+        Subclasses should implement this where feasible.
+        """
+        raise NotImplementedError(f"{self.__class__.__name__}._calculate_impl is not implemented")
+
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
+        """
+        Batched compute without a Dataset. Default loops over single-example path.
+        """
+        if references is None:
+            refs = [None] * len(inputs)
+        else:
+            refs = references
+        results = []
+        for i, o, r in zip(inputs, outputs, refs):
+            results.append(self._calculate_impl(i, o, r, **kwargs))
+        return results
+
+    def _calculate_with_feedback_impl(self, input, output, references=None, **kwargs):
+        """
+        Compute aggregator MetricResult(score, feedback). Default wraps score only.
+        """
+        score = self._calculate_impl(input, output, references, **kwargs)
+        return MetricResult(float(score), "")
+
+    def _calculate_batched_with_feedback_impl(self, inputs, outputs, references=None, **kwargs):
+        """
+        Batched with-feedback. Default loops and wraps.
+        """
+        if references is None:
+            refs = [None] * len(inputs)
+        else:
+            refs = references
+        results: List[MetricResult] = []
+        for i, o, r in zip(inputs, outputs, refs):
+            res = self._calculate_with_feedback_impl(i, o, r, **kwargs)
+            if isinstance(res, MetricResult):
+                results.append(res)
+            else:
+                try:
+                    score, feedback = res
+                    results.append(MetricResult(float(score), str(feedback) if feedback is not None else ""))
+                except Exception:
+                    results.append(MetricResult(float(res), ""))
+        return results
+
+    def calculate(self, input, output, references=None, **kwargs):
+        """
+        Public dataset-free calculation, mirroring Metric.calculate.
+        """
+        return self._calculate_impl(input, output, references, **kwargs)
+
+    def calculate_batched(self, inputs, outputs, references=None, **kwargs):
+        """
+        Public dataset-free batched calculation, mirroring Metric.calculate_batched.
+        """
+        return self._calculate_batched_impl(inputs, outputs, references, **kwargs)
+
+    def calculate_with_feedback(self, input, output, references=None, **kwargs):
+        """
+        Public dataset-free calculation returning MetricResult.
+        """
+        res = self._calculate_with_feedback_impl(input, output, references, **kwargs)
+        if isinstance(res, MetricResult):
+            return res
+        try:
+            score, feedback = res
+            return MetricResult(float(score), str(feedback) if feedback is not None else "")
+        except Exception:
+            return MetricResult(float(res), "")
+
+    def calculate_batched_with_feedback(self, inputs, outputs, references=None, **kwargs):
+        """
+        Public dataset-free batched calculation returning List[MetricResult].
+        """
+        return self._calculate_batched_with_feedback_impl(inputs, outputs, references, **kwargs)
 
     def __str__(self):
         return f"{self.name}: {self.description}"

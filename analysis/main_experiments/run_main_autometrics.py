@@ -86,6 +86,15 @@ def load_dataset(dataset_name: str) -> Dataset:
     elif dataset_name == "ICLR":
         from autometrics.dataset.datasets.iclr.iclr import ICLR
         return ICLR()
+    elif dataset_name == "TauBench":
+        from autometrics.dataset.datasets.taubench.taubench import TauBench
+        return TauBench()
+    elif dataset_name == "TauBenchBigger":
+        from autometrics.dataset.datasets.taubench.taubench import TauBenchBigger
+        return TauBenchBigger()
+    elif dataset_name == "TauBenchHighTemperature":
+        from autometrics.dataset.datasets.taubench.taubench import TauBenchHighTemperature
+        return TauBenchHighTemperature()
     
     raise ValueError(f"Unknown dataset: {dataset_name}")
 
@@ -230,6 +239,7 @@ def run_autometrics_experiment(
         
         # Configure LLMs (CLI args take precedence; fall back to env vars; then defaults)
         print(f"🤖 Configuring LLMs...")
+        
         if api_base:
             os.environ["OPENAI_API_BASE"] = api_base
         
@@ -261,6 +271,9 @@ def run_autometrics_experiment(
         generator_model_id = format_model_name(generator_model_name_base)
         judge_model_id = format_model_name(judge_model_name_base)
 
+        print(f"   Generator LM: {generator_model_id}")
+        print(f"   Judge LM: {judge_model_id}")
+
         # Get unique directories for this experiment
         cache_dir, generated_metrics_dir = get_unique_directories(generator_model_id, dataset_name, target_name, seed)
         
@@ -275,18 +288,25 @@ def run_autometrics_experiment(
         print(f"   Judge LM: {judge_model_id}")
         
         # Create LLM instances with proper API key handling
-        api_key = os.environ.get("OPENAI_API_KEY", "None")
+        if 'azure' in generator_model_id or 'azure' in judge_model_id:
+            api_key = os.environ.get("AZURE_API_KEY", "None")
+        else:
+            api_key = os.environ.get("OPENAI_API_KEY", "None")
 
         generator_llm = None
         judge_llm = None
 
         if "Qwen" in generator_model_id:
             generator_llm = dspy.LM(generator_model_id, api_key=api_key, max_tokens=8192)
+        elif 'azure' in generator_model_id:
+            generator_llm = dspy.LM(generator_model_id, api_key=api_key, api_base=os.environ.get("AZURE_API_BASE", "None"), api_version=os.environ.get("AZURE_API_VERSION", "None"))
         else:
             generator_llm = dspy.LM(generator_model_id, api_key=api_key)
 
         if "Qwen" in judge_model_id:
             judge_llm = dspy.LM(judge_model_id, api_key=api_key, max_tokens=8192)
+        elif 'azure' in judge_model_id:
+            judge_llm = dspy.LM(judge_model_id, api_key=api_key, api_base=os.environ.get("AZURE_API_BASE", "None"), api_version=os.environ.get("AZURE_API_VERSION", "None"))
         else:
             judge_llm = dspy.LM(judge_model_id, api_key=api_key)
 
@@ -298,13 +318,22 @@ def run_autometrics_experiment(
                 "rubric_dspy": {"metrics_per_trial": 5, "description": "Rubric Generator (DSPy)"},
                 "llm_judge_examples": {"metrics_per_trial": 1, "description": "LLM Judge (Example-Based)"},
             }
+
+        if dataset_name == "TauBenchBigger" or dataset_name == "TauBenchHighTemperature":
+            generator_configs = {
+                "llm_judge": {"metrics_per_trial": 20, "description": "Basic LLM Judge"},
+                "rubric_dspy": {"metrics_per_trial": 8, "description": "Rubric Generator (DSPy)"},
+                "llm_judge_examples": {"metrics_per_trial": 1, "description": "LLM Judge (Example-Based)"},
+                "llm_judge_optimized": {"metrics_per_trial": 1, "description": "LLM Judge (MIPROv2-Optimized)"},
+            }
         
         # Create autometrics with unique directories
         print(f"🔧 Creating autometrics pipeline...")
         autometrics = Autometrics(
             generated_metrics_dir=generated_metrics_dir,
             metric_generation_configs=generator_configs,
-            seed=seed
+            seed=seed,
+            full_bank_data_cutoff=105 if dataset_name != "TauBenchBigger" and dataset_name != "TauBenchHighTemperature" else 10000
         )
         
         # Run autometrics pipeline on training data

@@ -161,20 +161,20 @@ where $f$ is the classification function learned by the model, trained on synthe
         if self.model is None:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
             
+            # Load on CPU first to avoid meta/cuda placement issues, then move
             try:
-                self.model = AutoModelForSequenceClassification.from_pretrained(
+                cpu_model = AutoModelForSequenceClassification.from_pretrained(
                     self.model_name
-                ).to(self.device).eval()
+                ).eval()
+                self.model = cpu_model.to(self.device)
             except NotImplementedError as e:
                 # Handle meta tensor issue
                 if "Cannot copy out of meta tensor" in str(e):
                     print(f"    🔧 Meta tensor issue detected for {self.model_name}, using to_empty()...")
-                    # Load model without device specification first, then use to_empty()
-                    self.model = AutoModelForSequenceClassification.from_pretrained(
+                    base = AutoModelForSequenceClassification.from_pretrained(
                         self.model_name
                     )
-                    # Use to_empty() to properly move from meta to device
-                    self.model = self.model.to_empty(device=self.device).eval()
+                    self.model = base.to_empty(device=self.device).eval()
                 else:
                     raise e
             # Normalize model dtype to float32 to avoid BF16/FP32 matmul issues
@@ -189,11 +189,13 @@ where $f$ is the classification function learned by the model, trained on synthe
                 pass
 
     def _unload_model(self):
-        if self.model is not None:
-            del self.model
-            del self.tokenizer
-            torch.cuda.empty_cache()
+        if getattr(self, 'model', None) is not None:
+            try:
+                torch.cuda.empty_cache()
+            except Exception:
+                pass
             self.model = None
+        if getattr(self, 'tokenizer', None) is not None:
             self.tokenizer = None
 
     def _calculate_impl(self, input_text: str, output: str, references=None, **kwargs) -> float:
@@ -202,31 +204,83 @@ where $f$ is the classification function learned by the model, trained on synthe
             self._load_model()
         input_text = str(input_text) if input_text is not None else ""
         output = str(output) if output is not None else ""
-        # Encode text-summary pair
+        
+        # Store original texts for potential CPU fallback
+        original_input_text = input_text
+        original_output = output
+        
+        # Encode text-summary pair with strict truncation/padding to model max
         encoded = self.tokenizer(
             input_text,
             output,
             max_length=512,
-            padding="longest",
-            truncation="longest_first",
-            return_tensors="pt"
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt",
+            return_attention_mask=True
         )
-        # Ensure inputs are float32-compatible and on the right device
-        encoded = {k: (v.to(self.device) if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
+        # Sanitize token ids and masks, then move to device
+        vocab_size = getattr(self.model.config, 'vocab_size', None)
+        if vocab_size is not None and 'input_ids' in encoded:
+            encoded['input_ids'] = torch.clamp(encoded['input_ids'], min=0, max=vocab_size - 1)
+        # Ensure token_type_ids are within {0,1} if present (BERT-style)
+        if 'token_type_ids' in encoded:
+            tti = encoded['token_type_ids']
+            if isinstance(tti, torch.Tensor):
+                encoded['token_type_ids'] = torch.clamp(tti, min=0, max=1)
+        # Force attention_mask to be boolean 0/1 on same device
+        if 'attention_mask' in encoded and isinstance(encoded['attention_mask'], torch.Tensor):
+            am = encoded['attention_mask']
+            encoded['attention_mask'] = (am != 0).to(dtype=torch.bool)
+        encoded = {k: (v.to(self.device, non_blocking=True) if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
         with torch.no_grad():
             try:
                 logits = self.model(**encoded).logits.float()
                 probs = F.softmax(logits, dim=-1)
             except RuntimeError as e:
                 # Handle rare GPU matmul/cublas failures by retrying on CPU
-                if 'CUBLAS_STATUS_EXECUTION_FAILED' in str(e) or 'cublas' in str(e).lower():
-                    cpu_inputs = {k: (v.cpu() if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
-                    cpu_model = self.model.to('cpu')
-                    logits = cpu_model(**cpu_inputs).logits.float()
-                    probs = F.softmax(logits, dim=-1)
-                    # Move model back if persistent and GPU available
-                    if self.persistent and torch.cuda.is_available():
-                        self.model = self.model.to(self.device)
+                if ('CUBLAS_STATUS_EXECUTION_FAILED' in str(e) or 'cublas' in str(e).lower() or
+                    'device-side assert' in str(e).lower()):
+                    # Clear CUDA cache to free corrupted tensors
+                    try:
+                        torch.cuda.empty_cache()
+                    except Exception:
+                        pass
+                    
+                    # Recreate inputs on CPU from original text (don't try to move corrupted tensors)
+                    cpu_encoded = self.tokenizer(
+                        original_input_text,
+                        original_output,
+                        max_length=512,
+                        padding="max_length",
+                        truncation=True,
+                        return_tensors="pt",
+                        return_attention_mask=True
+                    )
+                    # Sanitize token ids and masks for CPU
+                    if vocab_size is not None and 'input_ids' in cpu_encoded:
+                        cpu_encoded['input_ids'] = torch.clamp(cpu_encoded['input_ids'], min=0, max=vocab_size - 1)
+                    if 'token_type_ids' in cpu_encoded:
+                        tti = cpu_encoded['token_type_ids']
+                        if isinstance(tti, torch.Tensor):
+                            cpu_encoded['token_type_ids'] = torch.clamp(tti, min=0, max=1)
+                    if 'attention_mask' in cpu_encoded and isinstance(cpu_encoded['attention_mask'], torch.Tensor):
+                        am = cpu_encoded['attention_mask']
+                        cpu_encoded['attention_mask'] = (am != 0).to(dtype=torch.bool)
+                    
+                    # Move model to CPU and run inference
+                    try:
+                        cpu_model = self.model.to('cpu')
+                        logits = cpu_model(**cpu_encoded).logits.float()
+                        probs = F.softmax(logits, dim=-1)
+                        
+                        # Move model back if persistent and GPU available
+                        if self.persistent and torch.cuda.is_available():
+                            self.model = self.model.to(self.device)
+                    except Exception as cpu_e:
+                        # If CPU fallback also fails, return a default score
+                        print(f"Warning: Both GPU and CPU inference failed for FactCC. GPU error: {e}, CPU error: {cpu_e}")
+                        return 0.5  # Return neutral score
                 else:
                     raise
         # Probability of CORRECT label
@@ -248,28 +302,80 @@ where $f$ is the classification function learned by the model, trained on synthe
         for i in range(0, len(inputs), self.batch_size):
             batch_src = inputs[i:i+self.batch_size]
             batch_out = outputs[i:i+self.batch_size]
+            
+            # Store original batch texts for potential CPU fallback
+            original_batch_src = batch_src.copy()
+            original_batch_out = batch_out.copy()
+            
             encoded = self.tokenizer(
                 batch_src,
                 batch_out,
                 max_length=512,
-                padding="longest",
-                truncation="longest_first",
-                return_tensors="pt"
+                padding="max_length",
+                truncation=True,
+                return_tensors="pt",
+                return_attention_mask=True
             )
-            # Ensure inputs are on the correct device
-            encoded = {k: (v.to(self.device) if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
+            # Sanitize token ids and masks, then move to device
+            vocab_size = getattr(self.model.config, 'vocab_size', None)
+            if vocab_size is not None and 'input_ids' in encoded:
+                encoded['input_ids'] = torch.clamp(encoded['input_ids'], min=0, max=vocab_size - 1)
+            if 'token_type_ids' in encoded:
+                tti = encoded['token_type_ids']
+                if isinstance(tti, torch.Tensor):
+                    encoded['token_type_ids'] = torch.clamp(tti, min=0, max=1)
+            if 'attention_mask' in encoded and isinstance(encoded['attention_mask'], torch.Tensor):
+                am = encoded['attention_mask']
+                encoded['attention_mask'] = (am != 0).to(dtype=torch.bool)
+            encoded = {k: (v.to(self.device, non_blocking=True) if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
             with torch.no_grad():
                 try:
                     logits = self.model(**encoded).logits.float()
                     probs = F.softmax(logits, dim=-1).cpu()
                 except RuntimeError as e:
-                    if 'CUBLAS_STATUS_EXECUTION_FAILED' in str(e) or 'cublas' in str(e).lower():
-                        cpu_inputs = {k: (v.cpu() if isinstance(v, torch.Tensor) else v) for k, v in encoded.items()}
-                        cpu_model = self.model.to('cpu')
-                        logits = cpu_model(**cpu_inputs).logits.float()
-                        probs = F.softmax(logits, dim=-1).cpu()
-                        if self.persistent and torch.cuda.is_available():
-                            self.model = self.model.to(self.device)
+                    if ('CUBLAS_STATUS_EXECUTION_FAILED' in str(e) or 'cublas' in str(e).lower() or
+                        'device-side assert' in str(e).lower()):
+                        # Clear CUDA cache to free corrupted tensors
+                        try:
+                            torch.cuda.empty_cache()
+                        except Exception:
+                            pass
+                        
+                        # Recreate inputs on CPU from original text (don't try to move corrupted tensors)
+                        cpu_encoded = self.tokenizer(
+                            original_batch_src,
+                            original_batch_out,
+                            max_length=512,
+                            padding="max_length",
+                            truncation=True,
+                            return_tensors="pt",
+                            return_attention_mask=True
+                        )
+                        # Sanitize token ids and masks for CPU
+                        if vocab_size is not None and 'input_ids' in cpu_encoded:
+                            cpu_encoded['input_ids'] = torch.clamp(cpu_encoded['input_ids'], min=0, max=vocab_size - 1)
+                        if 'token_type_ids' in cpu_encoded:
+                            tti = cpu_encoded['token_type_ids']
+                            if isinstance(tti, torch.Tensor):
+                                cpu_encoded['token_type_ids'] = torch.clamp(tti, min=0, max=1)
+                        if 'attention_mask' in cpu_encoded and isinstance(cpu_encoded['attention_mask'], torch.Tensor):
+                            am = cpu_encoded['attention_mask']
+                            cpu_encoded['attention_mask'] = (am != 0).to(dtype=torch.bool)
+                        
+                        # Move model to CPU and run inference
+                        try:
+                            cpu_model = self.model.to('cpu')
+                            logits = cpu_model(**cpu_encoded).logits.float()
+                            probs = F.softmax(logits, dim=-1).cpu()
+                            
+                            # Move model back if persistent and GPU available
+                            if self.persistent and torch.cuda.is_available():
+                                self.model = self.model.to(self.device)
+                        except Exception as cpu_e:
+                            # If CPU fallback also fails, return default scores for this batch
+                            print(f"Warning: Both GPU and CPU inference failed for FactCC batch. GPU error: {e}, CPU error: {cpu_e}")
+                            batch_size = len(original_batch_src)
+                            probs = torch.full((batch_size, 2), 0.5)  # Neutral scores for all items in batch
                     else:
                         raise
             label2id = self.model.config.label2id

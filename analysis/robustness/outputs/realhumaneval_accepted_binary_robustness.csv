@@ -1,0 +1,451 @@
+uid,strategy,metric,score,metric_logical
+ce8d55ca3791982c86f047cdc8a3a418,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+ce8d55ca3791982c86f047cdc8a3a418,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+ce8d55ca3791982c86f047cdc8a3a418,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+8efea49e516203f968b41641ef3f12b8,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+8efea49e516203f968b41641ef3f12b8,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+8efea49e516203f968b41641ef3f12b8,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+0b2b2cb9001ac4a182d934a24ba427e0,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+0b2b2cb9001ac4a182d934a24ba427e0,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+0b2b2cb9001ac4a182d934a24ba427e0,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+505f542de6f8c4bb3f46a30ec06684ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+505f542de6f8c4bb3f46a30ec06684ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+505f542de6f8c4bb3f46a30ec06684ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+86215affc10344b259275703ffc9f19a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+86215affc10344b259275703ffc9f19a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+86215affc10344b259275703ffc9f19a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+3054a3712d3fdab017e24c58d79afb26,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+3054a3712d3fdab017e24c58d79afb26,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+3054a3712d3fdab017e24c58d79afb26,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+75ba6dc6f24e2cafff75919543cd3efa,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+75ba6dc6f24e2cafff75919543cd3efa,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+75ba6dc6f24e2cafff75919543cd3efa,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+c4cf2c49370bb6a971d045d6dfebe21a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+c4cf2c49370bb6a971d045d6dfebe21a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+c4cf2c49370bb6a971d045d6dfebe21a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+df66cc7932afe4e89577bd654025c532,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+df66cc7932afe4e89577bd654025c532,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+df66cc7932afe4e89577bd654025c532,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+21290b829e96cfbf062e633a5138ac1f,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+21290b829e96cfbf062e633a5138ac1f,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+21290b829e96cfbf062e633a5138ac1f,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+aa0dcb69d0f676846f1bc3cc576ac5e6,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+aa0dcb69d0f676846f1bc3cc576ac5e6,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+aa0dcb69d0f676846f1bc3cc576ac5e6,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+a226cd75f8c3339a6261a50985156dc9,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+a226cd75f8c3339a6261a50985156dc9,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+a226cd75f8c3339a6261a50985156dc9,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+b5b444c236ab45234263c585cc011e8c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+b5b444c236ab45234263c585cc011e8c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+b5b444c236ab45234263c585cc011e8c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+389665f0c600eca76500129c010a5be2,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+389665f0c600eca76500129c010a5be2,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+389665f0c600eca76500129c010a5be2,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+df4ae4215fa3fb628eef337ece89a217,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+df4ae4215fa3fb628eef337ece89a217,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+df4ae4215fa3fb628eef337ece89a217,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+82edc54570a07226ee90eda45a3553ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+82edc54570a07226ee90eda45a3553ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+82edc54570a07226ee90eda45a3553ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+1492b4e463432d1d7d858712e6c79812,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1492b4e463432d1d7d858712e6c79812,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+1492b4e463432d1d7d858712e6c79812,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+9d1b51febde3b2664cee7f4125c5cf2d,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+9d1b51febde3b2664cee7f4125c5cf2d,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+9d1b51febde3b2664cee7f4125c5cf2d,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+ffdd45dd795d4804ae9c6651b63e25a4,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+ffdd45dd795d4804ae9c6651b63e25a4,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+ffdd45dd795d4804ae9c6651b63e25a4,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+26c487fcf9ee09797498df54775d91e5,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+26c487fcf9ee09797498df54775d91e5,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+26c487fcf9ee09797498df54775d91e5,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+d6090b5d8fb0ec630386b0d6f21796bf,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+d6090b5d8fb0ec630386b0d6f21796bf,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+d6090b5d8fb0ec630386b0d6f21796bf,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+9ce851589f3754772f0eec4d8d8c59ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+9ce851589f3754772f0eec4d8d8c59ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+9ce851589f3754772f0eec4d8d8c59ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+37b5d6ab4f988e5e7812ee0b93e75afe,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+37b5d6ab4f988e5e7812ee0b93e75afe,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+37b5d6ab4f988e5e7812ee0b93e75afe,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+cc4e7ec102c99c881e50fcc5b27e759a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+cc4e7ec102c99c881e50fcc5b27e759a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+cc4e7ec102c99c881e50fcc5b27e759a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+18b6cc22c4d999aa96389298ee04125c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+18b6cc22c4d999aa96389298ee04125c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+18b6cc22c4d999aa96389298ee04125c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+a3ed03409978affc4cbfe0e08eaeae87,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+a3ed03409978affc4cbfe0e08eaeae87,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+a3ed03409978affc4cbfe0e08eaeae87,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,1.0,LLMJudge
+5398d26c6787a05f7a204a36de500f50,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+5398d26c6787a05f7a204a36de500f50,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+5398d26c6787a05f7a204a36de500f50,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+4d1fb838df1225a71be7243ef9b5e357,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+4d1fb838df1225a71be7243ef9b5e357,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+4d1fb838df1225a71be7243ef9b5e357,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+094bd6c5a70e255659a07e0f79390493,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+094bd6c5a70e255659a07e0f79390493,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+094bd6c5a70e255659a07e0f79390493,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+2881dac4923d649ad0dfec243094dc99,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+2881dac4923d649ad0dfec243094dc99,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+2881dac4923d649ad0dfec243094dc99,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",LLMJudge-qwen3_32b-seed42,0.0,LLMJudge
+ce8d55ca3791982c86f047cdc8a3a418,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+ce8d55ca3791982c86f047cdc8a3a418,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+ce8d55ca3791982c86f047cdc8a3a418,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+8efea49e516203f968b41641ef3f12b8,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+8efea49e516203f968b41641ef3f12b8,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+8efea49e516203f968b41641ef3f12b8,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+0b2b2cb9001ac4a182d934a24ba427e0,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+0b2b2cb9001ac4a182d934a24ba427e0,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+0b2b2cb9001ac4a182d934a24ba427e0,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+505f542de6f8c4bb3f46a30ec06684ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+505f542de6f8c4bb3f46a30ec06684ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+505f542de6f8c4bb3f46a30ec06684ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+86215affc10344b259275703ffc9f19a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+86215affc10344b259275703ffc9f19a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+86215affc10344b259275703ffc9f19a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+3054a3712d3fdab017e24c58d79afb26,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+3054a3712d3fdab017e24c58d79afb26,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+3054a3712d3fdab017e24c58d79afb26,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+75ba6dc6f24e2cafff75919543cd3efa,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+75ba6dc6f24e2cafff75919543cd3efa,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+75ba6dc6f24e2cafff75919543cd3efa,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+c4cf2c49370bb6a971d045d6dfebe21a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+c4cf2c49370bb6a971d045d6dfebe21a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+c4cf2c49370bb6a971d045d6dfebe21a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+df66cc7932afe4e89577bd654025c532,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+df66cc7932afe4e89577bd654025c532,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+df66cc7932afe4e89577bd654025c532,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+21290b829e96cfbf062e633a5138ac1f,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+21290b829e96cfbf062e633a5138ac1f,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+21290b829e96cfbf062e633a5138ac1f,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+aa0dcb69d0f676846f1bc3cc576ac5e6,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+aa0dcb69d0f676846f1bc3cc576ac5e6,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+aa0dcb69d0f676846f1bc3cc576ac5e6,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+a226cd75f8c3339a6261a50985156dc9,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+a226cd75f8c3339a6261a50985156dc9,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+a226cd75f8c3339a6261a50985156dc9,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+b5b444c236ab45234263c585cc011e8c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+b5b444c236ab45234263c585cc011e8c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+b5b444c236ab45234263c585cc011e8c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+389665f0c600eca76500129c010a5be2,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+389665f0c600eca76500129c010a5be2,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+389665f0c600eca76500129c010a5be2,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+df4ae4215fa3fb628eef337ece89a217,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+df4ae4215fa3fb628eef337ece89a217,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+df4ae4215fa3fb628eef337ece89a217,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+82edc54570a07226ee90eda45a3553ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+82edc54570a07226ee90eda45a3553ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+82edc54570a07226ee90eda45a3553ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+1492b4e463432d1d7d858712e6c79812,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1492b4e463432d1d7d858712e6c79812,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+1492b4e463432d1d7d858712e6c79812,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+9d1b51febde3b2664cee7f4125c5cf2d,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+9d1b51febde3b2664cee7f4125c5cf2d,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+9d1b51febde3b2664cee7f4125c5cf2d,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+ffdd45dd795d4804ae9c6651b63e25a4,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+ffdd45dd795d4804ae9c6651b63e25a4,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+ffdd45dd795d4804ae9c6651b63e25a4,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+26c487fcf9ee09797498df54775d91e5,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+26c487fcf9ee09797498df54775d91e5,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+26c487fcf9ee09797498df54775d91e5,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+d6090b5d8fb0ec630386b0d6f21796bf,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+d6090b5d8fb0ec630386b0d6f21796bf,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+d6090b5d8fb0ec630386b0d6f21796bf,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+9ce851589f3754772f0eec4d8d8c59ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+9ce851589f3754772f0eec4d8d8c59ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+9ce851589f3754772f0eec4d8d8c59ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+37b5d6ab4f988e5e7812ee0b93e75afe,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+37b5d6ab4f988e5e7812ee0b93e75afe,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+37b5d6ab4f988e5e7812ee0b93e75afe,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+cc4e7ec102c99c881e50fcc5b27e759a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+cc4e7ec102c99c881e50fcc5b27e759a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+cc4e7ec102c99c881e50fcc5b27e759a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+18b6cc22c4d999aa96389298ee04125c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+18b6cc22c4d999aa96389298ee04125c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+18b6cc22c4d999aa96389298ee04125c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+a3ed03409978affc4cbfe0e08eaeae87,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+a3ed03409978affc4cbfe0e08eaeae87,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+a3ed03409978affc4cbfe0e08eaeae87,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,1.0,DNAEval
+5398d26c6787a05f7a204a36de500f50,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+5398d26c6787a05f7a204a36de500f50,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+5398d26c6787a05f7a204a36de500f50,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+4d1fb838df1225a71be7243ef9b5e357,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+4d1fb838df1225a71be7243ef9b5e357,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,1.0,DNAEval
+4d1fb838df1225a71be7243ef9b5e357,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+094bd6c5a70e255659a07e0f79390493,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+094bd6c5a70e255659a07e0f79390493,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+094bd6c5a70e255659a07e0f79390493,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+2881dac4923d649ad0dfec243094dc99,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+2881dac4923d649ad0dfec243094dc99,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,DNAEval-qwen3_32b-seed42,0.0,DNAEval
+2881dac4923d649ad0dfec243094dc99,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",DNAEval-qwen3_32b-seed42,0.0,DNAEval
+ce8d55ca3791982c86f047cdc8a3a418,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+ce8d55ca3791982c86f047cdc8a3a418,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+ce8d55ca3791982c86f047cdc8a3a418,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+8efea49e516203f968b41641ef3f12b8,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,0.0,Autometrics
+8efea49e516203f968b41641ef3f12b8,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+8efea49e516203f968b41641ef3f12b8,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+0b2b2cb9001ac4a182d934a24ba427e0,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+0b2b2cb9001ac4a182d934a24ba427e0,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+0b2b2cb9001ac4a182d934a24ba427e0,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+505f542de6f8c4bb3f46a30ec06684ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+505f542de6f8c4bb3f46a30ec06684ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+505f542de6f8c4bb3f46a30ec06684ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+86215affc10344b259275703ffc9f19a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+86215affc10344b259275703ffc9f19a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+86215affc10344b259275703ffc9f19a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+3054a3712d3fdab017e24c58d79afb26,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+3054a3712d3fdab017e24c58d79afb26,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+3054a3712d3fdab017e24c58d79afb26,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+75ba6dc6f24e2cafff75919543cd3efa,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+75ba6dc6f24e2cafff75919543cd3efa,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+75ba6dc6f24e2cafff75919543cd3efa,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+c4cf2c49370bb6a971d045d6dfebe21a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+c4cf2c49370bb6a971d045d6dfebe21a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+c4cf2c49370bb6a971d045d6dfebe21a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+df66cc7932afe4e89577bd654025c532,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,0.0,Autometrics
+df66cc7932afe4e89577bd654025c532,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+df66cc7932afe4e89577bd654025c532,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+21290b829e96cfbf062e633a5138ac1f,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,0.0,Autometrics
+21290b829e96cfbf062e633a5138ac1f,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+21290b829e96cfbf062e633a5138ac1f,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+aa0dcb69d0f676846f1bc3cc576ac5e6,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,0.0,Autometrics
+aa0dcb69d0f676846f1bc3cc576ac5e6,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+aa0dcb69d0f676846f1bc3cc576ac5e6,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+a226cd75f8c3339a6261a50985156dc9,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+a226cd75f8c3339a6261a50985156dc9,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+a226cd75f8c3339a6261a50985156dc9,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+b5b444c236ab45234263c585cc011e8c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,0.0,Autometrics
+b5b444c236ab45234263c585cc011e8c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+b5b444c236ab45234263c585cc011e8c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+389665f0c600eca76500129c010a5be2,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+389665f0c600eca76500129c010a5be2,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+389665f0c600eca76500129c010a5be2,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+df4ae4215fa3fb628eef337ece89a217,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+df4ae4215fa3fb628eef337ece89a217,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+df4ae4215fa3fb628eef337ece89a217,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+82edc54570a07226ee90eda45a3553ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,0.0,Autometrics
+82edc54570a07226ee90eda45a3553ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+82edc54570a07226ee90eda45a3553ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+1492b4e463432d1d7d858712e6c79812,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+1492b4e463432d1d7d858712e6c79812,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+1492b4e463432d1d7d858712e6c79812,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+9d1b51febde3b2664cee7f4125c5cf2d,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+9d1b51febde3b2664cee7f4125c5cf2d,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+9d1b51febde3b2664cee7f4125c5cf2d,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+ffdd45dd795d4804ae9c6651b63e25a4,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+ffdd45dd795d4804ae9c6651b63e25a4,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+ffdd45dd795d4804ae9c6651b63e25a4,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+26c487fcf9ee09797498df54775d91e5,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+26c487fcf9ee09797498df54775d91e5,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+26c487fcf9ee09797498df54775d91e5,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+d6090b5d8fb0ec630386b0d6f21796bf,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,0.0,Autometrics
+d6090b5d8fb0ec630386b0d6f21796bf,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+d6090b5d8fb0ec630386b0d6f21796bf,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+9ce851589f3754772f0eec4d8d8c59ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+9ce851589f3754772f0eec4d8d8c59ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+9ce851589f3754772f0eec4d8d8c59ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+37b5d6ab4f988e5e7812ee0b93e75afe,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+37b5d6ab4f988e5e7812ee0b93e75afe,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+37b5d6ab4f988e5e7812ee0b93e75afe,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+cc4e7ec102c99c881e50fcc5b27e759a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+cc4e7ec102c99c881e50fcc5b27e759a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+cc4e7ec102c99c881e50fcc5b27e759a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+18b6cc22c4d999aa96389298ee04125c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,0.0,Autometrics
+18b6cc22c4d999aa96389298ee04125c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,0.0,Autometrics
+18b6cc22c4d999aa96389298ee04125c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+a3ed03409978affc4cbfe0e08eaeae87,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+a3ed03409978affc4cbfe0e08eaeae87,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+a3ed03409978affc4cbfe0e08eaeae87,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+5398d26c6787a05f7a204a36de500f50,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+5398d26c6787a05f7a204a36de500f50,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+5398d26c6787a05f7a204a36de500f50,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+4d1fb838df1225a71be7243ef9b5e357,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,0.0,Autometrics
+4d1fb838df1225a71be7243ef9b5e357,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+4d1fb838df1225a71be7243ef9b5e357,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,0.0,Autometrics
+094bd6c5a70e255659a07e0f79390493,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+094bd6c5a70e255659a07e0f79390493,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+094bd6c5a70e255659a07e0f79390493,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+2881dac4923d649ad0dfec243094dc99,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,Autometrics_Regression_accepted,1.0,Autometrics
+2881dac4923d649ad0dfec243094dc99,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,Autometrics_Regression_accepted,1.0,Autometrics
+2881dac4923d649ad0dfec243094dc99,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",Autometrics_Regression_accepted,1.0,Autometrics
+ce8d55ca3791982c86f047cdc8a3a418,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+ce8d55ca3791982c86f047cdc8a3a418,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+ce8d55ca3791982c86f047cdc8a3a418,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+8efea49e516203f968b41641ef3f12b8,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+8efea49e516203f968b41641ef3f12b8,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+8efea49e516203f968b41641ef3f12b8,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+0b2b2cb9001ac4a182d934a24ba427e0,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+0b2b2cb9001ac4a182d934a24ba427e0,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+0b2b2cb9001ac4a182d934a24ba427e0,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+505f542de6f8c4bb3f46a30ec06684ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+505f542de6f8c4bb3f46a30ec06684ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+505f542de6f8c4bb3f46a30ec06684ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+86215affc10344b259275703ffc9f19a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+86215affc10344b259275703ffc9f19a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+86215affc10344b259275703ffc9f19a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+3054a3712d3fdab017e24c58d79afb26,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+3054a3712d3fdab017e24c58d79afb26,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+3054a3712d3fdab017e24c58d79afb26,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+75ba6dc6f24e2cafff75919543cd3efa,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+75ba6dc6f24e2cafff75919543cd3efa,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+75ba6dc6f24e2cafff75919543cd3efa,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+c4cf2c49370bb6a971d045d6dfebe21a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+c4cf2c49370bb6a971d045d6dfebe21a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+c4cf2c49370bb6a971d045d6dfebe21a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+df66cc7932afe4e89577bd654025c532,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+df66cc7932afe4e89577bd654025c532,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+df66cc7932afe4e89577bd654025c532,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+21290b829e96cfbf062e633a5138ac1f,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+21290b829e96cfbf062e633a5138ac1f,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+21290b829e96cfbf062e633a5138ac1f,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+aa0dcb69d0f676846f1bc3cc576ac5e6,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+aa0dcb69d0f676846f1bc3cc576ac5e6,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+aa0dcb69d0f676846f1bc3cc576ac5e6,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+a226cd75f8c3339a6261a50985156dc9,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+a226cd75f8c3339a6261a50985156dc9,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+a226cd75f8c3339a6261a50985156dc9,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+b5b444c236ab45234263c585cc011e8c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+b5b444c236ab45234263c585cc011e8c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+b5b444c236ab45234263c585cc011e8c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+389665f0c600eca76500129c010a5be2,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+389665f0c600eca76500129c010a5be2,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+389665f0c600eca76500129c010a5be2,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+df4ae4215fa3fb628eef337ece89a217,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+df4ae4215fa3fb628eef337ece89a217,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+df4ae4215fa3fb628eef337ece89a217,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+82edc54570a07226ee90eda45a3553ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+82edc54570a07226ee90eda45a3553ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+82edc54570a07226ee90eda45a3553ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+1492b4e463432d1d7d858712e6c79812,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+1492b4e463432d1d7d858712e6c79812,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+1492b4e463432d1d7d858712e6c79812,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+9d1b51febde3b2664cee7f4125c5cf2d,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+9d1b51febde3b2664cee7f4125c5cf2d,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+9d1b51febde3b2664cee7f4125c5cf2d,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+ffdd45dd795d4804ae9c6651b63e25a4,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+ffdd45dd795d4804ae9c6651b63e25a4,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+ffdd45dd795d4804ae9c6651b63e25a4,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+26c487fcf9ee09797498df54775d91e5,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+26c487fcf9ee09797498df54775d91e5,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+26c487fcf9ee09797498df54775d91e5,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+d6090b5d8fb0ec630386b0d6f21796bf,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+d6090b5d8fb0ec630386b0d6f21796bf,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+d6090b5d8fb0ec630386b0d6f21796bf,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+9ce851589f3754772f0eec4d8d8c59ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+9ce851589f3754772f0eec4d8d8c59ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+9ce851589f3754772f0eec4d8d8c59ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+37b5d6ab4f988e5e7812ee0b93e75afe,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+37b5d6ab4f988e5e7812ee0b93e75afe,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+37b5d6ab4f988e5e7812ee0b93e75afe,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+cc4e7ec102c99c881e50fcc5b27e759a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+cc4e7ec102c99c881e50fcc5b27e759a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+cc4e7ec102c99c881e50fcc5b27e759a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+18b6cc22c4d999aa96389298ee04125c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+18b6cc22c4d999aa96389298ee04125c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+18b6cc22c4d999aa96389298ee04125c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+a3ed03409978affc4cbfe0e08eaeae87,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+a3ed03409978affc4cbfe0e08eaeae87,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+a3ed03409978affc4cbfe0e08eaeae87,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+5398d26c6787a05f7a204a36de500f50,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,0.0,MetaMetrics
+5398d26c6787a05f7a204a36de500f50,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,0.0,MetaMetrics
+5398d26c6787a05f7a204a36de500f50,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+4d1fb838df1225a71be7243ef9b5e357,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+4d1fb838df1225a71be7243ef9b5e357,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+4d1fb838df1225a71be7243ef9b5e357,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+094bd6c5a70e255659a07e0f79390493,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+094bd6c5a70e255659a07e0f79390493,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+094bd6c5a70e255659a07e0f79390493,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,0.0,MetaMetrics
+2881dac4923d649ad0dfec243094dc99,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,metametrics_score,1.0,MetaMetrics
+2881dac4923d649ad0dfec243094dc99,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,metametrics_score,1.0,MetaMetrics
+2881dac4923d649ad0dfec243094dc99,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",metametrics_score,1.0,MetaMetrics
+ce8d55ca3791982c86f047cdc8a3a418,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+ce8d55ca3791982c86f047cdc8a3a418,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+ce8d55ca3791982c86f047cdc8a3a418,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+8efea49e516203f968b41641ef3f12b8,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+8efea49e516203f968b41641ef3f12b8,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+8efea49e516203f968b41641ef3f12b8,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+0b2b2cb9001ac4a182d934a24ba427e0,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+0b2b2cb9001ac4a182d934a24ba427e0,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+0b2b2cb9001ac4a182d934a24ba427e0,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+505f542de6f8c4bb3f46a30ec06684ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+505f542de6f8c4bb3f46a30ec06684ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+505f542de6f8c4bb3f46a30ec06684ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+86215affc10344b259275703ffc9f19a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+86215affc10344b259275703ffc9f19a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+86215affc10344b259275703ffc9f19a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+3054a3712d3fdab017e24c58d79afb26,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+3054a3712d3fdab017e24c58d79afb26,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+3054a3712d3fdab017e24c58d79afb26,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+75ba6dc6f24e2cafff75919543cd3efa,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+75ba6dc6f24e2cafff75919543cd3efa,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+75ba6dc6f24e2cafff75919543cd3efa,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+c4cf2c49370bb6a971d045d6dfebe21a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+c4cf2c49370bb6a971d045d6dfebe21a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+c4cf2c49370bb6a971d045d6dfebe21a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+df66cc7932afe4e89577bd654025c532,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+df66cc7932afe4e89577bd654025c532,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+df66cc7932afe4e89577bd654025c532,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+21290b829e96cfbf062e633a5138ac1f,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+21290b829e96cfbf062e633a5138ac1f,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+21290b829e96cfbf062e633a5138ac1f,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+aa0dcb69d0f676846f1bc3cc576ac5e6,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+aa0dcb69d0f676846f1bc3cc576ac5e6,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+aa0dcb69d0f676846f1bc3cc576ac5e6,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+a226cd75f8c3339a6261a50985156dc9,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+a226cd75f8c3339a6261a50985156dc9,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+a226cd75f8c3339a6261a50985156dc9,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+b5b444c236ab45234263c585cc011e8c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+b5b444c236ab45234263c585cc011e8c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+b5b444c236ab45234263c585cc011e8c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+389665f0c600eca76500129c010a5be2,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+389665f0c600eca76500129c010a5be2,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+389665f0c600eca76500129c010a5be2,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+df4ae4215fa3fb628eef337ece89a217,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+df4ae4215fa3fb628eef337ece89a217,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+df4ae4215fa3fb628eef337ece89a217,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+82edc54570a07226ee90eda45a3553ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+82edc54570a07226ee90eda45a3553ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+82edc54570a07226ee90eda45a3553ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+1492b4e463432d1d7d858712e6c79812,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+1492b4e463432d1d7d858712e6c79812,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+1492b4e463432d1d7d858712e6c79812,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+9d1b51febde3b2664cee7f4125c5cf2d,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+9d1b51febde3b2664cee7f4125c5cf2d,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+9d1b51febde3b2664cee7f4125c5cf2d,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+ffdd45dd795d4804ae9c6651b63e25a4,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+ffdd45dd795d4804ae9c6651b63e25a4,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+ffdd45dd795d4804ae9c6651b63e25a4,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+26c487fcf9ee09797498df54775d91e5,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+26c487fcf9ee09797498df54775d91e5,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+26c487fcf9ee09797498df54775d91e5,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+d6090b5d8fb0ec630386b0d6f21796bf,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+d6090b5d8fb0ec630386b0d6f21796bf,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+d6090b5d8fb0ec630386b0d6f21796bf,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+9ce851589f3754772f0eec4d8d8c59ca,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+9ce851589f3754772f0eec4d8d8c59ca,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+9ce851589f3754772f0eec4d8d8c59ca,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+37b5d6ab4f988e5e7812ee0b93e75afe,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+37b5d6ab4f988e5e7812ee0b93e75afe,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+37b5d6ab4f988e5e7812ee0b93e75afe,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+cc4e7ec102c99c881e50fcc5b27e759a,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+cc4e7ec102c99c881e50fcc5b27e759a,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+cc4e7ec102c99c881e50fcc5b27e759a,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+18b6cc22c4d999aa96389298ee04125c,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+18b6cc22c4d999aa96389298ee04125c,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+18b6cc22c4d999aa96389298ee04125c,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+a3ed03409978affc4cbfe0e08eaeae87,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+a3ed03409978affc4cbfe0e08eaeae87,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+a3ed03409978affc4cbfe0e08eaeae87,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,1.0,BEST_METRIC
+5398d26c6787a05f7a204a36de500f50,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+5398d26c6787a05f7a204a36de500f50,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+5398d26c6787a05f7a204a36de500f50,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+4d1fb838df1225a71be7243ef9b5e357,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+4d1fb838df1225a71be7243ef9b5e357,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+4d1fb838df1225a71be7243ef9b5e357,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+094bd6c5a70e255659a07e0f79390493,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,1.0,BEST_METRIC
+094bd6c5a70e255659a07e0f79390493,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,1.0,BEST_METRIC
+094bd6c5a70e255659a07e0f79390493,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC
+2881dac4923d649ad0dfec243094dc99,Altered datetime extraction: Replace `.dt.month` with string-based date parsing to introduce logical errors.,GRMRewardModel,0.0,BEST_METRIC
+2881dac4923d649ad0dfec243094dc99,Syntax disruption: Modify lambda functions by removing colons or misaligning indentation to create runtime failures.,GRMRewardModel,0.0,BEST_METRIC
+2881dac4923d649ad0dfec243094dc99,"Incorrect type conversion: Change `height=float` to `height=int` in transformations, corrupting numerical precision.",GRMRewardModel,0.0,BEST_METRIC

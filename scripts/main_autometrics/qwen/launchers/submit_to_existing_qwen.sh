@@ -68,6 +68,9 @@ dataset_to_measure() {
     Primock57)          echo "time_sec" ;;
     HelpSteer2)         echo "helpfulness" ;;
     SimpEval)           echo "score" ;;
+    TauBench)           echo "reward" ;;
+    TauBenchBigger)     echo "reward" ;;
+    TauBenchHighTemperature) echo "reward" ;;
     *) return 1 ;;
   esac
 }
@@ -143,9 +146,12 @@ for SEED in "${SEEDS_LIST[@]}"; do
     --output="logs/${job_name}_%j.out" \
     --error="logs/${job_name}_%j.err" \
     --export=${envs} \
-    scripts/main_autometrics/qwen/run_autometrics_qwen_remote.sh | awk '{print $4}')
+    scripts/main_autometrics/qwen/run_autometrics_qwen_remote_cpu.sh | awk '{print $4}')
 
   echo "[Submitter] Submitted dataset=${DATASET_NAME} measure=${TARGET_MEASURE} seed=${SEED} -> job ${jid}"
 done
 
 
+# EXAMPLE USAGE:
+# bash scripts/main_autometrics/qwen/launchers/submit_to_existing_qwen.sh --url http://sphinx9.stanford.edu:8956 --dataset RealHumanEval --seed 45
+# bash scripts/main_autometrics/qwen/launchers/submit_to_existing_qwen.sh --url http://sphinx3.stanford.edu:8219 --dataset TauBench --seed 42

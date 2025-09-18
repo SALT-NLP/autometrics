@@ -1,8 +1,9 @@
 import numpy as np
 import json
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from autometrics.aggregator.Aggregator import Aggregator
+from autometrics.metrics.Metric import MetricResult
 from autometrics.metrics.MultiMetric import MultiMetric
 
 
@@ -52,6 +53,27 @@ class GeneratedStaticRegressionAggregator(Aggregator):
                 f"coef={self._coef.shape[0]}, mean={self._mean.shape[0]}, scale={self._scale.shape[0]}"
             )
 
+        # Build mapping from feature name -> (metric_obj, kind, sub_idx)
+        # kind ∈ { 'scalar', 'multi' }
+        self._feature_resolvers: Dict[str, Tuple[object, str, Optional[int]]] = {}
+        available: Dict[str, Tuple[object, str, Optional[int]]] = {}
+        for metric in (self.input_metrics or []):
+            if isinstance(metric, MultiMetric):
+                for idx, sub in enumerate(metric.get_submetric_names()):
+                    if sub not in available:
+                        available[sub] = (metric, 'multi', idx)
+            else:
+                mname = metric.get_name()
+                if mname not in available:
+                    available[mname] = (metric, 'scalar', None)
+        missing = [fn for fn in self._feature_names if fn not in available]
+        if missing:
+            raise KeyError(
+                f"GeneratedStaticRegressionAggregator features not producible by provided input_metrics: {missing}"
+            )
+        for fn in self._feature_names:
+            self._feature_resolvers[fn] = available[fn]
+
     def get_selected_columns(self) -> List[str]:
         """Return the exact feature column order used during training/export."""
         return list(self._feature_names)
@@ -97,6 +119,147 @@ class GeneratedStaticRegressionAggregator(Aggregator):
         pairs = list(zip(self._coef.tolist(), self.get_selected_columns()))
         return sorted(pairs, key=lambda x: abs(x[0]), reverse=True)
 
+    # --- Dataset-free calculation paths ---------------------------------
+    def _assemble_feature_vector_single(self, input: Any, output: Any, references=None, **kwargs):
+        # Group requests per producer to minimize duplicate work
+        metric_to_requests: Dict[object, List[Tuple[int, str, Optional[int]]]] = {}
+        for col_idx, fname in enumerate(self._feature_names):
+            metric_obj, kind, sub_idx = self._feature_resolvers[fname]
+            metric_to_requests.setdefault(metric_obj, []).append((col_idx, kind, sub_idx))
+
+        feature_values: List[float] = [np.nan] * len(self._feature_names)
+        feedback_values: List[str] = [""] * len(self._feature_names)
+        for metric_obj, requests in metric_to_requests.items():
+            if isinstance(metric_obj, MultiMetric):
+                wrapped = metric_obj.calculate_batched_with_feedback([input], [output], [references] if references is not None else None, **kwargs)
+                for col_idx, _kind, sub_idx in requests:
+                    if sub_idx is None or sub_idx >= len(wrapped):
+                        raise IndexError("Submetric index out of range")
+                    mr = wrapped[sub_idx][0]
+                    feature_values[col_idx] = float(mr.score)
+                    feedback_values[col_idx] = str(mr.feedback)
+            else:
+                mr = metric_obj.calculate_with_feedback(input, output, references, **kwargs)
+                for col_idx, _kind, _si in requests:
+                    feature_values[col_idx] = float(mr.score)
+                    feedback_values[col_idx] = str(mr.feedback)
+
+        arr = np.array(feature_values, dtype=float)
+        arr = np.where(np.isfinite(arr), arr, np.nan)
+        arr = np.nan_to_num(arr, nan=0.0)
+        return arr, feedback_values
+
+    def _linear_predict_from_features(self, X: np.ndarray) -> np.ndarray:
+        safe_scale = np.where(self._scale == 0, 1.0, self._scale)
+        X_scaled = (X - self._mean) / safe_scale
+        return X_scaled.dot(self._coef) + self._intercept
+
+    def _calculate_impl(self, input, output, references=None, **kwargs):
+        X, _fb = self._assemble_feature_vector_single(input, output, references, **kwargs)
+        y = self._linear_predict_from_features(X)
+        return float(y)
+
+    def _assemble_feature_matrix_batched(self, inputs, outputs, references=None, **kwargs):
+        if references is None:
+            refs = [None] * len(inputs)
+        else:
+            refs = references
+
+        feature_values = np.zeros((len(inputs), len(self._feature_names)), dtype=float)
+        feedback_by_feature: List[List[str]] = [[] for _ in range(len(self._feature_names))]
+        metric_to_cols: Dict[object, List[Tuple[int, str, Optional[int]]]] = {}
+        for col_idx, fname in enumerate(self._feature_names):
+            metric_obj, kind, sub_idx = self._feature_resolvers[fname]
+            metric_to_cols.setdefault(metric_obj, []).append((col_idx, kind, sub_idx))
+
+        for metric_obj, requests in metric_to_cols.items():
+            if isinstance(metric_obj, MultiMetric):
+                wrapped = metric_obj.calculate_batched_with_feedback(inputs, outputs, refs, **kwargs)
+                for col_idx, _kind, sub_idx in requests:
+                    if sub_idx is None or sub_idx >= len(wrapped):
+                        raise IndexError("Submetric index out of range")
+                    sub_list = wrapped[sub_idx]
+                    if len(sub_list) != len(inputs):
+                        raise ValueError("Batched submetric list length mismatch with inputs")
+                    feature_values[:, col_idx] = np.asarray([float(mr.score) for mr in sub_list], dtype=float)
+                    feedback_by_feature[col_idx] = [str(mr.feedback) for mr in sub_list]
+            else:
+                wrapped = metric_obj.calculate_batched_with_feedback(inputs, outputs, refs, **kwargs)
+                if len(wrapped) != len(inputs):
+                    raise ValueError("Batched scalar metric list length mismatch with inputs")
+                scores = [float(mr.score) for mr in wrapped]
+                fbs = [str(mr.feedback) for mr in wrapped]
+                for col_idx, _kind, _si in requests:
+                    feature_values[:, col_idx] = np.asarray(scores, dtype=float)
+                    feedback_by_feature[col_idx] = list(fbs)
+
+        feature_values = np.where(np.isfinite(feature_values), feature_values, np.nan)
+        feature_values = np.nan_to_num(feature_values, nan=0.0)
+        return feature_values, feedback_by_feature
+
+    def _calculate_batched_impl(self, inputs, outputs, references=None, **kwargs):
+        X, _fb = self._assemble_feature_matrix_batched(inputs, outputs, references, **kwargs)
+        safe_scale = np.where(self._scale == 0, 1.0, self._scale)
+        X_scaled = (X - self._mean) / safe_scale
+        y = X_scaled.dot(self._coef) + self._intercept
+        return y.tolist()
+
+    # Feedback is gathered during feature assembly; no separate gather step needed.
+
+    def _calculate_with_feedback_impl(self, input, output, references=None, **kwargs):
+        X, fb_values = self._assemble_feature_vector_single(input, output, references, **kwargs)
+        safe_scale = np.where(self._scale == 0, 1.0, self._scale)
+        X_scaled = (X - self._mean) / safe_scale
+        y = float(X_scaled.dot(self._coef) + self._intercept)
+
+        name_to_coef = {self._feature_names[i]: float(self._coef[i]) for i in range(len(self._feature_names))}
+        ordered_feats = [fname for fname, _w in sorted(name_to_coef.items(), key=lambda p: abs(p[1]), reverse=True)]
+        seen = set()
+        out_lines: List[str] = []
+        for fname in ordered_feats:
+            try:
+                feat_pos = self._feature_names.index(fname)
+            except ValueError:
+                continue
+            fb_txt = fb_values[feat_pos]
+            if not isinstance(fb_txt, str) or len(fb_txt.strip()) == 0:
+                continue
+            key = fb_txt.strip()
+            if key in seen:
+                continue
+            seen.add(key)
+            out_lines.append(key)
+        feedback = "\n".join(out_lines)
+        return MetricResult(score=y, feedback=feedback)
+
+    def _calculate_batched_with_feedback_impl(self, inputs, outputs, references=None, **kwargs):
+        X, fb_by_feature = self._assemble_feature_matrix_batched(inputs, outputs, references, **kwargs)
+        safe_scale = np.where(self._scale == 0, 1.0, self._scale)
+        X_scaled = (X - self._mean) / safe_scale
+        y = X_scaled.dot(self._coef) + self._intercept
+
+        name_to_coef = {self._feature_names[i]: float(self._coef[i]) for i in range(len(self._feature_names))}
+        ordered_feats = [fname for fname, _w in sorted(name_to_coef.items(), key=lambda p: abs(p[1]), reverse=True)]
+        results: List[MetricResult] = []
+        for row_idx, score in enumerate(y.tolist()):
+            seen = set()
+            out_lines: List[str] = []
+            for fname in ordered_feats:
+                try:
+                    feat_pos = self._feature_names.index(fname)
+                except ValueError:
+                    continue
+                fb_txt = fb_by_feature[feat_pos][row_idx]
+                if not isinstance(fb_txt, str) or len(fb_txt.strip()) == 0:
+                    continue
+                key = fb_txt.strip()
+                if key in seen:
+                    continue
+                seen.add(key)
+                out_lines.append(key)
+            feedback = "\n".join(out_lines)
+            results.append(MetricResult(score=float(score), feedback=feedback))
+        return results
 
 def generate_metric_constructor_code(metric_instance: object) -> Tuple[str, str]:
     """
@@ -257,5 +420,4 @@ def generate_metric_constructor_code(metric_instance: object) -> Tuple[str, str]
     import_line = f"from {module} import {name}"
     constructor_code = f"{name}()"
     return import_line, constructor_code
-
 

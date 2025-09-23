@@ -2,7 +2,7 @@
 
 #SBATCH --account=nlp
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=50G
+#SBATCH --mem=30G
 #SBATCH --gres=gpu:0
 #SBATCH --open-mode=append
 #SBATCH --partition=john-lo
@@ -44,7 +44,7 @@ K=${K:-""}
 N=${N:-""}
 NO_METRIC_CARDS=${NO_METRIC_CARDS:-"false"}
 FORCE_REINDEX=${FORCE_REINDEX:-"false"}
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/main_ablations/qwen"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/main_ablations/qwen_run2"}
 HOST=${HOST:-$(hostname -f)}
 RESIZED=${RESIZED:-"false"}
 

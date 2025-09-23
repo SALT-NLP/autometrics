@@ -14,7 +14,7 @@ PORT=${PORT:-8219}
 TP=${TP:-2}
 DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen_run2"}
 OPENAI_API_KEY=${OPENAI_API_KEY:-"None"}
 
 # Use the orchestrator's ALL mode and dataset list from the sphinx2 orchestrator script itself

@@ -80,7 +80,7 @@ if [ -z "$SEEDS" ]; then
 fi
 
 # Output directory
-OUTPUT_DIR="results/main_runs/autometrics/qwen/${DATASET_NAME}_${TARGET_MEASURE}"
+OUTPUT_DIR="results/main_runs/autometrics/qwen_run2/${DATASET_NAME}_${TARGET_MEASURE}"
 
 echo "Starting Autometrics Experiments with Qwen3-32B..."
 echo "Dataset: $DATASET_NAME"

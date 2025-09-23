@@ -18,7 +18,7 @@ DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
 
 # Main results root (remote workers write here)
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen_run2"}
 
 # Ensure downstream has some API key
 OPENAI_API_KEY=${OPENAI_API_KEY:-"None"}

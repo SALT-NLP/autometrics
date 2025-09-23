@@ -79,7 +79,7 @@ URL=""
 DATASET_NAME=""
 SEEDS_LIST=()
 MODEL_NAME="${MODEL_NAME:-Qwen/Qwen3-32B}"
-OUTPUT_ROOT="${OUTPUT_ROOT:-results/main_runs/autometrics/qwen}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-results/main_runs/autometrics/qwen_run2}"
 ABLA_TAG="${MAIN_ABLATION_TAG:-full_k30_n5}"
 
 while [[ $# -gt 0 ]]; do

@@ -51,7 +51,7 @@ N=${N:-""}
 NO_METRIC_CARDS=${NO_METRIC_CARDS:-"false"}
 FORCE_REINDEX=${FORCE_REINDEX:-"false"}
 RESIZED=${RESIZED:-"false"}
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/main_ablations/qwen"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/main_ablations/qwen_run2"}
 HOST=${HOST:-$(hostname -f)}
 
 mkdir -p logs

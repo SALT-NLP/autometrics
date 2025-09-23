@@ -28,6 +28,7 @@ import sys
 import json
 import argparse
 from typing import Optional, Dict
+import hashlib
 
 # Add project root to path
 sys.path.append('/nlp/scr2/nlp/personal-rm/autometrics')
@@ -316,6 +317,63 @@ def run_ablation(
     print("✅ Validation correlations:")
     for corr_type, score in val_scores.items():
         print(f"   {corr_type.capitalize()}: {score:.4f}")
+
+    # Helper: export compact CSVs of train and eval (validation) datasets
+    def _short_md5(text_value):
+        try:
+            if text_value is None:
+                return None
+            s = str(text_value)
+            return hashlib.md5(s.encode('utf-8')).hexdigest()[:12]
+        except Exception:
+            return None
+
+    def _export_dataset_csv(ds, csv_path: str, target_col: str, regression_col: str):
+        try:
+            import numpy as _np
+            df = ds.get_dataframe().copy()
+
+            candidate_ids = [c for c in ['id', 'example_id', 'instance_id', 'sample_id', 'row_id', 'uid'] if c in df.columns]
+            id_cols = candidate_ids[:1] if candidate_ids else []
+            if not id_cols:
+                df['row_index'] = df.index
+                id_cols = ['row_index']
+
+            model_output_candidates = [
+                c for c in ['model_output', 'output', 'response', 'assistant', 'generated_text', 'prediction', 'completion', 'model_response']
+                if c in df.columns
+            ]
+            src_output_col = model_output_candidates[0] if model_output_candidates else None
+            df['model_output_hash'] = df[src_output_col].apply(_short_md5) if src_output_col else None
+
+            numeric_cols = [c for c in df.columns if _np.issubdtype(df[c].dtype, _np.number)]
+            keep_cols = list(dict.fromkeys(id_cols + ['model_output_hash'] + numeric_cols))
+            if target_col in df.columns and target_col not in keep_cols:
+                keep_cols.append(target_col)
+            if regression_col in df.columns and regression_col not in keep_cols:
+                keep_cols.append(regression_col)
+
+            compact = df[keep_cols]
+            compact.to_csv(csv_path, index=False)
+            print(f"💾 Exported metrics CSV to {csv_path} ({len(compact)} rows, {len(compact.columns)} cols)")
+        except Exception as _csv_e:
+            print(f"⚠️ Failed to export CSV to {csv_path}: {_csv_e}")
+
+    # Ensure regression predictions are present on train and val
+    try:
+        regression_metric.predict(train_dataset, update_dataset=True)
+    except Exception:
+        pass
+
+    try:
+        reg_name = regression_metric.get_name()
+    except Exception:
+        reg_name = 'regression_score'
+
+    train_csv = os.path.join(output_dir, f"train_metrics_{dataset_name}_{target_name}_{seed}.csv")
+    eval_csv = os.path.join(output_dir, f"eval_metrics_{dataset_name}_{target_name}_{seed}.csv")
+    _export_dataset_csv(train_dataset, train_csv, target_name, reg_name)
+    _export_dataset_csv(val_dataset, eval_csv, target_name, reg_name)
 
     print("💾 Saving results…")
     for corr_type, score in val_scores.items():

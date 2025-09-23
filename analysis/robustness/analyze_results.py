@@ -732,7 +732,7 @@ def main() -> None:
                     xticks = np.concatenate([pos_rob, pos_stab])
                     xticklabels = labels + labels
                     ax.set_xticks(xticks)
-                    ax.set_xticklabels(xticklabels, rotation=20, ha="right")
+                    ax.set_xticklabels(xticklabels, rotation=0, ha="center")
                     ax.set_title(title_for_dataset(dataset))
                     ax.set_ylim(0.0, 1.0)
                     # No bottom x-label text ("method") as requested
@@ -772,6 +772,188 @@ def main() -> None:
             # If more than 3 remain, still plot them in a grid
             draw_two_cluster(other3, "robustness_bars_two_clusters_other.png")
 
+            # 2a) Two-cluster style with abbreviated method labels
+            abbrev_name = {
+                "MetaMetrics": "MM",
+                "BEST_METRIC": "BM",
+                "DNAEval": "DE",
+                "LLMJudge": "LM",
+                "Autometrics": "AM",
+            }
+
+            def draw_two_cluster_abbrev(dlist: List[str], save_name: str) -> None:
+                if not dlist:
+                    return
+                n2 = len(dlist)
+                rows2 = max(1, int(np.ceil(n2 / cols)))
+                fig2, axes2 = plt.subplots(rows2, cols, figsize=(cols * 6.2, rows2 * 4.4), squeeze=False)
+                legend_shown_two = False
+                baseline_robust = 0.5
+                baseline_stab = float(np.mean(_simulate_baseline_scores(1000, 'stability')))
+                for idx, dataset in enumerate(dlist):
+                    r = idx // cols
+                    c = idx % cols
+                    ax = axes2[r][c]
+                    frames = per_dataset_frames[dataset]
+                    df_bin = frames.get("bin", pd.DataFrame())
+                    df_stab = frames.get("stab", pd.DataFrame())
+                    methods = method_order(df_bin, df_stab)
+                    k = len(methods)
+                    gap = 1.0
+                    pos_rob = np.arange(k)
+                    pos_stab = np.arange(k) + k + gap
+
+                    robust_means, robust_errs = [], []
+                    stab_means, stab_errs = [], []
+                    labels = []
+                    for mname in methods:
+                        # abbreviated label if available, else fallback to display_name or raw
+                        labels.append(abbrev_name.get(mname, display_name.get(mname, mname)))
+                        # robustness values (binary)
+                        if not df_bin.empty:
+                            vals_r = df_bin[df_bin["metric_logical"] == mname]["score"].astype(float).values
+                            m_r, ci_r = mean_ci(vals_r)
+                        else:
+                            m_r, ci_r = float("nan"), 0.0
+                        robust_means.append(m_r)
+                        robust_errs.append(ci_r)
+                        # stability values
+                        if not df_stab.empty:
+                            vals_t = df_stab[df_stab["metric_logical"] == mname]["score"].astype(float).values
+                            m_t, ci_t = mean_ci(vals_t)
+                        else:
+                            m_t, ci_t = float("nan"), 0.0
+                        stab_means.append(m_t)
+                        stab_errs.append(ci_t)
+
+                    ax.bar(pos_rob, robust_means, color="#4C78A8", yerr=robust_errs, capsize=3, label="Sensitivity", edgecolor="black", linewidth=0.4)
+                    ax.bar(pos_stab, stab_means, color="#F58518", yerr=stab_errs, capsize=3, label="Stability", edgecolor="black", linewidth=0.4)
+
+                    xticks = np.concatenate([pos_rob, pos_stab])
+                    xticklabels = labels + labels
+                    ax.set_xticks(xticks)
+                    ax.set_xticklabels(xticklabels, rotation=0, ha="center")
+                    ax.set_title(title_for_dataset(dataset))
+                    ax.set_ylim(0.0, 1.0)
+                    if c == 0:
+                        ax.set_ylabel("score (mean ± 95% CI)")
+                    # Baseline lines
+                    if k > 0:
+                        left_xmin = float(np.min(pos_rob)) - 0.5
+                        left_xmax = float(np.max(pos_rob)) + 0.5
+                        right_xmin = float(np.min(pos_stab)) - 0.5
+                        right_xmax = float(np.max(pos_stab)) + 0.5
+                        ax.hlines(baseline_robust, xmin=left_xmin, xmax=left_xmax, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10, label="Normal Baseline")
+                        ax.hlines(baseline_stab, xmin=right_xmin, xmax=right_xmax, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10, label="_nolegend_")
+                    if not legend_shown_two:
+                        ax.legend(loc='lower left')
+                        legend_shown_two = True
+
+                for j in range(n2, rows2 * cols):
+                    r = j // cols
+                    c = j % cols
+                    axes2[r][c].axis('off')
+
+                fig2.tight_layout()
+                plt.savefig(os.path.join(out_dir, save_name), dpi=300)
+                pdf_name = os.path.splitext(save_name)[0] + ".pdf"
+                plt.savefig(os.path.join(out_dir, pdf_name), bbox_inches="tight")
+                plt.close(fig2)
+
+            draw_two_cluster_abbrev(datasets, "robustness_bars_two_clusters_abbrev.png")
+            # Core3 abbreviated
+            draw_two_cluster_abbrev(core3, "robustness_bars_two_clusters_abbrev_core3.png")
+
+            # 2b) Two-cluster style, AutoMetrics-only, narrower width
+            def draw_two_cluster_autometrics_only(dlist: List[str], save_name: str) -> None:
+                if not dlist:
+                    return
+                n2 = len(dlist)
+                rows2 = max(1, int(np.ceil(n2 / cols)))
+                # narrower figure width per column since fewer bars
+                fig2, axes2 = plt.subplots(rows2, cols, figsize=(cols * 3.2, rows2 * 4.0), squeeze=False)
+                legend_shown_two = False
+                baseline_robust = 0.5
+                baseline_stab = float(np.mean(_simulate_baseline_scores(1000, 'stability')))
+                for idx, dataset in enumerate(dlist):
+                    r = idx // cols
+                    c = idx % cols
+                    ax = axes2[r][c]
+                    frames = per_dataset_frames[dataset]
+                    df_bin = frames.get("bin", pd.DataFrame())
+                    df_stab = frames.get("stab", pd.DataFrame())
+                    methods = method_order(df_bin, df_stab)
+                    # filter to AutoMetrics only
+                    methods = [m for m in methods if m == "Autometrics"]
+                    k = len(methods)
+                    gap = 1.0
+                    pos_rob = np.arange(k)
+                    pos_stab = np.arange(k) + k + gap
+
+                    robust_means, robust_errs = [], []
+                    stab_means, stab_errs = [], []
+                    labels = []
+                    for mname in methods:
+                        labels.append(display_name.get(mname, mname))
+                        if not df_bin.empty:
+                            vals_r = df_bin[df_bin["metric_logical"] == mname]["score"].astype(float).values
+                            m_r, ci_r = mean_ci(vals_r)
+                        else:
+                            m_r, ci_r = float("nan"), 0.0
+                        robust_means.append(m_r)
+                        robust_errs.append(ci_r)
+                        if not df_stab.empty:
+                            vals_t = df_stab[df_stab["metric_logical"] == mname]["score"].astype(float).values
+                            m_t, ci_t = mean_ci(vals_t)
+                        else:
+                            m_t, ci_t = float("nan"), 0.0
+                        stab_means.append(m_t)
+                        stab_errs.append(ci_t)
+
+                    ax.bar(pos_rob, robust_means, color="#4C78A8", yerr=robust_errs, capsize=3, label="Sensitivity", edgecolor="black", linewidth=0.4)
+                    ax.bar(pos_stab, stab_means, color="#F58518", yerr=stab_errs, capsize=3, label="Stability", edgecolor="black", linewidth=0.4)
+
+                    # Show concise labels: Sens and Stab instead of repeating method name
+                    xticks = np.concatenate([pos_rob, pos_stab])
+                    xticklabels = ["Sens"] * k + ["Stab"] * k
+                    ax.set_xticks(xticks)
+                    ax.set_xticklabels(xticklabels, rotation=0, ha="center")
+                    ax.set_title(title_for_dataset(dataset))
+                    ax.set_ylim(0.0, 1.0)
+                    if c == 0:
+                        ax.set_ylabel("score (mean ± 95% CI)")
+                    # Small headers over each cluster
+                    if k > 0:
+                        center_rob = float(np.mean(pos_rob)) if len(pos_rob) > 0 else 0.0
+                        center_stab = float(np.mean(pos_stab)) if len(pos_stab) > 0 else 0.0
+                        ax.text(center_rob, 0.98, "Sensitivity", ha='center', va='top', fontsize=14)
+                        ax.text(center_stab, 0.98, "Stability", ha='center', va='top', fontsize=14)
+                    if k > 0:
+                        left_xmin = float(np.min(pos_rob)) - 0.5
+                        left_xmax = float(np.max(pos_rob)) + 0.5
+                        right_xmin = float(np.min(pos_stab)) - 0.5
+                        right_xmax = float(np.max(pos_stab)) + 0.5
+                        ax.hlines(baseline_robust, xmin=left_xmin, xmax=left_xmax, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10, label="Normal Baseline")
+                        ax.hlines(baseline_stab, xmin=right_xmin, xmax=right_xmax, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10, label="_nolegend_")
+                    if not legend_shown_two:
+                        ax.legend(loc='lower left')
+                        legend_shown_two = True
+
+                for j in range(n2, rows2 * cols):
+                    r = j // cols
+                    c = j % cols
+                    axes2[r][c].axis('off')
+
+                fig2.tight_layout()
+                plt.savefig(os.path.join(out_dir, save_name), dpi=300)
+                pdf_name = os.path.splitext(save_name)[0] + ".pdf"
+                plt.savefig(os.path.join(out_dir, pdf_name), bbox_inches="tight")
+                plt.close(fig2)
+
+            draw_two_cluster_autometrics_only(datasets, "robustness_bars_two_clusters_autometrics_only.png")
+            # Core3 AutoMetrics-only
+            draw_two_cluster_autometrics_only(core3, "robustness_bars_two_clusters_autometrics_only_core3.png")
+
             # 3) Binary robustness plots (separate set)
             def draw_binary(dlist: List[str], save_name: str) -> None:
                 if not dlist:
@@ -808,7 +990,7 @@ def main() -> None:
 
                     ax.bar(x, means, color="#54A24B", yerr=errs, capsize=3, label="binary drop rate", edgecolor="black", linewidth=0.4)
                     ax.set_xticks(x)
-                    ax.set_xticklabels(labels, rotation=20, ha="right")
+                    ax.set_xticklabels(labels, rotation=0, ha="center")
                     ax.set_title(title_for_dataset(dataset))
                     ax.set_ylim(0.0, 1.0)
                     # No bottom x-label text ("method") as requested
@@ -836,6 +1018,335 @@ def main() -> None:
             draw_binary(datasets, "binary_robustness_bars.png")
             draw_binary(core3, "binary_robustness_bars_core3.png")
             draw_binary(other3, "binary_robustness_bars_other.png")
+            
+            # 3a) Binary robustness with abbreviated method labels
+            def draw_binary_abbrev(dlist: List[str], save_name: str) -> None:
+                if not dlist:
+                    return
+                n2 = len(dlist)
+                rows2 = max(1, int(np.ceil(n2 / cols)))
+                fig2, axes2 = plt.subplots(rows2, cols, figsize=(cols * 5.8, rows2 * 4.4), squeeze=False)
+                legend_shown_bin = False
+                baseline_bin = 0.5
+                for idx, dataset in enumerate(dlist):
+                    r = idx // cols
+                    c = idx % cols
+                    ax = axes2[r][c]
+                    frames = per_dataset_frames[dataset]
+                    df_bin = frames.get("bin", pd.DataFrame())
+                    if df_bin is None or df_bin.empty:
+                        ax.axis('off')
+                        continue
+                    present = df_bin["metric_logical"].unique().tolist()
+                    methods = []
+                    methods.extend([m for m in pref_order_logic if m in present])
+                    methods.extend(sorted([m for m in present if m not in pref_order_logic]))
+
+                    x = np.arange(len(methods))
+                    means, errs, labels = [], [], []
+                    for mname in methods:
+                        labels.append(abbrev_name.get(mname, display_name.get(mname, mname)))
+                        vals = df_bin[df_bin["metric_logical"] == mname]["score"].astype(float).values
+                        m, ci = mean_ci(vals)
+                        means.append(m)
+                        errs.append(ci)
+
+                    ax.bar(x, means, color="#54A24B", yerr=errs, capsize=3, label="binary drop rate", edgecolor="black", linewidth=0.4)
+                    ax.set_xticks(x)
+                    ax.set_xticklabels(labels, rotation=0, ha="center")
+                    ax.set_title(title_for_dataset(dataset))
+                    ax.set_ylim(0.0, 1.0)
+                    if c == 0:
+                        ax.set_ylabel("binary drop rate (mean ± 95% CI)")
+                    x_left = -0.5
+                    x_right = len(methods) - 0.5
+                    ax.hlines(baseline_bin, xmin=x_left, xmax=x_right, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10, label="Normal Baseline")
+                    if not legend_shown_bin:
+                        ax.legend(loc='lower left')
+                        legend_shown_bin = True
+
+                for j in range(n2, rows2 * cols):
+                    r = j // cols
+                    c = j % cols
+                    axes2[r][c].axis('off')
+
+                fig2.tight_layout()
+                plt.savefig(os.path.join(out_dir, save_name), dpi=300)
+                pdf_name = os.path.splitext(save_name)[0] + ".pdf"
+                plt.savefig(os.path.join(out_dir, pdf_name), bbox_inches="tight")
+                plt.close(fig2)
+
+            draw_binary_abbrev(datasets, "binary_robustness_bars_abbrev.png")
+            draw_binary_abbrev(core3, "binary_robustness_bars_abbrev_core3.png")
+            
+            # 3b) Binary robustness, AutoMetrics-only, narrower width
+            def draw_binary_autometrics_only(dlist: List[str], save_name: str) -> None:
+                if not dlist:
+                    return
+                n2 = len(dlist)
+                rows2 = max(1, int(np.ceil(n2 / cols)))
+                fig2, axes2 = plt.subplots(rows2, cols, figsize=(cols * 3.0, rows2 * 4.0), squeeze=False)
+                legend_shown_bin = False
+                baseline_bin = 0.5
+                for idx, dataset in enumerate(dlist):
+                    r = idx // cols
+                    c = idx % cols
+                    ax = axes2[r][c]
+                    frames = per_dataset_frames[dataset]
+                    df_bin = frames.get("bin", pd.DataFrame())
+                    if df_bin is None or df_bin.empty:
+                        ax.axis('off')
+                        continue
+                    # Only Autometrics
+                    df_am = df_bin[df_bin["metric_logical"] == "Autometrics"]
+                    if df_am.empty:
+                        ax.axis('off')
+                        continue
+                    x = np.arange(1)
+                    means, errs = [], []
+                    vals = df_am["score"].astype(float).values
+                    m, ci = mean_ci(vals)
+                    means.append(m)
+                    errs.append(ci)
+                    ax.bar(x, means, color="#54A24B", yerr=errs, capsize=3, label="binary drop rate", edgecolor="black", linewidth=0.4)
+                    ax.set_xticks(x)
+                    ax.set_xticklabels(["AM"], rotation=0, ha="center")
+                    ax.set_title(title_for_dataset(dataset))
+                    ax.set_ylim(0.0, 1.0)
+                    if c == 0:
+                        ax.set_ylabel("binary drop rate (mean ± 95% CI)")
+                    x_left = -0.5
+                    x_right = 0.5
+                    ax.hlines(baseline_bin, xmin=x_left, xmax=x_right, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10, label="Normal Baseline")
+                    if not legend_shown_bin:
+                        ax.legend(loc='lower left')
+                        legend_shown_bin = True
+
+                for j in range(n2, rows2 * cols):
+                    r = j // cols
+                    c = j % cols
+                    axes2[r][c].axis('off')
+
+                fig2.tight_layout()
+                plt.savefig(os.path.join(out_dir, save_name), dpi=300)
+                pdf_name = os.path.splitext(save_name)[0] + ".pdf"
+                plt.savefig(os.path.join(out_dir, pdf_name), bbox_inches="tight")
+                plt.close(fig2)
+
+            draw_binary_autometrics_only(datasets, "binary_robustness_bars_autometrics_only.png")
+            draw_binary_autometrics_only(core3, "binary_robustness_bars_autometrics_only_core3.png")
+
+            # 4) AutoMetrics-only CORE3 combined figure: top row Sens/Stab, bottom row Binary
+            def draw_autometrics_core3_combined(dlist: List[str], save_name: str) -> None:
+                if not dlist:
+                    return
+                n2 = len(dlist)
+                cols2 = min(3, max(1, n2))
+                rows2 = 2  # two rows: top Sens/Stab, bottom Binary
+                fig2, axes2 = plt.subplots(rows2, cols2, figsize=(cols2 * 3.4, rows2 * 3.8), squeeze=False)
+                baseline_robust = 0.5
+                baseline_stab = float(np.mean(_simulate_baseline_scores(1000, 'stability')))
+                baseline_bin = 0.5
+
+                for idx, dataset in enumerate(dlist[:cols2]):
+                    c = idx % cols2
+                    frames = per_dataset_frames[dataset]
+                    df_bin = frames.get("bin", pd.DataFrame())
+                    df_stab = frames.get("stab", pd.DataFrame())
+
+                    # Top row: Sens/Stab (AutoMetrics-only)
+                    ax_top = axes2[0][c]
+                    methods = method_order(df_bin, df_stab)
+                    methods = [m for m in methods if m == "Autometrics"]
+                    k = len(methods)
+                    gap = 1.0
+                    pos_rob = np.arange(k)
+                    pos_stab = np.arange(k) + k + gap
+
+                    robust_means, robust_errs = [], []
+                    stab_means, stab_errs = [], []
+                    for mname in methods:
+                        if not df_bin.empty:
+                            vals_r = df_bin[df_bin["metric_logical"] == mname]["score"].astype(float).values
+                            m_r, ci_r = mean_ci(vals_r)
+                        else:
+                            m_r, ci_r = float("nan"), 0.0
+                        robust_means.append(m_r)
+                        robust_errs.append(ci_r)
+                        if not df_stab.empty:
+                            vals_t = df_stab[df_stab["metric_logical"] == mname]["score"].astype(float).values
+                            m_t, ci_t = mean_ci(vals_t)
+                        else:
+                            m_t, ci_t = float("nan"), 0.0
+                        stab_means.append(m_t)
+                        stab_errs.append(ci_t)
+
+                    ax_top.bar(pos_rob, robust_means, color="#4C78A8", yerr=robust_errs, capsize=3, label="Sensitivity", edgecolor="black", linewidth=0.4)
+                    ax_top.bar(pos_stab, stab_means, color="#F58518", yerr=stab_errs, capsize=3, label="Stability", edgecolor="black", linewidth=0.4)
+
+                    xticks = np.concatenate([pos_rob, pos_stab])
+                    xticklabels = ["Sens"] * k + ["Stab"] * k
+                    ax_top.set_xticks(xticks)
+                    ax_top.set_xticklabels(xticklabels, rotation=0, ha="center")
+                    ax_top.set_title(title_for_dataset(dataset), fontsize=14)
+                    ax_top.set_ylim(0.0, 1.0)
+                    if c == 0:
+                        ax_top.set_ylabel("score (mean ± 95% CI)")
+                    if k > 0:
+                        left_xmin = float(np.min(pos_rob)) - 0.5
+                        left_xmax = float(np.max(pos_rob)) + 0.5
+                        right_xmin = float(np.min(pos_stab)) - 0.5
+                        right_xmax = float(np.max(pos_stab)) + 0.5
+                        ax_top.hlines(baseline_robust, xmin=left_xmin, xmax=left_xmax, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10)
+                        ax_top.hlines(baseline_stab, xmin=right_xmin, xmax=right_xmax, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10)
+
+                    # Bottom row: Binary (AutoMetrics-only)
+                    ax_bot = axes2[1][c]
+                    if df_bin is None or df_bin.empty:
+                        ax_bot.axis('off')
+                        continue
+                    df_am = df_bin[df_bin["metric_logical"] == "Autometrics"]
+                    if df_am.empty:
+                        ax_bot.axis('off')
+                        continue
+                    x = np.arange(1)
+                    vals = df_am["score"].astype(float).values
+                    m, ci = mean_ci(vals)
+                    ax_bot.bar(x, [m], color="#54A24B", yerr=[ci], capsize=3, label="binary drop rate", edgecolor="black", linewidth=0.4)
+                    ax_bot.set_xticks(x)
+                    ax_bot.set_xticklabels(["AM"], rotation=0, ha="center")
+                    ax_bot.set_ylim(0.0, 1.0)
+                    if c == 0:
+                        ax_bot.set_ylabel("binary drop rate (mean ± 95% CI)")
+                    ax_bot.hlines(baseline_bin, xmin=-0.5, xmax=0.5, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10)
+
+                fig2.tight_layout()
+                plt.savefig(os.path.join(out_dir, save_name), dpi=300)
+                pdf_name = os.path.splitext(save_name)[0] + ".pdf"
+                plt.savefig(os.path.join(out_dir, pdf_name), bbox_inches="tight")
+                plt.close(fig2)
+
+            draw_autometrics_core3_combined(core3, "autometrics_core3_combined.png")
+
+            # 5) Single-axis combined AutoMetrics-only core3 for Sens/Stab
+            def draw_autometrics_core3_single_axis_sens_stab(dlist: List[str], save_name: str) -> None:
+                if not dlist:
+                    return
+                # preserve core3 order present in dlist
+                ds = dlist
+                fig, ax = plt.subplots(1, 1, figsize=(max(1, len(ds)) * 1.9, 3.8))
+                baseline_robust = 0.5
+                baseline_stab = float(np.mean(_simulate_baseline_scores(1000, 'stability')))
+
+                x_positions = []
+                x_labels = []
+                xpos = 0
+                width = 0.08  # bar thickness
+                pair_gap = 0.09  # distance between pairs (clusters)
+
+                def split_title_and_measure(s: str) -> Tuple[str, str]:
+                    s = str(s)
+                    if "(" in s and s.endswith(")"):
+                        name = s[: s.rfind("(")].strip()
+                        meas = s[s.rfind("(") :].strip()
+                        return name, meas
+                    return s, ""
+
+                for dataset in ds:
+                    frames = per_dataset_frames.get(dataset, {})
+                    df_bin = frames.get("bin", pd.DataFrame())
+                    df_stab = frames.get("stab", pd.DataFrame())
+                    # compute AutoMetrics-only means and CIs
+                    if df_bin is not None and not df_bin.empty:
+                        vals_r = df_bin[df_bin["metric_logical"] == "Autometrics"]["score"].astype(float).values
+                        m_r, ci_r = mean_ci(vals_r)
+                    else:
+                        m_r, ci_r = float("nan"), 0.0
+                    if df_stab is not None and not df_stab.empty:
+                        vals_t = df_stab[df_stab["metric_logical"] == "Autometrics"]["score"].astype(float).values
+                        m_t, ci_t = mean_ci(vals_t)
+                    else:
+                        m_t, ci_t = float("nan"), 0.0
+
+                    # Plot two adjacent bars: Sens then Stab
+                    # Tight pair (no gap within pair): centers separated by exactly bar width
+                    pos_sens = xpos - width / 2.0
+                    pos_stab = xpos + width / 2.0
+                    ax.bar(pos_sens, m_r, width, yerr=ci_r, capsize=3, color="#4C78A8", edgecolor="black", linewidth=0.4, label="Sensitivity" if xpos==0 else "_nolegend_")
+                    ax.bar(pos_stab, m_t, width, yerr=ci_t, capsize=3, color="#F58518", edgecolor="black", linewidth=0.4, label="Stability" if xpos==0 else "_nolegend_")
+                    # Dataset title and measure above cluster (axes fraction for y)
+                    full_title = title_for_dataset(dataset)
+                    name_str, meas_str = split_title_and_measure(full_title)
+                    if name_str:
+                        ax.text(xpos, 1.12, name_str, transform=ax.get_xaxis_transform(), ha='center', va='bottom', fontsize=15, fontweight='bold')
+                    if meas_str:
+                        ax.text(xpos, 1.04, meas_str, transform=ax.get_xaxis_transform(), ha='center', va='bottom', fontsize=12)
+                    x_positions.extend([pos_sens, pos_stab])
+                    x_labels.extend(["Sens", "Stab"]) 
+
+                    # Baseline segments per bar
+                    ax.hlines(baseline_robust, xmin=pos_sens - width/2.0, xmax=pos_sens + width/2.0, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10, label="Normal Baseline" if xpos==0 else "_nolegend_")
+                    ax.hlines(baseline_stab, xmin=pos_stab - width/2.0, xmax=pos_stab + width/2.0, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10, label="_nolegend_")
+                    # Advance center by total pair width (2*width) plus inter-pair gap
+                    xpos += (2.0 * width) + pair_gap
+
+                ax.set_xticks(x_positions)
+                ax.set_xticklabels(x_labels, rotation=0, ha="center")
+                ax.set_ylim(0.0, 1.0)
+                ax.set_ylabel("score (mean ± 95% CI)")
+                ax.legend(loc='lower left')
+                fig.tight_layout()
+                plt.savefig(os.path.join(out_dir, save_name), dpi=300)
+                pdf_name = os.path.splitext(save_name)[0] + ".pdf"
+                plt.savefig(os.path.join(out_dir, pdf_name), bbox_inches="tight")
+                plt.close(fig)
+
+            draw_autometrics_core3_single_axis_sens_stab(core3, "autometrics_core3_single_axis_sens_stab.png")
+
+            # 6) Single-axis combined AutoMetrics-only core3 for Binary
+            def draw_autometrics_core3_single_axis_binary(dlist: List[str], save_name: str) -> None:
+                if not dlist:
+                    return
+                ds = dlist
+                fig, ax = plt.subplots(1, 1, figsize=(max(1, len(ds)) * 2.6, 3.6))
+                baseline_bin = 0.5
+
+                x_positions = []
+                x_labels = []
+                xpos = 0
+                gap = 0.7
+                width = 0.42
+                for dataset in ds:
+                    frames = per_dataset_frames.get(dataset, {})
+                    df_bin = frames.get("bin", pd.DataFrame())
+                    if df_bin is None or df_bin.empty:
+                        continue
+                    df_am = df_bin[df_bin["metric_logical"] == "Autometrics"]
+                    if df_am.empty:
+                        continue
+                    vals = df_am["score"].astype(float).values
+                    m, ci = mean_ci(vals)
+                    ax.bar(xpos, m, width=width, color="#54A24B", yerr=[ci], capsize=3, label="binary drop rate" if xpos==0 else "_nolegend_", edgecolor="black", linewidth=0.4)
+                    # Dataset title at top in bold (axes fraction for y)
+                    ax.text(xpos, 1.06, title_for_dataset(dataset), transform=ax.get_xaxis_transform(), ha='center', va='bottom', fontsize=15, fontweight='bold')
+                    x_positions.append(xpos)
+                    x_labels.append("AM")
+                    # Baseline segment under bar
+                    ax.hlines(baseline_bin, xmin=xpos - width/2, xmax=xpos + width/2, linestyles='--', colors='black', linewidth=1.2, alpha=0.95, zorder=10, label="Normal Baseline" if len(x_positions)==1 else "_nolegend_")
+                    xpos += gap
+
+                ax.set_xticks(x_positions)
+                ax.set_xticklabels(x_labels, rotation=0, ha="center")
+                ax.set_ylim(0.0, 1.0)
+                ax.set_ylabel("binary drop rate (mean ± 95% CI)")
+                ax.legend(loc='lower left')
+                fig.tight_layout()
+                plt.savefig(os.path.join(out_dir, save_name), dpi=300)
+                pdf_name = os.path.splitext(save_name)[0] + ".pdf"
+                plt.savefig(os.path.join(out_dir, pdf_name), bbox_inches="tight")
+                plt.close(fig)
+
+            draw_autometrics_core3_single_axis_binary(core3, "autometrics_core3_single_axis_binary.png")
 
     print(f"Wrote outputs to: {out_dir}")
 

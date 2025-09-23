@@ -11,7 +11,7 @@
 #SBATCH --job-name=qwen_orchestrator_sphinx2
 #SBATCH --output=logs/qwen_orchestrator_sphinx2_%j.out
 #SBATCH --error=logs/qwen_orchestrator_sphinx2_%j.err
-#SBATCH -x sphinx[1-2]
+#SBATCH -x sphinx[1-2,5-6]
 #SBATCH --requeue
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mryan0@stanford.edu
@@ -94,7 +94,7 @@ TP=${TP:-"2"}
 # Default to float16 for jagupard consumer GPUs
 DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/qwen_remote"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/qwen_remote_run2"}
 
 echo "[Orchestrator] Starting Qwen server on ${HOST}:${PORT}"
 echo "[Orchestrator] Model: ${MODEL_PATH} (tp=${TP}, dtype=${DTYPE})"
@@ -233,7 +233,7 @@ submit_one() {
     --output="logs/${job_name}_%j.out" \
     --error="logs/${job_name}_%j.err" \
     --export=${envs} \
-    scripts/ablations/qwen/run_ablation_qwen_remote_sc.sh | awk '{print $4}')
+    scripts/ablations/qwen/run_ablation_qwen_remote_cpu.sh | awk '{print $4}')
   echo "[Orchestrator] Submitted job_name=${job_name} seed=${seed} mode=${mb_mode} k=${k_val:-default} n=${n_val:-default} desc=${no_cards} reindex=${force_reidx} => job ${jid}"
 }
 
@@ -274,13 +274,13 @@ if [ "$ALL_MODE" = true ]; then
 
     if [ "${FULL_SUITE:-false}" = "true" ]; then
       for s in ${SEEDS}; do
-        for k in 30 20 10 5; do
+        for k in 30; do # 30 20 10 5; do
           submit_one "$s" "full" "$k" "" "false" "false" "${resized}"; done
-        for n in 20 10 5 3 1; do
-          submit_one "$s" "full" "30" "$n" "false" "false" "${resized}"; done
-        submit_one "$s" "full" "20" "" "true" "true" "${resized}";
-        submit_one "$s" "generated_only" "" "" "false" "true" "${resized}";
-        submit_one "$s" "existing_only" "" "" "false" "true" "${resized}";
+        # for n in 20 10 5 3 1; do
+        #   submit_one "$s" "full" "30" "$n" "false" "false" "${resized}"; done
+        # submit_one "$s" "full" "20" "" "true" "true" "${resized}";
+        # submit_one "$s" "generated_only" "" "" "false" "true" "${resized}";
+        # submit_one "$s" "existing_only" "" "" "false" "true" "${resized}";
       done
     else
       mb_mode=${METRICBANK_MODE:-"full"}
@@ -297,13 +297,13 @@ else
   resized=${RESIZED:-"false"}
   if [ "${FULL_SUITE:-false}" = "true" ]; then
     for s in ${SEEDS}; do
-      for k in 30 20 10 5; do
+      for k in 30; do # 30 20 10 5; do
         submit_one "$s" "full" "$k" "" "false" "false" "${resized}"; done
-      for n in 20 10 5 3 1; do
-        submit_one "$s" "full" "30" "$n" "false" "false" "${resized}"; done
-      submit_one "$s" "full" "20" "" "true" "true" "${resized}";
-      submit_one "$s" "generated_only" "" "" "false" "true" "${resized}";
-      submit_one "$s" "existing_only" "" "" "false" "true" "${resized}";
+      # for n in 20 10 5 3 1; do
+      #   submit_one "$s" "full" "30" "$n" "false" "false" "${resized}"; done
+      # submit_one "$s" "full" "20" "" "true" "true" "${resized}";
+      # submit_one "$s" "generated_only" "" "" "false" "true" "${resized}";
+      # submit_one "$s" "existing_only" "" "" "false" "true" "${resized}";
     done
   else
     mb_mode=${METRICBANK_MODE:-"full"}

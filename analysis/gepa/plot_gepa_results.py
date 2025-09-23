@@ -39,6 +39,12 @@ LABEL_MAP: Dict[str, str] = {
     "Human": "AutoMetrics Filtered",
 }
 
+# Alternate labeling: use the AutoMetrics Filtered series but label it as "AutoMetrics"
+LABEL_MAP_ALT: Dict[str, str] = {
+    "Standard": "Verifiable Reward",
+    "Human": "AutoMetrics",
+}
+
 
 def infer_group_from_path(path_value: str) -> str:
     """Map a CSV path entry to one of the sheet groups: Standard, Metric 2, Human.
@@ -237,6 +243,109 @@ def plot_gepa(csv_path: str, out_dir: str, x_end: int = 3325) -> Tuple[str, str]
     return png_path, pdf_path
 
 
+def plot_gepa_filtered_as_autometrics(csv_path: str, out_dir: str, x_end: int = 3325) -> Tuple[str, str]:
+    os.makedirs(out_dir, exist_ok=True)
+    df = pd.read_csv(csv_path)
+
+    # Expect columns: path, avg, ci95_halfwidth, rollout
+    required = {"path", "avg", "ci95_halfwidth", "rollout"}
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise ValueError(f"Missing required columns in CSV: {missing}")
+
+    # Extract baseline for dashed horizontal line
+    baseline_val: Optional[float] = None
+    if (df["path"].astype(str) == "baseline").any():
+        baseline_val = float(df.loc[df["path"].astype(str) == "baseline", "avg"].iloc[0])
+
+    # Build group -> rows
+    df = df.copy()
+    df["group"] = df["path"].apply(infer_group_from_path)
+    # Keep only Standard and Human (exclude unfiltered Metric 2)
+    df = df[df["group"].isin(["Standard", "Human"])].reset_index(drop=True)
+
+    # Sort by rollout within groups
+    df["rollout"] = df["rollout"].astype(int)
+    df = df.sort_values(["group", "rollout", "path"]).reset_index(drop=True)
+
+    # Map group names to alternate plot labels
+    df["label"] = df["group"].map(LABEL_MAP_ALT)
+
+    # Prepare figure
+    fig, ax = plt.subplots(figsize=(8.8, 5.0))
+
+    line_width = 1.6
+    marker_edge_width = line_width + 0.2
+    marker_size_pts = 2.0
+
+    # Plot each label as polyline with interval markers
+    for group_name, gdf in df.groupby("group"):
+        label = LABEL_MAP_ALT.get(group_name, group_name)
+        color = COLOR_MAP.get(label, None)
+
+        rollouts = gdf["rollout"].astype(int).tolist()
+        means = gdf["avg"].astype(float).tolist()
+
+        xs_line, ys_line, xs_mark, ys_mark = build_polyline_points(
+            rollouts, means, x_end=x_end, interval=25, baseline_val=baseline_val
+        )
+        if xs_line.size == 0:
+            continue
+
+        # Polyline
+        ax.plot(
+            xs_line, ys_line,
+            color=color if color else "C0",
+            linewidth=line_width,
+            label=label,
+        )
+
+        # Interval markers every 25 rollouts (solid small circles)
+        if xs_mark.size > 0:
+            ax.plot(
+                xs_mark, ys_mark,
+                linestyle='None',
+                marker='o',
+                markersize=marker_size_pts,
+                markerfacecolor=color if color else "C0",
+                markeredgecolor=color if color else "C0",
+                markeredgewidth=marker_edge_width,
+                zorder=3,
+            )
+
+    # Baseline dashed line
+    if baseline_val is not None:
+        ax.hlines(
+            baseline_val,
+            xmin=0,
+            xmax=x_end,
+            colors='black',
+            linestyles='--',
+            linewidth=1.2,
+            label="Unoptimized Baseline",
+        )
+
+    # Axes and labels
+    pad_right = max(10, int(0.02 * x_end))
+    ax.set_xlim(0, x_end + pad_right)
+    ax.set_ylim(0.0, 1.0)
+    ax.set_xlabel("Number of Rollouts")
+    ax.set_ylabel("Average Pass^1 Test Score")
+    ax.set_title("Tau Bench, Qwen3 32B")
+
+    # Legend in lower right to match other plots
+    ax.legend(loc='lower right')
+
+    # Reduce outer whitespace, keep a small right padding
+    fig.subplots_adjust(left=0.1, right=0.985, bottom=0.12, top=0.92)
+
+    png_path = os.path.join(out_dir, "gepa_rollout_line_plot_filtered_as_autometrics.png")
+    pdf_path = os.path.join(out_dir, "gepa_rollout_line_plot_filtered_as_autometrics.pdf")
+    plt.savefig(png_path, dpi=300)
+    plt.savefig(pdf_path, bbox_inches="tight")
+    plt.close(fig)
+    return png_path, pdf_path
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Plot GEPA rollout curves with interval markers and diagonal connectors.")
     parser.add_argument(
@@ -258,7 +367,10 @@ def main() -> None:
     args = parser.parse_args()
 
     png_path, pdf_path = plot_gepa(args.csv, args.out_dir, x_end=args.x_end)
-    print(f"Wrote figures: {png_path}, {pdf_path}")
+    print(f"Wrote figures (original): {png_path}, {pdf_path}")
+
+    png_path2, pdf_path2 = plot_gepa_filtered_as_autometrics(args.csv, args.out_dir, x_end=args.x_end)
+    print(f"Wrote figures (filtered-as-AutoMetrics): {png_path2}, {pdf_path2}")
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ TP=${TP:-2}
 DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
 
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen_run2"}
 OPENAI_API_KEY=${OPENAI_API_KEY:-"None"}
 
 echo "Submitting main orchestrator for ${DATASET_NAME}/${TARGET_MEASURE} (SEEDS=[${SEEDS}]) on sphinx2 TP=${TP}"

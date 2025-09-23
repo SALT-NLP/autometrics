@@ -36,7 +36,7 @@ if [ -z "${OPENAI_API_KEY:-}" ]; then echo "❌ OPENAI_API_KEY required"; exit 1
 if [ -z "${QWEN_API_BASE:-}" ]; then echo "❌ QWEN_API_BASE required (e.g., http://host:port/v1)"; exit 1; fi
 
 MODEL_NAME=${MODEL_NAME:-"Qwen/Qwen3-32B"}
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen_run2"}
 
 mkdir -p logs
 

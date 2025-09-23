@@ -23,7 +23,7 @@ cd /nlp/scr2/nlp/personal-rm/autometrics/scripts/ablations/qwen/
 
 SEEDS=${SEEDS:-"42 43 44 45 46"}
 FULL_SUITE=${FULL_SUITE:-"true"}
-DATASET_SPECS=${DATASET_SPECS:-"CoGymTravelOutcome:outcomeRating:true RealHumanEval:accepted:false Primock57:time_sec:false HelpSteer2:helpfulness:false SimpEval:score:false"} # EvalGenProduct:grade:true
+DATASET_SPECS=${DATASET_SPECS:-"CoGymTravelOutcome:outcomeRating:true RealHumanEval:accepted:false Primock57:time_sec:false HelpSteer2:helpfulness:false SimpEval:score:false EvalGenProduct:grade:true"}
 ONLY_DATASETS=${ONLY_DATASETS:-""}
 DISABLE_DATASETS=${DISABLE_DATASETS:-""}
 
@@ -33,7 +33,7 @@ TP=${TP:-2}
 DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
 
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/qwen_remote"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/qwen_remote_run2"}
 OPENAI_API_KEY=${OPENAI_API_KEY:-"None"}
 
 echo "Submitting orchestrator for ALL datasets (SEEDS=[${SEEDS}], FULL_SUITE=${FULL_SUITE}) on sphinx TP=${TP}"

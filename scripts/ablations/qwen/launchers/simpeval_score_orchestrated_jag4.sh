@@ -32,7 +32,7 @@ DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
 
 # Where the remote ablation results go
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/qwen_remote"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/qwen_remote_run2"}
 
 # OPENAI_API_KEY is required by downstream scripts; server ignores the key value
 OPENAI_API_KEY=${OPENAI_API_KEY:-"None"}

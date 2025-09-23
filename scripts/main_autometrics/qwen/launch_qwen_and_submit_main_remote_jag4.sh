@@ -81,7 +81,7 @@ HOST=${HOST:-$(hostname -f)}
 TP=${TP:-"4"}
 DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen_run2"}
 
 echo "[Main Orchestrator JAG4] Starting Qwen server on ${HOST}:${PORT}"
 

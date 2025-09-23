@@ -82,7 +82,7 @@ HOST=${HOST:-$(hostname -f)}
 TP=${TP:-"2"}
 DTYPE=${DTYPE:-"float16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/main_runs/autometrics/qwen_run2"}
 
 echo "[Main Orchestrator (sphinx2)] Starting Qwen server on ${HOST}:${PORT}"
 
@@ -161,7 +161,7 @@ submit_one() {
     --output="logs/${job_name}_%j.out" \
     --error="logs/${job_name}_%j.err" \
     --export=${envs} \
-    scripts/main_autometrics/qwen/run_autometrics_qwen_remote.sh | awk '{print $4}')
+    scripts/main_autometrics/qwen/run_autometrics_qwen_remote_cpu.sh | awk '{print $4}')
   echo "[Main Orchestrator (sphinx2)] Submitted job_name=${job_name} seed=${seed} => job ${jid}"
 }
 

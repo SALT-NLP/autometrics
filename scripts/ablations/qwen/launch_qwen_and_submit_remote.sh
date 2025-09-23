@@ -81,7 +81,7 @@ HOST=${HOST:-$(hostname -f)}
 TP=${TP:-"2"}
 DTYPE=${DTYPE:-"bfloat16"}
 MEM_FRACTION=${MEM_FRACTION:-"0.8"}
-OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/qwen_remote"}
+OUTPUT_ROOT=${OUTPUT_ROOT:-"results/ablations/qwen_remote_run2"}
 
 echo "[Orchestrator] Starting Qwen server on ${HOST}:${PORT}"
 echo "[Orchestrator] Model: ${MODEL_PATH} (tp=${TP}, dtype=${DTYPE})"

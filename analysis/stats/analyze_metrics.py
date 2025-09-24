@@ -150,7 +150,7 @@ def write_types_csv(
 
 def _pretty_category_name(cat: str) -> str:
     mapping = {
-        "llm_judge": "LLM Judge",
+        "llm_judge": "Single Criteria",
         "rubric": "Rubric",
         "examples_judge": "Examples Judge",
         "optimized_judge": "Optimized Judge",
@@ -440,4 +440,4 @@ if __name__ == "__main__":
 
 
 # Example usage:
-# python /nlp/scr2/nlp/personal-rm/autometrics/analysis/stats/analyze_metrics.py
+# python /nlp/scr2/nlp/personal-rm/autometrics/analysis/stats/analyze_metrics.py --compact

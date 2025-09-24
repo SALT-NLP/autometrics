@@ -810,6 +810,94 @@ def make_main_table_ci_overlap(main_aggr: Dict[str, Dict[Tuple[str, str], List[f
     lines.append(footer)
     return "\n".join(lines)
 
+def make_main_table_best_vs_second_ci(main_aggr: Dict[str, Dict[Tuple[str, str], List[float]]], corr_type: str, model_name: str) -> str:
+    """Variant where only the best method is textbf{bold} if its 95% CI excludes the second-best mean; otherwise the best is underline{underlined}. No styling for non-best methods."""
+    header = r"""\begin{table*}[h]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lccc|ccc}
+        \toprule
+        \rowcolor[gray]{0.9}
+         & \multicolumn{3}{c|}{\textbf{In-Distribution}} & \multicolumn{3}{c}{\textbf{Out-of-Distribution}} \\
+        \rowcolor[gray]{0.9}
+        Method & SimpEval & Primock57 & HelpSteer & EvalGen & RealHumanEval & CoGym \\
+        \midrule
+    """
+
+    lines: List[str] = [header]
+
+    main_ds_pairs: List[Tuple[str, str]] = [
+        ("SimpEval", "score"),
+        ("Primock57", "time_sec"),
+        ("HelpSteer2", "helpfulness"),
+        ("EvalGenProduct", "grade"),
+        ("RealHumanEval", "accepted"),
+        ("CoGymTravel", "outcomeRating"),
+    ]
+
+    def get_mean_ci(method: str, ds_tg: Tuple[str, str]) -> Tuple[float, Optional[float]]:
+        values = main_aggr.get(method, {}).get(ds_tg, [])
+        return compute_mean_ci(values)
+
+    for group_index, (group_name, rows) in enumerate(ABLATION_GROUPS):
+        lines.append(f"        \\rowcolor[gray]{{0.85}} \\multicolumn{{7}}{{l}}{{\\textbf{{{group_name}}}}} \\\\")
+
+        group_methods = [method_row_name for method_row_name, _ in rows]
+
+        # Pre-compute per-column top set and second-best mean
+        per_column_info: Dict[Tuple[str, str], Tuple[set, Optional[float]]] = {}
+        for ds_tg in main_ds_pairs:
+            means_by_method: Dict[str, float] = {}
+            for m in group_methods:
+                mean, _ci = get_mean_ci(m, ds_tg)
+                if not math.isnan(mean):
+                    means_by_method[m] = mean
+            if not means_by_method:
+                per_column_info[ds_tg] = (set(), None)
+                continue
+            top_val = max(means_by_method.values())
+            top_set = {m for m, v in means_by_method.items() if v == top_val}
+            lower_vals = [v for v in means_by_method.values() if v < top_val]
+            second_mean = max(lower_vals) if lower_vals else None
+            per_column_info[ds_tg] = (top_set, second_mean)
+
+        for method_row_name, _ in rows:
+            def style_cell(ds_tg: Tuple[str, str]) -> str:
+                top_set, second_mean = per_column_info.get(ds_tg, (set(), None))
+                mean, ci = get_mean_ci(method_row_name, ds_tg)
+                value_str = format_value(mean, ci)
+                if method_row_name not in top_set or math.isnan(mean) or second_mean is None:
+                    return value_str
+                margin = ci if ci is not None else 0.0
+                lower = mean - margin
+                # Bold if second-best mean is strictly below the lower bound of top's 95% CI
+                if second_mean < lower:
+                    return f"\\textbf{{{value_str}}}"
+                # Otherwise underline to denote best but not significantly better
+                return f"\\underline{{{value_str}}}"
+
+            d1 = style_cell(("SimpEval", "score"))
+            d2 = style_cell(("Primock57", "time_sec"))
+            d3 = style_cell(("HelpSteer2", "helpfulness"))
+            d4 = style_cell(("EvalGenProduct", "grade"))
+            d5 = style_cell(("RealHumanEval", "accepted"))
+            d6 = style_cell(("CoGymTravel", "outcomeRating"))
+            line = f"        {method_row_name:<30} & " + " & ".join([d1, d2, d3, d4, d5, d6]) + " \\\\" 
+            lines.append(line)
+        if group_index < len(ABLATION_GROUPS) - 1:
+            lines.append(r"        \\midrule")
+
+    footer = rf"""
+        \bottomrule
+    \end{{tabular}}
+    }}
+    \caption{{Performance ({corr_type.title()} correlation). Cells are \textbf{{bold}} when the best method's 95\% CI excludes the second-best mean (significantly best), and \underline{{underlined}} when best but not significantly better. Model: {model_name}.}}
+    \label{{tab:ablations_best_vs_second_{corr_type}}}
+\end{{table*}}"""
+
+    lines.append(footer)
+    return "\n".join(lines)
+
 def make_aux_table(aux_aggr: Dict[str, Dict[Tuple[str, str], List[float]]], corr_type: str, model_name: str) -> Optional[str]:
     if not aux_aggr:
         return None
@@ -934,6 +1022,12 @@ def main() -> None:
     main_overlap_path.write_text(main_overlap_tex)
     logging.info(f"Main (CI-overlap) LaTeX table → {main_overlap_path}")
 
+    # Build best-vs-second CI significance variant
+    main_best_vs_second_tex = make_main_table_best_vs_second_ci(main_aggr, args.corr_type, model_display_name)
+    main_best_vs_second_path = args.out_root / f"ablations_main_best_vs_second_{args.corr_type}_{model_safe_name}.tex"
+    main_best_vs_second_path.write_text(main_best_vs_second_tex)
+    logging.info(f"Main (best-vs-second CI) LaTeX table → {main_best_vs_second_path}")
+
     aux_table_tex = make_aux_table(aux_aggr, args.corr_type, model_display_name)
     if aux_table_tex:
         aux_tex_path = args.out_root / f"ablations_aux_{args.corr_type}_{model_safe_name}.tex"
@@ -950,6 +1044,8 @@ def main() -> None:
     print(f"Main LaTeX: {main_tex_path}")
     if aux_table_tex:
         print(f"Aux LaTeX: {aux_tex_path}")
+    print(f"Main (CI-overlap) LaTeX: {main_overlap_path}")
+    print(f"Main (best-vs-second CI) LaTeX: {main_best_vs_second_path}")
 
 
 if __name__ == "__main__":

@@ -140,7 +140,13 @@ def build_polyline_points(
     )
 
 
-def plot_gepa(csv_path: str, out_dir: str, x_end: int = 3325) -> Tuple[str, str]:
+def plot_gepa(
+    csv_path: str,
+    out_dir: str,
+    x_end: int = 3325,
+    y_min: Optional[float] = 0.5,
+    y_max: Optional[float] = 0.8,
+) -> Tuple[str, str]:
     os.makedirs(out_dir, exist_ok=True)
     df = pd.read_csv(csv_path)
 
@@ -224,7 +230,10 @@ def plot_gepa(csv_path: str, out_dir: str, x_end: int = 3325) -> Tuple[str, str]
     # Axes and labels
     pad_right = max(10, int(0.02 * x_end))
     ax.set_xlim(0, x_end + pad_right)
-    ax.set_ylim(0.0, 1.0)
+    if y_min is not None and y_max is not None:
+        ax.set_ylim(float(y_min), float(y_max))
+    else:
+        ax.set_ylim(0.0, 1.0)
     ax.set_xlabel("Number of Rollouts")
     ax.set_ylabel("Average Pass^1 Test Score")
     ax.set_title("Tau Bench, Qwen3 32B")
@@ -243,7 +252,13 @@ def plot_gepa(csv_path: str, out_dir: str, x_end: int = 3325) -> Tuple[str, str]
     return png_path, pdf_path
 
 
-def plot_gepa_filtered_as_autometrics(csv_path: str, out_dir: str, x_end: int = 3325) -> Tuple[str, str]:
+def plot_gepa_filtered_as_autometrics(
+    csv_path: str,
+    out_dir: str,
+    x_end: int = 3325,
+    y_min: Optional[float] = 0.5,
+    y_max: Optional[float] = 0.8,
+) -> Tuple[str, str]:
     os.makedirs(out_dir, exist_ok=True)
     df = pd.read_csv(csv_path)
 
@@ -328,7 +343,10 @@ def plot_gepa_filtered_as_autometrics(csv_path: str, out_dir: str, x_end: int = 
     # Axes and labels
     pad_right = max(10, int(0.02 * x_end))
     ax.set_xlim(0, x_end + pad_right)
-    ax.set_ylim(0.0, 1.0)
+    if y_min is not None and y_max is not None:
+        ax.set_ylim(float(y_min), float(y_max))
+    else:
+        ax.set_ylim(0.0, 1.0)
     ax.set_xlabel("Number of Rollouts")
     ax.set_ylabel("Average Pass^1 Test Score")
     ax.set_title("Tau Bench, Qwen3 32B")
@@ -364,12 +382,31 @@ def main() -> None:
         default=3325,
         help="Maximum number of rollouts on the x-axis (default: 3325)",
     )
+    parser.add_argument(
+        "--y-min",
+        type=float,
+        default=0.5,
+        help="Lower bound of y-axis (default: 0.5). Use together with --y-max.",
+    )
+    parser.add_argument(
+        "--y-max",
+        type=float,
+        default=0.8,
+        help="Upper bound of y-axis (default: 0.9). Use together with --y-min.",
+    )
     args = parser.parse_args()
 
-    png_path, pdf_path = plot_gepa(args.csv, args.out_dir, x_end=args.x_end)
+    # Validate y bounds
+    y_min: Optional[float] = args.y_min
+    y_max: Optional[float] = args.y_max
+    if y_min is not None and y_max is not None:
+        if not (0.0 <= y_min < y_max <= 1.0):
+            raise ValueError(f"Invalid y range: y_min={y_min}, y_max={y_max}. Must satisfy 0.0 <= y_min < y_max <= 1.0")
+
+    png_path, pdf_path = plot_gepa(args.csv, args.out_dir, x_end=args.x_end, y_min=y_min, y_max=y_max)
     print(f"Wrote figures (original): {png_path}, {pdf_path}")
 
-    png_path2, pdf_path2 = plot_gepa_filtered_as_autometrics(args.csv, args.out_dir, x_end=args.x_end)
+    png_path2, pdf_path2 = plot_gepa_filtered_as_autometrics(args.csv, args.out_dir, x_end=args.x_end, y_min=y_min, y_max=y_max)
     print(f"Wrote figures (filtered-as-AutoMetrics): {png_path2}, {pdf_path2}")
 
 

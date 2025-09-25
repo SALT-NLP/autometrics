@@ -1,55 +1,141 @@
 # autometrics
-Research Repo for the AutoMetrics library
+AutoMetrics: Automatically discover, generate, and aggregate evaluation metrics for NLP tasks.
 
-This README is in progress!  Right now it will give useful pointers for navigating the repo!
+Autometrics helps you evaluate text generation systems by:
 
-The pipeline for recommending metrics works as follows:
-1. Accept Human Labelled outputs and open ended feedback
-2. Retrieve relevant metrics from 100s in our metric bank
-3. Generate LLM as a Judge Rubrics based on human feedback
-4. Aggregate into a single metric using Regression
-5. Output Top-k relevant metrics, a single metric regression, and a metric report card
+1. Generating task-specific candidate metrics with LLMs (LLM-as-a-judge, rubric/code generated metrics)
+2. Retrieving the most relevant metrics from a bank of 40+ built-in metrics
+3. Evaluating all metrics on your dataset (reference-free and reference-based)
+4. Selecting the top metrics using regression
+5. Aggregating them into a single, optimized metric and producing a report card
 
-The parts of the repo are organized as follows:
-- `inputs`: Right now these come in the form of `datasets`
-    - Located at `autometrics/dataset/datasets` with the main class `autometrics/dataset/Dataset.py`
-- `metrics`: All the metrics in the bank that we will retreive
-    - Located at `autometrics/metrics`
-- `LLM as a Judge`: The code for generating LLM-as-a-judge rubrics based on feedback
-    - Located at `autometrics/metrics/llm_judge`.  There are several types to experiment with
-- `Aggregate`: The regression code for taking multiple metrics and learning a regression
-    - Located at `autometrics/aggregator`.  Specifically `autometrics/aggregator/regression` for the regression based methods.
-- `Evaluate`: For some tasks we compute accuracy of scores (i.e. pairwise) and some we compute correlation (i.e. scalar human labels).  Eventually some more evaluations of our metrics will go here, notably this is not for metrics that measure text quality themselves.
-    - Located at `autometrics/evaluate`.
-- `Test`: Unit tests and functionality tests
-    - Located at `autometrics/test`. Contains tests for caching and other features.
+The repository includes simple scripts, examples, notebooks, and a full library to run the end-to-end pipeline.
 
-# Getting started
+## Quickstart
 
-Make sure to install the necessary packages listed in `requirements.txt`.  Notably there could be some requirements missing so it would be amazing to collaborate on updating `requirements.txt` if anything is found to be lacking!
+1) Install dependencies
 
-## Java Requirements
+```bash
+pip install -r requirements.txt
+```
 
-This package requires Java Development Kit (JDK) 21 for some of its search functionality. You can install it using one of these methods:
+2) Ensure Java 21 is installed (required by some retrieval components). See Java section below.
 
-### Ubuntu/Debian
+3) Set an API key for an OpenAI-compatible endpoint (for LLM-based generation/judging):
+
+```bash
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+4) Run the simplest end-to-end example with sensible defaults:
+
+```bash
+python autometrics_simple_example.py
+```
+
+This will:
+
+- load the `HelpSteer` dataset
+- generate and retrieve metrics
+- select top-k via regression
+- print a summary and report card
+
+For a power-user example with customization, run:
+
+```bash
+python autometrics_example.py
+```
+
+## Examples and Tutorials
+
+- Simple script with all defaults: `autometrics_simple_example.py`
+- Power-user/custom configuration: `autometrics_example.py`
+- Integration demo on SimpDA with Qwen3-32B: `autometrics/examples/run_autometrics_integration.py`
+- LLM-as-a-judge (G-Eval) standalone usage: `autometrics/examples/llm_judge_geval_example.py`
+- Notebook tutorials: `tutorial.ipynb`, `demo.ipynb`
+- Text walkthrough tutorial: `TUTORIAL.md` and runnable `tutorial.py`
+
+If you prefer an experiments-style entry point with CLI arguments, see:
+
+```bash
+python analysis/main_experiments/run_main_autometrics.py <dataset_name> <target_name> <seed> <output_dir>
+```
+
+There are also convenience scripts in `analysis/` for ablations and scaling.
+
+## Repository Structure
+
+- `autometrics/dataset/datasets`: Built-in datasets (e.g., `helpsteer`, `simplification`, `evalgen`, `iclr`, ...). The main dataset interface lives in `autometrics/dataset/Dataset.py`.
+- `autometrics/metrics`: Metric implementations and utilities. See `autometrics/metrics/README.md` for how to write new metrics.
+- `autometrics/metrics/llm_judge`: LLM-as-a-judge rubric generators (e.g., G-Eval, Prometheus-style, example-based).
+- `autometrics/aggregator/regression`: Regression-based selection/aggregation (Lasso, Ridge, ElasticNet, PLS, etc.).
+- `autometrics/recommend`: Metric retrieval modules (BM25/ColBERT/LLMRec and `PipelinedRec`).
+- `autometrics/examples`: Small runnable examples demonstrating specific features.
+- `autometrics/test`: Unit and integration tests, including caching behavior and generator tests.
+- `analysis/`: Experiment drivers (CLI), ablations, robustness/scaling studies, and utilities.
+
+## Basic Usage (Library)
+
+```python
+import os
+import dspy
+from autometrics.autometrics import Autometrics
+from autometrics.dataset.datasets.helpsteer.helpsteer import HelpSteer
+
+os.environ["OPENAI_API_KEY"] = "your-key-here"
+
+dataset = HelpSteer()
+generator_llm = dspy.LM("openai/gpt-4o-mini")
+judge_llm = dspy.LM("openai/gpt-4o-mini")
+
+autometrics = Autometrics()
+results = autometrics.run(
+    dataset=dataset,
+    target_measure="helpfulness",
+    generator_llm=generator_llm,
+    judge_llm=judge_llm,
+)
+
+print([m.get_name() for m in results['top_metrics']])
+print(results['regression_metric'].get_name())
+```
+
+For more advanced configuration (custom generators, retrieval pipelines, priors, parallelism), see `TUTORIAL.md`.
+
+## System Requirements
+
+### Python
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Some metrics require GPUs. You can inspect GPU memory needs by checking `gpu_mem` on metric classes. Many metrics run on CPU.
+
+### Java (required for certain retrieval options)
+
+This package requires Java Development Kit (JDK) 21 for some of its search functionality.
+
+#### Ubuntu/Debian
 ```bash
 sudo apt update
 sudo apt install openjdk-21-jdk
 ```
 
-### macOS (using Homebrew)
+#### macOS (using Homebrew)
 ```bash
 brew install openjdk@21
 ```
 
-### Windows
-Download and install from [Oracle's website](https://www.oracle.com/java/technologies/downloads/#java21) or use [Chocolatey](https://chocolatey.org/):
+#### Windows
+Download and install from `https://www.oracle.com/java/technologies/downloads/#java21` or use Chocolatey:
 ```bash
 choco install openjdk21
 ```
 
-After installation, verify your Java version:
+Verify:
 ```bash
 java -version
 ```
@@ -63,36 +149,57 @@ OpenJDK 64-Bit Server VM ...
 
 Note: Java 17 or lower versions will not work as Pyserini requires Java 21.
 
-A nice simple starting point to working with this library would be to checkout the notebook `simpda.ipynb`.  This notebook shows computing metric correlations without introducing any LLM as a Judge complexity.  Just computing all metrics and aggregating (so skipping step 2)
+## Datasets
 
-For a more in depth introduction it would be useful to check out `simpda_dspy.ipynb` which will serve as an introduction to the LLM as a Judge components of the repo.
+Built-in datasets are in `autometrics/dataset/datasets` (e.g., `HelpSteer`, `SimpDA`, `ICLR`, `RealHumanEval`, etc.). You can also construct your own via the `Dataset` class.
 
-# Disk Caching
+Minimal custom dataset example:
+
+```python
+import pandas as pd
+from autometrics.dataset.Dataset import Dataset
+
+df = pd.DataFrame({
+    'id': ['1', '2'],
+    'input': ['prompt 1', 'prompt 2'],
+    'output': ['response 1', 'response 2'],
+    'reference': ['ref 1', 'ref 2'],
+    'human_score': [4.5, 3.2]
+})
+
+dataset = Dataset(
+    dataframe=df,
+    target_columns=['human_score'],
+    ignore_columns=['id'],
+    metric_columns=[],
+    name="MyCustomDataset",
+    data_id_column="id",
+    input_column="input",
+    output_column="output",
+    reference_columns=['reference'],
+    task_description="Evaluate response quality",
+)
+```
+
+## Disk Caching
 
 The library implements disk caching for all metrics to improve performance when running scripts multiple times. Key features:
 
-- All metrics cache results by default in the `./autometrics_cache` directory (configurable via `AUTOMETRICS_CACHE_DIR` environment variable)
-- Cache keys are generated based on:
-  - Input/output/references passed to the metric
-  - All initialization parameters (automatically included by default)
-  - Any additional keyword arguments passed to the calculate method
-- All initialization parameters automatically affect caching
-  - No need to explicitly register parameters
-  - Different parameter values create separate caches
-  - For example, BERTScore with different models or LLMJudge with different prompts will use different caches
-- The following parameters are automatically excluded from the cache key:
-  - `name` and `description` (don't affect output, just labeling)
-  - `use_cache` and `cache_dir` (cache configuration, not behavior)
-- You can exclude additional parameters that don't affect results using `self.exclude_from_cache_key()`
-  - For example, debug flags or verbosity settings
-- Caching can be disabled per-metric-instance by passing `use_cache=False` during initialization
-- Some simple metrics like BLEU and SARI have caching disabled by default (`DEFAULT_USE_CACHE=False`) since their computation is faster than cache lookup
+- All metrics cache results by default in the `./autometrics_cache` directory (configurable via `AUTOMETRICS_CACHE_DIR`)
+- Cache keys include input/output/references and all initialization parameters
+- Non-behavioral parameters are excluded automatically (name, description, cache config)
+- You can exclude additional parameters via `self.exclude_from_cache_key()`
+- Disable per-metric with `use_cache=False`
+- Very fast metrics like BLEU/SARI may disable cache by default
 
-To implement caching in your own metrics, you only need to:
-1. Call the parent constructor with `super().__init__(...)`
-2. Exclude any additional parameters that don't affect results with `self.exclude_from_cache_key('param1', 'param2', ...)`
+See examples in `autometrics/test/custom_metric_caching_example.py`. For guidance on writing new metrics, see `autometrics/metrics/README.md`.
 
-See examples in `autometrics/test/custom_metric_caching_example.py`.
+## Where to Go Next
+
+- Read the tutorial: `TUTORIAL.md` (and `tutorial.ipynb`)
+- Run examples in `autometrics/examples/`
+- Browse built-in metrics under `autometrics/metrics/`
+- Explore experiment drivers in `analysis/`
 
 ## Citation
 

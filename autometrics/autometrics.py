@@ -136,6 +136,8 @@ class Autometrics:
         # Parallelization configuration
         enable_parallel_evaluation: bool = True,
         max_parallel_workers: int = 20,
+        # Drop policy for generated metrics with negative coefficients in final regression
+        drop_generated_negative_coefficients: bool = True,
     ):
         """
         Initialize the Autometrics pipeline.
@@ -196,6 +198,7 @@ class Autometrics:
         # Store parallelization configuration
         self.enable_parallel_evaluation = enable_parallel_evaluation
         self.max_parallel_workers = max_parallel_workers
+        self.drop_generated_negative_coefficients = drop_generated_negative_coefficients
 
     def run(
         self,
@@ -339,7 +342,8 @@ class Autometrics:
         except Exception:
             # Fallback to safe repr if anything unexpected happens
             print(f"[Autometrics] Top metrics: {[type(m).__name__ for m in regression_results['top_metrics']]}")
-        
+        # Note: generated-negative drop policy is applied inside regression selection
+
         # 6. Generate a report card
         print("\n[Autometrics] Step 6: Generating Report Card")
         report_card = self._generate_report_card(
@@ -1249,7 +1253,7 @@ class Autometrics:
                 'final_regression_metric': None
             }
         
-        # HotellingPLS fast-path: train once, use selected columns, and return trained instance
+        # HotellingPLS fast-path: train once, optionally drop generated-negatives, and return trained instance
         if hasattr(regression_instance, "get_selected_columns") and isinstance(regression_instance, HotellingPLS):
             regression_dataset = dataset.copy()
             regression_instance.input_metrics = metric_instances
@@ -1283,6 +1287,57 @@ class Autometrics:
                 else:
                     if metric.get_name() in selected_cols:
                         top_metrics.append(metric)
+
+            # Optionally drop generated metrics with negative coefficients and retrain
+            if self.drop_generated_negative_coefficients:
+                try:
+                    kept_metrics = self._select_metrics_after_dropping_generated_negatives(
+                        regression_metric=regression_instance,
+                        selected_metrics=top_metrics
+                    )
+                except Exception:
+                    kept_metrics = top_metrics
+            else:
+                kept_metrics = top_metrics
+
+            if kept_metrics != top_metrics:
+                try:
+                    new_reg = type(regression_instance)(
+                        name=getattr(regression_instance, 'name', None),
+                        description=getattr(regression_instance, 'description', None),
+                        input_metrics=kept_metrics,
+                        dataset=regression_dataset,
+                        selection_mode=getattr(regression_instance, 'selection_mode', 'alpha'),
+                        top_n=getattr(regression_instance, 'top_n', None),
+                        random_state=getattr(regression_instance, 'random_state', self.seed),
+                    )
+                    new_reg.learn(regression_dataset, target_column=target_measure)
+
+                    try:
+                        new_importance_pairs = new_reg.identify_important_metrics() or []
+                    except Exception:
+                        new_importance_pairs = []
+
+                    new_selected_cols = set(new_reg.get_selected_columns())
+                    new_top_metrics = []
+                    for metric in kept_metrics:
+                        if isinstance(metric, MultiMetric):
+                            if any(sub in new_selected_cols for sub in metric.get_submetric_names()):
+                                new_top_metrics.append(metric)
+                        else:
+                            if metric.get_name() in new_selected_cols:
+                                new_top_metrics.append(metric)
+
+                    dataset.add_metric(new_reg, update_dataset=True)
+                    return {
+                        'top_metrics': new_top_metrics,
+                        'regression_metric': new_reg,
+                        'importance_scores': new_importance_pairs,
+                        'final_regression_metric': new_reg,
+                        'all_metrics_importance': new_importance_pairs
+                    }
+                except Exception:
+                    pass
 
             # Add the trained regression metric to the original dataset
             dataset.add_metric(regression_instance, update_dataset=True)
@@ -1377,6 +1432,31 @@ class Autometrics:
         )
         
         final_regression.learn(regression_dataset, target_column=target_measure)
+        
+        # After training the final regression, optionally drop generated metrics with negative coefficients
+        # and refit once on the kept metrics (N may shrink as a result)
+        if self.drop_generated_negative_coefficients:
+            try:
+                kept_metrics = self._select_metrics_after_dropping_generated_negatives(
+                    regression_metric=final_regression,
+                    selected_metrics=top_n_metrics
+                )
+            except Exception as e:
+                print(f"  ⚠ Warning: Drop policy failed, continuing without dropping: {e}")
+                kept_metrics = top_n_metrics
+            
+            if kept_metrics != top_n_metrics:
+                top_n_metrics = kept_metrics
+                try:
+                    final_regression = type(regression_instance)(
+                        name=f"Autometrics_Regression_{target_measure}",
+                        description=f"Regression aggregator for {target_measure} using top {len(top_n_metrics)} metrics",
+                        dataset=regression_dataset,
+                        input_metrics=top_n_metrics
+                    )
+                    final_regression.learn(regression_dataset, target_column=target_measure)
+                except Exception as e:
+                    print(f"  ⚠ Warning: Refit after drop failed, continuing with original final regression: {e}")
         
         # Add the final regression metric to the original dataset for user access
         # This ensures users get the final regression result in their original dataset
@@ -1599,6 +1679,183 @@ The Autometrics pipeline successfully identified the most relevant metrics for e
                 print(f"    🔄 Cleared heavy attributes (preserved dspy.LM if present) for {metric.get_name()}")
         except Exception as e:
             print(f"    ⚠ Warning: Failed to unload {metric.get_name()}: {e}")
+
+    # =============================
+    # Post-Regression Drop Helpers
+    # =============================
+
+    def _is_generated_metric_class(self, metric_cls: Type[Metric]) -> bool:
+        """
+        Best-effort detection if a metric class is a generated metric.
+        Priority: subclass check against known generated base classes; fallback to module path heuristic.
+        """
+        try:
+            from autometrics.metrics.generated.GeneratedLLMJudgeMetric import GeneratedLLMJudgeMetric
+        except Exception:
+            GeneratedLLMJudgeMetric = None  # type: ignore
+        try:
+            from autometrics.metrics.generated.GeneratedExampleRubric import GeneratedExampleRubric
+        except Exception:
+            GeneratedExampleRubric = None  # type: ignore
+        try:
+            from autometrics.metrics.generated.GeneratedOptimizedJudge import GeneratedOptimizedJudge
+        except Exception:
+            GeneratedOptimizedJudge = None  # type: ignore
+        try:
+            from autometrics.metrics.generated.GeneratedGEvalMetric import GeneratedGEvalMetric
+        except Exception:
+            GeneratedGEvalMetric = None  # type: ignore
+        try:
+            from autometrics.metrics.generated.GeneratedPrometheus import GeneratedPrometheus
+        except Exception:
+            GeneratedPrometheus = None  # type: ignore
+        try:
+            from autometrics.metrics.generated.GeneratedFinetunedMetric import GeneratedFinetunedMetric
+        except Exception:
+            GeneratedFinetunedMetric = None  # type: ignore
+        try:
+            from autometrics.metrics.generated.GeneratedCodeMetric import GeneratedCodeMetric
+        except Exception:
+            GeneratedCodeMetric = None  # type: ignore
+        try:
+            from autometrics.metrics.generated.GeneratedRefBasedMetric import GeneratedRefBasedMetric
+        except Exception:
+            GeneratedRefBasedMetric = None  # type: ignore
+        try:
+            from autometrics.metrics.generated.GeneratedRefFreeMetric import GeneratedRefFreeMetric
+        except Exception:
+            GeneratedRefFreeMetric = None  # type: ignore
+
+        generated_bases = [
+            b for b in [
+                GeneratedLLMJudgeMetric,
+                GeneratedExampleRubric,
+                GeneratedOptimizedJudge,
+                GeneratedGEvalMetric,
+                GeneratedPrometheus,
+                GeneratedFinetunedMetric,
+                GeneratedCodeMetric,
+                GeneratedRefBasedMetric,
+                GeneratedRefFreeMetric,
+            ] if b is not None
+        ]
+
+        try:
+            if any(issubclass(metric_cls, b) for b in generated_bases):
+                return True
+        except Exception:
+            pass
+
+        # Fallback heuristic: module path contains ".metrics.generated."
+        try:
+            module_path = getattr(metric_cls, "__module__", "") or ""
+            if ".metrics.generated." in module_path:
+                return True
+        except Exception:
+            pass
+        return False
+
+    def _select_metrics_after_dropping_generated_negatives(self, regression_metric: Any, selected_metrics: List[Metric]) -> List[Metric]:
+        """
+        Return a filtered list with generated metrics removed if their coefficients are negative.
+        Existing metrics are preserved. If all selected metrics are generated and all have
+        negative coefficients, return the original list (do not drop any).
+        """
+        try:
+            model = getattr(regression_metric, 'model', None)
+            if model is None or not hasattr(model, 'coef_'):
+                return selected_metrics
+
+            # Feature names used by the fitted regression (preferred order)
+            try:
+                feature_names = list(regression_metric.get_selected_columns())
+            except Exception:
+                try:
+                    feature_names = list(regression_metric.get_input_columns())
+                except Exception:
+                    return selected_metrics
+
+            if not feature_names:
+                return selected_metrics
+
+            coef = getattr(model, 'coef_', None)
+            if coef is None:
+                return selected_metrics
+
+            # Normalize to 1D array of length n_features
+            import numpy as _np
+            coef_arr = _np.array(coef)
+            if coef_arr.ndim == 2 and coef_arr.shape[0] == 1:
+                coef_vec = coef_arr[0]
+            else:
+                coef_vec = coef_arr
+            if coef_vec.shape[0] != len(feature_names):
+                # Shape mismatch; safer to abort
+                return selected_metrics
+
+            name_to_idx = {name: i for i, name in enumerate(feature_names)}
+
+            # Map metrics to their feature indices
+            def _features_for_metric(metric: Metric) -> List[int]:
+                try:
+                    if isinstance(metric, MultiMetric):
+                        cols = metric.get_submetric_names() or []
+                    else:
+                        cols = [metric.get_name()]
+                except Exception:
+                    cols = []
+                return [name_to_idx[c] for c in cols if c in name_to_idx]
+
+            metric_indices = {m: _features_for_metric(m) for m in selected_metrics}
+
+            # Determine which generated metrics have any negative coefficient
+            generated_negative_metrics = []
+            for m, idxs in metric_indices.items():
+                if not idxs:
+                    continue
+                try:
+                    is_generated = self._is_generated_metric_class(type(m))
+                except Exception:
+                    is_generated = False
+                if not is_generated:
+                    continue
+                # Any negative among this metric's coefficients?
+                try:
+                    if any(float(coef_vec[i]) < 0.0 for i in idxs):
+                        generated_negative_metrics.append(m)
+                except Exception:
+                    continue
+
+            if not generated_negative_metrics:
+                return selected_metrics
+
+            # Sanity check: if all selected metrics are generated and all have negative coeffs, keep all
+            try:
+                all_selected_generated = all(self._is_generated_metric_class(type(m)) for m in selected_metrics if m is not None)
+                if all_selected_generated and len(generated_negative_metrics) == len([m for m in selected_metrics if m is not None]):
+                    print("[Autometrics] All selected metrics are generated with negative coefficients; skipping drop policy")
+                    return selected_metrics
+            except Exception:
+                pass
+            # Build and return filtered list
+            kept = [m for m in selected_metrics if m not in generated_negative_metrics]
+            try:
+                if len(kept) < len(selected_metrics):
+                    dropped_metric_names = []
+                    for m in selected_metrics:
+                        if m in generated_negative_metrics:
+                            try:
+                                dropped_metric_names.append(m.get_name())
+                            except Exception:
+                                dropped_metric_names.append(type(m).__name__)
+                    print(f"[Autometrics] Dropping generated metrics with negative coefficients: {dropped_metric_names}")
+            except Exception:
+                pass
+            return kept
+
+        except Exception as e:
+            print(f"[Autometrics] Warning: Error applying drop policy: {e}")
+            return selected_metrics
 
 # =============================
 # End of Autometrics Pipeline Scaffold

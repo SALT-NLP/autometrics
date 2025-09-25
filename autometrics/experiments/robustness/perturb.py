@@ -17,12 +17,7 @@ Your primary focus should be on degrading performance along the specified Dimens
 2. Under the heading **Strategies:**, list **1–3** numbered, high-level perturbation strategies.  
    - Each strategy should be a short phrase (5–15 words) naming the category of change, followed by one concise sentence of abstract explanation.  
    - Do **not** include concrete rewrites, instance-specific examples, or example sentences.  
-
-Task: Given a complicated original sentence, simplify it so a broader audience can easily understand it.  
-Example Input: after the jerilderie raid, the gang laid low for 16 months evading capture.  
-Example Reference: after the jerilderie raid, the gang laid low for 16 months avoiding capture.  
-Example Output: after the jerilderie raid, the gang successfully hid for 16 months.  
-Dimension: Meaning Preservation"""
+"""
     task: str = dspy.InputField(description="The task that the model was originally trying to complete")
     example_sets: list[str] = dspy.InputField(description="Example inputs, outputs, and (optionally) references showcasing the model's performance on the task")
     dimension: str = dspy.InputField(description="The dimension to prioritize for the perturbation (this should be the aspect of the model output that is most impacted by the perturbation)")

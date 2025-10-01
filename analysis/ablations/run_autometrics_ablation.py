@@ -177,6 +177,7 @@ def run_ablation(
     no_metric_cards: bool = False,
     force_reindex: bool = False,
     resized: bool = False,
+    eval_all_top_metrics: bool = True,
 ) -> Dict[str, float]:
     existing = check_experiment_completed(output_dir, seed)
     if existing is not None:
@@ -283,7 +284,7 @@ def run_ablation(
         autometrics_kwargs['metric_bank'] = []
     # For 'full', we pass nothing so Autometrics uses its own defaults
 
-    autometrics = Autometrics(**autometrics_kwargs)
+    autometrics = Autometrics(drop_generated_negative_coefficients=False, **autometrics_kwargs)
 
     print("⚡ Running pipeline on training set…")
     results = autometrics.run(
@@ -312,6 +313,23 @@ def run_ablation(
         print(f"⚠️ Failed to export static regression: {_exp_e}")
 
     print("📈 Evaluating on validation split…")
+    if eval_all_top_metrics:
+        # Ensure ALL top metrics are computed on the validation split using Autometrics' parallel-first logic
+        try:
+            print("🧪 Computing all top metrics on validation split (parallel-first, GPU-aware)...")
+            eval_helper = Autometrics(seed=seed)
+            metric_classes = []
+            for m in results['top_metrics']:
+                metric_classes.append(m if isinstance(m, type) else type(m))
+            eval_helper._evaluate_metrics_on_dataset(val_dataset, metric_classes)
+        except Exception as _e:
+            print(f"⚠️ Warning: parallel evaluation of top metrics on val failed: {_e}. Falling back to sequential add_metric().")
+            try:
+                for metric in results['top_metrics']:
+                    val_dataset.add_metric(metric, update_dataset=True)
+            except Exception as _e2:
+                print(f"⚠️ Warning: failed to compute some top metrics on val sequentially: {_e2}")
+
     val_scores, val_p_values = evaluate_on_validation(regression_metric, val_dataset, target_name)
 
     print("✅ Validation correlations:")
@@ -429,6 +447,7 @@ def main():
     parser.add_argument("--no-metric-cards", action="store_true", help="Use description-only documents for retrieval and reranking (separate indices)")
     parser.add_argument("--force-reindex", action="store_true", help="Force retriever reindex (avoid cached indices)")
     parser.add_argument("--resized", action="store_true", help="Use resized dataset (for train and val splits of EvalGenProduct and CoGymTravelOutcome)")
+    parser.add_argument("--no-eval-all-top-metrics", dest="eval_all_top_metrics", action="store_false", default=True, help="Disable computing all top_metrics on validation split (enabled by default)")
 
     args = parser.parse_args()
 
@@ -452,6 +471,7 @@ def main():
             no_metric_cards=args.no_metric_cards,
             force_reindex=args.force_reindex,
             resized=args.resized,
+            eval_all_top_metrics=args.eval_all_top_metrics,
         )
         print("\n🎉 Final validation correlations:")
         for corr_type, score in scores.items():

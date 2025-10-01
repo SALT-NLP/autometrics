@@ -211,6 +211,7 @@ def run_autometrics_experiment(
     judge_model_name: Optional[str] = None,
     api_base: Optional[str] = None,
     skip_mipro: bool = False,
+    eval_all_top_metrics: bool = True,
 ) -> Dict[str, float]:
     """Run a single autometrics experiment."""
     
@@ -334,7 +335,8 @@ def run_autometrics_experiment(
             generated_metrics_dir=generated_metrics_dir,
             metric_generation_configs=generator_configs,
             seed=seed,
-            full_bank_data_cutoff=105 if dataset_name != "TauBenchBigger" and dataset_name != "TauBenchHighTemperature" else 10000
+            full_bank_data_cutoff=105 if dataset_name != "TauBenchBigger" and dataset_name != "TauBenchHighTemperature" else 10000,
+            drop_generated_negative_coefficients=False
         )
         
         # Run autometrics pipeline on training data
@@ -365,12 +367,30 @@ def run_autometrics_experiment(
         
         # Evaluate on test set
         print(f"📈 Evaluating regression metric on test set...")
-        # Ensure constituent top metrics are computed on the test split before regression prediction
-        try:
-            for metric in results['top_metrics']:
-                test_dataset.add_metric(metric, update_dataset=True)
-        except Exception as _e:
-            print(f"⚠️ Warning: failed to precompute top metrics on test: {_e}")
+        if eval_all_top_metrics:
+            # Ensure ALL top metrics are computed on the test split using Autometrics' parallel-first logic
+            try:
+                print("🧪 Computing all top metrics on test split (parallel-first, GPU-aware)...")
+                eval_helper = Autometrics(seed=seed)
+                metric_classes = []
+                for m in results['top_metrics']:
+                    # Convert instances to classes if needed
+                    metric_classes.append(m if isinstance(m, type) else type(m))
+                eval_helper._evaluate_metrics_on_dataset(test_dataset, metric_classes)
+            except Exception as _e:
+                print(f"⚠️ Warning: parallel evaluation of top metrics on test failed: {_e}. Falling back to sequential add_metric().")
+                try:
+                    for metric in results['top_metrics']:
+                        test_dataset.add_metric(metric, update_dataset=True)
+                except Exception as _e2:
+                    print(f"⚠️ Warning: failed to compute some top metrics on test sequentially: {_e2}")
+        else:
+            # Original behavior: minimally precompute constituents to support regression prediction
+            try:
+                for metric in results['top_metrics']:
+                    test_dataset.add_metric(metric, update_dataset=True)
+            except Exception as _e:
+                print(f"⚠️ Warning: failed to precompute top metrics on test: {_e}")
         test_scores, test_p_values = evaluate_regression_on_test(regression_metric, test_dataset, target_name, results['top_metrics'])
         
         print(f"✅ Test correlations:")
@@ -516,6 +536,7 @@ def main():
     parser.add_argument("--model-name", dest="model_name", type=str, default=None, help="LLM model name (e.g., openai/gpt-5-mini)")
     parser.add_argument("--api-base", dest="api_base", type=str, default=None, help="API base URL for OpenAI-compatible endpoints")
     parser.add_argument("--skip-mipro", action="store_true", help="Skip Mipro (typically used because MIPRO changes the lm temperature and new openai models do not support it)")
+    parser.add_argument("--no-eval-all-top-metrics", dest="eval_all_top_metrics", action="store_false", default=True, help="Disable computing all top_metrics on test/eval splits (enabled by default)")
     args = parser.parse_args()
 
     # Check for API key
@@ -534,6 +555,7 @@ def main():
             judge_model_name=args.model_name,
             api_base=args.api_base,
             skip_mipro=args.skip_mipro,
+            eval_all_top_metrics=args.eval_all_top_metrics,
         )
         print(f"\n🎉 Final test correlations:")
         for corr_type, score in scores.items():

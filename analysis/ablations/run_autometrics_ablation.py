@@ -178,6 +178,7 @@ def run_ablation(
     force_reindex: bool = False,
     resized: bool = False,
     eval_all_top_metrics: bool = True,
+    eval_all_retrieved_metrics: bool = True,
 ) -> Dict[str, float]:
     existing = check_experiment_completed(output_dir, seed)
     if existing is not None:
@@ -313,6 +314,22 @@ def run_ablation(
         print(f"⚠️ Failed to export static regression: {_exp_e}")
 
     print("📈 Evaluating on validation split…")
+    if eval_all_retrieved_metrics:
+        # Compute ALL retrieved metrics (top-k from retrieval) on the validation split
+        try:
+            print("🧪 Computing all retrieved metrics on validation split (parallel-first, GPU-aware)...")
+            eval_helper = Autometrics(seed=seed)
+            metric_classes = []
+            for m in results['retrieved_metrics']:
+                metric_classes.append(m if isinstance(m, type) else type(m))
+            eval_helper._evaluate_metrics_on_dataset(val_dataset, metric_classes)
+        except Exception as _e:
+            print(f"⚠️ Warning: parallel evaluation of retrieved metrics on val failed: {_e}. Falling back to sequential add_metric().")
+            try:
+                for metric in results['retrieved_metrics']:
+                    val_dataset.add_metric(metric, update_dataset=True)
+            except Exception as _e2:
+                print(f"⚠️ Warning: failed to compute some retrieved metrics on val sequentially: {_e2}")
     if eval_all_top_metrics:
         # Ensure ALL top metrics are computed on the validation split using Autometrics' parallel-first logic
         try:
@@ -448,6 +465,7 @@ def main():
     parser.add_argument("--force-reindex", action="store_true", help="Force retriever reindex (avoid cached indices)")
     parser.add_argument("--resized", action="store_true", help="Use resized dataset (for train and val splits of EvalGenProduct and CoGymTravelOutcome)")
     parser.add_argument("--no-eval-all-top-metrics", dest="eval_all_top_metrics", action="store_false", default=True, help="Disable computing all top_metrics on validation split (enabled by default)")
+    parser.add_argument("--no-eval-all-retrieved-metrics", dest="eval_all_retrieved_metrics", action="store_false", default=True, help="Disable computing all retrieved metrics (top-k from retrieval) on validation split (enabled by default)")
 
     args = parser.parse_args()
 
@@ -472,6 +490,7 @@ def main():
             force_reindex=args.force_reindex,
             resized=args.resized,
             eval_all_top_metrics=args.eval_all_top_metrics,
+            eval_all_retrieved_metrics=args.eval_all_retrieved_metrics,
         )
         print("\n🎉 Final validation correlations:")
         for corr_type, score in scores.items():

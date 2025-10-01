@@ -212,6 +212,7 @@ def run_autometrics_experiment(
     api_base: Optional[str] = None,
     skip_mipro: bool = False,
     eval_all_top_metrics: bool = True,
+    eval_all_retrieved_metrics: bool = True,
 ) -> Dict[str, float]:
     """Run a single autometrics experiment."""
     
@@ -367,6 +368,22 @@ def run_autometrics_experiment(
         
         # Evaluate on test set
         print(f"📈 Evaluating regression metric on test set...")
+        if eval_all_retrieved_metrics:
+            # Compute ALL retrieved metrics (top-k from retrieval) on the test split
+            try:
+                print("🧪 Computing all retrieved metrics on test split (parallel-first, GPU-aware)...")
+                eval_helper = Autometrics(seed=seed)
+                metric_classes = []
+                for m in results['retrieved_metrics']:
+                    metric_classes.append(m if isinstance(m, type) else type(m))
+                eval_helper._evaluate_metrics_on_dataset(test_dataset, metric_classes)
+            except Exception as _e:
+                print(f"⚠️ Warning: parallel evaluation of retrieved metrics on test failed: {_e}. Falling back to sequential add_metric().")
+                try:
+                    for metric in results['retrieved_metrics']:
+                        test_dataset.add_metric(metric, update_dataset=True)
+                except Exception as _e2:
+                    print(f"⚠️ Warning: failed to compute some retrieved metrics on test sequentially: {_e2}")
         if eval_all_top_metrics:
             # Ensure ALL top metrics are computed on the test split using Autometrics' parallel-first logic
             try:
@@ -537,6 +554,7 @@ def main():
     parser.add_argument("--api-base", dest="api_base", type=str, default=None, help="API base URL for OpenAI-compatible endpoints")
     parser.add_argument("--skip-mipro", action="store_true", help="Skip Mipro (typically used because MIPRO changes the lm temperature and new openai models do not support it)")
     parser.add_argument("--no-eval-all-top-metrics", dest="eval_all_top_metrics", action="store_false", default=True, help="Disable computing all top_metrics on test/eval splits (enabled by default)")
+    parser.add_argument("--no-eval-all-retrieved-metrics", dest="eval_all_retrieved_metrics", action="store_false", default=True, help="Disable computing all retrieved metrics (top-k from retrieval) on test/eval splits (enabled by default)")
     args = parser.parse_args()
 
     # Check for API key
@@ -556,6 +574,7 @@ def main():
             api_base=args.api_base,
             skip_mipro=args.skip_mipro,
             eval_all_top_metrics=args.eval_all_top_metrics,
+            eval_all_retrieved_metrics=args.eval_all_retrieved_metrics,
         )
         print(f"\n🎉 Final test correlations:")
         for corr_type, score in scores.items():

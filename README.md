@@ -48,12 +48,10 @@ python autometrics_example.py
 
 ## Examples and Tutorials
 
-- Simple script with all defaults: `autometrics_simple_example.py`
-- Power-user/custom configuration: `autometrics_example.py`
-- Integration demo on SimpDA with Qwen3-32B: `autometrics/examples/run_autometrics_integration.py`
-- LLM-as-a-judge (G-Eval) standalone usage: `autometrics/examples/llm_judge_geval_example.py`
-- Notebook tutorials: `tutorial.ipynb`, `demo.ipynb`
-- Text walkthrough tutorial: `TUTORIAL.md` and runnable `tutorial.py`
+- Simple script with all defaults: `examples/autometrics_simple_example.py`
+- Power-user/custom configuration: `examples/autometrics_example.py`
+- Notebook tutorials: `examples/tutorial.ipynb`, `demo.ipynb`
+- Text walkthrough tutorial: `examples/TUTORIAL.md` and runnable `examples/tutorial.py`
 
 If you prefer an experiments-style entry point with CLI arguments, see:
 
@@ -70,7 +68,6 @@ There are also convenience scripts in `analysis/` for ablations and scaling.
 - `autometrics/metrics/llm_judge`: LLM-as-a-judge rubric generators (e.g., G-Eval, Prometheus-style, example-based).
 - `autometrics/aggregator/regression`: Regression-based selection/aggregation (Lasso, Ridge, ElasticNet, PLS, etc.).
 - `autometrics/recommend`: Metric retrieval modules (BM25/ColBERT/LLMRec and `PipelinedRec`).
-- `autometrics/examples`: Small runnable examples demonstrating specific features.
 - `autometrics/test`: Unit and integration tests, including caching behavior and generator tests.
 - `analysis/`: Experiment drivers (CLI), ablations, robustness/scaling studies, and utilities.
 
@@ -196,8 +193,7 @@ See examples in `autometrics/test/custom_metric_caching_example.py`. For guidanc
 
 ## Where to Go Next
 
-- Read the tutorial: `TUTORIAL.md` (and `tutorial.ipynb`)
-- Run examples in `autometrics/examples/`
+- Read the tutorial: `examples/TUTORIAL.md` (and `examples/tutorial.ipynb`)
 - Browse built-in metrics under `autometrics/metrics/`
 - Explore experiment drivers in `analysis/`
 
@@ -207,7 +203,7 @@ If you use this software, please cite it as below.
 
 ```
 @software{Ryan_Autometrics_2025,
-author = {Ryan, Michael J. and Zhang, Yanzhe and Salunkhe, Amol and Chu, Yi and Rahman, Emily and Xu, Di and Yang, Diyi},
+author = {Ryan, Michael J. and Zhang, Yanzhe and Salunkhe, Amol and Chu, Yi and Xu, Di and Yang, Diyi},
 license = {MIT},
 title = {{Autometrics}},
 url = {https://github.com/XenonMolecule/autometrics},

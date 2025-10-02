@@ -11,12 +11,55 @@ Autometrics helps you evaluate text generation systems by:
 
 The repository includes simple scripts, examples, notebooks, and a full library to run the end-to-end pipeline.
 
+## Installation (pip + optional extras)
+
+Install the published package (recommended):
+
+```bash
+pip install autometrics-research
+```
+
+Install with extras (examples):
+
+```bash
+pip install "autometrics-research[mauve]"
+pip install "autometrics-research[bleurt,bert-score,rouge]"
+pip install "autometrics-research[reward-models,gpu]"  # reward models + GPU accel
+```
+
+Developer install (from source):
+
+```bash
+pip install -e .
+```
+
+<details>
+  <summary>Optional extras (summary)</summary>
+
+  - fasttext: FastText classifiers (toxicity/nsfw/educational)
+  - lens: LENS metrics (LENS, LENS_SALSA)
+  - parascore: Paraphrase metrics (ParaScore/ParaScoreFree)
+  - bert-score: BERTScore
+  - bleurt: BLEURT
+  - moverscore: MOVERScore (adds pyemd)
+  - rouge: ROUGE / UpdateROUGE
+  - meteor: METEOR (adds beautifulsoup4)
+  - infolm: InfoLM (adds torchmetrics)
+  - mauve: MAUVE (evaluate + mauve-text)
+  - spacy: SummaQA (spacy + en_core_web_sm)
+  - hf-evaluate: HF evaluate wrappers (e.g., Toxicity)
+  - reward-models: Large HF reward models (accelerate + hub)
+  - readability: FKGL (textstat)
+  - gpu: FlashAttention + NV libs (optional acceleration)
+
+</details>
+
 ## Quickstart
 
 1) Install dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install autometrics-research
 ```
 
 2) Ensure Java 21 is installed (required by some retrieval components). See Java section below.

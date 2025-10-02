@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 #replace_package_name_marker
 name="autometrics-research"
 #replace_package_version_marker
-version="0.0.5"
+version="0.0.6"
 description = "Automatically generate evaluators that approximate human judgements"
 readme = "README.md"
 authors = [{ name = "Michael Ryan", email = "michaeljryan@stanford.edu" }]
@@ -94,8 +94,7 @@ mauve = [
 ]
 
 spacy = [
-    "spacy",
-    "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl"
+    "spacy"
 ]
 
 hf-evaluate = [

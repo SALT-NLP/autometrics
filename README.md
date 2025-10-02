@@ -36,21 +36,21 @@ pip install -e .
 <details>
   <summary>Optional extras (summary)</summary>
 
-  - fasttext: FastText classifiers (toxicity/nsfw/educational)
-  - lens: LENS metrics (LENS, LENS_SALSA)
-  - parascore: Paraphrase metrics (ParaScore/ParaScoreFree)
-  - bert-score: BERTScore
-  - bleurt: BLEURT
-  - moverscore: MOVERScore (adds pyemd)
-  - rouge: ROUGE / UpdateROUGE
-  - meteor: METEOR (adds beautifulsoup4)
-  - infolm: InfoLM (adds torchmetrics)
-  - mauve: MAUVE (evaluate + mauve-text)
-  - spacy: SummaQA (spacy + en_core_web_sm)
-  - hf-evaluate: HF evaluate wrappers (e.g., Toxicity)
-  - reward-models: Large HF reward models (accelerate + hub)
-  - readability: FKGL (textstat)
-  - gpu: FlashAttention + NV libs (optional acceleration)
+  - fasttext: FastText classifiers — metrics: FastTextEducationalValue, FastTextToxicity, FastTextNSFW
+  - lens: LENS metrics — metrics: LENS, LENS_SALSA
+  - parascore: Paraphrase metrics — metrics: ParaScore, ParaScoreFree
+  - bert-score: metrics: BERTScore
+  - bleurt: metrics: BLEURT
+  - moverscore: metrics: MOVERScore (adds pyemd)
+  - rouge: metrics: ROUGE, UpdateROUGE
+  - meteor: metrics: METEOR (adds beautifulsoup4)
+  - infolm: metrics: InfoLM (adds torchmetrics)
+  - mauve: metrics: MAUVE (evaluate + mauve-text)
+  - spacy: metrics: SummaQA (requires `spacy` model; install with `python -m spacy download en_core_web_sm`)
+  - hf-evaluate: HF evaluate wrappers — metrics: Toxicity; also used by some wrappers
+  - reward-models: Large HF reward models — metrics: PRMRewardModel, INFORMRewardModel, LDLRewardModel, GRMRewardModel
+  - readability: metrics: FKGL (textstat)
+  - gpu: FlashAttention + NV libs (optional acceleration; benefits large reward models)
 
 </details>
 

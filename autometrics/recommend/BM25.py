@@ -6,6 +6,7 @@ import os
 from platformdirs import user_data_dir
 import json
 import subprocess
+import warnings
 from pyserini.search.lucene import LuceneSearcher
 
 class BM25(MetricRecommender):
@@ -26,6 +27,33 @@ class BM25(MetricRecommender):
 
         # (Re-)build index if needed
         if force_reindex or not os.path.exists(self.lucene_index_path):
+            # --------------------------------------------------------------
+            # Java check (Pyserini/Lucene requires Java 21)
+            # --------------------------------------------------------------
+            def _java_major_version() -> int | None:
+                try:
+                    res = subprocess.run(["java", "-version"], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                    out = res.stderr.decode() if res.stderr else res.stdout.decode()
+                    # Expect lines like: openjdk version "21.0.x"
+                    if 'version "' in out:
+                        ver = out.split('version "', 1)[1].split('"', 1)[0]
+                        major = ver.split('.')[0]
+                        return int(major)
+                except Exception:
+                    return None
+                return None
+
+            _major = _java_major_version()
+            if _major is None or _major < 21:
+                warnings.warn(
+                    "[BM25] Java 21+ is required by Pyserini/Lucene.\n"
+                    "Install Java 21 and ensure `java -version` reports 21+, e.g.:\n"
+                    "  - Ubuntu/Debian: sudo apt install openjdk-21-jdk\n"
+                    "  - macOS: brew install openjdk@21\n"
+                    "  - Windows: https://www.oracle.com/java/technologies/downloads/#java21",
+                    RuntimeWarning,
+                )
+
             print(
                 f"Building BM25 index in {self.lucene_index_path} for {len(metric_classes)} metrics …"
             )
@@ -66,7 +94,7 @@ class BM25(MetricRecommender):
             ])
 
             if result.returncode != 0:
-                raise RuntimeError("Failed to build BM25 index")
+                raise RuntimeError("Failed to build BM25 index. Ensure Java 21+ is installed and on PATH.")
 
         # ------------------------------------------------------------------
         # Initialise Lucene searcher on the freshly built (or cached) index.

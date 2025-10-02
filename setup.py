@@ -33,8 +33,18 @@ def check_java_version():
 
 
 class CustomInstall(install):
+    """Legacy install hook.
+
+    Note: When building via PEP 517/pyproject.toml (setuptools.build_meta),
+    this install command is typically not invoked by pip. Java requirements
+    are documented in the README and should be validated at runtime by
+    components that need Java.
+    """
+
     def run(self):
-        check_java_version()
+        # Allow CI/users to bypass check if needed
+        if os.environ.get("AUTOMETRICS_SKIP_JAVA_CHECK") != "1":
+            check_java_version()
         install.run(self)
 
 
@@ -57,12 +67,13 @@ def read_requirements(path):
 
 
 setup(
-    name="autometrics",
+    # Keep metadata minimal here; the authoritative config lives in pyproject.toml
+    name="autometrics-research",
     version=read("VERSION"),
     description="Package for the autometrics project.",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests", ".github"]),
-    install_requires=read_requirements("requirements.txt"),
+    # Dependencies are declared in pyproject.toml; avoid duplication here
     cmdclass={'install': CustomInstall},
 )

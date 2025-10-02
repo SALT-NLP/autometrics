@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 #replace_package_name_marker
 name="autometrics-research"
 #replace_package_version_marker
-version="0.0.3"
+version="0.0.4"
 description = "Automatically generate evaluators that approximate human judgements"
 readme = "README.md"
 authors = [{ name = "Michael Ryan", email = "michaeljryan@stanford.edu" }]

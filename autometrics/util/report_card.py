@@ -728,6 +728,8 @@ def render_html(context: Dict[str, Any]) -> str:
     reqs = context.get('requirements', [])
     examples_html = context.get('examples_html', '')
     lm_summary = context.get('summary', '')
+    py_code = context.get('python_code', '')
+    py_filename = context.get('python_filename', 'AutoMetricsRegression.py')
 
     def html_escape(s: str) -> str:
         return (s or '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
@@ -759,6 +761,8 @@ def render_html(context: Dict[str, Any]) -> str:
     runtime_json = json.dumps(runtime)
     robustness_json = json.dumps(robustness)
     coeff_list_json = json.dumps(coeff_rows)
+    py_code_json = json.dumps(py_code)
+    py_filename_json = json.dumps(py_filename)
     page_title = html_escape(str(context.get('target_measure', 'Metric')).replace('_',' ').title())
 
     # Robustness tooltip content (brief, words only)
@@ -788,7 +792,7 @@ def render_html(context: Dict[str, Any]) -> str:
     body.dark-mode .card { background-color: #1e1e1e; border-color: #333; color: #e0e0e0; }
     body.dark-mode .table, body-dark-mode .table td { background-color: #1e1e1e; color: #e0e0e0; border-color: #333; }
   </style>
-  <script>const RC_CORR = __CORR__; const RC_RUNTIME = __RUNTIME__; const RC_ROB = __ROB__; const RC_DOCS = __DOCS__; const RC_DOCS_MAP = __DOCS_MAP__;</script>
+  <script>const RC_CORR = __CORR__; const RC_RUNTIME = __RUNTIME__; const RC_ROB = __ROB__; const RC_DOCS = __DOCS__; const RC_DOCS_MAP = __DOCS_MAP__; const RC_PY_CODE = __PY_CODE__; const RC_PY_FILENAME = __PY_FILENAME__;</script>
 </head>
 <body>
   <div class="container my-5">
@@ -800,6 +804,7 @@ def render_html(context: Dict[str, Any]) -> str:
           <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
         </div>
         <button class="btn btn-primary" onclick="window.print()">Export to PDF</button>
+        <button class="btn btn-outline-primary ms-2" type="button" onclick="downloadPython()">Export to Python</button>
       </div>
     </div>
 
@@ -1057,6 +1062,22 @@ def render_html(context: Dict[str, Any]) -> str:
       Plotly.newPlot('robustness-stab', [{x: names, y: stab, type:'bar', name:'Stability'}], Object.assign({yaxis:{title:'Stability'}}, getThemeLayout()));
     }
 
+    function downloadPython() {
+      try {
+        const code = RC_PY_CODE || '';
+        if (!code) { return; }
+        const blob = new Blob([code], { type: 'text/x-python' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const name = (RC_PY_FILENAME && typeof RC_PY_FILENAME === 'string' && RC_PY_FILENAME.trim()) ? RC_PY_FILENAME : 'AutoMetricsRegression.py';
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){ URL.revokeObjectURL(url); try { a.remove(); } catch(_){} }, 0);
+      } catch(_) { }
+    }
+
     function drawAll() { drawCorrelation(); drawRuntime(); drawRobustness(); }
     drawAll();
   </script>
@@ -1178,6 +1199,8 @@ def render_html(context: Dict[str, Any]) -> str:
             .replace('__ROB_TIP__', rob_tip_html)
             .replace('__DOCS__', json.dumps(all_metric_docs))
             .replace('__DOCS_MAP__', json.dumps(docs_map))
+            .replace('__PY_CODE__', py_code_json)
+            .replace('__PY_FILENAME__', py_filename_json)
             )
     return html
 
@@ -1341,6 +1364,21 @@ def generate_metric_report_card(
     except Exception:
         summary_text = ''
 
+    # Prepare Python export strings for embedding in the report
+    py_code_str = ''
+    py_filename = ''
+    try:
+        # Prefer explicit method to return code string without I/O if available
+        if hasattr(regression_metric, 'export_python_code') and callable(getattr(regression_metric, 'export_python_code')):
+            py_code_str = regression_metric.export_python_code(inline_generated_metrics=True, name_salt=None)
+        # Provide a friendly default filename based on target
+        base = str(getattr(regression_metric, 'name', 'AutoMetricsRegression')) or 'AutoMetricsRegression'
+        safe_base = base.replace(' ', '_').replace('-', '_')
+        py_filename = f"{safe_base}.py"
+    except Exception:
+        py_code_str = ''
+        py_filename = 'AutoMetricsRegression.py'
+
     html = render_html({
         'coefficients': coeffs,
         'correlation': correlation,
@@ -1352,6 +1390,8 @@ def generate_metric_report_card(
         'summary': summary_text,
         'target_measure': target_measure,
         'metrics_for_docs': metrics,
+        'python_code': py_code_str,
+        'python_filename': py_filename,
     })
 
     saved_path = None

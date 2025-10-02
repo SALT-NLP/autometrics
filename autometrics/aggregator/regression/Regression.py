@@ -193,6 +193,29 @@ class Regression(Aggregator):
         """
         return list(self._selected_columns) if self._selected_columns else self.get_input_columns()
 
+    def export_python_code(self, *, inline_generated_metrics: bool = True, name_salt: Optional[str] = None) -> str:
+        """
+        Return the generated standalone Python code for this regression without writing to disk.
+
+        Parameters
+        ----------
+        inline_generated_metrics: bool
+            When True, attempt to inline the Python source for any generated metrics
+            that support code generation, to produce a single-file export.
+        name_salt: Optional[str]
+            Optional suffix applied to the internal exported metric name to avoid
+            collisions with any existing AutoMetrics caches.
+
+        Returns
+        -------
+        str
+            The full Python module as a string.
+        """
+        return self._generate_python_code(
+            inline_generated_metrics=inline_generated_metrics,
+            name_salt=name_salt,
+        )
+
     # --- Dataset-free calculation paths ---------------------------------
     def _require_scaler(self):
         if self.scaler is None:
@@ -515,7 +538,7 @@ class {class_def_name}(GeneratedStaticRegressionAggregator):
         will be suffixed with the salt to avoid collisions with any existing
         AutoMetrics caches. If None, no salt is applied.
         """
-        code = self._generate_python_code(inline_generated_metrics=inline_generated_metrics, name_salt=name_salt)
+        code = self.export_python_code(inline_generated_metrics=inline_generated_metrics, name_salt=name_salt)
         import os
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, 'w', encoding='utf-8') as f:

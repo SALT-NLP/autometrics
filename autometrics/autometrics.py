@@ -9,12 +9,13 @@ from autometrics.aggregator.regression.HotellingPLS import HotellingPLS
 from autometrics.dataset.Dataset import Dataset
 from autometrics.metrics.Metric import Metric
 from autometrics.recommend.MetricRecommender import MetricRecommender
-from typing import List, Type, Optional, Dict, Any, Union
+from typing import List, Type, Optional, Dict, Any, Union, Callable
 import dspy
 import os
 import importlib.util
 import inspect
 from autometrics.metrics.MultiMetric import MultiMetric
+import threading
 
 ## This is the main file for the complete Autometrics pipeline.
 #
@@ -138,6 +139,8 @@ class Autometrics:
         max_parallel_workers: int = 20,
         # Drop policy for generated metrics with negative coefficients in final regression
         drop_generated_negative_coefficients: bool = True,
+        # Progress hook (0-100 float, high-level message)
+        on_progress: Optional[Callable[[float, str], None]] = None,
     ):
         """
         Initialize the Autometrics pipeline.
@@ -200,6 +203,58 @@ class Autometrics:
         self.max_parallel_workers = max_parallel_workers
         self.drop_generated_negative_coefficients = drop_generated_negative_coefficients
 
+        # Progress reporting setup
+        self.on_progress: Callable[[float, str], None] = on_progress or self._default_progress_update_hook
+        self._progress_lock = threading.Lock()
+        self.pbar = None
+        self.last_progress: float = 0.0
+
+    # Default progress update hook (tqdm progress bar)
+    def _default_progress_update_hook(self, progress, message):
+        if self.pbar is None:
+            return
+        with self._progress_lock:
+            try:
+                delta = float(progress) - float(self.last_progress)
+            except Exception:
+                delta = 0.0
+            if delta > 0:
+                try:
+                    self.pbar.update(delta)
+                except Exception:
+                    pass
+                try:
+                    self.pbar.set_description(str(message))
+                except Exception:
+                    pass
+                self.last_progress = float(progress)
+            if self.last_progress >= 100 or progress >= 100:
+                try:
+                    self.pbar.close()
+                except Exception:
+                    pass
+                self.pbar = None
+
+    def _tick_eval_progress(self, message_prefix: str = "Evaluating metrics"):
+        """Increment per-metric evaluation progress and emit a progress update.
+        Uses internal counters set for the current evaluation step."""
+        try:
+            total = getattr(self, "_eval_total_current_step", 0) or 0
+            if total <= 0:
+                # Nothing to report against
+                return
+            completed_prev = getattr(self, "_eval_completed_current_step", 0) or 0
+            completed = completed_prev + 1
+            setattr(self, "_eval_completed_current_step", completed)
+            base = float(getattr(self, "_eval_progress_base", 0.0))
+            weight = float(getattr(self, "_eval_step_weight", 0.0))
+            fraction = min(max(completed / float(total), 0.0), 1.0)
+            progress_value = base + weight * fraction
+            self.on_progress(progress_value, f"{message_prefix} {completed}/{total}")
+        except Exception:
+            # Do not fail the pipeline on progress issues
+            pass
+
     def run(
         self,
         dataset: Dataset,
@@ -234,25 +289,62 @@ class Autometrics:
         """
         print(f"[Autometrics] Starting pipeline for {dataset.get_name()} - {target_measure}")
         print(f"[Autometrics] Configuration: retrieve={num_to_retrieve}, regress={num_to_regress}, regenerate={regenerate_metrics}")
+
+        # Initialize default tqdm progress bar if available
+        try:
+            import tqdm as _tqdm  # type: ignore
+            if self.pbar is None:
+                self.pbar = _tqdm.tqdm(total=100, smoothing=0, dynamic_ncols=True)
+                self.last_progress = 0.0
+        except Exception:
+            pass
+
+        # Compute step weighting
+        priors_present = bool(self.metric_priors or self.generated_metric_priors)
+        active_steps = 7 + (1 if priors_present else 0)
+        step_weight = 100.0 / max(active_steps, 1)
+        progress_base = 0.0
         
         # 0. Process metric priors (if any)
         prior_metrics = []
         if self.metric_priors or self.generated_metric_priors:
             print("\n[Autometrics] Step 0: Processing Metric Priors")
+            try:
+                self.on_progress(progress_base, "Processing priors")
+            except Exception:
+                pass
             prior_metrics = self._process_metric_priors(
                 dataset, target_measure, generator_llm, judge_llm, regenerate_metrics, prometheus_api_base, model_save_dir
             )
             print(f"[Autometrics] Processed {len(prior_metrics)} prior metrics")
+            try:
+                self.on_progress(progress_base + step_weight, "Priors ready")
+            except Exception:
+                pass
+            progress_base += step_weight
         
         # 1. Generate metrics (or load from disk if available)
         print("\n[Autometrics] Step 1: Generating/Loading Metrics")
+        try:
+            self.on_progress(progress_base, "Generating metrics")
+        except Exception:
+            pass
         generated_metrics = self._generate_or_load_metrics(
             dataset, target_measure, generator_llm, judge_llm, regenerate_metrics, prometheus_api_base, model_save_dir
         )
         print(f"[Autometrics] Generated/Loaded {len(generated_metrics)} metrics")
+        try:
+            self.on_progress(progress_base + step_weight, "Metrics ready")
+        except Exception:
+            pass
+        progress_base += step_weight
         
         # 2. Load metric bank and configure retriever
         print("\n[Autometrics] Step 2: Loading Metric Bank")
+        try:
+            self.on_progress(progress_base, "Preparing retrieval")
+        except Exception:
+            pass
         metric_bank = self._load_metric_bank(dataset)
         
         print(f"[Autometrics] Loaded {len(metric_bank)} metrics in bank")
@@ -288,6 +380,11 @@ class Autometrics:
         retriever_kwargs = self._validate_and_adjust_retriever_config(retriever_kwargs, dataset, metric_bank, num_to_retrieve)
         
         retriever_instance = self.retriever(**retriever_kwargs)
+        try:
+            self.on_progress(progress_base + step_weight, "Retrieval ready")
+        except Exception:
+            pass
+        progress_base += step_weight
         
         # Construct regression strategy with dataset-specific kwargs
         print("[Autometrics] Configuring regression strategy...")
@@ -308,13 +405,37 @@ class Autometrics:
         
         # 3. Retrieve top-K metrics using retriever
         print(f"\n[Autometrics] Step 3: Retrieving Top {num_to_retrieve} Metrics")
+        try:
+            self.on_progress(progress_base, "Retrieving top K metrics")
+        except Exception:
+            pass
         retrieved_metrics = self._retrieve_top_k_metrics(dataset, target_measure, num_to_retrieve, retriever_instance, metric_bank)
         print(f"[Autometrics] Retrieved {len(retrieved_metrics)} metrics")
+        try:
+            self.on_progress(progress_base + step_weight, f"Retrieved {len(retrieved_metrics)} metrics")
+        except Exception:
+            pass
+        progress_base += step_weight
         
         # 4. Combine priors with retrieved metrics and evaluate
         all_metrics_to_evaluate = prior_metrics + retrieved_metrics
         print(f"\n[Autometrics] Step 4: Evaluating {len(all_metrics_to_evaluate)} Metrics on Dataset ({len(prior_metrics)} priors + {len(retrieved_metrics)} retrieved)")
-        successful_metric_instances = self._evaluate_metrics_on_dataset(dataset, all_metrics_to_evaluate)
+        try:
+            self.on_progress(progress_base, "Evaluating metrics")
+        except Exception:
+            pass
+        successful_metric_instances = self._evaluate_metrics_on_dataset(
+            dataset,
+            all_metrics_to_evaluate,
+            progress_base=progress_base,
+            progress_step_weight=step_weight,
+            progress_message_prefix="Evaluating metrics"
+        )
+        try:
+            self.on_progress(progress_base + step_weight, "Evaluation complete")
+        except Exception:
+            pass
+        progress_base += step_weight
         
         # 5. Regress to get top-N metrics using regression strategy
         if self.regression_strategy == HotellingPLS:
@@ -324,9 +445,18 @@ class Autometrics:
                 print(f"\n[Autometrics] Step 5: Regression Analysis (Selecting Top {num_to_regress} via Hotelling T²)")
         else:
             print(f"\n[Autometrics] Step 5: Regression Analysis (Selecting Top {num_to_regress} via {self.regression_strategy.__name__})")
+        try:
+            self.on_progress(progress_base, "Running regression")
+        except Exception:
+            pass
         regression_results = self._regress_and_select_top_n(
             dataset, successful_metric_instances, target_measure, num_to_regress, regression_instance
         )
+        try:
+            self.on_progress(progress_base + step_weight, f"Selected top {len(regression_results['top_metrics'])} metrics")
+        except Exception:
+            pass
+        progress_base += step_weight
 
         print(f"[Autometrics] Found top {len(regression_results['top_metrics'])} metrics.")
         try:
@@ -346,6 +476,10 @@ class Autometrics:
 
         # 6. Generate a report card
         print("\n[Autometrics] Step 6: Generating Report Card")
+        try:
+            self.on_progress(progress_base, "Generating report")
+        except Exception:
+            pass
         report_card = self._generate_report_card(
             regression_results['top_metrics'],
             regression_results['regression_metric'],
@@ -384,9 +518,23 @@ class Autometrics:
             report_card_path = None
             regression_kendall_tau = None
             regression_pearson_r = None
+        try:
+            self.on_progress(progress_base + step_weight, "Report ready")
+        except Exception:
+            pass
+        progress_base += step_weight
         
         # 7. Return results
         print("\n[Autometrics] Pipeline Complete!")
+        try:
+            self.on_progress(progress_base, "Assembling results")
+        except Exception:
+            pass
+        try:
+            # Ensure final bar closure
+            self.on_progress(100.0, "Pipeline complete")
+        except Exception:
+            pass
         
         return {
             'top_metrics': regression_results['top_metrics'],
@@ -839,7 +987,7 @@ class Autometrics:
         
         return retrieved_metrics
 
-    def _evaluate_metrics_on_dataset(self, dataset: Dataset, metric_classes: List[Type[Metric]]) -> List[Metric]:
+    def _evaluate_metrics_on_dataset(self, dataset: Dataset, metric_classes: List[Type[Metric]], progress_base: float = 0.0, progress_step_weight: float = 0.0, progress_message_prefix: str = "Evaluating metrics") -> List[Metric]:
         """
         Add each metric to the dataset and compute its values using parallel execution.
         Returns the list of successfully evaluated metric instances.
@@ -902,6 +1050,16 @@ class Autometrics:
         regular_metrics = [(i, metric) for i, metric in valid_metrics if (i, metric) not in auto_device_map_metrics]
         
         successful_metrics = []
+
+        # Setup evaluation progress counters for this step
+        try:
+            total_evaluable = len(regular_metrics) + len(auto_device_map_metrics)
+            setattr(self, "_eval_total_current_step", total_evaluable)
+            setattr(self, "_eval_completed_current_step", 0)
+            setattr(self, "_eval_progress_base", float(progress_base))
+            setattr(self, "_eval_step_weight", float(progress_step_weight))
+        except Exception:
+            pass
         
         # Phase 1: Evaluate regular metrics in parallel (if enabled and we have multiple)
         if self.enable_parallel_evaluation and len(regular_metrics) > 1:
@@ -917,6 +1075,14 @@ class Autometrics:
             print(f"[Autometrics] device_map='auto' metrics: [{', '.join(m.get_name() for _, m in auto_device_map_metrics)}]")
             successful_metrics.extend(self._evaluate_metrics_sequential(dataset, metric_classes, auto_device_map_metrics))
         
+        # Clear temporary counters
+        try:
+            for attr in ["_eval_total_current_step", "_eval_completed_current_step", "_eval_progress_base", "_eval_step_weight"]:
+                if hasattr(self, attr):
+                    delattr(self, attr)
+        except Exception:
+            pass
+
         return successful_metrics
     
     def _evaluate_metrics_sequential(self, dataset: Dataset, metric_classes: List[Type[Metric]], valid_metrics: List[tuple]) -> List[Metric]:
@@ -938,6 +1104,10 @@ class Autometrics:
                 
                 print(f"    ✓ {metric.get_name()} computed successfully")
                 successful_metrics.append(metric)
+                try:
+                    self._tick_eval_progress()
+                except Exception:
+                    pass
                 
                 # Unload the metric after successful evaluation to free GPU memory
                 # This is especially important for large models like LDLReward27B (27B params)
@@ -969,6 +1139,10 @@ class Autometrics:
             except Exception as e:
                 print(f"    ✗ Error evaluating {metric.get_name()}: {e}")
                 failed_metrics.append(metric_classes[i])
+                try:
+                    self._tick_eval_progress()
+                except Exception:
+                    pass
                 
                 # Try to unload the failed metric as well
                 try:
@@ -1120,6 +1294,10 @@ class Autometrics:
                 else:
                     # Other types of errors - add to failed metrics
                     failed_metrics.append(metric_classes[original_index])
+                    try:
+                        self._tick_eval_progress()
+                    except Exception:
+                        pass
                     
                     # Check if we've exceeded the allowed failed metrics threshold
                     if len(failed_metrics) > self.allowed_failed_metrics:
@@ -1143,6 +1321,10 @@ class Autometrics:
                 
                 successful_metrics.append(metric)
                 print(f"    ✓ {metric.get_name()} aggregated successfully")
+                try:
+                    self._tick_eval_progress()
+                except Exception:
+                    pass
                 
             except Exception as e:
                 print(f"    ✗ Error aggregating {metric.get_name()}: {e}")
@@ -1207,6 +1389,10 @@ class Autometrics:
                 except Exception as e:
                     print(f"    ✗ {metric.get_name()} retry failed: {e}")
                     failed_metrics.append(metric_class)
+                    try:
+                        self._tick_eval_progress()
+                    except Exception:
+                        pass
                     
                     # Check if we've exceeded the allowed failed metrics threshold
                     if len(failed_metrics) > self.allowed_failed_metrics:

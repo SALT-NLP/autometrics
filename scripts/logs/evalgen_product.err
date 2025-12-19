@@ -1,29 +1,0 @@
-Traceback (most recent call last):
-  File "/projects/m000076/mryan0/autometrics/design2code.py", line 4, in <module>
-    from autometrics.generator.LLMJudgeProposer import LLMJudgeProposer
-  File "/projects/m000076/mryan0/autometrics/autometrics/generator/LLMJudgeProposer.py", line 6, in <module>
-    from prometheus_eval.litellm import LiteLLM
-ModuleNotFoundError: No module named 'prometheus_eval'
-Downloading readme:   0%|          | 0.00/716 [00:00<?, ?B/s]Downloading readme: 100%|██████████| 716/716 [00:00<00:00, 6.29kB/s]Downloading readme: 100%|██████████| 716/716 [00:00<00:00, 6.27kB/s]
-Traceback (most recent call last):
-  File "/projects/m000076/mryan0/autometrics/design2code.py", line 35, in <module>
-    train.add_metrics(all_metrics)
-  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/Dataset.py", line 95, in add_metrics
-    self.add_metric(metric, update_dataset=update_dataset)
-  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/PairwiseDataset.py", line 122, in add_metric
-    self.model1_dataset.add_metric(metric, update_dataset=update_dataset)
-  File "/projects/m000076/mryan0/autometrics/autometrics/dataset/Dataset.py", line 85, in add_metric
-    metric.predict(self, update_dataset=update_dataset)
-  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/ReferenceBasedMultiMetric.py", line 57, in predict
-    results = self.calculate_batched(inputs, outputs, references)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/MultiMetric.py", line 28, in calculate_batched
-    results.append(self.calculate(i, o, r, **kwargs))
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/SARI.py", line 333, in calculate
-    keep, dels, add, final = SARIsent(input, output, references)
-                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/projects/m000076/mryan0/autometrics/autometrics/metrics/reference_based/SARI.py", line 142, in SARIsent
-    s1grams = word_tokenize(ssent.lower())
-                            ^^^^^^^^^^^
-AttributeError: 'list' object has no attribute 'lower'

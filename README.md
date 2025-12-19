@@ -59,7 +59,7 @@ pip install -e .
 1) Install dependencies
 
 ```bash
-pip install autometrics-research
+pip install autometrics-ai
 ```
 
 2) Ensure Java 21 is installed (required by some retrieval components). See Java section below.

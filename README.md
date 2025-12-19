@@ -16,15 +16,15 @@ The repository includes simple scripts, examples, notebooks, and a full library 
 Install the published package (recommended):
 
 ```bash
-pip install autometrics-research
+pip install autometrics-ai
 ```
 
 Install with extras (examples):
 
 ```bash
-pip install "autometrics-research[mauve]"
-pip install "autometrics-research[bleurt,bert-score,rouge]"
-pip install "autometrics-research[reward-models,gpu]"  # reward models + GPU accel
+pip install "autometrics-ai[mauve]"
+pip install "autometrics-ai[bleurt,bert-score,rouge]"
+pip install "autometrics-ai[reward-models,gpu]"  # reward models + GPU accel
 ```
 
 Developer install (from source):

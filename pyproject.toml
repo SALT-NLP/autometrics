@@ -14,18 +14,35 @@ readme = "README.md"
 authors = [{ name = "Michael Ryan", email = "michaeljryan@stanford.edu" }]
 license = { text = "MIT License" }
 requires-python = ">=3.9"
+keywords = [
+    "evaluation",
+    "metrics",
+    "llm",
+    "llm-as-a-judge",
+    "nlp",
+    "human-feedback",
+    "reward-model",
+]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: POSIX :: Linux",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
 ]
 # project dependencies function similarly to requirements.txt,
 # `pip install .` will pull from pyproject.toml dependencies
 dependencies = [
     "dspy",
+    "diskcache",
     "platformdirs",
     "numpy",
     "scipy",
@@ -35,13 +52,24 @@ dependencies = [
     "nltk",
     "sacrebleu",
     "scikit-learn",
-    "Levenshtein"
+    "Levenshtein",
+    "tqdm",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["autometrics", "autometrics.*"]
 exclude = ["tests", "tests.*", "autometrics.test", "autometrics.test.*"]
+
+[tool.setuptools.package-data]
+autometrics = [
+    "metrics/documentation/*.md",
+    "metrics/documentation/prompt.txt",
+    "util/*.js",
+]
+
+[tool.setuptools.exclude-package-data]
+autometrics = ["**/.DS_Store", "**/TODO.txt"]
 
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.18.0,<1.0.0"]
@@ -115,26 +143,8 @@ gpu = [
 ]
 
 [project.urls]
-homepage = "https://github.com/XenonMolecule/SynthesizeMe"
-
-[tool.poetry]
-name = "synthesizeme"
-version = "0.0.11-alpha.1"
-description = "Learn what Language Models think about you! Synthesize personas from your LLM interactions."
-authors = ["Michael Ryan <michaeljryan@stanford.edu>"]
-license = "MIT"
-readme = "README.md"
-homepage = "https://github.com/XenonMolecule/SynthesizeMe"
-repository = "https://github.com/XenonMolecule/SynthesizeMe"
-keywords = ["synthesizeme", "ai", "language models", "llm", "personalization"]
-
-# may be a bit much
-[tool.poetry.dependencies]
-python = ">=3.9,<3.14"
-dspy = ">=2.6"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.3"
+homepage = "https://github.com/SALT-NLP/autometrics"
+repository = "https://github.com/SALT-NLP/autometrics"
 
 [tool.coverage.run]
 branch = true

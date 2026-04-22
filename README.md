@@ -1,251 +1,145 @@
-# autometrics
-AutoMetrics: Automatically discover, generate, and aggregate evaluation metrics for NLP tasks.
+# AutoMetrics
 
-Autometrics helps you evaluate text generation systems by:
+**Automatically induce evaluation metrics that approximate human judgment from fewer than 100 labels.**
 
-1. Generating task-specific candidate metrics with LLMs (LLM-as-a-judge, rubric/code generated metrics)
-2. Retrieving the most relevant metrics from a bank of 40+ built-in metrics
-3. Evaluating all metrics on your dataset (reference-free and reference-based)
-4. Selecting the top metrics using regression
-5. Aggregating them into a single, optimized metric and producing a report card
+[![PyPI](https://img.shields.io/pypi/v/autometrics-ai.svg)](https://pypi.org/project/autometrics-ai/)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Paper](https://img.shields.io/badge/ICLR-2026-B31B1B.svg)](https://openreview.net/forum?id=ymJuBifPUy)
 
-The repository includes simple scripts, examples, notebooks, and a full library to run the end-to-end pipeline.
+AutoMetrics takes a small set of human-labeled examples (thumbs, Likert, pairwise — under 100 points) and produces a single interpretable evaluator for your task. It synthesizes candidate criteria with LLM judges, retrieves complementary metrics from a curated bank of 48, and composes them with PLS regression. Across five tasks in the paper, it beats LLM-as-a-judge baselines by up to **+33.4% Kendall τ**, and in an agentic-task case study it matches the performance of a verifiable reward.
 
-## Installation (pip + optional extras)
+![AutoMetrics pipeline](docs/images/pipeline.png)
 
-Install the published package (recommended):
+---
+
+## Install
 
 ```bash
 pip install autometrics-ai
 ```
 
-Install with extras (examples):
-
-```bash
-pip install "autometrics-ai[mauve]"
-pip install "autometrics-ai[bleurt,bert-score,rouge]"
-pip install "autometrics-ai[reward-models,gpu]"  # reward models + GPU accel
-```
-
-Developer install (from source):
-
-```bash
-pip install -e .
-```
-
-<details>
-  <summary>Optional extras (summary)</summary>
-
-  - fasttext: FastText classifiers — metrics: FastTextEducationalValue, FastTextToxicity, FastTextNSFW
-  - lens: LENS metrics — metrics: LENS, LENS_SALSA
-  - parascore: Paraphrase metrics — metrics: ParaScore, ParaScoreFree
-  - bert-score: metrics: BERTScore
-  - bleurt: metrics: BLEURT
-  - moverscore: metrics: MOVERScore (adds pyemd)
-  - rouge: metrics: ROUGE, UpdateROUGE
-  - meteor: metrics: METEOR (adds beautifulsoup4)
-  - infolm: metrics: InfoLM (adds torchmetrics)
-  - mauve: metrics: MAUVE (evaluate + mauve-text)
-  - spacy: metrics: SummaQA (requires `spacy` model; install with `python -m spacy download en_core_web_sm`)
-  - hf-evaluate: HF evaluate wrappers — metrics: Toxicity; also used by some wrappers
-  - reward-models: Large HF reward models — metrics: PRMRewardModel, INFORMRewardModel, LDLRewardModel, GRMRewardModel
-  - readability: metrics: FKGL (textstat)
-  - gpu: FlashAttention + NV libs (optional acceleration; benefits large reward models)
-
-</details>
+Base install requires only Python 3.9+. Heavy dependencies (Java 21, `pyserini`, `pylate`, `bert_score`, …) are loaded lazily — they're needed only if you opt into features that use them.
 
 ## Quickstart
 
-1) Install the package:
-
 ```bash
-pip install autometrics-ai
-```
-
-2) Set an API key for an OpenAI-compatible endpoint (for LLM-based generation/judging):
-
-```bash
-export OPENAI_API_KEY="your-api-key-here"
-```
-
-3) Run the dead-simple quickstart — a tiny custom dataset in **generated-only mode** (no Java, no GPU, no bank retrieval):
-
-```bash
+export OPENAI_API_KEY="sk-..."
 python examples/tutorial.py
 ```
 
-This builds a small `Dataset`, generates a few LLM-judge metrics for your task, fits them to your human scores with PLS (the paper's default), and prints the aggregated metric's predictions.
+Builds a tiny custom dataset, generates a handful of LLM-judge metrics for your task, fits PLS to your human scores, and writes an interactive HTML report to `artifacts/`. No Java, no GPU, no bank dependencies required for this path.
 
-### Next steps
+## How it works
 
-Once the quickstart works, try the progressively more involved examples:
+1. **Generate.** Propose task-specific candidate metrics — single-criterion, rubric, example-based, and MIPROv2-optimized LLM judges (10 + 5 + 1 + 1 by default).
+2. **Retrieve.** Rank the generated candidates alongside the 48-metric **MetricBank** (ColBERT → LLM reranker) and keep the top `k=30`.
+3. **Regress.** Fit Partial Least Squares on the training set to select `n=5` predictive metrics and learn their weights.
+4. **Report.** Emit (a) the aggregated metric as a Python class you can import, (b) a Metric Card per generated metric, and (c) an HTML report card with coefficients, correlation, robustness, runtime, and per-example feedback.
 
-- `examples/autometrics_simple_example.py` — same `Autometrics()` defaults, but on the HelpSteer dataset so the full pipeline (generation + metric-bank retrieval + PLS) runs. Requires Java 21 (see below).
-- `examples/autometrics_example.py` — power-user example showing custom generator configs, retriever pipelines, priors, and regressors.
+For datasets of ≤100 rows AutoMetrics runs in **generated-only mode** by default, skipping the metric bank entirely.
 
-## Examples and Tutorials
+See the paper ([ICLR 2026](https://openreview.net/forum?id=ymJuBifPUy)) for the full method, ablations, and case study.
 
-- Quickstart (generated-only): `examples/tutorial.py`
-- Defaults on a real dataset: `examples/autometrics_simple_example.py`
-- Power-user/custom configuration: `examples/autometrics_example.py`
-- Text walkthrough: `examples/TUTORIAL.md`
-- Notebook tutorials: `examples/tutorial.ipynb`, `demo.ipynb`
+## Examples
 
-If you prefer an experiments-style entry point with CLI arguments, see:
+| File | Scope | Requires |
+|---|---|---|
+| [`examples/tutorial.py`](examples/tutorial.py) | Dead-simple 8-row demo, generated-only | `OPENAI_API_KEY` |
+| [`examples/autometrics_simple_example.py`](examples/autometrics_simple_example.py) | Full pipeline with defaults on HelpSteer | + Java 21, bank extras |
+| [`examples/autometrics_example.py`](examples/autometrics_example.py) | Custom generators, retriever, regressor, priors | + your own config |
 
-```bash
-python analysis/main_experiments/run_main_autometrics.py <dataset_name> <target_name> <seed> <output_dir>
-```
+Narrative walkthrough: [`examples/TUTORIAL.md`](examples/TUTORIAL.md).
 
-There are also convenience scripts in `analysis/` for ablations and scaling.
-
-## Repository Structure
-
-- `autometrics/dataset/datasets`: Built-in datasets (e.g., `helpsteer`, `simplification`, `evalgen`, `iclr`, ...). The main dataset interface lives in `autometrics/dataset/Dataset.py`.
-- `autometrics/metrics`: Metric implementations and utilities. See `autometrics/metrics/README.md` for how to write new metrics.
-- `autometrics/metrics/llm_judge`: LLM-as-a-judge rubric generators (e.g., G-Eval, Prometheus-style, example-based).
-- `autometrics/aggregator/regression`: Regression-based selection/aggregation (Lasso, Ridge, ElasticNet, PLS, etc.).
-- `autometrics/recommend`: Metric retrieval modules (BM25/ColBERT/LLMRec and `PipelinedRec`).
-- `autometrics/test`: Unit and integration tests, including caching behavior and generator tests.
-- `analysis/`: Experiment drivers (CLI), ablations, robustness/scaling studies, and utilities.
-
-## Basic Usage (Library)
+## Use on your own data
 
 ```python
-import os
-import dspy
+import dspy, pandas as pd
 from autometrics.autometrics import Autometrics
-from autometrics.dataset.datasets.helpsteer.helpsteer import HelpSteer
-
-os.environ["OPENAI_API_KEY"] = "your-key-here"
-
-dataset = HelpSteer()
-generator_llm = dspy.LM("openai/gpt-4o-mini")
-judge_llm = dspy.LM("openai/gpt-4o-mini")
-
-autometrics = Autometrics()
-results = autometrics.run(
-    dataset=dataset,
-    target_measure="helpfulness",
-    generator_llm=generator_llm,
-    judge_llm=judge_llm,
-)
-
-print([m.get_name() for m in results['top_metrics']])
-print(results['regression_metric'].get_name())
-```
-
-For more advanced configuration (custom generators, retrieval pipelines, priors, parallelism), see `TUTORIAL.md`.
-
-## System Requirements
-
-### Python
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Some metrics require GPUs. You can inspect GPU memory needs by checking `gpu_mem` on metric classes. Many metrics run on CPU.
-
-### Java (required for certain retrieval options)
-
-This package requires Java Development Kit (JDK) 21 for some of its search functionality.
-
-#### Ubuntu/Debian
-```bash
-sudo apt update
-sudo apt install openjdk-21-jdk
-```
-
-#### macOS (using Homebrew)
-```bash
-brew install openjdk@21
-```
-
-#### Windows
-Download and install from `https://www.oracle.com/java/technologies/downloads/#java21` or use Chocolatey:
-```bash
-choco install openjdk21
-```
-
-Verify:
-```bash
-java -version
-```
-
-You should see something like:
-```
-openjdk version "21.0.x"
-OpenJDK Runtime Environment ...
-OpenJDK 64-Bit Server VM ...
-```
-
-Note: Java 17 or lower versions will not work as Pyserini requires Java 21.
-
-## Datasets
-
-Built-in datasets are in `autometrics/dataset/datasets` (e.g., `HelpSteer`, `SimpDA`, `ICLR`, `RealHumanEval`, etc.). You can also construct your own via the `Dataset` class.
-
-Minimal custom dataset example:
-
-```python
-import pandas as pd
 from autometrics.dataset.Dataset import Dataset
 
 df = pd.DataFrame({
-    'id': ['1', '2'],
-    'input': ['prompt 1', 'prompt 2'],
-    'output': ['response 1', 'response 2'],
-    'reference': ['ref 1', 'ref 2'],
-    'human_score': [4.5, 3.2]
+    "id": ["1", "2", "3"],
+    "input":  ["prompt 1", "prompt 2", "prompt 3"],
+    "output": ["response 1", "response 2", "response 3"],
+    "score":  [4.5, 3.2, 4.8],
 })
-
 dataset = Dataset(
-    dataframe=df,
-    target_columns=['human_score'],
-    ignore_columns=['id'],
-    metric_columns=[],
-    name="MyCustomDataset",
-    data_id_column="id",
-    input_column="input",
-    output_column="output",
-    reference_columns=['reference'],
-    task_description="Evaluate response quality",
+    dataframe=df, name="MyTask",
+    data_id_column="id", input_column="input", output_column="output",
+    target_columns=["score"], ignore_columns=["id"], metric_columns=[],
+    reference_columns=[], task_description="Describe your task in one sentence.",
 )
+
+llm = dspy.LM("openai/gpt-4o-mini")
+results = Autometrics().run(
+    dataset=dataset, target_measure="score",
+    generator_llm=llm, judge_llm=llm,
+)
+
+final = results["regression_metric"]       # an importable Metric
+final.predict(dataset)                     # scores on any Dataset with same schema
 ```
 
-## Disk Caching
+## Requirements
 
-The library implements disk caching for all metrics to improve performance when running scripts multiple times. Key features:
+| Component | Needed for |
+|---|---|
+| Python ≥ 3.9 | everything |
+| `OPENAI_API_KEY` (or any LiteLLM-compatible endpoint) | LLM-based generation and judging |
+| Java 21 | BM25 retrieval over the full MetricBank (`pyserini`) |
+| GPU | some bank metrics (reward models, large BERTScore); CPU works for generated-only |
 
-- All metrics cache results by default in the `./autometrics_cache` directory (configurable via `AUTOMETRICS_CACHE_DIR`)
-- Cache keys include input/output/references and all initialization parameters
-- Non-behavioral parameters are excluded automatically (name, description, cache config)
-- You can exclude additional parameters via `self.exclude_from_cache_key()`
-- Disable per-metric with `use_cache=False`
-- Very fast metrics like BLEU/SARI may disable cache by default
+## Reproducing the paper
 
-See examples in `autometrics/test/custom_metric_caching_example.py`. For guidance on writing new metrics, see `autometrics/metrics/README.md`.
+```bash
+python analysis/main_experiments/run_main_autometrics.py <dataset> <target> <seed> <output_dir>
+```
 
-## Where to Go Next
+Ablation and scaling drivers live under `analysis/`. Hyperparameters and prompts are documented in the paper's appendix.
 
-- Read the tutorial: `examples/TUTORIAL.md` (and `examples/tutorial.ipynb`)
-- Browse built-in metrics under `autometrics/metrics/`
-- Explore experiment drivers in `analysis/`
+## Repository layout
+
+```
+autometrics/
+├── autometrics.py            Pipeline orchestrator
+├── dataset/                  Dataset interface + built-in tasks
+├── metrics/                  MetricBank (48 metrics) + generated metric scaffolds
+├── generator/                LLM judge proposers (single, rubric, examples, G-Eval, optimized)
+├── recommend/                Retrievers (BM25, ColBERT, LLMRec, Pipelined)
+├── aggregator/regression/    PLS (default), Lasso, Ridge, ElasticNet, HotellingPLS
+└── util/report_card.py       HTML report generator
+analysis/                     Paper experiment drivers
+examples/                     Tutorial scripts and walkthroughs
+```
+
+## Optional extras
+
+<details>
+<summary>Install extras for metric-bank components with heavier dependencies</summary>
+
+```bash
+pip install "autometrics-ai[bert-score,rouge,bleurt]"
+pip install "autometrics-ai[reward-models,gpu]"
+pip install "autometrics-ai[mauve,parascore,lens,fasttext]"
+```
+
+Individual clusters: `fasttext`, `lens`, `parascore`, `bert-score`, `bleurt`, `moverscore`, `rouge`, `meteor`, `infolm`, `mauve`, `spacy`, `hf-evaluate`, `reward-models`, `readability`, `gpu`. See `pyproject.toml` for the full mapping. Metrics whose dependencies are missing are silently skipped with a warning — no install is strictly required.
+
+</details>
 
 ## Citation
 
-If you use this software, please cite it as below.
-
-```
-@software{Ryan_Autometrics_2025,
-author = {Ryan, Michael J. and Zhang, Yanzhe and Salunkhe, Amol and Chu, Yi and Xu, Di and Yang, Diyi},
-license = {MIT},
-title = {{Autometrics}},
-url = {https://github.com/XenonMolecule/autometrics},
-version = {1.0.0},
-year = {2025}
+```bibtex
+@inproceedings{ryan2026autometrics,
+  title   = {AutoMetrics: Approximate Human Judgments with Automatically Generated Evaluators},
+  author  = {Ryan, Michael J and Zhang, Yanzhe and Salunkhe, Amol and Chu, Yi and Xu, Di and Yang, Diyi},
+  booktitle = {The Fourteenth International Conference on Learning Representations},
+  year    = {2026},
+  url     = {https://openreview.net/forum?id=ymJuBifPUy}
 }
 ```
+
+## License
+
+MIT — see [LICENSE](LICENSE).

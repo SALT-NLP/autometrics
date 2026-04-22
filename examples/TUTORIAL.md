@@ -168,6 +168,32 @@ results = autometrics.run(
 
 See `examples/autometrics_simple_example.py` for a runnable version.
 
+### Using different data for generation vs. regression
+
+By default Autometrics uses the same dataset for every step: it draws
+good/bad examples from it when proposing criteria (Step 1), and it fits
+the PLS regression against the human scores on the same rows (Steps 4–5).
+
+If you have a larger pool of examples available for *proposing* metrics
+than you have labeled data for *fitting* — e.g. an unlabeled production
+trace plus a small hand-labeled evaluation set — you can pass the two
+datasets separately. Artifacts (generated metric files, report card,
+cache keys) are named after the regression dataset so one run stays
+coherent on disk.
+
+```python
+results = autometrics.run(
+    dataset=small_labeled,              # fallback if a split is omitted
+    generation_dataset=large_pool,      # Step 1: criteria proposal
+    regression_dataset=small_labeled,   # Steps 4–5: fit + select
+    target_measure="helpfulness",
+    generator_llm=generator_llm,
+    judge_llm=judge_llm,
+)
+```
+
+Leave both new kwargs out to keep the single-dataset behavior.
+
 ### Advanced Configuration
 ```python
 from autometrics.recommend.ColBERT import ColBERT

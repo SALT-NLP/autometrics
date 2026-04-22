@@ -274,6 +274,8 @@ class Autometrics:
         prometheus_api_base: Optional[str] = None,
         model_save_dir: Optional[str] = None,
         eval_dataset: Optional[Dataset] = None,
+        generation_dataset: Optional[Dataset] = None,
+        regression_dataset: Optional[Dataset] = None,
         report_output_path: Optional[str] = None,
         verbose: bool = True,
         **kwargs
@@ -281,20 +283,47 @@ class Autometrics:
         """
         Run the full Autometrics pipeline.
         Args:
-            dataset: The dataset to evaluate on
-            target_measure: The specific target measure/column to evaluate (e.g., "helpfulness", "fluency")
-            generator_llm: LLM for metric generation
-            judge_llm: LLM for metric evaluation
-            num_to_retrieve: Number of metrics to retrieve from the bank (default: 30)
-            num_to_regress: Number of metrics to select via regression (default: 5)
-            regenerate_metrics: If True, force regeneration of metrics even if files exist
-            prometheus_api_base: API base for Prometheus models (required for rubric_prometheus)
-            model_save_dir: Directory to save fine-tuned models (defaults to "/finetunes")
+            dataset: Fallback dataset used for both metric generation and regression
+                fitting when ``generation_dataset`` / ``regression_dataset`` are not
+                provided. Required.
+            target_measure: The target measure/column to predict (e.g., "helpfulness").
+            generator_llm: LLM for metric generation.
+            judge_llm: LLM for metric evaluation.
+            num_to_retrieve: Number of metrics to retrieve from the bank (default: 30).
+            num_to_regress: Number of metrics to select via regression (default: 5).
+            regenerate_metrics: If True, force regeneration of metrics even if files exist.
+            prometheus_api_base: API base for Prometheus models.
+            model_save_dir: Directory to save fine-tuned models (defaults to "/finetunes").
+            eval_dataset: Optional held-out dataset used only for the report card's
+                correlation / examples / runtime sections. Orthogonal to the split
+                between generation and regression.
+            generation_dataset: Optional dataset used during Step 1 (metric generation).
+                LLM-judge proposers, rubric / example-based generators, and the
+                MIPROv2-optimized judge all draw their axes-of-variation and
+                few-shot examples from this dataset. Defaults to ``dataset``.
+            regression_dataset: Optional dataset used during Step 4 (metric evaluation)
+                and Step 5 (regression fit + top-N selection). The ``full_bank_data_cutoff``
+                generated-only trigger is also evaluated against this dataset, and the
+                generated-metrics on-disk directory is named after it. Defaults to ``dataset``.
+            report_output_path: Override for the HTML report path.
+            verbose: Print pipeline progress.
             kwargs: Additional config for generators, retrievers, etc.
         Returns:
-            Dict with keys: 'top_metrics', 'regression_metric', 'report_card', 'all_generated_metrics', etc.
+            Dict with keys: 'top_metrics', 'regression_metric', 'report_card',
+            'all_generated_metrics', 'dataset' (regression_dataset), 'generation_dataset', ...
         """
-        print(f"[Autometrics] Starting pipeline for {dataset.get_name()} - {target_measure}")
+        # Resolve dataset splits. The existing single-dataset API is preserved:
+        # callers who only pass ``dataset`` get identical behaviour to before.
+        # Passing ``generation_dataset`` or ``regression_dataset`` lets a caller
+        # use different splits for criteria proposal vs. regression fitting —
+        # useful when a large unlabeled / differently-labeled pool is available
+        # for prompting LLM judges but the labeled training set is small.
+        generation_dataset = generation_dataset or dataset
+        regression_dataset = regression_dataset or dataset
+        if generation_dataset is not regression_dataset:
+            print(f"[Autometrics] Using split datasets: generation='{generation_dataset.get_name()}' regression='{regression_dataset.get_name()}'")
+
+        print(f"[Autometrics] Starting pipeline for {regression_dataset.get_name()} - {target_measure}")
         print(f"[Autometrics] Configuration: retrieve={num_to_retrieve}, regress={num_to_regress}, regenerate={regenerate_metrics}")
 
         # Initialize default tqdm progress bar if available
@@ -321,7 +350,8 @@ class Autometrics:
             except Exception:
                 pass
             prior_metrics = self._process_metric_priors(
-                dataset, target_measure, generator_llm, judge_llm, regenerate_metrics, prometheus_api_base, model_save_dir
+                generation_dataset, target_measure, generator_llm, judge_llm, regenerate_metrics, prometheus_api_base, model_save_dir,
+                save_name_dataset=regression_dataset,
             )
             print(f"[Autometrics] Processed {len(prior_metrics)} prior metrics")
             try:
@@ -337,7 +367,8 @@ class Autometrics:
         except Exception:
             pass
         generated_metrics = self._generate_or_load_metrics(
-            dataset, target_measure, generator_llm, judge_llm, regenerate_metrics, prometheus_api_base, model_save_dir
+            generation_dataset, target_measure, generator_llm, judge_llm, regenerate_metrics, prometheus_api_base, model_save_dir,
+            save_name_dataset=regression_dataset,
         )
         print(f"[Autometrics] Generated/Loaded {len(generated_metrics)} metrics")
         try:
@@ -354,11 +385,12 @@ class Autometrics:
             pass
 
         # 2.0 Small-dataset override: if the user hasn't overridden metric_bank
-        # and the dataset is small enough, use generated metrics only. We short-
-        # circuit *before* calling _load_metric_bank so that the heavy MetricBank
-        # import (bert_score, rouge, pylate, …) is never triggered in this path.
+        # and the regression dataset is small enough, use generated metrics only.
+        # The cutoff is a statement about how much labeled data we have to fit
+        # regression with, so it's evaluated against regression_dataset (not the
+        # possibly-larger generation_dataset).
         try:
-            dataset_size = len(dataset.get_dataframe())
+            dataset_size = len(regression_dataset.get_dataframe())
         except Exception:
             dataset_size = None
         use_generated_only = (
@@ -369,11 +401,11 @@ class Autometrics:
         )
         if use_generated_only:
             print(
-                f"[Autometrics] Dataset size ({dataset_size}) <= cutoff ({self.full_bank_data_cutoff}) with default bank — using generated metrics only"
+                f"[Autometrics] Regression dataset size ({dataset_size}) <= cutoff ({self.full_bank_data_cutoff}) with default bank — using generated metrics only"
             )
             metric_bank = []
         else:
-            metric_bank = self._load_metric_bank(dataset)
+            metric_bank = self._load_metric_bank(regression_dataset)
             print(f"[Autometrics] Loaded {len(metric_bank)} metrics in bank")
 
         # 2.5 Merge generated metrics with metric bank
@@ -394,8 +426,11 @@ class Autometrics:
             retriever_kwargs["metric_classes"] = metric_bank
             retriever_kwargs["model"] = generator_llm  # Use generator LLM for LLMRec
 
-            # Generate dynamic index paths and validate retrieval hyperparameters
-            retriever_kwargs = self._validate_and_adjust_retriever_config(retriever_kwargs, dataset, metric_bank, num_to_retrieve)
+            # Generate dynamic index paths and validate retrieval hyperparameters.
+            # Retrieval keys off the task description + target name, so either
+            # split's name would do; use regression_dataset for consistency with
+            # how this run is identified elsewhere (cache paths, report card).
+            retriever_kwargs = self._validate_and_adjust_retriever_config(retriever_kwargs, regression_dataset, metric_bank, num_to_retrieve)
 
             retriever_instance = self.retriever(**retriever_kwargs)
         try:
@@ -418,7 +453,7 @@ class Autometrics:
                 regression_kwargs["selection_mode"] = "alpha"
                 regression_kwargs.pop("top_n", None)
         # Add dataset to kwargs since all regression classes accept dataset parameter
-        regression_kwargs["dataset"] = dataset
+        regression_kwargs["dataset"] = regression_dataset
         regression_instance = self.regression_strategy(**regression_kwargs)
         
         # 3. Retrieve top-K metrics using retriever
@@ -433,7 +468,7 @@ class Autometrics:
             retrieved_metrics = list(metric_bank)
             print(f"[Autometrics] Generated-only mode: using {len(retrieved_metrics)} generated metrics without retrieval")
         else:
-            retrieved_metrics = self._retrieve_top_k_metrics(dataset, target_measure, num_to_retrieve, retriever_instance, metric_bank)
+            retrieved_metrics = self._retrieve_top_k_metrics(regression_dataset, target_measure, num_to_retrieve, retriever_instance, metric_bank)
         print(f"[Autometrics] Retrieved {len(retrieved_metrics)} metrics")
         try:
             self.on_progress(progress_base + step_weight, f"Retrieved {len(retrieved_metrics)} metrics")
@@ -449,7 +484,7 @@ class Autometrics:
         except Exception:
             pass
         successful_metric_instances = self._evaluate_metrics_on_dataset(
-            dataset,
+            regression_dataset,
             all_metrics_to_evaluate,
             progress_base=progress_base,
             progress_step_weight=step_weight,
@@ -474,7 +509,7 @@ class Autometrics:
         except Exception:
             pass
         regression_results = self._regress_and_select_top_n(
-            dataset, successful_metric_instances, target_measure, num_to_regress, regression_instance
+            regression_dataset, successful_metric_instances, target_measure, num_to_regress, regression_instance
         )
         try:
             self.on_progress(progress_base + step_weight, f"Selected top {len(regression_results['top_metrics'])} metrics")
@@ -507,7 +542,7 @@ class Autometrics:
         report_card = self._generate_report_card(
             regression_results['top_metrics'],
             regression_results['regression_metric'],
-            dataset,
+            regression_dataset,
             target_measure
         )
 
@@ -519,9 +554,9 @@ class Autometrics:
                 metrics=regression_results['top_metrics'],
                 target_measure=target_measure,
                 eval_dataset=eval_dataset,
-                train_dataset=dataset,
+                train_dataset=regression_dataset,
                 lm=generator_llm,
-                output_path=report_output_path or os.path.join("artifacts", f"report_{dataset.get_name().replace(' ', '_')}_{target_measure.replace(' ', '_')}_{self.seed}.html"),
+                output_path=report_output_path or os.path.join("artifacts", f"report_{regression_dataset.get_name().replace(' ', '_')}_{target_measure.replace(' ', '_')}_{self.seed}.html"),
                 verbose=verbose,
             )
             report_card_html = html_artifacts.get('html', '')
@@ -580,7 +615,9 @@ class Autometrics:
             'prior_metrics': prior_metrics,
             'retrieved_metrics': retrieved_metrics,
             'importance_scores': regression_results['importance_scores'],
-            'dataset': dataset,
+            'dataset': regression_dataset,
+            'generation_dataset': generation_dataset,
+            'regression_dataset': regression_dataset,
             'target_measure': target_measure,
             'pipeline_config': {
                 'num_to_retrieve': num_to_retrieve,
@@ -630,35 +667,42 @@ class Autometrics:
         judge_llm: dspy.LM,
         regenerate_metrics: bool = False,
         prometheus_api_base: Optional[str] = None,
-        model_save_dir: Optional[str] = None
+        model_save_dir: Optional[str] = None,
+        save_name_dataset: Optional[Dataset] = None,
     ) -> List[Type[Metric]]:
         """
-        Process metric priors - both regular metrics and generated metrics.
-        Returns a list of metric classes that should be included upfront.
+        Process metric priors — both user-specified classes and generated ones.
+
+        ``dataset`` is the generation split (feeds proposer prompts);
+        ``save_name_dataset`` is the regression split and is used purely for
+        on-disk naming so every artifact from one ``run()`` shares an identity.
+        ``save_name_dataset`` falls back to ``dataset`` when not split.
         """
         prior_metrics = []
-        
+        save_name_dataset = save_name_dataset or dataset
+        save_name = save_name_dataset.get_name()
+
         # Add regular metric priors
         if self.metric_priors:
             print(f"[Autometrics] Adding {len(self.metric_priors)} regular metric priors")
             prior_metrics.extend(self.metric_priors)
-        
+
         # Generate and add generated metric priors
         if self.generated_metric_priors:
             print(f"[Autometrics] Generating {sum(self.generated_metric_priors.values())} prior metrics using generators: {list(self.generated_metric_priors.keys())}")
-            
+
             # Determine output directory for generated prior metrics
             if self.merge_generated_with_bank and isinstance(self.metric_bank, str):
                 output_dir = self.metric_bank
             else:
                 # Create a unique run ID based on dataset, target measure, and seed
-                run_id = f"{dataset.get_name()}_{target_measure}_{self.seed or 42}"
+                run_id = f"{save_name}_{target_measure}_{self.seed or 42}"
                 output_dir = self.generated_metrics_dir or f"generated_metrics/{run_id}"
-            
+
             # Process each generator configuration for priors
             for generator_type, metrics_per_trial in self.generated_metric_priors.items():
                 # Check if metrics already exist for this generator
-                safe_dataset_name = dataset.get_name().replace(" ", "_").replace("/", "_")
+                safe_dataset_name = save_name.replace(" ", "_").replace("/", "_")
                 safe_measure_name = target_measure.replace(" ", "_").replace("/", "_")
                 generator_dir = os.path.join(output_dir, "generated_metrics", safe_dataset_name, safe_measure_name, f"seed_{self.seed or 42}", generator_type)
                 
@@ -694,10 +738,10 @@ class Autometrics:
                 
                 # Save generated metrics
                 metric_paths = self._save_generated_metrics(
-                    metrics, generator_type, dataset.get_name(), target_measure, 
+                    metrics, generator_type, save_name, target_measure,
                     self.seed or 42, output_dir
                 )
-                
+
                 print(f"[Autometrics] Saved {len(metric_paths)} prior metrics for {generator_type}")
                 
                 # Load the saved metrics as classes
@@ -779,41 +823,53 @@ class Autometrics:
         return combined_metrics
 
     def _generate_or_load_metrics(
-        self, 
-        dataset: Dataset, 
+        self,
+        dataset: Dataset,
         target_measure: str,
-        generator_llm: dspy.LM, 
-        judge_llm: dspy.LM, 
+        generator_llm: dspy.LM,
+        judge_llm: dspy.LM,
         regenerate_metrics: bool = False,
         prometheus_api_base: Optional[str] = None,
-        model_save_dir: Optional[str] = None
+        model_save_dir: Optional[str] = None,
+        save_name_dataset: Optional[Dataset] = None,
     ) -> List[Type[Metric]]:
         """
         Generate new metrics using configured generators, or load from disk if available.
-        Save generated metrics as Python files in generated_metrics_dir.
-        Return a list of metric classes (not instances).
+
+        Args:
+            dataset: The dataset passed to each generator (``generation_dataset`` in
+                the public API). Axes-of-variation, rubric examples, and optimized
+                prompts are all derived from here.
+            save_name_dataset: Dataset used to name the on-disk run directory and
+                the per-metric filenames. This is the ``regression_dataset`` in the
+                public API so that every artifact from a single ``run()`` lives
+                under one stable identifier, even when the generation split has a
+                different name. Falls back to ``dataset`` for the single-dataset
+                case.
         """
-        
+
         all_generated_metrics = []
-        
+        save_name_dataset = save_name_dataset or dataset
+        save_name = save_name_dataset.get_name()
+
         # Determine output directory for generated metrics
         if self.merge_generated_with_bank and isinstance(self.metric_bank, str):
             output_dir = self.metric_bank
         else:
             # Create a unique run ID based on dataset, target measure, and seed
-            run_id = f"{dataset.get_name()}_{target_measure}_{self.seed or 42}"
+            run_id = f"{save_name}_{target_measure}_{self.seed or 42}"
             output_dir = self.generated_metrics_dir or f"generated_metrics/{run_id}"
-        
+
         # Process each generator configuration
         for generator_type, config in self.metric_generation_configs.items():
             metrics_per_trial = config.get("metrics_per_trial", 1)
-            
+
             # Check if metrics already exist for this generator
             # Directory structure: dataset_name/measure/seed/generator_type
-            safe_dataset_name = dataset.get_name().replace(" ", "_").replace("/", "_")
+            safe_dataset_name = save_name.replace(" ", "_").replace("/", "_")
             safe_measure_name = target_measure.replace(" ", "_").replace("/", "_")
             generator_dir = os.path.join(output_dir, "generated_metrics", safe_dataset_name, safe_measure_name, f"seed_{self.seed or 42}", generator_type)
-            
+
             if not regenerate_metrics and os.path.exists(generator_dir):
                 # Try to load existing metrics
                 try:
@@ -824,38 +880,38 @@ class Autometrics:
                         continue
                 except Exception as e:
                     print(f"[Autometrics] Warning: Failed to load existing metrics for {generator_type}: {e}")
-            
+
             # Generate new metrics
             print(f"[Autometrics] Generating {metrics_per_trial} metrics using {generator_type}...")
-            
+
             # Create generator based on type
             generator = self._create_generator(
                 generator_type, generator_llm, judge_llm, self.seed, prometheus_api_base, model_save_dir
             )
-            
-            # Generate metrics
+
+            # Generate metrics — operates on the generation split.
             metrics = generator.generate(
                 dataset=dataset,
                 target_measure=target_measure,
                 n_metrics=metrics_per_trial
             )
-            
+
             if not metrics:
                 print(f"[Autometrics] Warning: No metrics generated for {generator_type}")
                 continue
-            
-            # Save generated metrics
+
+            # Save generated metrics under save_name so all run artifacts share an identity.
             metric_paths = self._save_generated_metrics(
-                metrics, generator_type, dataset.get_name(), target_measure, 
+                metrics, generator_type, save_name, target_measure,
                 self.seed or 42, output_dir
             )
-            
+
             print(f"[Autometrics] Saved {len(metric_paths)} metrics for {generator_type}")
-            
+
             # Load the saved metrics as classes
             saved_metrics = self._load_metrics_from_directory(generator_dir)
             all_generated_metrics.extend(saved_metrics)
-        
+
         return all_generated_metrics
     
     def _create_generator(self, generator_type: str, generator_llm: dspy.LM, judge_llm: dspy.LM, seed: int, prometheus_api_base: Optional[str] = None, model_save_dir: Optional[str] = None):

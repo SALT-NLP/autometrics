@@ -56,45 +56,40 @@ pip install -e .
 
 ## Quickstart
 
-1) Install dependencies
+1) Install the package:
 
 ```bash
 pip install autometrics-ai
 ```
 
-2) Ensure Java 21 is installed (required by some retrieval components). See Java section below.
-
-3) Set an API key for an OpenAI-compatible endpoint (for LLM-based generation/judging):
+2) Set an API key for an OpenAI-compatible endpoint (for LLM-based generation/judging):
 
 ```bash
 export OPENAI_API_KEY="your-api-key-here"
 ```
 
-4) Run the simplest end-to-end example with sensible defaults:
+3) Run the dead-simple quickstart — a tiny custom dataset in **generated-only mode** (no Java, no GPU, no bank retrieval):
 
 ```bash
-python autometrics_simple_example.py
+python examples/tutorial.py
 ```
 
-This will:
+This builds a small `Dataset`, generates a few LLM-judge metrics for your task, fits them to your human scores with PLS (the paper's default), and prints the aggregated metric's predictions.
 
-- load the `HelpSteer` dataset
-- generate and retrieve metrics
-- select top-k via regression
-- print a summary and report card
+### Next steps
 
-For a power-user example with customization, run:
+Once the quickstart works, try the progressively more involved examples:
 
-```bash
-python autometrics_example.py
-```
+- `examples/autometrics_simple_example.py` — same `Autometrics()` defaults, but on the HelpSteer dataset so the full pipeline (generation + metric-bank retrieval + PLS) runs. Requires Java 21 (see below).
+- `examples/autometrics_example.py` — power-user example showing custom generator configs, retriever pipelines, priors, and regressors.
 
 ## Examples and Tutorials
 
-- Simple script with all defaults: `examples/autometrics_simple_example.py`
+- Quickstart (generated-only): `examples/tutorial.py`
+- Defaults on a real dataset: `examples/autometrics_simple_example.py`
 - Power-user/custom configuration: `examples/autometrics_example.py`
+- Text walkthrough: `examples/TUTORIAL.md`
 - Notebook tutorials: `examples/tutorial.ipynb`, `demo.ipynb`
-- Text walkthrough tutorial: `examples/TUTORIAL.md` and runnable `examples/tutorial.py`
 
 If you prefer an experiments-style entry point with CLI arguments, see:
 

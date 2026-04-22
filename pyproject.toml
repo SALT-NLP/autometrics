@@ -40,11 +40,8 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["synthesizeme", "synthesizeme.*"]
-exclude = ["tests", "tests.*"]
-
-[tool.setuptools.package-data]
-synthesizeme = ["primitives/*.js", "prompts/*"]
+include = ["autometrics", "autometrics.*"]
+exclude = ["tests", "tests.*", "autometrics.test", "autometrics.test.*"]
 
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.18.0,<1.0.0"]

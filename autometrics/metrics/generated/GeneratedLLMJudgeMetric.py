@@ -258,6 +258,12 @@ class _LLMJudgeMetricMixin:
         
 
         _default_model_code = generate_llm_constructor_code(self.model)
+        # Pre-compute the escaped model code for embedding in the generated
+        # __repr__ string literal. Done outside the f-string so this file
+        # stays compatible with Python 3.9–3.11 (backslashes inside f-string
+        # expressions were only allowed starting in 3.12).
+        _safe_class_name = self.name.replace(" ", "_").replace("-", "_")
+        _model_code_for_repr = _default_model_code.replace('"', '\\"')
 
         code = f"""# Auto-generated metric file for {self.name}
 import dspy
@@ -267,7 +273,7 @@ from typing import ClassVar
 
 DEFAULT_MODEL = {_default_model_code}
 
-class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
+class {_safe_class_name}_LLMJudge({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
 
     description: ClassVar[str] = {json.dumps(self.description)}
@@ -284,7 +290,7 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
         )
 
     def __repr__(self):
-        return f"{self.name.replace(' ', '_').replace('-', '_')}_LLMJudge(model={generate_llm_constructor_code(self.model).replace("\"", "\\\"")})"
+        return "{_safe_class_name}_LLMJudge(model={_model_code_for_repr})"
 
 """
         return code
@@ -465,10 +471,16 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
                 model_name=str(getattr(self.model, "model", self.model)),
             )
         
+        # Pre-format bullet lists outside the f-string so backslashes don't
+        # appear inside f-string expressions (not allowed on Python < 3.12).
+        _nl_bullet = "\n  - "
+        tasks_bullets = _nl_bullet + _nl_bullet.join(outputs.tasks)
+        best_bullets = _nl_bullet + _nl_bullet.join(outputs.best_suited_for_circumstances)
+        not_rec_bullets = _nl_bullet + _nl_bullet.join(outputs.not_recommended_for_circumstances)
         return f"""- **Domain:** {outputs.domain}
-- **Tasks:** {"\n  - " + "\n  - ".join(outputs.tasks)}
-- **Best Suited For:** {"\n  - " + "\n  - ".join(outputs.best_suited_for_circumstances)}
-- **Not Recommended For:** {"\n  - " + "\n  - ".join(outputs.not_recommended_for_circumstances)}"""
+- **Tasks:** {tasks_bullets}
+- **Best Suited For:** {best_bullets}
+- **Not Recommended For:** {not_rec_bullets}"""
 
     def generate_metric_implementation(self):
         ref_type = "reference-based" if self.is_reference_based else "reference-free"
@@ -504,9 +516,13 @@ class {self.name.replace(" ", "_").replace("-", "_")}_LLMJudge({class_name}):
                 model_name=str(getattr(self.model, "model", self.model)),
             )
         
-        return f"""- **Biases:** {"\n  - " + "\n  - ".join(outputs.biases)}
-- **Task Misalignment Risks:** {"\n  - " + "\n  - ".join(outputs.task_misalignment_risks)}
-- **Failure Cases:** {"\n  - " + "\n  - ".join(outputs.failure_cases)}"""
+        _nl_bullet = "\n  - "
+        biases_bullets = _nl_bullet + _nl_bullet.join(outputs.biases)
+        misalign_bullets = _nl_bullet + _nl_bullet.join(outputs.task_misalignment_risks)
+        failure_bullets = _nl_bullet + _nl_bullet.join(outputs.failure_cases)
+        return f"""- **Biases:** {biases_bullets}
+- **Task Misalignment Risks:** {misalign_bullets}
+- **Failure Cases:** {failure_bullets}"""
 
     def generature_further_reading(self):
         return generate_further_reading(self) + "\n  - [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://openreview.net/pdf?id=uccHPGDlao)"

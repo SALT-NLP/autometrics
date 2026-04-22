@@ -1,141 +1,103 @@
 #!/usr/bin/env python3
 """
-Super Simple Autometrics Tutorial
-=================================
+Autometrics Quickstart — generated-only
+=======================================
 
-This tutorial shows the absolute basics of using autometrics.
-Just load a dataset, run the pipeline, and get your metrics!
+The dead-simple entry point. Bring a small dataset of (input, output, human_score)
+rows and Autometrics will generate task-specific LLM-judge metrics, fit them to
+your human scores with PLS, and hand you back one aggregated metric you can call
+on new data.
+
+Everything in this tutorial runs in generated-only mode: no metric bank, no
+retrieval, no Java, no GPU. All you need is an OPENAI_API_KEY.
+
+Usage:
+    export OPENAI_API_KEY="sk-..."
+    python tutorial.py
 """
 
-## Cell 1: Setup and Imports
 import os
+import pandas as pd
 import dspy
+
 from autometrics.autometrics import Autometrics
-from autometrics.dataset.datasets.simplification.simplification import SimpDA
-from autometrics.aggregator.regression.ElasticNet import ElasticNet
+from autometrics.dataset.Dataset import Dataset
 
-# Set your OpenAI API key
-# os.environ["OPENAI_API_KEY"] = "your-api-key-here"
 
-## Cell 2: Load Dataset
-# Load the SimpDA dataset (text simplification)
-dataset = SimpDA()
-target_measure = "simplicity"  # The human score column we want to predict
+# 1. Build a tiny dataset.
+#    Columns are up to you — just name the input, output, and target-score
+#    columns when you construct the Dataset. With <= 100 rows and the default
+#    metric bank, Autometrics skips retrieval entirely and uses only the
+#    metrics it generates for your task (generated-only mode).
+df = pd.DataFrame({
+    "id":     ["1", "2", "3", "4", "5", "6", "7", "8"],
+    "input":  [
+        "Explain photosynthesis to a 10-year-old.",
+        "What is 17 * 23?",
+        "Summarize the plot of Hamlet in one sentence.",
+        "Give me a recipe for pancakes.",
+        "Translate 'good morning' to Spanish.",
+        "What causes rainbows?",
+        "Write a haiku about autumn.",
+        "List three benefits of exercise.",
+    ],
+    "output": [
+        "Plants use sunlight to turn water and air into food. It's how they eat!",
+        "17 times 23 equals 391.",
+        "A Danish prince seeks revenge for his father's murder and everything ends badly.",
+        "Mix flour, eggs, milk; cook on a hot pan.",
+        "Buenos días.",
+        "Light bending through water droplets.",
+        "crisp leaves underfoot / the maple tree lets them fall / sweater weather now",
+        "Better mood, stronger heart, more energy.",
+    ],
+    "helpfulness": [5, 5, 4, 3, 5, 2, 4, 5],
+})
 
-print(f"Dataset: {dataset.get_name()}")
-print(f"Size: {len(dataset.get_dataframe())} examples")
-print(f"Target measure: {target_measure}")
+dataset = Dataset(
+    dataframe=df,
+    target_columns=["helpfulness"],
+    ignore_columns=["id"],
+    metric_columns=[],
+    name="QuickstartDemo",
+    data_id_column="id",
+    input_column="input",
+    output_column="output",
+    reference_columns=[],
+    task_description="Answer the user's question helpfully.",
+)
 
-## Cell 3: Configure LLMs
-# Use GPT-4o-mini for both generation and judging
+# 2. Pick an LLM for generating and judging. GPT-4o-mini is cheap and good enough.
 generator_llm = dspy.LM("openai/gpt-4o-mini")
 judge_llm = dspy.LM("openai/gpt-4o-mini")
 
-print("LLMs configured!")
-
-## Cell 4: Create Simple Autometrics Pipeline
-# Super simple configuration:
-# - Generate 1 metric using LLM judge
-# - Retrieve 10 metrics from the bank
-# - Select top 5 using ElasticNet regression
+# 3. Generate a handful of LLM-judge metrics. PLS is the default aggregator
+#    (the one used in the paper) — no need to pass it explicitly.
 autometrics = Autometrics(
-    metric_generation_configs={
-        "llm_judge": {"metrics_per_trial": 1}  # Just generate 1 metric
-    },
-    regression_strategy=ElasticNet,  # Use ElasticNet instead of default Lasso
-    seed=42,  # For reproducibility
-    generated_metrics_dir="tutorial_metrics"  # Unique directory for this tutorial
+    metric_generation_configs={"llm_judge": {"metrics_per_trial": 3}},
+    generated_metrics_dir="quickstart_metrics",
+    seed=42,
 )
-
-print("Autometrics pipeline created!")
-
-## Cell 5: Run the Pipeline
-print("Running autometrics pipeline...")
-print("This will:")
-print("1. Generate 1 LLM judge metric")
-print("2. Retrieve 10 relevant metrics from the bank")
-print("3. Evaluate all metrics on your dataset")
-print("4. Select top 5 using ElasticNet regression")
-print("5. Create a final aggregated metric")
 
 results = autometrics.run(
     dataset=dataset,
-    target_measure=target_measure,
+    target_measure="helpfulness",
     generator_llm=generator_llm,
     judge_llm=judge_llm,
-    num_to_retrieve=10,  # Retrieve 10 metrics
-    num_to_regress=5     # Select top 5
+    num_to_regress=2,
 )
 
-print("Pipeline complete! 🎉")
+# 4. Inspect what came out.
+print(f"\nGenerated {len(results['all_generated_metrics'])} metrics; "
+      f"kept the top {len(results['top_metrics'])}:")
+for m in results["top_metrics"]:
+    print(f"  - {m.get_name()}")
 
-## Cell 6: View Results
-print("\n" + "="*50)
-print("RESULTS")
-print("="*50)
+print(f"\nAggregated metric: {results['regression_metric'].get_name()}")
 
-print(f"\nGenerated metrics: {len(results['all_generated_metrics'])}")
-for i, metric in enumerate(results['all_generated_metrics']):
-    print(f"  {i+1}. {metric.__name__}")
-
-print(f"\nRetrieved metrics: {len(results['retrieved_metrics'])}")
-for i, metric in enumerate(results['retrieved_metrics'][:3]):  # Show first 3
-    print(f"  {i+1}. {metric.__name__}")
-
-print(f"\nTop selected metrics: {len(results['top_metrics'])}")
-for i, metric in enumerate(results['top_metrics']):
-    print(f"  {i+1}. {metric.get_name()}")
-
-print(f"\nFinal regression metric: {results['regression_metric'].get_name()}")
-print(f"Description: {results['regression_metric'].get_description()}")
-
-## Cell 7: Use Your Metrics
-print("\n" + "="*50)
-print("USING YOUR METRICS")
-print("="*50)
-
-# Get predictions from your final metric
-final_scores = results['regression_metric'].predict(dataset)
-human_scores = dataset.get_dataframe()[target_measure]
-
-print(f"\nPredicted vs Human scores for first 5 examples:")
-print("Example | Predicted | Human | Pred Rank | Human Rank")
-print("-" * 55)
-
-# Get first 5 examples
-first_5_pred = final_scores[:5]
-first_5_human = human_scores.iloc[:5]
-
-for i in range(min(5, len(final_scores))):
-    predicted = first_5_pred[i]
-    human = first_5_human.iloc[i]
-    
-    # Calculate ranks within these 5 examples (higher score = higher rank)
-    pred_rank = (first_5_pred > predicted).sum() + 1
-    human_rank = (first_5_human > human).sum() + 1
-    
-    print(f"  {i+1}     | {predicted:.3f}    | {human:.3f} | {pred_rank:>9} | {human_rank:>10}")
-
-# Check correlation with human scores
-import numpy as np
-from scipy.stats import pearsonr
-
-correlation, p_value = pearsonr(human_scores, final_scores)
-print(f"\nCorrelation with human scores: {correlation:.3f} (p={p_value:.3f})")
-
-## Cell 8: View Report Card
-print("\n" + "="*50)
-print("REPORT CARD")
-print("="*50)
-
-print(results['report_card'])
-
-print("\n" + "="*50)
-print("TUTORIAL COMPLETE!")
-print("="*50)
-print("You now have:")
-print("✅ A custom metric for your task")
-print("✅ Top 5 most relevant metrics")
-print("✅ A final aggregated metric")
-print("✅ Correlation with human judgments")
-print("\nYou can use these metrics on new data!")
+# 5. Use it on new data. The regression_metric is a regular Metric, so you can
+#    call .predict(dataset) on any Dataset with the same input/output schema.
+scores = results["regression_metric"].predict(dataset)
+print(f"\nPredicted vs. human scores:")
+for pred, human in zip(scores, df["helpfulness"]):
+    print(f"  predicted={pred:.2f}  human={human}")

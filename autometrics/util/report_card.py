@@ -765,6 +765,44 @@ def render_html(context: Dict[str, Any]) -> str:
     py_filename_json = json.dumps(py_filename)
     page_title = html_escape(str(context.get('target_measure', 'Metric')).replace('_',' ').title())
 
+    # Big, hard-to-miss banner rendered when no held-out eval_dataset was
+    # supplied and the report numbers below are computed on the training set.
+    # Written for a reader with no ML background: the ask is that they walk
+    # away knowing the numbers here are much better than they would be on
+    # new data.
+    train_as_eval_banner = ''
+    if context.get('used_train_as_eval'):
+        train_as_eval_banner = (
+            '<div class="alert alert-danger shadow-lg border-4 border-danger mb-4 px-4 py-4" '
+            'role="alert" style="border-radius: 10px; border-width: 4px !important; '
+            'background: repeating-linear-gradient(135deg, #f8d7da, #f8d7da 20px, #f5c2c7 20px, #f5c2c7 40px);">'
+            '<div style="display:flex; align-items:flex-start; gap:16px;">'
+            '<div style="font-size:2.6rem; line-height:1; flex-shrink:0;">&#9888;&#65039;</div>'
+            '<div>'
+            '<h2 style="margin:0 0 8px 0; color:#842029; font-weight:800; font-size:1.6rem; text-transform:uppercase; letter-spacing:0.5px;">'
+            'Warning: these numbers are too good to be true'
+            '</h2>'
+            '<p style="margin:0 0 10px 0; font-size:1.1rem; color:#212529;">'
+            'No separate evaluation dataset was provided, so the scores on this page were '
+            'measured on <strong>the exact same data the metric was trained on</strong>. '
+            'That is like grading a student on questions they already memorized &mdash; '
+            'the results look great but do not reflect how the metric will perform on new data.'
+            '</p>'
+            '<p style="margin:0 0 10px 0; font-size:1.05rem; color:#212529;">'
+            '<strong>What you should do:</strong> before trusting any number below, re-run '
+            'Autometrics and pass an <code>eval_dataset</code> (a separate set of examples '
+            'that were <em>not</em> used for training). The correlation, example table, and '
+            'runtime figures will then reflect real performance.'
+            '</p>'
+            '<p style="margin:0; font-size:0.95rem; color:#58151c;">'
+            'Until then, treat every chart and statistic on this page as an <strong>upper '
+            'bound</strong> on performance, not a prediction of it.'
+            '</p>'
+            '</div>'
+            '</div>'
+            '</div>'
+        )
+
     # Robustness tooltip content (brief, words only)
     rob_tip_html = (
         "<div style=\"max-width: 320px\">"
@@ -807,6 +845,7 @@ def render_html(context: Dict[str, Any]) -> str:
         <button class="btn btn-outline-primary ms-2" type="button" onclick="downloadPython()">Export to Python</button>
       </div>
     </div>
+    __TRAIN_AS_EVAL_BANNER__
 
     <div class="row g-4">
       <div class="col-md-6">
@@ -1201,6 +1240,7 @@ def render_html(context: Dict[str, Any]) -> str:
             .replace('__DOCS_MAP__', json.dumps(docs_map))
             .replace('__PY_CODE__', py_code_json)
             .replace('__PY_FILENAME__', py_filename_json)
+            .replace('__TRAIN_AS_EVAL_BANNER__', train_as_eval_banner)
             )
     return html
 
@@ -1228,61 +1268,67 @@ def generate_metric_report_card(
     except Exception:
         pass
 
-    # Prepare sections depending on eval availability
+    # Prepare sections depending on eval availability. If the caller did not
+    # provide a held-out eval_dataset we fall back to the training dataset so
+    # that the report's correlation / runtime / examples / robustness sections
+    # aren't blank. We track this with ``used_train_as_eval`` so the HTML can
+    # surface a prominent banner warning that the numbers are on the same data
+    # the regression was fit on.
     correlation = {}
     robustness = { 'available': False }
     runtime = {}
     examples_html = ''
 
-    if eval_dataset is not None:
+    report_dataset = eval_dataset if eval_dataset is not None else train_dataset
+    used_train_as_eval = eval_dataset is None and train_dataset is not None
+
+    if report_dataset is not None:
         # 1) Measure runtime FIRST on a fresh subsample to avoid warming caches
         try:
-            runtime = measure_runtime(eval_dataset, metrics, sample_size=30)
+            runtime = measure_runtime(report_dataset, metrics, sample_size=30)
         except Exception:
             runtime = {}
         if verbose:
             print(f"[ReportCard] Runtime sample computed for {runtime.get('sample_size', 0)} rows")
 
-        # 2) Ensure metric columns exist on eval dataset (this may use caches thereafter)
-        ensure_eval_metrics(eval_dataset, metrics)
+        # 2) Ensure metric columns exist on the report dataset (this may use caches thereafter)
+        ensure_eval_metrics(report_dataset, metrics)
         if verbose:
             print(f"[ReportCard] Ensured metric columns on eval dataset: {len(metrics)} metrics")
 
-        # 3) Ensure regression column exists on eval dataset
+        # 3) Ensure regression column exists on the report dataset
         try:
             if hasattr(regression_metric, 'get_name'):
                 name = regression_metric.get_name()
             else:
                 name = f"Autometrics_Regression_{target_measure}"
-            cols = eval_dataset.get_dataframe().columns
+            cols = report_dataset.get_dataframe().columns
             if not any(str(name).lower() in c.lower() for c in cols):
-                eval_dataset.add_metric(regression_metric, update_dataset=True)
+                report_dataset.add_metric(regression_metric, update_dataset=True)
                 if verbose:
-                    print(f"[ReportCard] Added regression metric to eval dataset: {name}")
+                    print(f"[ReportCard] Added regression metric to report dataset: {name}")
         except Exception:
             pass
 
-        # 4) Correlation (uses eval columns)
-        # Try to pass the exact regression column name, if present on the metric
+        # 4) Correlation
         reg_name = None
         try:
             reg_name = regression_metric.get_name() if hasattr(regression_metric, 'get_name') else None
         except Exception:
             reg_name = None
-        correlation = compute_correlation(eval_dataset, feature_names, target_measure, include_regression=True, regression_col_name=reg_name)
+        correlation = compute_correlation(report_dataset, feature_names, target_measure, include_regression=True, regression_col_name=reg_name)
         if verbose:
             r = correlation.get('regression', {}).get('r') if isinstance(correlation, dict) else None
             t = correlation.get('regression', {}).get('tau') if isinstance(correlation, dict) else None
             print(f"[ReportCard] Correlation computed (regression): r={r}, tau={t}")
 
-        # 5) Robustness (requires original metric values present on eval dataset)
+        # 5) Robustness (requires original metric values present on report dataset)
         try:
-            # Include the regression metric itself so robustness evaluates it directly
             metrics_for_robustness = list(metrics)
             if regression_metric is not None:
                 metrics_for_robustness.append(regression_metric)
             robustness = run_robustness(
-                eval_dataset,
+                report_dataset,
                 metrics_for_robustness,
                 target_measure,
                 lm,
@@ -1302,18 +1348,17 @@ def generate_metric_report_card(
 
         # 6) Examples table (default: include aggregated regression feedback only)
         try:
-            # Determine aggregated regression feedback column if present
             agg_fb_cols: List[str] = []
             try:
                 if hasattr(regression_metric, 'get_name'):
                     reg_name = regression_metric.get_name()
                     fb_col = f"{reg_name}__feedback"
-                    if fb_col in eval_dataset.get_dataframe().columns:
+                    if fb_col in report_dataset.get_dataframe().columns:
                         agg_fb_cols.append(fb_col)
             except Exception:
                 pass
             examples_html = build_examples_table(
-                eval_dataset,
+                report_dataset,
                 feature_names,
                 target_measure,
                 include_regression=True,
@@ -1392,6 +1437,7 @@ def generate_metric_report_card(
         'metrics_for_docs': metrics,
         'python_code': py_code_str,
         'python_filename': py_filename,
+        'used_train_as_eval': used_train_as_eval,
     })
 
     saved_path = None

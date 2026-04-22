@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """
-Simple example usage of the Autometrics pipeline with good defaults.
+Autometrics on a real dataset, all defaults
+===========================================
 
-This script demonstrates the simplest way to use Autometrics with minimal configuration.
-Just set your API key and run!
+This script runs the full pipeline — metric generation + retrieval from the
+built-in bank + PLS aggregation — on the HelpSteer dataset with no custom
+configuration. It's the second step after `tutorial.py`: same `Autometrics()`,
+but now on real data that exercises the metric bank and retrievers.
+
+If you just want the minimal generated-only entry point, see `tutorial.py`.
+For full customization, see `autometrics_example.py`.
 
 Usage:
     export OPENAI_API_KEY="your-api-key-here"

@@ -189,3 +189,5 @@ core
 /full_test_metrics/
 /generated_metrics_*
 /autometrics_cache_*
+/artifacts/
+/quickstart_metrics/

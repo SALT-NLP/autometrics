@@ -200,24 +200,32 @@ def compute_correlation(eval_dataset: Any, feature_names: List[str], target_meas
             x_norm = x_clean
         r_val: Optional[float] = None
         tau_val: Optional[float] = None
+        r_pval: Optional[float] = None
+        tau_pval: Optional[float] = None
         if len(x_clean) >= 3:
             if _HAVE_SCIPY:
                 try:
-                    r_val = float(pearsonr(x_clean, y_clean).statistic)
+                    res = pearsonr(x_clean, y_clean)
+                    r_val = float(res.statistic)
+                    r_pval = float(res.pvalue)
                 except Exception:
                     r_val = None
+                    r_pval = None
                 try:
-                    tau_val = float(kendalltau(x_clean, y_clean).statistic)
+                    res = kendalltau(x_clean, y_clean)
+                    tau_val = float(res.statistic)
+                    tau_pval = float(res.pvalue)
                 except Exception:
                     tau_val = None
+                    tau_pval = None
             else:
-                # Fallback to numpy corrcoef for Pearson only, leave tau as None
+                # Fallback to numpy corrcoef for Pearson only, leave tau and p-values as None
                 try:
                     if np.std(x_clean) > 0 and np.std(y_clean) > 0:
                         r_val = float(np.corrcoef(x_clean, y_clean)[0, 1])
                 except Exception:
                     r_val = None
-        results['metrics'].append({ 'name': name, 'r': r_val, 'tau': tau_val, 'x': x_clean.tolist(), 'x_norm': x_norm.tolist() if x_clean.size > 0 else [], 'y': y_clean.tolist(), 'ids': ids_clean, 'y_min': y_min, 'y_max': y_max })
+        results['metrics'].append({ 'name': name, 'r': r_val, 'tau': tau_val, 'r_pvalue': r_pval, 'tau_pvalue': tau_pval, 'x': x_clean.tolist(), 'x_norm': x_norm.tolist() if x_clean.size > 0 else [], 'y': y_clean.tolist(), 'ids': ids_clean, 'y_min': y_min, 'y_max': y_max })
     # Try regression column if present
     if include_regression:
         reg_cols = [c for c in df.columns if c.lower().startswith('autometrics_regression_')]
@@ -237,23 +245,31 @@ def compute_correlation(eval_dataset: Any, feature_names: List[str], target_meas
             x_norm = x_clean
             r_val: Optional[float] = None
             tau_val: Optional[float] = None
+            r_pval: Optional[float] = None
+            tau_pval: Optional[float] = None
             if len(x_clean) >= 3:
                 if _HAVE_SCIPY:
                     try:
-                        r_val = float(pearsonr(x_clean, y_clean).statistic)
+                        res = pearsonr(x_clean, y_clean)
+                        r_val = float(res.statistic)
+                        r_pval = float(res.pvalue)
                     except Exception:
                         r_val = None
+                        r_pval = None
                     try:
-                        tau_val = float(kendalltau(x_clean, y_clean).statistic)
+                        res = kendalltau(x_clean, y_clean)
+                        tau_val = float(res.statistic)
+                        tau_pval = float(res.pvalue)
                     except Exception:
                         tau_val = None
+                        tau_pval = None
                 else:
                     try:
                         if np.std(x_clean) > 0 and np.std(y_clean) > 0:
                             r_val = float(np.corrcoef(x_clean, y_clean)[0, 1])
                     except Exception:
                         r_val = None
-            results['regression'] = { 'name': col, 'r': r_val, 'tau': tau_val, 'x': x_clean.tolist(), 'x_norm': x_norm.tolist(), 'y': y_clean.tolist(), 'ids': ids_clean, 'y_min': y_min, 'y_max': y_max }
+            results['regression'] = { 'name': col, 'r': r_val, 'tau': tau_val, 'r_pvalue': r_pval, 'tau_pvalue': tau_pval, 'x': x_clean.tolist(), 'x_norm': x_norm.tolist(), 'y': y_clean.tolist(), 'ids': ids_clean, 'y_min': y_min, 'y_max': y_max }
     return results
 
 
@@ -803,6 +819,61 @@ def render_html(context: Dict[str, Any]) -> str:
             '</div>'
         )
 
+    # Significance banner. Fires on the regression metric's Pearson p-value
+    # against the target. Two tiers:
+    #   0.05 < p <= 0.30 : yellow caution — correlation is not statistically
+    #                       significant; practitioners should inspect the
+    #                       selected metrics before trusting them.
+    #   p > 0.30         : red alarm — AutoMetrics did not identify metrics
+    #                       that meaningfully correlate with human judgment;
+    #                       this run should not be used as-is.
+    # Written so a non-stats reader knows what to do.
+    pvalue_banner = ''
+    reg_block = corr.get('regression') if isinstance(corr, dict) else None
+    reg_p = reg_block.get('r_pvalue') if isinstance(reg_block, dict) else None
+    if isinstance(reg_p, (int, float)) and reg_p == reg_p:  # not NaN
+        if reg_p > 0.30:
+            pvalue_banner = (
+                '<div class="alert alert-danger shadow-lg border-4 border-danger mb-4 px-4 py-4" '
+                'role="alert" style="border-radius: 10px; border-width: 4px !important;">'
+                '<div style="display:flex; align-items:flex-start; gap:16px;">'
+                '<div style="font-size:2.6rem; line-height:1; flex-shrink:0;">&#128721;</div>'
+                '<div>'
+                '<h2 style="margin:0 0 8px 0; color:#842029; font-weight:800; font-size:1.6rem; text-transform:uppercase; letter-spacing:0.5px;">'
+                'AutoMetrics did not find useful metrics for this task'
+                '</h2>'
+                f'<p style="margin:0 0 10px 0; font-size:1.1rem; color:#212529;">'
+                f'The aggregated metric\'s correlation with human judgments is <strong>not statistically reliable</strong> '
+                f'(Pearson <em>p</em> = {reg_p:.2f}, well above the 0.30 cutoff). '
+                f'In plain terms: the patterns shown below could easily be coincidence, and the selected metrics are '
+                f'<strong>unlikely to predict human judgment</strong> on new data.'
+                '</p>'
+                '<p style="margin:0 0 10px 0; font-size:1.05rem; color:#212529;">'
+                '<strong>What you should do:</strong> do not ship these metrics. Consider collecting more labeled '
+                'examples, sharpening the task description passed to <code>Autometrics</code>, or checking whether your '
+                'target column actually captures the quality you care about.'
+                '</p>'
+                '</div></div></div>'
+            )
+        elif reg_p > 0.05:
+            pvalue_banner = (
+                '<div class="alert alert-warning shadow-sm border-3 border-warning mb-4 px-4 py-3" '
+                'role="alert" style="border-radius: 10px; border-width: 3px !important;">'
+                '<div style="display:flex; align-items:flex-start; gap:14px;">'
+                '<div style="font-size:2rem; line-height:1; flex-shrink:0;">&#9888;&#65039;</div>'
+                '<div>'
+                '<h3 style="margin:0 0 6px 0; color:#664d03; font-weight:800; font-size:1.25rem;">'
+                'Check these metrics carefully before trusting them'
+                '</h3>'
+                f'<p style="margin:0; font-size:1.0rem; color:#212529;">'
+                f'The aggregated metric\'s correlation with human judgments is <strong>not statistically significant</strong> '
+                f'(Pearson <em>p</em> = {reg_p:.2f}, above the conventional 0.05 threshold). '
+                f'Review the selected metrics below and consider collecting more labeled examples before relying on this '
+                f'run in production.'
+                '</p>'
+                '</div></div></div>'
+            )
+
     # Robustness tooltip content (brief, words only)
     rob_tip_html = (
         "<div style=\"max-width: 320px\">"
@@ -846,6 +917,7 @@ def render_html(context: Dict[str, Any]) -> str:
       </div>
     </div>
     __TRAIN_AS_EVAL_BANNER__
+    __PVALUE_BANNER__
 
     <div class="row g-4">
       <div class="col-md-6">
@@ -991,8 +1063,15 @@ def render_html(context: Dict[str, Any]) -> str:
         const tlab = (RC_CORR.regression.tau!=null ? (RC_CORR.regression.tau.toFixed ? RC_CORR.regression.tau.toFixed(2) : RC_CORR.regression.tau) : 'NA');
         const ids = RC_CORR.regression.ids || [];
         const text = ids.map(id => 'ID: ' + id);
+        const fmtP = (v) => {
+          if (v == null) return 'NA';
+          if (v < 0.001) return '<0.001';
+          return v.toFixed ? v.toFixed(3) : v;
+        };
+        const rplab = fmtP(RC_CORR.regression.r_pvalue);
+        const tplab = fmtP(RC_CORR.regression.tau_pvalue);
         traces.push({ x: RC_CORR.regression.x_norm || RC_CORR.regression.x || [], y: RC_CORR.regression.y || [], mode: 'markers', name: (RC_CORR.regression.name || 'Aggregate') + ' (r=' + rlab + ', \u03C4=' + tlab + ')', marker: { size: 8, color: 'black' }, text: text, hovertemplate: '%{text}<br>x=%{x:.3f}<br>y=%{y:.3f}<extra></extra>' });
-        document.getElementById('correlation-stats').innerText = 'Aggregate metric: r=' + rlab + ', \u03C4=' + tlab;
+        document.getElementById('correlation-stats').innerText = 'Aggregate metric: r=' + rlab + ' (p=' + rplab + '), \u03C4=' + tlab + ' (p=' + tplab + ')';
       }
       Plotly.newPlot('correlation-chart', traces, layout, {displayModeBar: false});
       // Click-to-jump: when a point is clicked, locate its ID in the examples table and jump to it
@@ -1241,6 +1320,7 @@ def render_html(context: Dict[str, Any]) -> str:
             .replace('__PY_CODE__', py_code_json)
             .replace('__PY_FILENAME__', py_filename_json)
             .replace('__TRAIN_AS_EVAL_BANNER__', train_as_eval_banner)
+            .replace('__PVALUE_BANNER__', pvalue_banner)
             )
     return html
 
@@ -1450,13 +1530,18 @@ def generate_metric_report_card(
         except Exception:
             saved_path = None
 
-    # Extract reusable correlation stats for regression (kendall tau and pearson r)
+    # Extract reusable correlation stats for regression (effect sizes + p-values)
     reg_tau = None
     reg_r = None
+    reg_tau_p = None
+    reg_r_p = None
     try:
         if isinstance(correlation, dict) and correlation.get('regression'):
-            reg_tau = correlation['regression'].get('tau')
-            reg_r = correlation['regression'].get('r')
+            reg_block = correlation['regression']
+            reg_tau = reg_block.get('tau')
+            reg_r = reg_block.get('r')
+            reg_tau_p = reg_block.get('tau_pvalue')
+            reg_r_p = reg_block.get('r_pvalue')
     except Exception:
         pass
 
@@ -1467,6 +1552,8 @@ def generate_metric_report_card(
             'coefficients': coeffs,
             'kendall_tau_regression': reg_tau,
             'pearson_r_regression': reg_r,
+            'kendall_p_regression': reg_tau_p,
+            'pearson_p_regression': reg_r_p,
             'correlation': correlation,
         }
     }

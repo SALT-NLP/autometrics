@@ -10,79 +10,119 @@ import os
 
 # ---------------------------------------------------------------------------
 # Import metric *classes* only (light-weight) – do NOT instantiate here.
+# Each import is wrapped in try/except so users with a partial install (e.g.
+# generated-only mode with just the base deps) can still import MetricBank
+# and get back whichever metrics *can* be loaded. Missing metrics are logged
+# once at import time and simply omitted from the registries.
 # ---------------------------------------------------------------------------
 
-from autometrics.metrics.reference_based.BLEU import BLEU
-from autometrics.metrics.reference_based.CHRF import CHRF
-from autometrics.metrics.reference_based.TER import TER
-from autometrics.metrics.reference_based.GLEU import GLEU
-from autometrics.metrics.reference_based.SARI import SARI
-from autometrics.metrics.reference_based.BERTScore import BERTScore
-from autometrics.metrics.reference_based.ROUGE import ROUGE
-from autometrics.metrics.reference_based.MOVERScore import MOVERScore
-from autometrics.metrics.reference_based.BARTScore import BARTScore
-from autometrics.metrics.reference_based.UniEvalDialogue import UniEvalDialogue
-from autometrics.metrics.reference_based.UniEvalSum import UniEvalSum
-from autometrics.metrics.reference_based.CIDEr import CIDEr
-from autometrics.metrics.reference_based.METEOR import METEOR
-from autometrics.metrics.reference_based.StringSimilarity import (
-    LevenshteinDistance,
-    LevenshteinRatio,
-    HammingDistance,
-    JaroSimilarity,
-    JaroWinklerSimilarity,
-    JaccardDistance,
-)
-from autometrics.metrics.reference_based.ParaScore import ParaScore
-from autometrics.metrics.reference_based.YiSi import YiSi
-from autometrics.metrics.reference_based.MAUVE import MAUVE
-from autometrics.metrics.reference_based.PseudoPARENT import PseudoPARENT
-from autometrics.metrics.reference_based.NIST import NIST
-from autometrics.metrics.reference_based.IBLEU import IBLEU
-from autometrics.metrics.reference_based.UpdateROUGE import UpdateROUGE
-from autometrics.metrics.reference_based.BLEURT import BLEURT
-from autometrics.metrics.reference_based.LENS import LENS
-from autometrics.metrics.reference_based.CharCut import CharCut
-from autometrics.metrics.reference_based.InfoLM import InfoLM
+import warnings as _warnings
 
-from autometrics.metrics.reference_free.FKGL import FKGL
-from autometrics.metrics.reference_free.UniEvalFact import UniEvalFact
-from autometrics.metrics.reference_free.Perplexity import Perplexity
-from autometrics.metrics.reference_free.ParaScoreFree import ParaScoreFree
-from autometrics.metrics.reference_free.INFORMRewardModel import INFORMRewardModel
-from autometrics.metrics.reference_free.PRMRewardModel import MathProcessRewardModel
-from autometrics.metrics.reference_free.SummaQA import SummaQA
-from autometrics.metrics.reference_free.DistinctNGram import DistinctNGram
-from autometrics.metrics.reference_free.FastTextToxicity import FastTextToxicity
-from autometrics.metrics.reference_free.FastTextNSFW import FastTextNSFW
-from autometrics.metrics.reference_free.FastTextEducationalValue import FastTextEducationalValue
-from autometrics.metrics.reference_free.SelfBLEU import SelfBLEU
-from autometrics.metrics.reference_free.FactCC import FactCC
-from autometrics.metrics.reference_free.Toxicity import Toxicity
-from autometrics.metrics.reference_free.GRMRewardModel import GRMRewardModel
-from autometrics.metrics.reference_free.LDLRewardModel import LDLRewardModel
-from autometrics.metrics.reference_free.Sentiment import Sentiment
-from autometrics.metrics.reference_free.LENS_SALSA import LENS_SALSA
+
+def _try_import(module_path: str, *names: str):
+    """Import ``names`` from ``module_path``; return dict of available ones."""
+    try:
+        module = __import__(module_path, fromlist=list(names))
+    except Exception as exc:  # noqa: BLE001 – any import failure counts
+        _warnings.warn(
+            f"[MetricBank] Skipping {module_path} ({', '.join(names)}): {exc}",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return {}
+    return {n: getattr(module, n) for n in names if hasattr(module, n)}
+
+
+_rb = {}
+for _mod, _cls in [
+    ("autometrics.metrics.reference_based.BLEU", "BLEU"),
+    ("autometrics.metrics.reference_based.CHRF", "CHRF"),
+    ("autometrics.metrics.reference_based.TER", "TER"),
+    ("autometrics.metrics.reference_based.GLEU", "GLEU"),
+    ("autometrics.metrics.reference_based.SARI", "SARI"),
+    ("autometrics.metrics.reference_based.BERTScore", "BERTScore"),
+    ("autometrics.metrics.reference_based.ROUGE", "ROUGE"),
+    ("autometrics.metrics.reference_based.MOVERScore", "MOVERScore"),
+    ("autometrics.metrics.reference_based.BARTScore", "BARTScore"),
+    ("autometrics.metrics.reference_based.UniEvalDialogue", "UniEvalDialogue"),
+    ("autometrics.metrics.reference_based.UniEvalSum", "UniEvalSum"),
+    ("autometrics.metrics.reference_based.CIDEr", "CIDEr"),
+    ("autometrics.metrics.reference_based.METEOR", "METEOR"),
+    ("autometrics.metrics.reference_based.ParaScore", "ParaScore"),
+    ("autometrics.metrics.reference_based.YiSi", "YiSi"),
+    ("autometrics.metrics.reference_based.MAUVE", "MAUVE"),
+    ("autometrics.metrics.reference_based.PseudoPARENT", "PseudoPARENT"),
+    ("autometrics.metrics.reference_based.NIST", "NIST"),
+    ("autometrics.metrics.reference_based.IBLEU", "IBLEU"),
+    ("autometrics.metrics.reference_based.UpdateROUGE", "UpdateROUGE"),
+    ("autometrics.metrics.reference_based.BLEURT", "BLEURT"),
+    ("autometrics.metrics.reference_based.LENS", "LENS"),
+    ("autometrics.metrics.reference_based.CharCut", "CharCut"),
+    ("autometrics.metrics.reference_based.InfoLM", "InfoLM"),
+]:
+    _rb.update(_try_import(_mod, _cls))
+
+_rb.update(
+    _try_import(
+        "autometrics.metrics.reference_based.StringSimilarity",
+        "LevenshteinDistance",
+        "LevenshteinRatio",
+        "HammingDistance",
+        "JaroSimilarity",
+        "JaroWinklerSimilarity",
+        "JaccardDistance",
+    )
+)
+
+_rf = {}
+for _mod, _cls in [
+    ("autometrics.metrics.reference_free.FKGL", "FKGL"),
+    ("autometrics.metrics.reference_free.UniEvalFact", "UniEvalFact"),
+    ("autometrics.metrics.reference_free.Perplexity", "Perplexity"),
+    ("autometrics.metrics.reference_free.ParaScoreFree", "ParaScoreFree"),
+    ("autometrics.metrics.reference_free.INFORMRewardModel", "INFORMRewardModel"),
+    ("autometrics.metrics.reference_free.PRMRewardModel", "MathProcessRewardModel"),
+    ("autometrics.metrics.reference_free.SummaQA", "SummaQA"),
+    ("autometrics.metrics.reference_free.DistinctNGram", "DistinctNGram"),
+    ("autometrics.metrics.reference_free.FastTextToxicity", "FastTextToxicity"),
+    ("autometrics.metrics.reference_free.FastTextNSFW", "FastTextNSFW"),
+    ("autometrics.metrics.reference_free.FastTextEducationalValue", "FastTextEducationalValue"),
+    ("autometrics.metrics.reference_free.SelfBLEU", "SelfBLEU"),
+    ("autometrics.metrics.reference_free.FactCC", "FactCC"),
+    ("autometrics.metrics.reference_free.Toxicity", "Toxicity"),
+    ("autometrics.metrics.reference_free.GRMRewardModel", "GRMRewardModel"),
+    ("autometrics.metrics.reference_free.LDLRewardModel", "LDLRewardModel"),
+    ("autometrics.metrics.reference_free.Sentiment", "Sentiment"),
+    ("autometrics.metrics.reference_free.LENS_SALSA", "LENS_SALSA"),
+]:
+    _rf.update(_try_import(_mod, _cls))
+
+# Preserve the original metric ordering for tests / reproducibility.
+_REFERENCE_BASED_ORDER = [
+    "BLEU", "CHRF", "TER", "GLEU", "SARI", "BERTScore", "ROUGE", "MOVERScore",
+    "BARTScore", "UniEvalDialogue", "UniEvalSum", "CIDEr", "METEOR", "BLEURT",
+    "LevenshteinDistance", "LevenshteinRatio", "HammingDistance", "JaroSimilarity",
+    "JaroWinklerSimilarity", "JaccardDistance", "ParaScore", "YiSi", "MAUVE",
+    "PseudoPARENT", "NIST", "IBLEU", "UpdateROUGE", "LENS", "CharCut", "InfoLM",
+]
+_REFERENCE_FREE_ORDER = [
+    "FKGL", "UniEvalFact", "Perplexity", "ParaScoreFree", "INFORMRewardModel",
+    "MathProcessRewardModel", "SummaQA", "DistinctNGram", "FastTextToxicity",
+    "FastTextNSFW", "FastTextEducationalValue", "SelfBLEU", "FactCC", "Toxicity",
+    "Sentiment", "GRMRewardModel", "LENS_SALSA", "LDLRewardModel",
+]
+
+# Expose successfully-loaded classes at module scope for ``from ... import X``
+# style access elsewhere in the codebase.
+globals().update(_rb)
+globals().update(_rf)
 
 # ---------------------------------------------------------------------------
 # Metric class registries
 # ---------------------------------------------------------------------------
 
-reference_based_metric_classes: List[Type] = [
-    BLEU, CHRF, TER, GLEU, SARI, BERTScore, ROUGE, MOVERScore, BARTScore,
-    UniEvalDialogue, UniEvalSum, CIDEr, METEOR, BLEURT, LevenshteinDistance,
-    LevenshteinRatio, HammingDistance, JaroSimilarity, JaroWinklerSimilarity,
-    JaccardDistance, ParaScore, YiSi, MAUVE, PseudoPARENT, NIST, IBLEU,
-    UpdateROUGE, LENS, CharCut, InfoLM,
-]
-
-reference_free_metric_classes: List[Type] = [
-    FKGL, UniEvalFact, Perplexity, ParaScoreFree, INFORMRewardModel,
-    MathProcessRewardModel, SummaQA, DistinctNGram, FastTextToxicity,
-    FastTextNSFW, FastTextEducationalValue, SelfBLEU, FactCC, Toxicity,
-    Sentiment, GRMRewardModel, LENS_SALSA, LDLRewardModel,
-]
-
+reference_based_metric_classes: List[Type] = [_rb[n] for n in _REFERENCE_BASED_ORDER if n in _rb]
+reference_free_metric_classes: List[Type] = [_rf[n] for n in _REFERENCE_FREE_ORDER if n in _rf]
 all_metric_classes: List[Type] = reference_based_metric_classes + reference_free_metric_classes
 
 # ---------------------------------------------------------------------------

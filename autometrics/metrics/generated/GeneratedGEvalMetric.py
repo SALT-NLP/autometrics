@@ -296,15 +296,19 @@ class _GEvalMetricMixin:
     def _generate_python_code(self, include_metric_card: bool = True) -> str:
         """Export a standalone python file that re-creates this metric."""
         class_name = "GeneratedRefBasedGEvalMetric" if self.is_reference_based else "GeneratedRefFreeGEvalMetric"
+        _default_model_code = generate_llm_constructor_code(self.model)
+        _safe_class_name = self.name.replace(" ", "_").replace("-", "_")
+        # Pre-escape outside the f-string for Python 3.9–3.11 compatibility.
+        _model_code_for_repr = _default_model_code.replace('"', '\\"')
         code = f"""# Auto-generated G-Eval metric file for {self.name}
 import dspy
 import os
 from autometrics.metrics.generated.GeneratedGEvalMetric import {class_name}
 from typing import ClassVar
 
-DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
+DEFAULT_MODEL = {_default_model_code}
 
-class {self.name.replace(" ", "_").replace("-", "_")}_GEval({class_name}):
+class {_safe_class_name}_GEval({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
 
     description: ClassVar[str] = {json.dumps(self.description)}
@@ -324,7 +328,7 @@ class {self.name.replace(" ", "_").replace("-", "_")}_GEval({class_name}):
         )
 
     def __repr__(self):
-        return f"{self.name.replace(' ', '_').replace('-', '_')}_GEval(model={generate_llm_constructor_code(self.model).replace('\"', "\\\"")})"
+        return "{_safe_class_name}_GEval(model={_model_code_for_repr})"
 
 """
         return code
@@ -519,10 +523,14 @@ class {self.name.replace(" ", "_").replace("-", "_")}_GEval({class_name}):
                 model_name=str(getattr(self.model, "model", self.model)),
             )
         
+        _nl_bullet = "\n  - "
+        tasks_bullets = _nl_bullet + _nl_bullet.join(outputs.tasks)
+        best_bullets = _nl_bullet + _nl_bullet.join(outputs.best_suited_for_circumstances)
+        not_rec_bullets = _nl_bullet + _nl_bullet.join(outputs.not_recommended_for_circumstances)
         return f"""- **Domain:** {outputs.domain}
-- **Tasks:** {"\n  - " + "\n  - ".join(outputs.tasks)}
-- **Best Suited For:** {"\n  - " + "\n  - ".join(outputs.best_suited_for_circumstances)}
-- **Not Recommended For:** {"\n  - " + "\n  - ".join(outputs.not_recommended_for_circumstances)}"""
+- **Tasks:** {tasks_bullets}
+- **Best Suited For:** {best_bullets}
+- **Not Recommended For:** {not_rec_bullets}"""
 
     def generate_metric_implementation(self):
         ref_type = "reference-based" if self.is_reference_based else "reference-free"
@@ -561,9 +569,13 @@ class {self.name.replace(" ", "_").replace("-", "_")}_GEval({class_name}):
                 model_name=str(getattr(self.model, "model", self.model)),
             )
         
-        return f"""- **Biases:** {"\n  - " + "\n  - ".join(outputs.biases)}
-- **Task Misalignment Risks:** {"\n  - " + "\n  - ".join(outputs.task_misalignment_risks)}
-- **Failure Cases:** {"\n  - " + "\n  - ".join(outputs.failure_cases)}"""
+        _nl_bullet = "\n  - "
+        biases_bullets = _nl_bullet + _nl_bullet.join(outputs.biases)
+        misalign_bullets = _nl_bullet + _nl_bullet.join(outputs.task_misalignment_risks)
+        failure_bullets = _nl_bullet + _nl_bullet.join(outputs.failure_cases)
+        return f"""- **Biases:** {biases_bullets}
+- **Task Misalignment Risks:** {misalign_bullets}
+- **Failure Cases:** {failure_bullets}"""
 
     def generature_further_reading(self):
         return generate_further_reading(self) + "\n  - [G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment](https://arxiv.org/abs/2303.16634)\n  - [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://openreview.net/pdf?id=uccHPGDlao)"

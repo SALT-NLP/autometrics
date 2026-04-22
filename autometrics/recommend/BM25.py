@@ -7,7 +7,11 @@ from platformdirs import user_data_dir
 import json
 import subprocess
 import warnings
-from pyserini.search.lucene import LuceneSearcher
+
+# NOTE: pyserini is imported lazily inside __init__ so that merely importing
+# this module (and, transitively, autometrics.autometrics) does not require
+# Java 21 / pyserini. Only users who actually construct a BM25 retriever pay
+# the dependency cost.
 
 class BM25(MetricRecommender):
     def __init__(self, metric_classes: List[Type[Metric]], index_path: str = user_data_dir("autometrics", "bm25"), force_reindex: bool = False, use_description_only: bool = False):
@@ -98,7 +102,11 @@ class BM25(MetricRecommender):
 
         # ------------------------------------------------------------------
         # Initialise Lucene searcher on the freshly built (or cached) index.
+        # Pyserini is imported here (not at module scope) so that Autometrics
+        # users who never hit the retrieval path don't need Java 21 installed.
         # ------------------------------------------------------------------
+        from pyserini.search.lucene import LuceneSearcher
+
         self.searcher = LuceneSearcher(self.lucene_index_path)
         self.searcher.set_language('en')
 

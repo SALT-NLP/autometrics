@@ -3,19 +3,26 @@ from autometrics.recommend.LLMRec import LLMRec
 from autometrics.recommend.ColBERT import ColBERT
 from autometrics.recommend.BM25 import BM25
 from autometrics.recommend.PipelinedRec import PipelinedRec
-from autometrics.metrics.MetricBank import all_metric_classes
 from autometrics.aggregator.regression.PLS import PLS
 from autometrics.aggregator.regression.HotellingPLS import HotellingPLS
 from autometrics.dataset.Dataset import Dataset
 from autometrics.metrics.Metric import Metric
+from autometrics.metrics.MultiMetric import MultiMetric
 from autometrics.recommend.MetricRecommender import MetricRecommender
 from typing import List, Type, Optional, Dict, Any, Union, Callable
 import dspy
 import os
 import importlib.util
 import inspect
-from autometrics.metrics.MultiMetric import MultiMetric
 import threading
+
+# Sentinel used as the default for ``metric_bank``. We resolve it to the real
+# ``all_metric_classes`` list lazily in ``_load_metric_bank`` so that importing
+# ``Autometrics`` does not transitively import every metric's dependencies
+# (bert_score, pyemd, rouge, pylate, …). This keeps generated-only usage
+# (``metric_bank=[]`` or the ``full_bank_data_cutoff`` small-dataset path)
+# truly free of heavy optional deps.
+_DEFAULT_METRIC_BANK = object()
 
 ## This is the main file for the complete Autometrics pipeline.
 #
@@ -125,7 +132,7 @@ class Autometrics:
         retriever_kwargs: dict = DEFAULT_RETRIEVER_KWARGS,
         regression_strategy: Type = PLS,
         regression_kwargs: dict = DEFAULT_REGRESSION_KWARGS,
-        metric_bank: Union[List[Type[Metric]], str] = all_metric_classes,
+        metric_bank: Union[List[Type[Metric]], str] = _DEFAULT_METRIC_BANK,
         generated_metrics_dir: Optional[str] = None,
         merge_generated_with_bank: bool = False,
         seed: int = 42,
@@ -345,41 +352,52 @@ class Autometrics:
             self.on_progress(progress_base, "Preparing retrieval")
         except Exception:
             pass
-        metric_bank = self._load_metric_bank(dataset)
-        
-        print(f"[Autometrics] Loaded {len(metric_bank)} metrics in bank")
 
-        # 2.1 Apply small-dataset override to use generated metrics only
-        # Do not overwrite self.metric_bank; only adjust the local metric_bank for this run
+        # 2.0 Small-dataset override: if the user hasn't overridden metric_bank
+        # and the dataset is small enough, use generated metrics only. We short-
+        # circuit *before* calling _load_metric_bank so that the heavy MetricBank
+        # import (bert_score, rouge, pylate, …) is never triggered in this path.
         try:
             dataset_size = len(dataset.get_dataframe())
         except Exception:
             dataset_size = None
-        if (
+        use_generated_only = (
             self.full_bank_data_cutoff is not None
             and dataset_size is not None
             and dataset_size <= self.full_bank_data_cutoff
-            and (self.metric_bank is all_metric_classes)
-        ):
+            and (self.metric_bank is _DEFAULT_METRIC_BANK)
+        )
+        if use_generated_only:
             print(
                 f"[Autometrics] Dataset size ({dataset_size}) <= cutoff ({self.full_bank_data_cutoff}) with default bank — using generated metrics only"
             )
             metric_bank = []
+        else:
+            metric_bank = self._load_metric_bank(dataset)
+            print(f"[Autometrics] Loaded {len(metric_bank)} metrics in bank")
 
         # 2.5 Merge generated metrics with metric bank
         print("\n[Autometrics]  Merging Generated Metrics with Metric Bank")
         metric_bank = self._merge_generated_with_bank(metric_bank, generated_metrics)
         
-        # Configure retriever with metric bank and model
-        print("[Autometrics] Configuring retriever...")
-        retriever_kwargs = self.retriever_kwargs.copy()
-        retriever_kwargs["metric_classes"] = metric_bank
-        retriever_kwargs["model"] = generator_llm  # Use generator LLM for LLMRec
-        
-        # Generate dynamic index paths and validate retrieval hyperparameters
-        retriever_kwargs = self._validate_and_adjust_retriever_config(retriever_kwargs, dataset, metric_bank, num_to_retrieve)
-        
-        retriever_instance = self.retriever(**retriever_kwargs)
+        # Configure retriever with metric bank and model.
+        # In generated-only mode we skip building the retriever altogether —
+        # there's nothing to retrieve from (the generated metrics are already
+        # what we want to evaluate), and building BM25/ColBERT indices here
+        # would drag in Java/pyserini/pylate.
+        retriever_instance = None
+        if use_generated_only:
+            print("[Autometrics] Skipping retriever setup (generated-only mode)")
+        else:
+            print("[Autometrics] Configuring retriever...")
+            retriever_kwargs = self.retriever_kwargs.copy()
+            retriever_kwargs["metric_classes"] = metric_bank
+            retriever_kwargs["model"] = generator_llm  # Use generator LLM for LLMRec
+
+            # Generate dynamic index paths and validate retrieval hyperparameters
+            retriever_kwargs = self._validate_and_adjust_retriever_config(retriever_kwargs, dataset, metric_bank, num_to_retrieve)
+
+            retriever_instance = self.retriever(**retriever_kwargs)
         try:
             self.on_progress(progress_base + step_weight, "Retrieval ready")
         except Exception:
@@ -409,7 +427,13 @@ class Autometrics:
             self.on_progress(progress_base, "Retrieving top K metrics")
         except Exception:
             pass
-        retrieved_metrics = self._retrieve_top_k_metrics(dataset, target_measure, num_to_retrieve, retriever_instance, metric_bank)
+        if use_generated_only:
+            # No retrieval — feed the generated metrics (already in metric_bank
+            # at this point via _merge_generated_with_bank) straight into eval.
+            retrieved_metrics = list(metric_bank)
+            print(f"[Autometrics] Generated-only mode: using {len(retrieved_metrics)} generated metrics without retrieval")
+        else:
+            retrieved_metrics = self._retrieve_top_k_metrics(dataset, target_measure, num_to_retrieve, retriever_instance, metric_bank)
         print(f"[Autometrics] Retrieved {len(retrieved_metrics)} metrics")
         try:
             self.on_progress(progress_base + step_weight, f"Retrieved {len(retrieved_metrics)} metrics")
@@ -568,27 +592,27 @@ class Autometrics:
     def _load_metric_bank(self, dataset: Optional[Dataset] = None) -> List[Type[Metric]]:
         """
         Load metric classes from metric_bank.
-        - If metric_bank is a list: return it directly
-        - If metric_bank is a directory: load all classes from the directory (assumes all files are valid metrics)
-        - If metric_bank is None: return all_metric_classes
-        
-        If dataset is provided and has no reference columns, automatically switch to reference_free metrics
-        when using the default all_metric_classes.
+        - If metric_bank is the default sentinel: lazy-import and return all_metric_classes
+          (or reference_free_metric_classes if the dataset has no reference columns).
+        - If metric_bank is a list: return it directly.
+        - If metric_bank is a directory path: load all classes from that directory.
         """
-        if isinstance(self.metric_bank, list):
-            # Special case: if metric_bank is all_metric_classes and dataset has no reference columns,
-            # switch to reference_free metrics
-            if (self.metric_bank is all_metric_classes and 
-                dataset is not None and 
-                not self._dataset_has_reference_columns(dataset)):
+        if self.metric_bank is _DEFAULT_METRIC_BANK:
+            from autometrics.metrics.MetricBank import (
+                all_metric_classes,
+                reference_free_metric_classes,
+            )
+            if dataset is not None and not self._dataset_has_reference_columns(dataset):
                 print("[Autometrics] Dataset has no reference columns - switching to reference_free metrics")
-                from autometrics.metrics.MetricBank import reference_free_metric_classes
                 return reference_free_metric_classes
-            return self.metric_bank
-        elif isinstance(self.metric_bank, str):
-            return self._load_metrics_from_directory(self.metric_bank)
-        else:
             return all_metric_classes
+        if isinstance(self.metric_bank, list):
+            return self.metric_bank
+        if isinstance(self.metric_bank, str):
+            return self._load_metrics_from_directory(self.metric_bank)
+        # Unknown type — fall through to the default bank to preserve prior behaviour.
+        from autometrics.metrics.MetricBank import all_metric_classes
+        return all_metric_classes
 
     def _process_metric_priors(
         self,

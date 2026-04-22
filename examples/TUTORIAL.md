@@ -4,21 +4,44 @@
 
 Autometrics automatically finds the best evaluation metrics for your NLP task by:
 1. **Generating** task-specific metrics using LLMs
-2. **Retrieving** relevant metrics from a bank of 40+ built-in metrics  
+2. **Retrieving** relevant metrics from a bank of 40+ built-in metrics
 3. **Evaluating** all metrics on your dataset
-4. **Selecting** the top metrics using regression
+4. **Selecting** the top metrics using PLS regression (the aggregator used in the paper)
 5. **Aggregating** into a single optimized metric
 
 **Intended Use**: Evaluate text generation quality (summarization, translation, dialogue, etc.) with human-aligned metrics.
 
+### Three tiers of examples
+
+Pick whichever matches what you want to do right now:
+
+| Tier | File | What it does | What it needs |
+|---|---|---|---|
+| **1. Quickstart** | `examples/tutorial.py` | Tiny custom dataset → generated-only LLM-judge metrics → PLS | `OPENAI_API_KEY` |
+| **2. Defaults on real data** | `examples/autometrics_simple_example.py` | HelpSteer → full pipeline (generation + bank retrieval + PLS) | `OPENAI_API_KEY`, Java 21, full dep install |
+| **3. Power user** | `examples/autometrics_example.py` | Custom generators, retrievers, priors, regressors | Everything plus your own preferences |
+
+If you are new to Autometrics, start with tier 1 — it's the shortest path to a working metric.
+
+### Generated-only mode (recommended for small datasets)
+
+When your dataset has **≤ 100 rows** and you use the default metric bank, Autometrics automatically skips the metric bank and retrieval steps and uses only the metrics it generates for your task. This is controlled by `full_bank_data_cutoff=100` on `Autometrics(...)`. The upshot: no Java, no GPU, no heavy deps — just `OPENAI_API_KEY`. This is the mode tier 1 runs in.
+
+You can also opt in explicitly on any dataset by passing `metric_bank=[]`.
+
 ## Prerequisites: System Requirements
+
+Tier 1 only needs the base `pip install` and an `OPENAI_API_KEY`. Tiers 2 and 3 additionally need the sections below.
 
 ### Python Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### Java Requirements
+### Java Requirements (tier 2+ only)
+
+Required for Pyserini-based retrieval over the full metric bank.
+
 ```bash
 # Ubuntu/Debian
 sudo apt install openjdk-21-jdk
@@ -30,8 +53,8 @@ brew install openjdk@21
 java -version  # Should show Java 21
 ```
 
-### GPU Requirements
-Some metrics require GPUs. Check requirements:
+### GPU Requirements (optional, tier 2+)
+Some metrics in the bank require GPUs. Check requirements:
 
 ```python
 from autometrics.metrics.MetricBank import all_metric_classes
@@ -91,33 +114,59 @@ dataset = Dataset(
 
 ## Step 2: Running the Autometrics Pipeline
 
-### Basic Usage (All Defaults)
+### Basic Usage — generated-only (recommended starting point)
+
+With a small dataset (`≤ 100` rows) Autometrics skips the bank and just fits a
+handful of LLM-judge metrics to your scores. This is tier 1.
+
 ```python
 import os
 import dspy
 from autometrics.autometrics import Autometrics
 
-# Set API key
 os.environ["OPENAI_API_KEY"] = "your-key-here"
 
-# Configure LLMs
 generator_llm = dspy.LM("openai/gpt-4o-mini")
 judge_llm = dspy.LM("openai/gpt-4o-mini")
 
-# Create pipeline with defaults
-autometrics = Autometrics()
+autometrics = Autometrics(
+    metric_generation_configs={"llm_judge": {"metrics_per_trial": 3}},
+)
 
-# Run pipeline
 results = autometrics.run(
-    dataset=dataset,
+    dataset=dataset,          # your small custom Dataset from Step 1
     target_measure="human_score",
     generator_llm=generator_llm,
-    judge_llm=judge_llm
+    judge_llm=judge_llm,
+    num_to_regress=2,
 )
 
 print(f"Top metrics: {[m.get_name() for m in results['top_metrics']]}")
-print(f"Regression metric: {results['regression_metric'].get_name()}")
+print(f"Aggregated metric: {results['regression_metric'].get_name()}")
 ```
+
+See `examples/tutorial.py` for a runnable version of this.
+
+### Full pipeline on a real dataset (all defaults)
+
+On a larger dataset, plain `Autometrics()` runs the full pipeline: generation +
+bank retrieval + PLS aggregation. This is tier 2.
+
+```python
+from autometrics.dataset.datasets.helpsteer.helpsteer import HelpSteer
+
+dataset = HelpSteer()
+autometrics = Autometrics()  # all defaults: PLS, ColBERT/BM25 → LLMRec retrieval
+
+results = autometrics.run(
+    dataset=dataset,
+    target_measure="helpfulness",
+    generator_llm=generator_llm,
+    judge_llm=judge_llm,
+)
+```
+
+See `examples/autometrics_simple_example.py` for a runnable version.
 
 ### Advanced Configuration
 ```python
@@ -291,36 +340,29 @@ pipeline = PipelinedRec(
 ```
 
 ### Regression Strategies
+
+`PLS` is the default — it's what the paper uses and what `Autometrics()` picks with no arguments. You usually don't need to change it. Lasso / Ridge / ElasticNet / HotellingPLS are available as alternatives if you want a different bias on the selection.
+
 ```python
+from autometrics.aggregator.regression.PLS import PLS
 from autometrics.aggregator.regression.Lasso import Lasso
 from autometrics.aggregator.regression.Ridge import Ridge
 from autometrics.aggregator.regression.ElasticNet import ElasticNet
 
-# Lasso (default) - sparse selection, good for interpretability
-lasso = Lasso(
-    name="LassoRegression",
-    description="L1-regularized regression for sparse metric selection",
-    dataset=dataset  # Added automatically
-)
+# PLS (default) — what the paper uses. Latent-variable regression that handles
+# correlated metrics well.
+# You already get this with plain Autometrics(); no need to construct it.
 
-# Ridge - dense selection, good for stability
-ridge = Ridge(
-    name="RidgeRegression", 
-    description="L2-regularized regression for stable predictions",
-    dataset=dataset
-)
+# Alternatives, if you want them:
 
-# ElasticNet - balanced L1/L2 regularization
-elasticnet = ElasticNet(
-    name="ElasticNetRegression",
-    description="Combined L1/L2 regularization",
-    dataset=dataset
-)
+# Lasso — sparse selection, good for interpretability
+# Ridge — dense selection, stable with correlated features
+# ElasticNet — mix of L1 + L2
 
-# Use in Autometrics
+# Swapping the strategy:
 autometrics = Autometrics(
-    regression_strategy=Ridge,  # Change from default Lasso
-    regression_kwargs={}  # Additional kwargs for regression
+    regression_strategy=Ridge,  # or Lasso, ElasticNet, HotellingPLS
+    regression_kwargs={}        # extra kwargs for the regressor
 )
 ```
 
@@ -456,7 +498,7 @@ print(results['report_card'])
 - 3. CustomLLMJudge_helpfulness
 
 ## Regression Aggregator
-- Type: Lasso
+- Type: PLS
 - Name: Autometrics_Regression_helpfulness
 ```
 

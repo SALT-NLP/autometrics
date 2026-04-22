@@ -6,11 +6,15 @@ from autometrics.recommend.MetricRecommender import MetricRecommender
 
 import os
 from platformdirs import user_data_dir
-from pylate import indexes, models, retrieve
 try:
     import torch
 except Exception:
     torch = None
+
+# NOTE: pylate is imported lazily inside the methods below so that merely
+# importing this module (and, transitively, autometrics.autometrics) does
+# not require pylate to be installed. Only users who actually construct a
+# ColBERT retriever pay the dependency cost.
 
 class ColBERT(MetricRecommender):
     """Metric recommender that leverages Modern ColBERT via the PyLate package.
@@ -35,6 +39,8 @@ class ColBERT(MetricRecommender):
         self.index_name: str = "colbert_index" # Causes too many issues when this is a parameter.  Just use the index path to determine the index name.
         self.use_description_only: bool = use_description_only
 
+        from pylate import indexes, models, retrieve
+
         # Initialize the ColBERT model
         self.model = models.ColBERT(
             model_name_or_path="lightonai/GTE-ModernColBERT-v1",
@@ -44,14 +50,14 @@ class ColBERT(MetricRecommender):
         # we need to construct it from scratch.
         if force_reindex or not os.path.exists(self.index_path):
             self._build_index()
-        
+
         # Initialize the PLAID index
         self.index = indexes.PLAID(
             index_folder=self.index_path,
             index_name=self.index_name,
             override=False,
         )
-        
+
         # Initialize the retriever
         self.retriever = retrieve.ColBERT(index=self.index)
 
@@ -62,6 +68,8 @@ class ColBERT(MetricRecommender):
     # ---------------------------------------------------------------------
     def _build_index(self) -> None:
         """Create a ColBERT index for *metric_classes* at *index_path*."""
+        from pylate import indexes
+
         # Make sure the parent directory exists
         os.makedirs(os.path.dirname(self.index_path), exist_ok=True)
 
@@ -153,6 +161,8 @@ class ColBERT(MetricRecommender):
             if "NoneType" in message and "has no attribute 'search'" in message:
                 # Likely a broken PLAID index; rebuild if a GPU is available
                 if _has_gpu():
+                    from pylate import indexes, retrieve
+
                     print("[ColBERT] Detected broken index during retrieval. Rebuilding index on GPU...")
                     self._build_index()
                     # Reinitialize index and retriever after rebuild

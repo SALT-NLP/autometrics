@@ -446,10 +446,14 @@ class {generated_class_name}({class_name}):
                 rubric_summary=rubric_summary,
             )
         
+        _nl_bullet = "\n  - "
+        tasks_bullets = _nl_bullet + _nl_bullet.join(outputs.tasks)
+        best_bullets = _nl_bullet + _nl_bullet.join(outputs.best_suited_for_circumstances)
+        not_rec_bullets = _nl_bullet + _nl_bullet.join(outputs.not_recommended_for_circumstances)
         return f"""- **Domain:** {outputs.domain}
-- **Tasks:** {"\n  - " + "\n  - ".join(outputs.tasks)}
-- **Best Suited For:** {"\n  - " + "\n  - ".join(outputs.best_suited_for_circumstances)}
-- **Not Recommended For:** {"\n  - " + "\n  - ".join(outputs.not_recommended_for_circumstances)}"""
+- **Tasks:** {tasks_bullets}
+- **Best Suited For:** {best_bullets}
+- **Not Recommended For:** {not_rec_bullets}"""
 
     def generate_metric_implementation(self):
         ref_type = "reference-based" if self.is_reference_based else "reference-free"
@@ -494,9 +498,13 @@ class {generated_class_name}({class_name}):
                 rubric_summary=rubric_summary,
             )
         
-        return f"""- **Biases:** {"\n  - " + "\n  - ".join(outputs.biases)}
-- **Task Misalignment Risks:** {"\n  - " + "\n  - ".join(outputs.task_misalignment_risks)}
-- **Failure Cases:** {"\n  - " + "\n  - ".join(outputs.failure_cases)}"""
+        _nl_bullet = "\n  - "
+        biases_bullets = _nl_bullet + _nl_bullet.join(outputs.biases)
+        misalign_bullets = _nl_bullet + _nl_bullet.join(outputs.task_misalignment_risks)
+        failure_bullets = _nl_bullet + _nl_bullet.join(outputs.failure_cases)
+        return f"""- **Biases:** {biases_bullets}
+- **Task Misalignment Risks:** {misalign_bullets}
+- **Failure Cases:** {failure_bullets}"""
 
     def generature_further_reading(self):
         return generate_further_reading(self) + "\n  - [Prometheus: Inducing Fine-grained Evaluation Capability in Language Models](https://arxiv.org/abs/2310.08491)\n  - [Prometheus-Eval Library](https://github.com/prometheus-eval/prometheus-eval)"

@@ -371,6 +371,11 @@ class _OptimizedJudgeMetricMixin:
             except Exception as e:
                 print(f"Warning: Could not read optimized prompt file: {e}")
 
+        _default_model_code = generate_llm_constructor_code(self.model)
+        _safe_class_name = self.name.replace(" ", "_").replace("-", "_")
+        # Pre-escape for Python 3.9–3.11 (no backslashes inside f-string exprs).
+        _model_code_for_repr = _default_model_code.replace('"', '\\"')
+
         code = f"""# Auto-generated optimized metric file for {self.name}
 import dspy
 import os
@@ -380,12 +385,12 @@ import atexit
 from autometrics.metrics.generated.GeneratedOptimizedJudge import {class_name}
 from typing import ClassVar
 
-DEFAULT_MODEL = {generate_llm_constructor_code(self.model)}
+DEFAULT_MODEL = {_default_model_code}
 
 # Embedded optimized prompt data
 OPTIMIZED_PROMPT_DATA = {json.dumps(prompt_data)}
 
-class {self.name.replace(" ", "_").replace("-", "_")}_OptimizedJudge({class_name}):
+class {_safe_class_name}_OptimizedJudge({class_name}):
     \"\"\"{self.metric_card if include_metric_card else ""}\"\"\"
 
     description: ClassVar[str] = {json.dumps(self.description)}
@@ -436,7 +441,7 @@ class {self.name.replace(" ", "_").replace("-", "_")}_OptimizedJudge({class_name
         )
 
     def __repr__(self):
-        return f"{self.name.replace(' ', '_').replace('-', '_')}_OptimizedJudge(model={generate_llm_constructor_code(self.model).replace("\"", "\\\"")})"
+        return "{_safe_class_name}_OptimizedJudge(model={_model_code_for_repr})"
 
 """
         return code
@@ -693,10 +698,14 @@ class {self.name.replace(" ", "_").replace("-", "_")}_OptimizedJudge({class_name
                 model_name=str(getattr(self.model, "model", self.model)),
             )
         
+        _nl_bullet = "\n  - "
+        tasks_bullets = _nl_bullet + _nl_bullet.join(outputs.tasks)
+        best_bullets = _nl_bullet + _nl_bullet.join(outputs.best_suited_for_circumstances)
+        not_rec_bullets = _nl_bullet + _nl_bullet.join(outputs.not_recommended_for_circumstances)
         return f"""- **Domain:** {outputs.domain}
-- **Tasks:** {"\n  - " + "\n  - ".join(outputs.tasks)}
-- **Best Suited For:** {"\n  - " + "\n  - ".join(outputs.best_suited_for_circumstances)}
-- **Not Recommended For:** {"\n  - " + "\n  - ".join(outputs.not_recommended_for_circumstances)}"""
+- **Tasks:** {tasks_bullets}
+- **Best Suited For:** {best_bullets}
+- **Not Recommended For:** {not_rec_bullets}"""
 
     def generate_metric_implementation(self):
         ref_type = "reference-based" if self.is_reference_based else "reference-free"
@@ -746,9 +755,13 @@ class {self.name.replace(" ", "_").replace("-", "_")}_OptimizedJudge({class_name
         all_risks = outputs.task_misalignment_risks + optimization_limitations[1:2]
         all_failures = outputs.failure_cases + optimization_limitations[2:]
         
-        return f"""- **Biases:** {"\n  - " + "\n  - ".join(all_biases)}
-- **Task Misalignment Risks:** {"\n  - " + "\n  - ".join(all_risks)}
-- **Failure Cases:** {"\n  - " + "\n  - ".join(all_failures)}"""
+        _nl_bullet = "\n  - "
+        biases_bullets = _nl_bullet + _nl_bullet.join(all_biases)
+        risks_bullets = _nl_bullet + _nl_bullet.join(all_risks)
+        failures_bullets = _nl_bullet + _nl_bullet.join(all_failures)
+        return f"""- **Biases:** {biases_bullets}
+- **Task Misalignment Risks:** {risks_bullets}
+- **Failure Cases:** {failures_bullets}"""
 
     def generature_further_reading(self):
         return generate_further_reading(self) + "\n  - [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://openreview.net/pdf?id=uccHPGDlao)\n  - [Optimizing Instructions and Demonstrations for Multi-Stage Language Model Programs](https://aclanthology.org/2024.emnlp-main.525.pdf)"

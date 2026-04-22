@@ -40,10 +40,18 @@ def generate_related_metrics(metric: GeneratedRefFreeMetric | GeneratedRefBasedM
 
     if recommender is None:
         if recommender_global is None:
-            # Lazy import heavy modules only when first needed (avoids 90s startup delay)
-            from autometrics.metrics.MetricBank import all_metric_classes
-            from autometrics.recommend.BM25 import BM25
-            from autometrics.recommend.ColBERT import ColBERT
+            # Lazy import heavy modules only when first needed (avoids 90s startup delay).
+            # If MetricBank / BM25 / ColBERT can't be imported (e.g. generated-only
+            # mode where the user hasn't installed bert_score / pyserini / pylate),
+            # skip the Related Metrics section rather than crashing metric-card
+            # generation.
+            try:
+                from autometrics.metrics.MetricBank import all_metric_classes
+                from autometrics.recommend.BM25 import BM25
+                from autometrics.recommend.ColBERT import ColBERT
+            except ImportError as import_error:
+                print(f"[metric_card] Skipping Related Metrics — could not import MetricBank/retrievers: {import_error}")
+                return """- **Related Metrics:**\n  - None"""
             # Try to initialize BM25 recommender first
             try:
                 print(f"Initializing BM25 recommender with index path: {bm25_index_path}")

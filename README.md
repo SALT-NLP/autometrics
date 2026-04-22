@@ -90,14 +90,6 @@ final.predict(dataset)                     # scores on any Dataset with same sch
 | Java 21 | BM25 retrieval over the full MetricBank (`pyserini`) |
 | GPU | some bank metrics (reward models, large BERTScore); CPU works for generated-only |
 
-## Reproducing the paper
-
-```bash
-python analysis/main_experiments/run_main_autometrics.py <dataset> <target> <seed> <output_dir>
-```
-
-Ablation and scaling drivers live under `analysis/`. Hyperparameters and prompts are documented in the paper's appendix.
-
 ## Repository layout
 
 ```
@@ -109,7 +101,6 @@ autometrics/
 ├── recommend/                Retrievers (BM25, ColBERT, LLMRec, Pipelined)
 ├── aggregator/regression/    PLS (default), Lasso, Ridge, ElasticNet, HotellingPLS
 └── util/report_card.py       HTML report generator
-analysis/                     Paper experiment drivers
 examples/                     Tutorial scripts and walkthroughs
 ```
 

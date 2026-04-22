@@ -529,10 +529,14 @@ class Autometrics:
             # Pull Kendall tau and Pearson r for regression if available
             regression_kendall_tau = None
             regression_pearson_r = None
+            regression_kendall_p = None
+            regression_pearson_p = None
             try:
                 arts = html_artifacts.get('artifacts') or {}
                 regression_kendall_tau = arts.get('kendall_tau_regression')
                 regression_pearson_r = arts.get('pearson_r_regression')
+                regression_kendall_p = arts.get('kendall_p_regression')
+                regression_pearson_p = arts.get('pearson_p_regression')
             except Exception:
                 pass
             print(f"[Autometrics] Report card HTML generated{f' at {report_card_path}' if report_card_path else ''}")
@@ -542,6 +546,8 @@ class Autometrics:
             report_card_path = None
             regression_kendall_tau = None
             regression_pearson_r = None
+            regression_kendall_p = None
+            regression_pearson_p = None
         try:
             self.on_progress(progress_base + step_weight, "Report ready")
         except Exception:
@@ -568,6 +574,8 @@ class Autometrics:
             'report_card_path': report_card_path,
             'regression_kendall_tau_eval': regression_kendall_tau,
             'regression_pearson_r_eval': regression_pearson_r,
+            'regression_kendall_p_eval': regression_kendall_p,
+            'regression_pearson_p_eval': regression_pearson_p,
             'all_generated_metrics': generated_metrics,
             'prior_metrics': prior_metrics,
             'retrieved_metrics': retrieved_metrics,

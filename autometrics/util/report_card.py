@@ -1089,7 +1089,7 @@ def render_html(context: Dict[str, Any]) -> str:
             const dt = jQuery(tblEl).DataTable();
             // Search by exact match in first column (ID)
             dt.search('');
-            dt.columns(0).search('^' + id.replace(/[.*+?^${}()|[\]\\\]/g, '\\\$&') + '$', true, false).draw();
+            dt.columns(0).search('^' + id.replace(/[.*+?^${}()|[\]\\]/g, '\\\$&') + '$', true, false).draw();
             // Scroll into view first visible row after draw completes
             setTimeout(function(){
               let rowNode = null;
@@ -1112,7 +1112,7 @@ def render_html(context: Dict[str, Any]) -> str:
             // Filter to rows whose first cell (ID) matches
             dt.columns().every(function(idx) {
               if (idx === 0) {
-                this.search('^' + id.replace(/[.*+?^${}()|[\]\\\]/g, '\\\$&') + '$', true, false);
+                this.search('^' + id.replace(/[.*+?^${}()|[\]\\]/g, '\\\$&') + '$', true, false);
               } else {
                 this.search('');
               }
